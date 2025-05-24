@@ -546,7 +546,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
 <body>
     <div class="header no-break">
         <div class="logo-section">
-            <div class="logo-placeholder">KQ</div>
+            <img src="data:https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Logo" style="width: 80px; height: 80px;">
             <div>
                 <h1 class="company-name">KEYQUEST MORTGAGE</h1>
                 <p class="company-tagline">Your Trusted Mortgage Advisory Partner</p>
