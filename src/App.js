@@ -395,8 +395,8 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #1d4ed8;
         }
         
@@ -408,7 +408,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         }
         
         .logo-section img {
-            max-width: 120px;
+            max-width: 200px;
             height: auto;
             display: block;
         }
@@ -428,17 +428,17 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         .property-type-banner {
             background: ${inputs.propertyType === 'private' ? '#1d4ed8' : '#059669'};
             color: white;
-            padding: 12px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         .section {
-            margin: 30px 0;
-            padding: 20px;
+            margin: 20px 0;
+            padding: 15px;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             background: #fafafa;
@@ -801,7 +801,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
           <img 
             src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
             alt="KeyQuest Mortgage Logo" 
-            className="h-20 w-auto"
+            className="h-32 w-auto"
           />
         </div>
         
