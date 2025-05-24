@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut } from 'lucide-react';
+import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building } from 'lucide-react';
 import './App.css';
 
 // Employee credentials (in production, store these securely)
@@ -104,45 +104,49 @@ const LoginScreen = ({ onLogin }) => {
 };
 
 const MortgageCalculator = ({ currentUser, onLogout }) => {
+  // Reset all values to 0 when component mounts (fresh login)
   const [inputs, setInputs] = useState({
-    purchasePrice: 2000000,  // Updated to match Excel
+    // Property Type Selection
+    propertyType: 'private', // 'private' or 'hdb'
+    
+    purchasePrice: 0,
     loanPercentage: 75, // 55, 75, or custom
-    customLoanAmount: 1500000,  // Updated to match Excel
+    customLoanAmount: 0,
     useCustomAmount: false,
     
     // Stress test rate (separate field for calculations)
-    stressTestRate: 4.0,
+    stressTestRate: 0,
     
     // Interest rates for each year
-    interestRateY1: 2.3,      // Year 1
-    interestRateY2: 1.3,      // Year 2
-    interestRateY3: 1.3,      // Year 3
-    interestRateY4: 1.3,      // Year 4
-    interestRateY5: 1.28,     // Year 5
-    interestRateThereafter: 1.28, // Thereafter
+    interestRateY1: 0,      // Year 1
+    interestRateY2: 0,      // Year 2
+    interestRateY3: 0,      // Year 3
+    interestRateY4: 0,      // Year 4
+    interestRateY5: 0,      // Year 5
+    interestRateThereafter: 0, // Thereafter
     
     // Total interest period selection
     interestPeriodSelection: 5, // Default to 5 years
     
-    loanTenor: 29,  // Updated to match Excel
+    loanTenor: 0,
     
-    // Applicant A - Updated to match Excel
-    monthlySalaryA: 4500,
-    annualSalaryA: 60000,
-    applicantAgeA: 34,
+    // Applicant A
+    monthlySalaryA: 0,
+    annualSalaryA: 0,
+    applicantAgeA: 0,
     
-    // Applicant B - Updated to match Excel
-    monthlySalaryB: 5500,
-    annualSalaryB: 70000,
+    // Applicant B
+    monthlySalaryB: 0,
+    annualSalaryB: 0,
     applicantAgeB: 0,
     
     // Show Fund and Pledging (combined solution)
     showFundAmount: 0,
-    pledgeAmount: 60000,  // Updated to match Excel - Applicant B has $60,000 pledge
+    pledgeAmount: 0,
     
-    // Existing commitments - Updated to match Excel
-    carLoanA: 2000,
-    carLoanB: 1000,
+    // Existing commitments
+    carLoanA: 0,
+    carLoanB: 0,
     personalLoanA: 0,
     personalLoanB: 0
   });
@@ -197,7 +201,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
   // Main calculation function
   const calculateMortgage = useCallback(() => {
     const {
-      purchasePrice, loanPercentage, customLoanAmount, useCustomAmount,
+      propertyType, purchasePrice, loanPercentage, customLoanAmount, useCustomAmount,
       stressTestRate, interestRateY1, interestRateY2, interestRateY3, 
       interestRateY4, interestRateY5, interestRateThereafter, loanTenor,
       interestPeriodSelection,
@@ -291,6 +295,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
     const cashPledgeHDB = hdbPass ? 0 : Math.abs(hdbDeficit) * 48;
 
     return {
+      propertyType,
       loanAmount,
       loanAmount75,
       loanAmount55,
@@ -356,6 +361,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
 
     try {
       const loanAmountSource = inputs.useCustomAmount ? 'Custom Amount' : `${inputs.loanPercentage}% of Purchase Price`;
+      const propertyTypeText = inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property';
       const currentDate = new Date().toLocaleDateString('en-SG', {
         year: 'numeric',
         month: 'long',
@@ -369,7 +375,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mortgage Analysis Report - KeyQuest Mortgage</title>
+    <title>Mortgage Analysis Report - ${propertyTypeText}</title>
     <style>
         @media print {
             body { margin: 0; padding: 15px; }
@@ -398,40 +404,36 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
             margin-bottom: 15px;
         }
         
-        .logo-placeholder {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #dc2626, #1d4ed8);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-        }
-        
-        .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1d4ed8;
-            margin: 0;
+        .logo-section img {
+            max-width: 120px;
+            height: auto;
+            display: block;
         }
         
         .company-tagline {
             color: #666;
-            font-size: 12px;
-            margin: 5px 0 0 0;
+            font-size: 14px;
+            margin: 10px 0 0 0;
         }
         
         .report-info {
             margin-top: 15px;
             font-size: 12px;
             color: #666;
+        }
+        
+        .property-type-banner {
+            background: ${inputs.propertyType === 'private' ? '#1d4ed8' : '#059669'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
         }
         
         .section {
@@ -536,21 +538,18 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             .two-column, .installment-grid, .funding-grid { 
                 grid-template-columns: 1fr; 
             }
-            .logo-section { 
-                flex-direction: column; 
-                gap: 8px; 
-            }
         }
     </style>
 </head>
 <body>
     <div class="header no-break">
         <div class="logo-section">
-            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Logo" style="width: 80px; height: 80px;">
-            <div>
-                <h1 class="company-name">KEYQUEST MORTGAGE</h1>
-                <p class="company-tagline">Your Trusted Mortgage Advisory Partner</p>
-            </div>
+            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
+        </div>
+        <p class="company-tagline">Your Trusted Mortgage Advisory Partner</p>
+        
+        <div class="property-type-banner">
+            ${propertyTypeText} Analysis
         </div>
         
         <div class="report-info">
@@ -564,6 +563,10 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         <div class="highlight-box">
             <div class="two-column">
                 <div>
+                    <div class="info-row">
+                        <span class="info-label">Property Type:</span>
+                        <span class="info-value">${propertyTypeText}</span>
+                    </div>
                     <div class="info-row">
                         <span class="info-label">Property Value:</span>
                         <span class="info-value">${formatCurrency(inputs.purchasePrice)}</span>
@@ -595,11 +598,11 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         </div>
     </div>
 
-    ${(!results.tdsrPass || !results.hdbPass) ? `
+    ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && !results.hdbPass) ? `
     <div class="section no-break">
         <h2>💡 FUNDING SOLUTIONS</h2>
         
-        ${!results.tdsrPass ? `
+        ${inputs.propertyType === 'private' && !results.tdsrPass ? `
         <div style="margin: 15px 0;">
             <h3 style="color: #dc2626; margin-bottom: 10px;">Private Property Options</h3>
             <div class="funding-grid">
@@ -615,7 +618,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         </div>
         ` : ''}
         
-        ${!results.hdbPass ? `
+        ${inputs.propertyType === 'hdb' && !results.hdbPass ? `
         <div style="margin: 15px 0;">
             <h3 style="color: #dc2626; margin-bottom: 10px;">HDB Property Options</h3>
             <div class="funding-grid">
@@ -757,19 +760,14 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         <p style="margin: 4px 0;">• Interest rates are estimates and may vary.</p>
     </div>
 
-    <div class="footer no-break">
-        <div style="margin-bottom: 10px;">
-            <strong style="color: #1d4ed8; font-size: 14px;">KEYQUEST MORTGAGE</strong><br>
-            Your Trusted Mortgage Advisory Partner
-        </div>
-        
+    <div class="footer no-break">        
         <div style="margin-bottom: 8px;">
             📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
         </div>
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 10px;">
             <p style="margin: 0; font-size: 9px;">This report is confidential and intended for the named applicant(s). 
-            KeyQuest Mortgage provides professional mortgage advisory services in Singapore.</p>
+            Your Trusted Mortgage Advisory Partner</p>
         </div>
     </div>
 </body>
@@ -797,29 +795,69 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 bg-white">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <Calculator className="text-blue-600" />
-            Comprehensive Mortgage Calculator
-          </h1>
-          <p className="text-gray-600 mt-2">Calculate mortgage affordability for both HDB and Private properties</p>
+      {/* Header with Logo */}
+      <div className="mb-8">
+        <div className="flex justify-center mb-6">
+          <img 
+            src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
+            alt="KeyQuest Mortgage Logo" 
+            className="h-20 w-auto"
+          />
         </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-600">Logged in as: <span className="font-medium">{currentUser}</span></p>
-          <button
-            onClick={onLogout}
-            className="mt-1 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
+        
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+              <Calculator className="text-blue-600" />
+              Comprehensive Mortgage Calculator
+            </h1>
+            <p className="text-gray-600 mt-2">Calculate mortgage affordability for both HDB and Private properties</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-600">Logged in as: <span className="font-medium">{currentUser}</span></p>
+            <button
+              onClick={onLogout}
+              className="mt-1 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Input Section */}
         <div className="space-y-6">
+          {/* Property Type Selection */}
+          <div className="bg-purple-50 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 text-purple-800">Property Type</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => handleInputChange('propertyType', 'private')}
+                className={`p-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                  inputs.propertyType === 'private'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300'
+                }`}
+              >
+                <Building className="w-5 h-5" />
+                <span className="font-medium">Private Property</span>
+              </button>
+              <button
+                onClick={() => handleInputChange('propertyType', 'hdb')}
+                className={`p-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                  inputs.propertyType === 'hdb'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-green-300'
+                }`}
+              >
+                <Home className="w-5 h-5" />
+                <span className="font-medium">HDB Property</span>
+              </button>
+            </div>
+          </div>
+
           <div className="bg-blue-50 p-6 rounded-lg">
             <h2 className="text-xl font-semibold mb-4 text-blue-800">Loan Details</h2>
             <div className="grid grid-cols-1 gap-4">
@@ -1121,7 +1159,16 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         {results && (
           <div className="space-y-6">
             <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Calculation Results</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Calculation Results</h2>
+                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  inputs.propertyType === 'private' 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-green-100 text-green-800'
+                }`}>
+                  {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'}
+                </div>
+              </div>
               <div className="space-y-6">
                 <div>
                   <h3 className="font-medium mb-3">Loan Information</h3>
@@ -1254,81 +1301,84 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
               </div>
             </div>
 
-            {/* Private Property Results */}
-            <div className={`p-6 rounded-lg border-2 ${results.tdsrPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                {results.tdsrPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
-                Private Property (TDSR 55%)
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-gray-600">Required Income:</span>
-                  <div className="font-semibold">{formatCurrency(results.requiredIncomeTDSR)}</div>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                  <div className={`font-semibold ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(results.tdsrDeficit)}
+            {/* Property-specific Results */}
+            {inputs.propertyType === 'private' && (
+              <div className={`p-6 rounded-lg border-2 ${results.tdsrPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  {results.tdsrPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+                  Private Property (TDSR 55%)
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm text-gray-600">Required Income:</span>
+                    <div className="font-semibold">{formatCurrency(results.requiredIncomeTDSR)}</div>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Deficit/Surplus:</span>
+                    <div className={`font-semibold ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatCurrency(results.tdsrDeficit)}
+                    </div>
                   </div>
                 </div>
+                {!results.tdsrPass && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="font-medium mb-2">Cash Requirements (Choose One):</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <span className="text-sm text-gray-600">Cash to Show:</span>
+                        <div className="font-semibold text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm text-gray-600">Cash to Pledge:</span>
+                        <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
+                      </div>
+                    </div>
+                    <div className="text-center mt-2">
+                      <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                    </div>
+                  </div>
+                )}
               </div>
-              {!results.tdsrPass && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="font-medium mb-2">Cash Requirements (Choose One):</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <span className="text-sm text-gray-600">Cash to Show:</span>
-                      <div className="font-semibold text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
-                    </div>
-                    <div className="text-center">
-                      <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                      <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
-                    </div>
-                  </div>
-                  <div className="text-center mt-2">
-                    <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
 
-            {/* HDB Results */}
-            <div className={`p-6 rounded-lg border-2 ${results.hdbPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                {results.hdbPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
-                HDB Property (MSR 30%)
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-gray-600">Required Income:</span>
-                  <div className="font-semibold">{formatCurrency(results.requiredIncomeHDB)}</div>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                  <div className={`font-semibold ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(results.hdbDeficit)}
+            {inputs.propertyType === 'hdb' && (
+              <div className={`p-6 rounded-lg border-2 ${results.hdbPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  {results.hdbPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+                  HDB Property (MSR 30%)
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm text-gray-600">Required Income:</span>
+                    <div className="font-semibold">{formatCurrency(results.requiredIncomeHDB)}</div>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-600">Deficit/Surplus:</span>
+                    <div className={`font-semibold ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatCurrency(results.hdbDeficit)}
+                    </div>
                   </div>
                 </div>
+                {!results.hdbPass && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="font-medium mb-2">Cash Requirements (Choose One):</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <span className="text-sm text-gray-600">Cash to Show:</span>
+                        <div className="font-semibold text-red-600">{formatCurrency(results.cashShowHDB)}</div>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-sm text-gray-600">Cash to Pledge:</span>
+                        <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
+                      </div>
+                    </div>
+                    <div className="text-center mt-2">
+                      <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                    </div>
+                  </div>
+                )}
               </div>
-              {!results.hdbPass && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="font-medium mb-2">Cash Requirements (Choose One):</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <span className="text-sm text-gray-600">Cash to Show:</span>
-                      <div className="font-semibold text-red-600">{formatCurrency(results.cashShowHDB)}</div>
-                    </div>
-                    <div className="text-center">
-                      <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                      <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
-                    </div>
-                  </div>
-                  <div className="text-center mt-2">
-                    <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Generate Report Button */}
             <button
@@ -1339,7 +1389,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
               Generate Clean Professional Report (PDF)
             </button>
             <p className="text-sm text-gray-500 text-center">
-              Clean, client-ready report with KeyQuest Mortgage branding - no confusing technical sections
+              Clean, client-ready report for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'} analysis
             </p>
 
             {/* Formula Information */}
