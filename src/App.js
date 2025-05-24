@@ -115,7 +115,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
     useCustomAmount: false,
     
     // Stress test rate (separate field for calculations)
-    stressTestRate: 0,
+    stressTestRate: 4,
     
     // Interest rates for each year
     interestRateY1: 0,      // Year 1
@@ -395,8 +395,8 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         
         .header {
             text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #1d4ed8;
         }
         
@@ -404,7 +404,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         
         .logo-section img {
@@ -416,11 +416,11 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         .company-tagline {
             color: #666;
             font-size: 14px;
-            margin: 10px 0 0 0;
+            margin: 5px 0 0 0;
         }
         
         .report-info {
-            margin-top: 15px;
+            margin-top: 8px;
             font-size: 12px;
             color: #666;
         }
@@ -433,7 +433,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             text-align: center;
             font-size: 16px;
             font-weight: bold;
-            margin: 15px 0;
+            margin: 10px 0;
         }
         
         .section {
