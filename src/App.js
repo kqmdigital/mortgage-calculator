@@ -546,7 +546,6 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         <div class="logo-section">
             <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
         </div>
-        <p class="company-tagline">Your Trusted Mortgage Advisory Partner</p>
         
         <div class="property-type-banner">
             ${propertyTypeText} Analysis
@@ -554,7 +553,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         
         <div class="report-info">
             <strong>Mortgage Analysis Report</strong><br>
-            Generated: ${currentDate} | Prepared by: ${currentUser} | Report ID: KQM-${Date.now()}
+            Generated: ${currentDate} | Report ID: KQM-${Date.now()}
         </div>
     </div>
 
