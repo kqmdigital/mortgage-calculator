@@ -537,26 +537,54 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mortgage Analysis Report - ${propertyTypeText}</title>
     <style>
+        @page {
+            size: A4;
+            margin: 0.5in 0.75in;
+        }
+        
         @media print {
-            body { margin: 0; padding: 15px; }
-            .page-break { page-break-before: always; }
-            .no-break { page-break-inside: avoid; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            body { 
+                margin: 0; 
+                padding: 0;
+                font-size: 11px;
+                line-height: 1.3;
+            }
+            
+            .page-break { 
+                page-break-before: always; 
+            }
+            
+            .no-break { 
+                page-break-inside: avoid; 
+                break-inside: avoid;
+            }
+            
+            .avoid-break {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.5;
+            line-height: 1.4;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0;
+            padding: 10px;
             background: white;
+            font-size: 12px;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #1d4ed8;
         }
         
@@ -564,66 +592,69 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .logo-section img {
-            max-width: 200px;
+            max-width: 150px;
             height: auto;
             display: block;
         }
         
         .company-tagline {
             color: #666;
-            font-size: 14px;
-            margin: 5px 0 0 0;
+            font-size: 12px;
+            margin: 3px 0 0 0;
         }
         
         .report-info {
-            margin-top: 8px;
-            font-size: 12px;
+            margin-top: 6px;
+            font-size: 10px;
             color: #666;
         }
         
         .property-type-banner {
             background: ${inputs.propertyType === 'private' ? '#1d4ed8' : '#059669'};
             color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
             text-align: center;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 8px 0;
         }
         
         .section {
-            margin: 20px 0;
-            padding: 15px;
+            margin: 15px 0;
+            padding: 12px;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #fafafa;
             page-break-inside: avoid;
+            break-inside: avoid;
         }
         
         .section h2 {
             color: #1d4ed8;
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-            font-size: 16px;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            margin-top: 0;
         }
         
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
         }
         
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 6px 0;
+            padding: 4px 0;
             border-bottom: 1px dotted #ccc;
+            font-size: 11px;
         }
         
         .info-label {
@@ -639,63 +670,175 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         .highlight-box {
             background: #eff6ff;
             border: 1px solid #3b82f6;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 15px 0;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
         }
         
-        .installment-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 15px 0;
+        .year-breakdown {
+            background: white; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 6px; 
+            padding: 10px; 
+            margin-bottom: 12px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         
-        .installment-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 12px;
-            text-align: center;
+        .year-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+            border-bottom: 1px solid #f0f0f0; 
+            padding-bottom: 6px;
+        }
+        
+        .year-title {
+            margin: 0; 
+            color: #333; 
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .year-rate {
+            font-size: 13px; 
+            font-weight: bold; 
+            color: #3b82f6;
+        }
+        
+        .payment-grid {
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 8px; 
+            margin-bottom: 10px;
+        }
+        
+        .payment-card {
+            text-align: center; 
+            padding: 8px; 
+            border-radius: 4px;
+            font-size: 10px;
+        }
+        
+        .payment-card.interest {
+            background: #fef2f2;
+        }
+        
+        .payment-card.principal {
+            background: #eff6ff;
+        }
+        
+        .payment-card-label {
+            color: #666; 
+            margin-bottom: 3px;
+            font-size: 9px;
+        }
+        
+        .payment-card-value {
+            font-weight: bold; 
+            font-size: 11px;
+        }
+        
+        .payment-card-value.interest {
+            color: #dc2626;
+        }
+        
+        .payment-card-value.principal {
+            color: #2563eb;
+        }
+        
+        .installment-summary {
+            text-align: center; 
+            background: #f0fdf4; 
+            padding: 8px; 
+            border-radius: 4px; 
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .installment-label {
+            color: #666; 
+            font-size: 9px; 
+            margin-bottom: 3px;
+        }
+        
+        .installment-value {
+            font-weight: bold; 
+            color: #16a34a; 
+            font-size: 12px;
         }
         
         .funding-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 15px 0;
+            gap: 10px;
+            margin: 10px 0;
         }
         
         .funding-card {
             background: white;
             border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 15px;
+            border-radius: 4px;
+            padding: 10px;
             text-align: center;
+            font-size: 11px;
         }
         
         .footer {
-            margin-top: 40px;
-            padding-top: 20px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 1px solid #e5e7eb;
             text-align: center;
             color: #666;
-            font-size: 11px;
+            font-size: 9px;
             page-break-inside: avoid;
+            break-inside: avoid;
         }
         
         .disclaimer {
             background: #f3f4f6;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 20px 0;
-            font-size: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 9px;
             color: #555;
             page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        
+        .total-interest-box {
+            background: white; 
+            padding: 8px; 
+            border-radius: 4px; 
+            border: 1px solid #3b82f6; 
+            margin-top: 10px; 
+            text-align: center;
+        }
+        
+        .total-interest-title {
+            margin: 0 0 4px 0; 
+            color: #3b82f6; 
+            font-size: 11px;
+        }
+        
+        .total-interest-value {
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #3b82f6;
+        }
+        
+        @media print {
+            .two-column, .payment-grid, .funding-grid { 
+                grid-template-columns: 1fr 1fr !important; 
+            }
+            
+            .year-breakdown {
+                margin-bottom: 8px;
+            }
         }
         
         @media (max-width: 600px) {
-            .two-column, .installment-grid, .funding-grid { 
+            .two-column, .payment-grid, .funding-grid { 
                 grid-template-columns: 1fr; 
             }
         }
@@ -800,47 +943,47 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
     </div>
     ` : ''}
 
-    <div class="section no-break">
+    <div class="section avoid-break">
         <h2>📊 DETAILED PAYMENT BREAKDOWN</h2>
         
-        <h3 style="color: #555; margin: 20px 0 15px 0;">Year-by-Year Payment Analysis</h3>
+        <h3 style="color: #555; margin: 15px 0 10px 0; font-size: 12px;">Year-by-Year Payment Analysis</h3>
         
         ${results.yearlyBreakdown && results.yearlyBreakdown.map((breakdown, index) => `
-        <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;">
-                <h4 style="margin: 0; color: #333; font-size: 16px;">Year ${breakdown.year}</h4>
-                <span style="font-size: 16px; font-weight: bold; color: #3b82f6;">${breakdown.rate}% p.a.</span>
+        <div class="year-breakdown">
+            <div class="year-header">
+                <h4 class="year-title">Year ${breakdown.year}</h4>
+                <span class="year-rate">${breakdown.rate}% p.a.</span>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
-                <div style="text-align: center; background: #fef2f2; padding: 12px; border-radius: 6px;">
-                    <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Monthly Interest Payable</div>
-                    <div style="font-weight: bold; color: #dc2626; font-size: 14px;">${formatCurrency(breakdown.monthlyInterest)}</div>
+            <div class="payment-grid">
+                <div class="payment-card interest">
+                    <div class="payment-card-label">Monthly Interest Payable</div>
+                    <div class="payment-card-value interest">${formatCurrency(breakdown.monthlyInterest)}</div>
                 </div>
-                <div style="text-align: center; background: #eff6ff; padding: 12px; border-radius: 6px;">
-                    <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Monthly Principal Payable</div>
-                    <div style="font-weight: bold; color: #2563eb; font-size: 14px;">${formatCurrency(breakdown.monthlyPrincipal)}</div>
+                <div class="payment-card principal">
+                    <div class="payment-card-label">Monthly Principal Payable</div>
+                    <div class="payment-card-value principal">${formatCurrency(breakdown.monthlyPrincipal)}</div>
                 </div>
-                <div style="text-align: center; background: #fef2f2; padding: 12px; border-radius: 6px;">
-                    <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Total Interest Payable</div>
-                    <div style="font-weight: bold; color: #dc2626; font-size: 14px;">${formatCurrency(breakdown.totalInterest)}</div>
+                <div class="payment-card interest">
+                    <div class="payment-card-label">Total Interest Payable</div>
+                    <div class="payment-card-value interest">${formatCurrency(breakdown.totalInterest)}</div>
                 </div>
-                <div style="text-align: center; background: #eff6ff; padding: 12px; border-radius: 6px;">
-                    <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Total Principal Payable</div>
-                    <div style="font-weight: bold; color: #2563eb; font-size: 14px;">${formatCurrency(breakdown.totalPrincipal)}</div>
+                <div class="payment-card principal">
+                    <div class="payment-card-label">Total Principal Payable</div>
+                    <div class="payment-card-value principal">${formatCurrency(breakdown.totalPrincipal)}</div>
                 </div>
             </div>
             
-            <div style="text-align: center; background: #f0fdf4; padding: 12px; border-radius: 6px; border-top: 1px solid #e0e0e0;">
-                <div style="color: #666; font-size: 12px; margin-bottom: 5px;">Monthly Installment</div>
-                <div style="font-weight: bold; color: #16a34a; font-size: 16px;">${formatCurrency(breakdown.monthlyInstallment)}</div>
+            <div class="installment-summary">
+                <div class="installment-label">Monthly Installment</div>
+                <div class="installment-value">${formatCurrency(breakdown.monthlyInstallment)}</div>
             </div>
         </div>
         `).join('')}
 
-        <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #3b82f6; margin-top: 15px; text-align: center;">
-            <h4 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 14px;">Total Interest (First ${inputs.interestPeriodSelection} Years)</h4>
-            <div style="font-size: 18px; font-weight: bold; color: #3b82f6;">${formatCurrency(results.selectedPeriodTotal || 0)}</div>
+        <div class="total-interest-box">
+            <h4 class="total-interest-title">Total Interest (First ${inputs.interestPeriodSelection} Years)</h4>
+            <div class="total-interest-value">${formatCurrency(results.selectedPeriodTotal || 0)}</div>
         </div>
     </div>
 
