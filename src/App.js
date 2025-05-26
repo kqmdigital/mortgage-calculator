@@ -190,26 +190,46 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
   // Calculate maximum loan tenor based on property type and loan percentage
   const calculateMaxLoanTenor = () => {
     const averageAge = calculateAverageAge();
-    if (averageAge === 0) return 35; // Default max if no age provided
+    
+    // Determine loan percentage
+    let loanPercentage;
+    if (inputs.useCustomAmount) {
+      const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
+      const customAmount = parseNumberInput(inputs.customLoanAmount) || 0;
+      loanPercentage = purchasePrice > 0 ? (customAmount / purchasePrice) * 100 : 75; // Default to 75%
+    } else {
+      loanPercentage = inputs.loanPercentage;
+    }
+    
+    // If no age provided, return maximum possible tenor for the loan type
+    if (averageAge === 0) {
+      if (inputs.propertyType === 'hdb') {
+        return loanPercentage >= 56 && loanPercentage <= 75 ? 25 : 30;
+      } else {
+        return loanPercentage >= 56 && loanPercentage <= 75 ? 30 : 35;
+      }
+    }
     
     if (inputs.propertyType === 'hdb') {
-      let loanPercentage;
-      if (inputs.useCustomAmount) {
-        const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
-        const customAmount = parseNumberInput(inputs.customLoanAmount) || 0;
-        loanPercentage = purchasePrice > 0 ? (customAmount / purchasePrice) * 100 : 0;
-      } else {
-        loanPercentage = inputs.loanPercentage;
-      }
-      
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        return Math.min(35, Math.max(1, 65 - averageAge));
+        // HDB 56%-75%: Max 25 years, age cap at 65
+        return Math.min(25, Math.max(1, 65 - averageAge));
       } else if (loanPercentage <= 55) {
+        // HDB 55% and below: Max 30 years, age cap at 75
+        return Math.min(30, Math.max(1, 75 - averageAge));
+      }
+    } else {
+      // Private property
+      if (loanPercentage >= 56 && loanPercentage <= 75) {
+        // Private 56%-75%: Max 30 years, age cap at 65
+        return Math.min(30, Math.max(1, 65 - averageAge));
+      } else if (loanPercentage <= 55) {
+        // Private 55% and below: Max 35 years, age cap at 75
         return Math.min(35, Math.max(1, 75 - averageAge));
       }
     }
     
-    return 35; // Default max for private property or other cases
+    return 30; // Default fallback
   };
 
   // PMT function calculation
@@ -479,7 +499,8 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
       }));
     } else if (field === 'loanTenor') {
       const parsedValue = parseNumberInput(value);
-      const cappedValue = Math.min(35, Math.max(1, parsedValue || 30));
+      const maxTenor = calculateMaxLoanTenor();
+      const cappedValue = Math.min(maxTenor, Math.max(1, parsedValue || 30));
       setInputs(prev => ({
         ...prev,
         [field]: cappedValue
@@ -885,7 +906,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         
         ${results.averageAge > 0 ? `
         <div style="margin-top: 15px;">
-            <h4 style="color: #555; font-size: 14px;">Age Information</h4>
+            <h4 style="color: #555; font-size: 14px;">Age & Tenor Information</h4>
             <div class="info-row">
                 <span class="info-label">Average Age:</span>
                 <span class="info-value">${results.averageAge.toFixed(1)} years</span>
@@ -893,6 +914,15 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             <div class="info-row">
                 <span class="info-label">Max Loan Tenor:</span>
                 <span class="info-value">${results.maxLoanTenor} years</span>
+            </div>
+            <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                <p style="font-size: 11px; color: #1e40af; margin: 0; line-height: 1.3;">
+                    <strong>${inputs.propertyType === 'hdb' ? 'HDB' : 'Private'} Property Rules:</strong><br>
+                    ${inputs.propertyType === 'hdb' 
+                        ? '• 56%-75% loan: Max 25yr (age≤65)<br>• ≤55% loan: Max 30yr (age≤75)'
+                        : '• 56%-75% loan: Max 30yr (age≤65)<br>• ≤55% loan: Max 35yr (age≤75)'
+                    }
+                </p>
             </div>
         </div>
         ` : ''}
@@ -919,6 +949,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
         <p style="margin: 4px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
         <p style="margin: 4px 0;">• Additional fees (legal, valuation, insurance) are not included.</p>
+        <p style="margin: 4px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
         <p style="margin: 4px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
         <p style="margin: 4px 0;">• Interest rates are estimates and may vary.</p>
     </div>
@@ -1112,16 +1143,23 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
                     type="number"
                     value={inputs.loanTenor}
                     onChange={(e) => handleInputChange('loanTenor', e.target.value)}
-                    max="35"
+                    max={results ? results.maxLoanTenor : "35"}
                     min="1"
                     className="w-full p-3 border rounded-lg"
                   />
                   {results && (
                     <div className="mt-1 text-xs text-gray-600">
-                      <p>Max tenor based on age: {results.maxLoanTenor} years</p>
+                      <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
                       {results.averageAge > 0 && (
-                        <p>Average applicant age: {results.averageAge.toFixed(1)} years</p>
+                        <p><strong>Average age:</strong> {results.averageAge.toFixed(1)} years</p>
                       )}
+                      <p className="text-blue-600 font-medium">
+                        {inputs.propertyType === 'hdb' ? 'HDB' : 'Private'} Property Rules:
+                        {inputs.propertyType === 'hdb' 
+                          ? ' 56%-75% loan: Max 25yr (age≤65), ≤55% loan: Max 30yr (age≤75)'
+                          : ' 56%-75% loan: Max 30yr (age≤65), ≤55% loan: Max 35yr (age≤75)'
+                        }
+                      </p>
                     </div>
                   )}
                 </div>
@@ -1644,6 +1682,16 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
                 Key Formulas Used
               </h3>
               <div className="text-sm space-y-2 text-gray-700">
+                <p><strong>Maximum Loan Tenor Rules:</strong></p>
+                <p className="ml-4"><strong>HDB Property:</strong></p>
+                <p className="ml-6">• 56%-75% loan: Max 25 years, borrower age capped at 65 years</p>
+                <p className="ml-6">• ≤55% loan: Max 30 years, borrower age capped at 75 years</p>
+                <p className="ml-4"><strong>Private Property:</strong></p>
+                <p className="ml-6">• 56%-75% loan: Max 30 years, borrower age capped at 65 years</p>
+                <p className="ml-6">• ≤55% loan: Max 35 years, borrower age capped at 75 years</p>
+                <p className="ml-4">• <strong>Calculation:</strong> Min(Max_Tenor_Years, Age_Cap - Average_Age)</p>
+                <p className="ml-4">• <strong>Example:</strong> HDB 75% loan, average age 55 → Min(25, 65-55) = 10 years</p>
+                
                 <p><strong>Commitment Inclusions by Property Type:</strong></p>
                 <p className="ml-4"><strong>Private Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
                 <p className="ml-4"><strong>HDB Property (MSR):</strong> Property loans only (car & personal loans excluded)</p>
