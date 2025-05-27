@@ -1309,6 +1309,11 @@ This ensures all content fits properly without being cut off.`);
                     value={inputs.stressTestRate}
                     onChange={(e) => handleInputChange('stressTestRate', Number(e.target.value))}
                     className="w-full p-3 border rounded-lg bg-red-50"
+                    style={{
+                      MozAppearance: 'textfield',
+                      WebkitAppearance: 'none',
+                      appearance: 'none'
+                    }}
                   />
                   <p className="text-xs text-red-600 mt-1">Used for affordability calculation</p>
                 </div>
@@ -1321,6 +1326,11 @@ This ensures all content fits properly without being cut off.`);
                     max={results ? results.maxLoanTenor : "35"}
                     min="1"
                     className="w-full p-3 border rounded-lg"
+                    style={{
+                      MozAppearance: 'textfield',
+                      WebkitAppearance: 'none',
+                      appearance: 'none'
+                    }}
                   />
                   {results && (
                     <div className="mt-1 text-xs text-gray-600">
