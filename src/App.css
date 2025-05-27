@@ -2,6 +2,32 @@
   text-align: left;
 }
 
+/* Remove ONLY spinner arrows from number inputs - Keep number behavior */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
+/* Firefox - Remove spinner while keeping number input behavior */
+input[type=number] {
+  -moz-appearance: textfield !important;
+}
+
+/* Additional specificity for Tailwind overrides */
+.w-full[type="number"]::-webkit-outer-spin-button,
+.w-full[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
+/* Ensure number inputs still behave as numbers (override Tailwind) */
+input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
 /* Custom input focus styles */
 input:focus {
   outline: none;
