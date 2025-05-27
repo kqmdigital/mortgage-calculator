@@ -104,7 +104,7 @@ const LoginScreen = ({ onLogin }) => {
 };
 
 const MortgageCalculator = ({ currentUser, onLogout }) => {
-  // Reset all values to empty when component mounts (fresh login)
+  // Reset all values with defaults when component mounts (fresh login)
   const [inputs, setInputs] = useState({
     // Property Type Selection
     propertyType: 'private', // 'private' or 'hdb'
@@ -491,8 +491,20 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
       'propertyLoanA', 'propertyLoanB', 'applicantAgeA', 'applicantAgeB'
     ];
     
+    const interestRateFields = [
+      'interestRateY1', 'interestRateY2', 'interestRateY3', 
+      'interestRateY4', 'interestRateY5', 'interestRateThereafter'
+    ];
+    
     if (numericFields.includes(field)) {
       const parsedValue = parseNumberInput(value);
+      setInputs(prev => ({
+        ...prev,
+        [field]: parsedValue
+      }));
+    } else if (interestRateFields.includes(field) || field === 'stressTestRate') {
+      // Handle interest rates and stress test rate to allow empty values
+      const parsedValue = value === '' ? '' : Number(value);
       setInputs(prev => ({
         ...prev,
         [field]: parsedValue
@@ -500,11 +512,19 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
     } else if (field === 'loanTenor') {
       const parsedValue = parseNumberInput(value);
       const maxTenor = calculateMaxLoanTenor();
-      const cappedValue = Math.min(maxTenor, Math.max(1, parsedValue || 30));
-      setInputs(prev => ({
-        ...prev,
-        [field]: cappedValue
-      }));
+      // Handle empty values - don't set a default, just validate if there's a value
+      if (parsedValue === '' || parsedValue === null || parsedValue === undefined) {
+        setInputs(prev => ({
+          ...prev,
+          [field]: ''
+        }));
+      } else {
+        const cappedValue = Math.min(maxTenor, Math.max(1, parsedValue));
+        setInputs(prev => ({
+          ...prev,
+          [field]: cappedValue
+        }));
+      }
     } else {
       setInputs(prev => ({
         ...prev,
@@ -1122,7 +1142,19 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         newWindow.print();
       }, 500);
 
-      alert('Clean professional report generated! Use your browser\'s print dialog to save as PDF.');
+      // Show detailed instructions for optimal PDF printing
+      alert(`Professional report generated successfully! 
+
+📄 FOR BEST PDF RESULTS:
+• Use Chrome or Edge browser for printing
+• In print dialog, select "More settings"
+• Set margins to "Minimum" or "Custom" (0.5 inch)
+• Choose "A4" paper size
+• Enable "Background graphics"
+• Set scale to "100%" or "Fit to page width"
+• Select "Portrait" orientation
+
+This ensures all content fits properly without being cut off.`);
 
     } catch (error) {
       console.error('Error generating report:', error);
@@ -1285,7 +1317,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
                   <input
                     type="number"
                     value={inputs.loanTenor}
-                    onChange={(e) => handleInputChange('loanTenor', e.target.value)}
+                    onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
                     max={results ? results.maxLoanTenor : "35"}
                     min="1"
                     className="w-full p-3 border rounded-lg"
