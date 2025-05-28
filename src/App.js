@@ -415,6 +415,7 @@ const MonthlyRepaymentCalculator = () => {
 
   // PDF Report generation for Monthly Repayment Calculator
   // PDF Report generation for Monthly Repayment Calculator (UPDATED VERSION)
+// PDF Report generation for Monthly Repayment Calculator (FINAL UPDATED VERSION)
 const generateRepaymentPDFReport = (results, loanType = 'new') => {
   if (!results) {
     alert('Please calculate the loan first before generating a report.');
@@ -456,7 +457,7 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     <style>
         @page {
             size: A4;
-            margin: 0.5in 0.75in;
+            margin: 0.4in 0.6in;
         }
         
         @media print {
@@ -469,7 +470,7 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
                 margin: 0; 
                 padding: 0;
                 font-size: 10px;
-                line-height: 1.2;
+                line-height: 1.1;
             }
             
             .page-break { 
@@ -484,50 +485,50 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.3;
+            line-height: 1.2;
             color: #333;
             max-width: 100%;
             margin: 0;
-            padding: 10px;
+            padding: 8px;
             background: white;
-            font-size: 11px;
+            font-size: 10px;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 2px solid #1d4ed8;
         }
         
         .logo-section img {
-            max-width: 150px;
+            max-width: 120px;
             height: auto;
             display: block;
         }
         
         .report-info {
-            margin-top: 6px;
-            font-size: 10px;
+            margin-top: 4px;
+            font-size: 9px;
             color: #666;
         }
         
         .loan-type-banner {
             background: #1d4ed8;
             color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 4px 8px;
+            border-radius: 4px;
             text-align: center;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            margin: 8px 0;
+            margin: 6px 0;
         }
         
         .section {
-            margin: 15px 0;
-            padding: 12px;
+            margin: 8px 0;
+            padding: 8px;
             border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            border-radius: 4px;
             background: #fafafa;
             page-break-inside: avoid;
         }
@@ -535,56 +536,35 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
         .section h2 {
             color: #1d4ed8;
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            font-size: 14px;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            font-size: 12px;
             margin-top: 0;
+            text-align: center;
         }
         
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dotted #ccc;
-            font-size: 11px;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .info-value {
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .highlight-box {
+        .loan-details-header {
             background: #eff6ff;
             border: 1px solid #3b82f6;
             border-radius: 4px;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 6px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-size: 10px;
         }
         
         .repayment-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9px;
-            margin: 10px 0;
+            font-size: 8px;
+            margin: 6px 0;
         }
         
         .repayment-table th,
         .repayment-table td {
             border: 1px solid #e5e7eb;
-            padding: 6px 4px;
-            text-align: right;
+            padding: 4px 2px;
+            text-align: center;
         }
         
         .repayment-table th {
@@ -592,24 +572,19 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
             font-weight: bold;
             color: #374151;
         }
-        
-        .repayment-table th:first-child,
-        .repayment-table td:first-child {
-            text-align: center;
-        }
 
         .monthly-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8px;
-            margin: 10px 0;
+            font-size: 7px;
+            margin: 6px 0;
         }
         
         .monthly-table th,
         .monthly-table td {
             border: 1px solid #e5e7eb;
-            padding: 4px 2px;
-            text-align: right;
+            padding: 3px 2px;
+            text-align: center;
         }
         
         .monthly-table th {
@@ -618,29 +593,55 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
             color: #374151;
         }
         
-        .monthly-table th:first-child,
-        .monthly-table td:first-child {
-            text-align: center;
-        }
-        
         .footer {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 15px;
+            padding-top: 10px;
             border-top: 1px solid #e5e7eb;
             text-align: center;
             color: #666;
-            font-size: 9px;
+            font-size: 8px;
             page-break-inside: avoid;
         }
         
         .disclaimer {
             background: #f3f4f6;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 15px 0;
-            font-size: 9px;
+            padding: 6px;
+            border-radius: 3px;
+            margin: 8px 0;
+            font-size: 8px;
             color: #555;
             page-break-inside: avoid;
+        }
+
+        .refinancing-section {
+            margin: 8px 0;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background: #fafafa;
+            font-size: 9px;
+        }
+
+        .refinancing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 6px 0;
+        }
+
+        .refinancing-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 3px;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .savings-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            font-size: 9px;
         }
     </style>
 </head>
@@ -660,22 +661,11 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
         </div>
     </div>
 
-    <div class="section no-break">
-        <h2>📋 LOAN SUMMARY</h2>
-        <div class="highlight-box">
-            <div class="info-row">
-                <span class="info-label">Loan Amount:</span>
-                <span class="info-value">${formatCurrency(loanDetails.amount)}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Loan Period:</span>
-                <span class="info-value">${loanDetails.years} years ${loanDetails.months > 0 ? loanDetails.months + ' months' : ''}</span>
-            </div>
-        </div>
-    </div>
-
     <div class="section">
         <h2>📅 YEARLY REPAYMENT SCHEDULE</h2>
+        <div class="loan-details-header">
+            <strong>Loan Amount: ${formatCurrency(loanDetails.amount)} | Loan Period: ${loanDetails.years} years ${loanDetails.months > 0 ? loanDetails.months + ' months' : ''}</strong>
+        </div>
         <table class="repayment-table">
             <thead>
                 <tr>
@@ -705,42 +695,40 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     </div>
 
     ${loanType === 'refinancing' && refinancingResults ? `
-    <div class="section">
-        <h2>💰 REFINANCING COMPARISON</h2>
-        <div class="highlight-box">
-            <div class="two-column">
-                <div>
-                    <h4 style="color: #666; margin-bottom: 10px;">Current Loan</h4>
-                    <div class="info-row">
-                        <span class="info-label">Monthly Payment:</span>
-                        <span class="info-value">${formatCurrency(refinancingResults.current.monthlyPayment)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Total Interest:</span>
-                        <span class="info-value">${formatCurrency(refinancingResults.current.totalInterest)}</span>
-                    </div>
+    <div class="refinancing-section">
+        <h2 style="color: #1d4ed8; font-size: 12px; margin: 0 0 8px 0; text-align: center;">💰 REFINANCING COMPARISON</h2>
+        <div class="refinancing-grid">
+            <div class="refinancing-card">
+                <h4 style="color: #666; margin: 0 0 6px 0; font-size: 10px;">Current Loan</h4>
+                <div class="savings-row">
+                    <span>Monthly Payment:</span>
+                    <span><strong>${formatCurrency(refinancingResults.current.monthlyPayment)}</strong></span>
                 </div>
-                <div>
-                    <h4 style="color: #666; margin-bottom: 10px;">New Package</h4>
-                    <div class="info-row">
-                        <span class="info-label">Monthly Payment:</span>
-                        <span class="info-value">${formatCurrency(refinancingResults.new.monthlyPayment)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Total Interest:</span>
-                        <span class="info-value">${formatCurrency(refinancingResults.new.totalInterest)}</span>
-                    </div>
+                <div class="savings-row">
+                    <span>Total Interest:</span>
+                    <span><strong>${formatCurrency(refinancingResults.current.totalInterest)}</strong></span>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-                <div class="info-row" style="justify-content: center; border: none; font-size: 14px;">
-                    <span class="info-label">Monthly Savings:</span>
-                    <span class="info-value" style="color: #16a34a; margin-left: 10px;">${formatCurrency(Math.abs(refinancingResults.monthlySavings))}</span>
+            <div class="refinancing-card">
+                <h4 style="color: #666; margin: 0 0 6px 0; font-size: 10px;">New Package</h4>
+                <div class="savings-row">
+                    <span>Monthly Payment:</span>
+                    <span><strong>${formatCurrency(refinancingResults.new.monthlyPayment)}</strong></span>
                 </div>
-                <div class="info-row" style="justify-content: center; border: none; font-size: 14px;">
-                    <span class="info-label">Total Interest Savings:</span>
-                    <span class="info-value" style="color: #16a34a; margin-left: 10px;">${formatCurrency(Math.abs(refinancingResults.totalInterestSavings))}</span>
+                <div class="savings-row">
+                    <span>Total Interest:</span>
+                    <span><strong>${formatCurrency(refinancingResults.new.totalInterest)}</strong></span>
                 </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+            <div class="savings-row" style="justify-content: center; font-size: 10px;">
+                <span>Monthly Savings:</span>
+                <span style="color: #16a34a; margin-left: 8px; font-weight: bold;">${formatCurrency(Math.abs(refinancingResults.monthlySavings))}</span>
+            </div>
+            <div class="savings-row" style="justify-content: center; font-size: 10px;">
+                <span>Total Interest Savings:</span>
+                <span style="color: #16a34a; margin-left: 8px; font-weight: bold;">${formatCurrency(Math.abs(refinancingResults.totalInterestSavings))}</span>
             </div>
         </div>
     </div>
@@ -778,20 +766,20 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     </div>
 
     <div class="disclaimer no-break">
-        <h4 style="margin: 0 0 8px 0; color: #333; font-size: 12px;">Important Notes</h4>
-        <p style="margin: 4px 0;">• This schedule is based on fixed interest rates and regular monthly payments.</p>
-        <p style="margin: 4px 0;">• Actual payments may vary based on rate changes and payment timing.</p>
-        <p style="margin: 4px 0;">• Early payments can significantly reduce total interest paid.</p>
-        <p style="margin: 4px 0;">• Consult our specialists for personalized advice and current market rates.</p>
+        <h4 style="margin: 0 0 4px 0; color: #333; font-size: 9px;">Important Notes</h4>
+        <p style="margin: 2px 0;">• This schedule is based on fixed interest rates and regular monthly payments.</p>
+        <p style="margin: 2px 0;">• Actual payments may vary based on rate changes and payment timing.</p>
+        <p style="margin: 2px 0;">• Early payments can significantly reduce total interest paid.</p>
+        <p style="margin: 2px 0;">• Consult our specialists for personalized advice and current market rates.</p>
     </div>
 
     <div class="footer no-break">        
-        <div style="margin-bottom: 8px;">
+        <div style="margin-bottom: 6px;">
             📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
         </div>
         
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 10px;">
-            <p style="margin: 0; font-size: 9px;">This report is confidential and intended for loan assessment purposes. 
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 8px;">
+            <p style="margin: 0; font-size: 7px;">This report is confidential and intended for loan assessment purposes. 
             Your Trusted Mortgage Advisory Partner</p>
         </div>
     </div>
@@ -815,7 +803,7 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
 📄 FOR BEST PDF RESULTS:
 • Use Chrome or Edge browser for printing
 • In print dialog, select "More settings"
-• Set margins to "Minimum" or "Custom" (0.5 inch)
+• Set margins to "Minimum" or "Custom" (0.4 inch)
 • Choose "A4" paper size
 • Enable "Background graphics"
 • Set scale to "100%" or "Fit to page width"
