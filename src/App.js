@@ -235,15 +235,19 @@ const MonthlyRepaymentCalculator = () => {
     // Aggregate into yearly data
     let currentYear = null;
     let yearData = null;
+    let yearCounter = 1;
     
     monthlyData.forEach((month, index) => {
-      if (month.year !== currentYear) {
+      const monthYear = Math.floor((month.month - 1) / 12) + 1; // Calculate which year this month belongs to
+      
+      if (monthYear !== currentYear) {
         if (yearData) {
           yearlyData.push(yearData);
         }
-        currentYear = month.year;
+        currentYear = monthYear;
         yearData = {
-          year: currentYear,
+          year: `Year ${yearCounter}`,
+          yearNumber: yearCounter,
           rate: month.rate,
           beginningPrincipal: month.beginningBalance,
           monthlyInstalment: month.monthlyPayment,
@@ -252,6 +256,7 @@ const MonthlyRepaymentCalculator = () => {
           endingPrincipal: month.endingBalance,
           months: []
         };
+        yearCounter++;
       }
       
       yearData.interestPaid += month.interestPayment;
@@ -635,6 +640,22 @@ const MonthlyRepaymentCalculator = () => {
                         <span class="info-label">Loan Type:</span>
                         <span class="info-value">${loanDetails.type}</span>
                     </div>
+                  {results && (
+                    <div className="mt-1 text-xs text-gray-600">
+                      <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
+                      {results.averageAge > 0 && (
+                        <p><strong>Average age:</strong> {results.averageAge.toFixed(1)} years</p>
+                      )}
+                      <p className="text-blue-600 font-medium">
+                        {inputs.propertyType === 'hdb' ? 'HDB' : 'Private'} Property Rules:
+                        {inputs.propertyType === 'hdb' 
+                          ? ' 56%-75% loan: Max 25yr (age≤65), ≤55% loan: Max 30yr (age≤75)'
+                          : ' 56%-75% loan: Max 30yr (age≤65), ≤55% loan: Max 35yr (age≤75)'
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
                     <div class="info-row">
                         <span class="info-label">Loan Amount:</span>
                         <span class="info-value">${formatCurrency(loanDetails.amount)}</span>
@@ -828,22 +849,22 @@ const MonthlyRepaymentCalculator = () => {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Loan amount</label>
+                  <label className="block text-sm font-medium mb-2">Loan amount (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(newLoan.loanAmount)}
                       onChange={(e) => handleNewLoanChange('loanAmount', e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="750,000"
+                      className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="750,000.00"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Interest rate</label>
+                    <label className="block text-sm font-medium mb-2">Interest rate (%)</label>
                     <div className="relative">
                       <input
                         type="number"
@@ -990,13 +1011,12 @@ const MonthlyRepaymentCalculator = () => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2">Date</th>
+                          <th className="text-center py-2">Year</th>
                           <th className="text-center py-2">Interest rate</th>
-                          <th className="text-right py-2">Beginning principal</th>
-                          <th className="text-right py-2">Monthly instalment</th>
-                          <th className="text-right py-2">Interest paid</th>
-                          <th className="text-right py-2">Principal paid</th>
-                          <th className="text-right py-2">Ending principal</th>
+                          <th className="text-center py-2">Monthly instalment</th>
+                          <th className="text-center py-2">Interest paid</th>
+                          <th className="text-center py-2">Principal paid</th>
+                          <th className="text-center py-2">Ending principal</th>
                           <th className="text-center py-2"></th>
                         </tr>
                       </thead>
@@ -1004,49 +1024,46 @@ const MonthlyRepaymentCalculator = () => {
                         {newLoanResults.yearlyData.map((year, index) => (
                           <React.Fragment key={index}>
                             <tr className="border-b hover:bg-gray-50">
-                              <td className="py-3">{year.year}</td>
-                              <td className="text-center py-3">{typeof year.rate === 'string' ? year.rate : `${year.rate}%`}</td>
-                              <td className="text-right py-3">{formatCurrency(year.beginningPrincipal)}</td>
-                              <td className="text-right py-3">{formatCurrency(year.monthlyInstalment)}</td>
-                              <td className="text-right py-3">{formatCurrency(year.interestPaid)}</td>
-                              <td className="text-right py-3">{formatCurrency(year.principalPaid)}</td>
-                              <td className="text-right py-3">{formatCurrency(year.endingPrincipal)}</td>
+                              <td className="text-center py-3">{year.year}</td>
+                              <td className="text-center py-3">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</td>
+                              <td className="text-center py-3">{formatCurrency(year.monthlyInstalment)}</td>
+                              <td className="text-center py-3">{formatCurrency(year.interestPaid)}</td>
+                              <td className="text-center py-3">{formatCurrency(year.principalPaid)}</td>
+                              <td className="text-center py-3">{formatCurrency(year.endingPrincipal)}</td>
                               <td className="text-center py-3">
                                 <button
                                   onClick={() => setShowMonthlyBreakdown(prev => ({
                                     ...prev,
-                                    [year.year]: !prev[year.year]
+                                    [year.yearNumber]: !prev[year.yearNumber]
                                   }))}
                                   className="text-blue-600 hover:text-blue-800"
                                 >
-                                  {showMonthlyBreakdown[year.year] ? '−' : '+'}
+                                  {showMonthlyBreakdown[year.yearNumber] ? '−' : '+'}
                                 </button>
                               </td>
                             </tr>
-                            {showMonthlyBreakdown[year.year] && (
+                            {showMonthlyBreakdown[year.yearNumber] && (
                               <tr>
-                                <td colSpan="8" className="p-0">
+                                <td colSpan="7" className="p-0">
                                   <div className="bg-gray-50 p-4">
                                     <table className="w-full text-xs">
                                       <thead>
                                         <tr className="text-gray-600">
-                                          <th className="text-left py-1">(Yr{Math.floor((year.months[0].month - 1) / 12) + 1}) Month</th>
-                                          <th className="text-right py-1">Beginning principal</th>
-                                          <th className="text-right py-1">Monthly instalment</th>
-                                          <th className="text-right py-1">Interest paid</th>
-                                          <th className="text-right py-1">Principal paid</th>
-                                          <th className="text-right py-1">Ending principal</th>
+                                          <th className="text-center py-1">Month</th>
+                                          <th className="text-center py-1">Monthly instalment</th>
+                                          <th className="text-center py-1">Interest paid</th>
+                                          <th className="text-center py-1">Principal paid</th>
+                                          <th className="text-center py-1">Ending principal</th>
                                         </tr>
                                       </thead>
                                       <tbody>
                                         {year.months.map((month, mIndex) => (
                                           <tr key={mIndex} className="border-t border-gray-200">
-                                            <td className="py-1">{month.monthName}</td>
-                                            <td className="text-right py-1">{formatCurrency(month.beginningBalance)}</td>
-                                            <td className="text-right py-1">{formatCurrency(month.monthlyPayment)}</td>
-                                            <td className="text-right py-1">{formatCurrency(month.interestPayment)}</td>
-                                            <td className="text-right py-1">{formatCurrency(month.principalPayment)}</td>
-                                            <td className="text-right py-1">{formatCurrency(month.endingBalance)}</td>
+                                            <td className="text-center py-1">{month.monthName}</td>
+                                            <td className="text-center py-1">{formatCurrency(month.monthlyPayment)}</td>
+                                            <td className="text-center py-1">{formatCurrency(month.interestPayment)}</td>
+                                            <td className="text-center py-1">{formatCurrency(month.principalPayment)}</td>
+                                            <td className="text-center py-1">{formatCurrency(month.endingBalance)}</td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -1091,15 +1108,15 @@ const MonthlyRepaymentCalculator = () => {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Outstanding loan amount</label>
+                  <label className="block text-sm font-medium mb-2">Outstanding loan amount (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(existingLoan.outstandingAmount)}
                       onChange={(e) => handleExistingLoanChange('outstandingAmount', e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="500,000"
+                      className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="500,000.00"
                     />
                   </div>
                 </div>
@@ -1108,7 +1125,7 @@ const MonthlyRepaymentCalculator = () => {
                   <h4 className="font-medium mb-3">• Current</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Existing interest rate</label>
+                      <label className="block text-sm font-medium mb-2">Existing interest rate (%)</label>
                       <div className="relative">
                         <input
                           type="number"
@@ -1152,7 +1169,7 @@ const MonthlyRepaymentCalculator = () => {
                   <h4 className="font-medium mb-3 text-orange-600">• New package details</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Interest rate</label>
+                      <label className="block text-sm font-medium mb-2">Interest rate (%)</label>
                       <div className="relative">
                         <input
                           type="number"
@@ -1326,25 +1343,23 @@ const MonthlyRepaymentCalculator = () => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2">Date</th>
+                          <th className="text-center py-2">Year</th>
                           <th className="text-center py-2">Interest rate</th>
-                          <th className="text-right py-2">Beginning principal</th>
-                          <th className="text-right py-2">Monthly instalment</th>
-                          <th className="text-right py-2">Interest paid</th>
-                          <th className="text-right py-2">Principal paid</th>
-                          <th className="text-right py-2">Ending principal</th>
+                          <th className="text-center py-2">Monthly instalment</th>
+                          <th className="text-center py-2">Interest paid</th>
+                          <th className="text-center py-2">Principal paid</th>
+                          <th className="text-center py-2">Ending principal</th>
                         </tr>
                       </thead>
                       <tbody>
                         {refinancingResults.new.yearlyData.map((year, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50">
-                            <td className="py-3">{year.year}</td>
-                            <td className="text-center py-3">{typeof year.rate === 'string' ? year.rate : `${year.rate}%`}</td>
-                            <td className="text-right py-3">{formatCurrency(year.beginningPrincipal)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.monthlyInstalment)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.interestPaid)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.principalPaid)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.endingPrincipal)}</td>
+                            <td className="text-center py-3">{year.year}</td>
+                            <td className="text-center py-3">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</td>
+                            <td className="text-center py-3">{formatCurrency(year.monthlyInstalment)}</td>
+                            <td className="text-center py-3">{formatCurrency(year.interestPaid)}</td>
+                            <td className="text-center py-3">{formatCurrency(year.principalPaid)}</td>
+                            <td className="text-center py-3">{formatCurrency(year.endingPrincipal)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1577,20 +1592,25 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     
     // Total commitments (different for HDB vs Private)
     let totalCommitments;
+    let totalCommitmentsTDSR; // For TDSR calculation (always includes all commitments)
+    
     if (propertyType === 'hdb') {
-      // For HDB: Include property loans only in MSR calculation, exclude personal and car loans
+      // For HDB MSR: Include property loans only
       totalCommitments = parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
+      // For HDB TDSR: Include ALL commitments (car, personal, property loans)
+      totalCommitmentsTDSR = parsedInputs.carLoanA + parsedInputs.carLoanB + parsedInputs.personalLoanA + parsedInputs.personalLoanB + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
     } else {
-      // For Private: Include ALL commitments in TDSR calculation (car, personal, property loans)
+      // For Private: Include ALL commitments in TDSR calculation
       totalCommitments = parsedInputs.carLoanA + parsedInputs.carLoanB + parsedInputs.personalLoanA + parsedInputs.personalLoanB + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
+      totalCommitmentsTDSR = totalCommitments;
     }
     
     // TDSR and MSR calculations
-    const tdsr55Available = (combinedMonthlyIncome * 0.55) - totalCommitments;
+    const tdsr55Available = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR;
     const msr30Available = combinedMonthlyIncome * 0.3;
     
     // Required income calculations
-    const requiredIncomeTDSR = (monthlyInstallment + totalCommitments) / 0.55;
+    const requiredIncomeTDSR = (monthlyInstallment + totalCommitmentsTDSR) / 0.55;
     const requiredIncomeHDB = (monthlyInstallment + totalCommitments) / 0.3;
     
     // Deficit calculations
@@ -1635,6 +1655,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       cashPledgeTDSR,
       cashPledgeHDB,
       totalCommitments,
+      totalCommitmentsTDSR,
       averageAge,
       maxLoanTenor
     };
@@ -1981,36 +2002,119 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         <div class="affordability-title">
             ${inputs.propertyType === 'private' 
                 ? `TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}`
-                : `MSR Assessment: ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}`
+                : `Overall HDB Assessment: ${(results.hdbPass && results.tdsrPass) ? 'PASS ✓' : 'FAIL ✗'}`
             }
         </div>
         <div style="font-size: 14px;">
             ${inputs.propertyType === 'private'
                 ? `Required Income: ${formatCurrency(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}`
-                : `Required Income: ${formatCurrency(results.requiredIncomeHDB)} | Deficit/Surplus: ${formatCurrency(results.hdbDeficit)}`
+                : `Must pass BOTH MSR (30%) AND TDSR (55%) tests`
             }
         </div>
     </div>
 
-    ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && !results.hdbPass) ? `
+    ${inputs.propertyType === 'hdb' ? `
+    <div class="section no-break">
+        <h2>📊 HDB DUAL ASSESSMENT (MSR & TDSR)</h2>
+        <div class="two-column">
+            <div style="background: ${results.hdbPass ? '#f0fdf4' : '#fef2f2'}; border: 2px solid ${results.hdbPass ? '#22c55e' : '#ef4444'}; border-radius: 6px; padding: 12px;">
+                <h3 style="color: ${results.hdbPass ? '#16a34a' : '#dc2626'}; font-size: 14px; margin: 0 0 10px 0;">MSR 30% Test</h3>
+                <div class="info-row" style="border: none;">
+                    <span class="info-label">Required Income:</span>
+                    <span class="info-value">${formatCurrency(results.requiredIncomeHDB)}</span>
+                </div>
+                <div class="info-row" style="border: none;">
+                    <span class="info-label">Deficit/Surplus:</span>
+                    <span class="info-value" style="color: ${results.hdbDeficit >= 0 ? '#16a34a' : '#dc2626'};">${formatCurrency(results.hdbDeficit)}</span>
+                </div>
+                <div style="text-align: center; margin-top: 10px; font-weight: bold; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">
+                    ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
+                </div>
+            </div>
+            
+            <div style="background: ${results.tdsrPass ? '#f0fdf4' : '#fef2f2'}; border: 2px solid ${results.tdsrPass ? '#22c55e' : '#ef4444'}; border-radius: 6px; padding: 12px;">
+                <h3 style="color: ${results.tdsrPass ? '#16a34a' : '#dc2626'}; font-size: 14px; margin: 0 0 10px 0;">TDSR 55% Test</h3>
+                <div class="info-row" style="border: none;">
+                    <span class="info-label">Required Income:</span>
+                    <span class="info-value">${formatCurrency(results.requiredIncomeTDSR)}</span>
+                </div>
+                <div class="info-row" style="border: none;">
+                    <span class="info-label">Deficit/Surplus:</span>
+                    <span class="info-value" style="color: ${results.tdsrDeficit >= 0 ? '#16a34a' : '#dc2626'};">${formatCurrency(results.tdsrDeficit)}</span>
+                </div>
+                <div style="text-align: center; margin-top: 10px; font-weight: bold; color: ${results.tdsrPass ? '#16a34a' : '#dc2626'};">
+                    ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 12px; margin-top: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 12px; color: #1d4ed8;">
+                <strong>Note:</strong> For HDB loans, banks assess both MSR (30%) for property-related debt and TDSR (55%) for total debt servicing.
+                Both tests must be passed for loan approval.
+            </p>
+        </div>
+    </div>
+    ` : ''}
+
+    ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && (!results.hdbPass || !results.tdsrPass)) ? `
+        ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && (!results.hdbPass || !results.tdsrPass)) ? `
     <div class="section no-break">
         <h2>💡 FUNDING SOLUTIONS</h2>
-        <p style="text-align: center; margin-bottom: 15px;">To meet the ${inputs.propertyType === 'private' ? 'TDSR' : 'MSR'} requirements, you need one of the following:</p>
+        <p style="text-align: center; margin-bottom: 15px;">To meet the ${inputs.propertyType === 'private' ? 'TDSR' : 'MSR and TDSR'} requirements, you need one of the following:</p>
         
+        ${inputs.propertyType === 'hdb' ? `
+        <div style="margin-bottom: 15px;">
+            <h4 style="color: #555; font-size: 12px; margin-bottom: 8px;">For MSR (30%) Shortfall:</h4>
+            <div class="funding-grid">
+                <div class="funding-card">
+                    <strong>Show Fund Option</strong><br>
+                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
+                        ${formatCurrency(results.cashShowHDB)}
+                    </span>
+                </div>
+                <div class="funding-card">
+                    <strong>Pledge Option</strong><br>
+                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
+                        ${formatCurrency(results.cashPledgeHDB)}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <h4 style="color: #555; font-size: 12px; margin-bottom: 8px;">For TDSR (55%) Shortfall:</h4>
+            <div class="funding-grid">
+                <div class="funding-card">
+                    <strong>Show Fund Option</strong><br>
+                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
+                        ${formatCurrency(results.cashShowTDSR)}
+                    </span>
+                </div>
+                <div class="funding-card">
+                    <strong>Pledge Option</strong><br>
+                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
+                        ${formatCurrency(results.cashPledgeTDSR)}
+                    </span>
+                </div>
+            </div>
+        </div>
+        ` : `
         <div class="funding-grid">
             <div class="funding-card">
                 <strong>Show Fund Option</strong><br>
                 <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                    ${formatCurrency(inputs.propertyType === 'private' ? results.cashShowTDSR : results.cashShowHDB)}
+                    ${formatCurrency(results.cashShowTDSR)}
                 </span>
             </div>
             <div class="funding-card">
                 <strong>Pledge Option</strong><br>
                 <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                    ${formatCurrency(inputs.propertyType === 'private' ? results.cashPledgeTDSR : results.cashPledgeHDB)}
+                    ${formatCurrency(results.cashPledgeTDSR)}
                 </span>
             </div>
         </div>
+        `}
         
         <p style="font-size: 12px; color: #666; text-align: center; margin-top: 15px;">
             <em>Choose either Show Fund OR Pledge option, not both</em>
@@ -2092,34 +2196,40 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
                 <span class="info-label">Show Fund Amount:</span>
                 <span class="info-value">${formatCurrency(parseNumberInput(inputs.showFundAmount))}</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Show Fund Monthly Income:</span>
-                <span class="info-value">${formatCurrency((parseNumberInput(inputs.showFundAmount) || 0) * 0.00625)}</span>
-            </div>
             ` : ''}
             ${(parseNumberInput(inputs.pledgeAmount) || 0) > 0 ? `
             <div class="info-row">
                 <span class="info-label">Pledge Amount:</span>
                 <span class="info-value">${formatCurrency(parseNumberInput(inputs.pledgeAmount))}</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Pledge Monthly Income:</span>
-                <span class="info-value">${formatCurrency((parseNumberInput(inputs.pledgeAmount) || 0) / 48)}</span>
-            </div>
             ` : ''}
         </div>
         ` : ''}
         
-        ${(results.totalCommitments > 0) ? `
+        ${(results.totalCommitments > 0 || (inputs.propertyType === 'hdb' && results.totalCommitmentsTDSR > 0)) ? `
         <div style="margin-top: 15px;">
             <h4 style="color: #555; font-size: 14px;">Monthly Commitments</h4>
-            <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.totalCommitments)}</div>
             ${inputs.propertyType === 'hdb' ? `
+                <div style="font-size: 16px; font-weight: bold; color: #dc2626;">
+                    MSR Commitments: ${formatCurrency(results.totalCommitments)}
+                </div>
                 <p style="font-size: 11px; color: #666; margin-top: 5px;">
                     <strong>HDB MSR Calculation:</strong> Includes property loans only (${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}). 
                     Car loans and personal loans are excluded from MSR.
                 </p>
+                ${results.totalCommitmentsTDSR > 0 ? `
+                <div style="font-size: 16px; font-weight: bold; color: #dc2626; margin-top: 10px;">
+                    TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}
+                </div>
+                <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                    <strong>HDB TDSR Calculation:</strong> Includes all commitments:
+                    <br>• Car loans: ${formatCurrency(parseNumberInput(inputs.carLoanA) + parseNumberInput(inputs.carLoanB))}
+                    <br>• Personal loans: ${formatCurrency(parseNumberInput(inputs.personalLoanA) + parseNumberInput(inputs.personalLoanB))}
+                    <br>• Property loans: ${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}
+                </p>
+                ` : ''}
             ` : `
+                <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.totalCommitments)}</div>
                 <p style="font-size: 11px; color: #666; margin-top: 5px;">
                     <strong>Private Property TDSR Calculation:</strong> Includes all commitments:
                     <br>• Car loans: ${formatCurrency(parseNumberInput(inputs.carLoanA) + parseNumberInput(inputs.carLoanB))}
@@ -2136,7 +2246,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
         <p style="margin: 4px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
         <p style="margin: 4px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
-        <p style="margin: 4px 0;">• ${inputs.propertyType === 'private' ? 'TDSR limit: 55%' : 'MSR limit: 30%'} of gross monthly income.</p>
+        <p style="margin: 4px 0;">• ${inputs.propertyType === 'private' ? 'TDSR limit: 55%' : 'MSR limit: 30% and TDSR limit: 55%'} of gross monthly income.</p>
         <p style="margin: 4px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
         <p style="margin: 4px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
     </div>
@@ -2225,13 +2335,16 @@ This ensures all content fits properly without being cut off.`);
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Purchase Price (SGD)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.purchasePrice)}
-                  onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter purchase price"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.purchasePrice)}
+                    onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="1,000,000.00"
+                  />
+                </div>
               </div>
             </div>
             
@@ -2279,13 +2392,16 @@ This ensures all content fits properly without being cut off.`);
                 {inputs.useCustomAmount && (
                   <div>
                     <label className="block text-sm font-medium mb-1">Custom Loan Amount (SGD)</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.customLoanAmount)}
-                      onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
-                      className="w-full p-3 border rounded-lg"
-                      placeholder="Enter custom loan amount"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.customLoanAmount)}
+                        onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
+                        className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                        placeholder="750,000.00"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -2296,36 +2412,43 @@ This ensures all content fits properly without being cut off.`);
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Stress Test Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.stressTestRate}
-                    onChange={(e) => handleInputChange('stressTestRate', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg bg-red-50"
-                    style={{
-                      MozAppearance: 'textfield',
-                      WebkitAppearance: 'none',
-                      appearance: 'none'
-                    }}
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={inputs.stressTestRate}
+                      onChange={(e) => handleInputChange('stressTestRate', Number(e.target.value))}
+                      className="w-full pr-8 pl-3 p-3 border rounded-lg bg-red-50"
+                      placeholder="4.00"
+                      style={{
+                        MozAppearance: 'textfield',
+                        WebkitAppearance: 'none',
+                        appearance: 'none'
+                      }}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                  </div>
                   <p className="text-xs text-red-600 mt-1">Used for affordability calculation</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Loan Tenor (Years)</label>
-                  <input
-                    type="number"
-                    value={inputs.loanTenor}
-                    onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
-                    max={results ? results.maxLoanTenor : "35"}
-                    min="1"
-                    className="w-full p-3 border rounded-lg"
-                    style={{
-                      MozAppearance: 'textfield',
-                      WebkitAppearance: 'none',
-                      appearance: 'none'
-                    }}
-                  />
-                  {results && (
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={inputs.loanTenor}
+                      onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
+                      max={results ? results.maxLoanTenor : "35"}
+                      min="1"
+                      className="w-full pr-12 pl-3 p-3 border rounded-lg"
+                      placeholder="30"
+                      style={{
+                        MozAppearance: 'textfield',
+                        WebkitAppearance: 'none',
+                        appearance: 'none'
+                      }}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                  </div>
                     <div className="mt-1 text-xs text-gray-600">
                       <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
                       {results.averageAge > 0 && (
@@ -2352,34 +2475,43 @@ This ensures all content fits properly without being cut off.`);
                 <h3 className="font-medium mb-3">Applicant A</h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Monthly Salary</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.monthlySalaryA)}
-                      onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter monthly salary"
-                    />
+                    <label className="block text-sm font-medium mb-1">Monthly Salary (SGD)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.monthlySalaryA)}
+                        onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
+                        className="w-full pl-12 pr-3 p-2 border rounded"
+                        placeholder="8,000.00"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Annual Salary</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.annualSalaryA)}
-                      onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter annual salary"
-                    />
+                    <label className="block text-sm font-medium mb-1">Annual Salary (SGD)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.annualSalaryA)}
+                        onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
+                        className="w-full pl-12 pr-3 p-2 border rounded"
+                        placeholder="120,000.00"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Age</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.applicantAgeA)}
-                      onChange={(e) => handleInputChange('applicantAgeA', e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter age"
-                    />
+                    <label className="block text-sm font-medium mb-1">Age (Years)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.applicantAgeA)}
+                        onChange={(e) => handleInputChange('applicantAgeA', e.target.value)}
+                        className="w-full pr-12 pl-3 p-2 border rounded"
+                        placeholder="35"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2387,34 +2519,43 @@ This ensures all content fits properly without being cut off.`);
                 <h3 className="font-medium mb-3">Applicant B</h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Monthly Salary</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.monthlySalaryB)}
-                      onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter monthly salary"
-                    />
+                    <label className="block text-sm font-medium mb-1">Monthly Salary (SGD)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.monthlySalaryB)}
+                        onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
+                        className="w-full pl-12 pr-3 p-2 border rounded"
+                        placeholder="6,000.00"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Annual Salary</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.annualSalaryB)}
-                      onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter annual salary"
-                    />
+                    <label className="block text-sm font-medium mb-1">Annual Salary (SGD)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.annualSalaryB)}
+                        onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
+                        className="w-full pl-12 pr-3 p-2 border rounded"
+                        placeholder="90,000.00"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Age</label>
-                    <input
-                      type="text"
-                      value={formatNumberInput(inputs.applicantAgeB)}
-                      onChange={(e) => handleInputChange('applicantAgeB', e.target.value)}
-                      className="w-full p-2 border rounded"
-                      placeholder="Enter age"
-                    />
+                    <label className="block text-sm font-medium mb-1">Age (Years)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.applicantAgeB)}
+                        onChange={(e) => handleInputChange('applicantAgeB', e.target.value)}
+                        className="w-full pr-12 pl-3 p-2 border rounded"
+                        placeholder="32"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2425,24 +2566,30 @@ This ensures all content fits properly without being cut off.`);
             <h2 className="text-xl font-semibold mb-4 text-yellow-800">Additional Funding Options</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Show Fund Amount</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.showFundAmount)}
-                  onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter show fund amount"
-                />
+                <label className="block text-sm font-medium mb-2">Show Fund Amount (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.showFundAmount)}
+                    onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="500,000.00"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Pledge Amount</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.pledgeAmount)}
-                  onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter pledge amount"
-                />
+                <label className="block text-sm font-medium mb-2">Pledge Amount (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.pledgeAmount)}
+                    onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="300,000.00"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -2451,64 +2598,82 @@ This ensures all content fits properly without being cut off.`);
             <h2 className="text-xl font-semibold mb-4 text-red-800">Existing Commitments</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Car Loan (A)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.carLoanA)}
-                  onChange={(e) => handleInputChange('carLoanA', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter car loan amount"
-                />
+                <label className="block text-sm font-medium mb-2">Car Loan (A) - Monthly Payment (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.carLoanA)}
+                    onChange={(e) => handleInputChange('carLoanA', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="800.00"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Car Loan (B)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.carLoanB)}
-                  onChange={(e) => handleInputChange('carLoanB', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter car loan amount"
-                />
+                <label className="block text-sm font-medium mb-2">Car Loan (B) - Monthly Payment (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.carLoanB)}
+                    onChange={(e) => handleInputChange('carLoanB', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="600.00"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Personal Loan (A)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.personalLoanA)}
-                  onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter personal loan amount"
-                />
+                <label className="block text-sm font-medium mb-2">Personal Loan (A) - Monthly Payment (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.personalLoanA)}
+                    onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="500.00"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Personal Loan (B)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.personalLoanB)}
-                  onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter personal loan amount"
-                />
+                <label className="block text-sm font-medium mb-2">Personal Loan (B) - Monthly Payment (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.personalLoanB)}
+                    onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="300.00"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Property Loan (A)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.propertyLoanA)}
-                  onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter property loan amount"
-                />
+                <label className="block text-sm font-medium mb-2">Property Loan (A) - Monthly Payment (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.propertyLoanA)}
+                    onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="2,000.00"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Property Loan (B)</label>
-                <input
-                  type="text"
-                  value={formatNumberInput(inputs.propertyLoanB)}
-                  onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="Enter property loan amount"
-                />
+                <label className="block text-sm font-medium mb-2">Property Loan (B) - Monthly Payment (SGD)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <input
+                    type="text"
+                    value={formatNumberInput(inputs.propertyLoanB)}
+                    onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
+                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    placeholder="1,500.00"
+                  />
+                </div>
               </div>
             </div>
             
@@ -2583,15 +2748,22 @@ This ensures all content fits properly without being cut off.`);
                     </div>
                     <div>
                       <span className="text-sm text-gray-600">
-                        Total Commitments {inputs.propertyType === 'hdb' ? '(Property Only)' : '(All Loans)'}:
+                        {inputs.propertyType === 'hdb' ? 'MSR Commitments (Property Only):' : 'Total Commitments (All Loans):'}
                       </span>
                       <div className="font-semibold">{formatCurrency(results.totalCommitments)}</div>
                       <div className="text-xs text-gray-500">
                         {inputs.propertyType === 'hdb' 
-                          ? 'Includes: Property loans only' 
-                          : 'Includes: Car, personal & property loans'
+                          ? 'MSR: Property loans only' 
+                          : 'TDSR: Car, personal & property loans'
                         }
                       </div>
+                      {inputs.propertyType === 'hdb' && results.totalCommitmentsTDSR > 0 && (
+                        <div className="mt-2">
+                          <span className="text-sm text-gray-600">TDSR Commitments (All Loans):</span>
+                          <div className="font-semibold">{formatCurrency(results.totalCommitmentsTDSR)}</div>
+                          <div className="text-xs text-gray-500">TDSR: Car, personal & property loans</div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2639,41 +2811,98 @@ This ensures all content fits properly without being cut off.`);
             )}
 
             {inputs.propertyType === 'hdb' && (
-              <div className={`p-6 rounded-lg border-2 ${results.hdbPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  {results.hdbPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
-                  HDB Property (MSR 30%)
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm text-gray-600">Required Income:</span>
-                    <div className="font-semibold">{formatCurrency(results.requiredIncomeHDB)}</div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                    <div className={`font-semibold ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatCurrency(results.hdbDeficit)}
+              <div className="space-y-4">
+                {/* MSR 30% Assessment */}
+                <div className={`p-6 rounded-lg border-2 ${results.hdbPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    {results.hdbPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+                    HDB Property (MSR 30%)
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm text-gray-600">Required Income:</span>
+                      <div className="font-semibold">{formatCurrency(results.requiredIncomeHDB)}</div>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-600">Deficit/Surplus:</span>
+                      <div className={`font-semibold ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(results.hdbDeficit)}
+                      </div>
                     </div>
                   </div>
+                  {!results.hdbPass && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h4 className="font-medium mb-2">MSR Cash Requirements (Choose One):</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <span className="text-sm text-gray-600">Cash to Show:</span>
+                          <div className="font-semibold text-red-600">{formatCurrency(results.cashShowHDB)}</div>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm text-gray-600">Cash to Pledge:</span>
+                          <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
+                        </div>
+                      </div>
+                      <div className="text-center mt-2">
+                        <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {!results.hdbPass && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h4 className="font-medium mb-2">Cash Requirements (Choose One):</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <span className="text-sm text-gray-600">Cash to Show:</span>
-                        <div className="font-semibold text-red-600">{formatCurrency(results.cashShowHDB)}</div>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                        <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
-                      </div>
+
+                {/* TDSR 55% Assessment for HDB */}
+                <div className={`p-6 rounded-lg border-2 ${results.tdsrPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    {results.tdsrPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+                    HDB Property (TDSR 55%)
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm text-gray-600">Required Income:</span>
+                      <div className="font-semibold">{formatCurrency(results.requiredIncomeTDSR)}</div>
                     </div>
-                    <div className="text-center mt-2">
-                      <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                    <div>
+                      <span className="text-sm text-gray-600">Deficit/Surplus:</span>
+                      <div className={`font-semibold ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(results.tdsrDeficit)}
+                      </div>
                     </div>
                   </div>
-                )}
+                  {!results.tdsrPass && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h4 className="font-medium mb-2">TDSR Cash Requirements (Choose One):</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <span className="text-sm text-gray-600">Cash to Show:</span>
+                          <div className="font-semibold text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm text-gray-600">Cash to Pledge:</span>
+                          <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
+                        </div>
+                      </div>
+                      <div className="text-center mt-2">
+                        <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Overall HDB Assessment */}
+                <div className={`p-4 rounded-lg border-2 text-center ${(results.hdbPass && results.tdsrPass) ? 'bg-green-100 border-green-300' : 'bg-red-100 border-red-300'}`}>
+                  <h4 className="font-bold text-lg">
+                    Overall HDB Assessment: {(results.hdbPass && results.tdsrPass) ? 
+                      <span className="text-green-700">PASS ✓</span> : 
+                      <span className="text-red-700">FAIL ✗</span>
+                    }
+                  </h4>
+                  <p className="text-sm mt-2 text-gray-600">
+                    {(results.hdbPass && results.tdsrPass) ? 
+                      'You meet both MSR (30%) and TDSR (55%) requirements.' :
+                      'You must pass BOTH MSR (30%) AND TDSR (55%) tests for HDB loan approval.'
+                    }
+                  </p>
+                </div>
               </div>
             )}
 
@@ -2708,6 +2937,8 @@ This ensures all content fits properly without being cut off.`);
                 <p><strong>Commitment Inclusions by Property Type:</strong></p>
                 <p className="ml-4"><strong>Private Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
                 <p className="ml-4"><strong>HDB Property (MSR):</strong> Property loans only (car & personal loans excluded)</p>
+                <p className="ml-4"><strong>HDB Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
+                <p className="ml-4"><em>Note: HDB properties must pass BOTH MSR (30%) AND TDSR (55%) tests</em></p>
                 
                 <p><strong>Monthly Installment Calculation:</strong></p>
                 <p className="ml-4">• PMT(Stress Test Rate/12, Loan Tenor×12, Loan Amount)</p>
@@ -2722,8 +2953,9 @@ This ensures all content fits properly without being cut off.`);
                 <p><strong>Affordability Ratios:</strong></p>
                 <p className="ml-4">• <strong>TDSR 55% (Private):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
                 <p className="ml-4">• <strong>MSR 30% (HDB):</strong> Combined Monthly Income × 0.3 - Property Loans Only</p>
+                <p className="ml-4">• <strong>TDSR 55% (HDB):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
                 <p className="ml-4">• Required Income TDSR = (Stress Test Installment + All Commitments) ÷ 0.55</p>
-                <p className="ml-4">• Required Income HDB = (Stress Test Installment + Property Loans Only) ÷ 0.3</p>
+                <p className="ml-4">• Required Income HDB MSR = (Stress Test Installment + Property Loans Only) ÷ 0.3</p>
                 
                 <p><strong>Cash Requirements (when deficit exists):</strong></p>
                 <p className="ml-4">• Cash to Show = |Deficit| ÷ 0.00625</p>
