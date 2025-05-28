@@ -460,175 +460,156 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     <style>
         @page {
             size: A4;
-            margin: 0.4in 0.6in;
+            margin: 0.5in;
         }
         
-        @media print {
-            * {
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-            
-            body { 
-                margin: 0; 
-                padding: 0;
-                font-size: 10px;
-                line-height: 1.1;
-            }
-            
-            .page-break { 
-                page-break-before: always; 
-            }
-            
-            .no-break { 
-                page-break-inside: avoid; 
-                break-inside: avoid;
-            }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            font-size: 10px;
             line-height: 1.2;
             color: #333;
-            max-width: 100%;
-            margin: 0;
-            padding: 8px;
             background: white;
-            font-size: 10px;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 8px;
-            padding-bottom: 6px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #1d4ed8;
         }
         
-        .logo-section img {
-            max-width: 120px;
-            height: auto;
-            display: block;
+        .logo-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
         }
         
-        .report-info {
-            margin-top: 4px;
-            font-size: 9px;
-            color: #666;
+        .logo-section img {
+            width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
         
         .loan-type-banner {
             background: #1d4ed8;
             color: white;
-            padding: 4px 8px;
+            padding: 8px 12px;
             border-radius: 4px;
             text-align: center;
             font-size: 12px;
             font-weight: bold;
-            margin: 6px 0;
+            margin: 8px 0;
+        }
+        
+        .report-info {
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+            margin-top: 6px;
         }
         
         .section {
-            margin: 8px 0;
-            padding: 8px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            background: #fafafa;
-            page-break-inside: avoid;
+            margin-bottom: 15px;
+            break-inside: avoid;
         }
         
-        .section h2 {
+        .section-title {
             color: #1d4ed8;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 4px;
-            margin-bottom: 8px;
-            font-size: 12px;
-            margin-top: 0;
+            font-size: 14px;
+            font-weight: bold;
             text-align: center;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
         }
         
         .loan-details-header {
             background: #eff6ff;
             border: 1px solid #3b82f6;
             border-radius: 4px;
-            padding: 6px;
-            margin-bottom: 8px;
+            padding: 8px;
+            margin-bottom: 10px;
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
         }
         
         .repayment-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 8px;
-            margin: 6px 0;
+            margin: 0;
         }
         
         .repayment-table th,
         .repayment-table td {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #ccc;
             padding: 4px 2px;
             text-align: center;
+            vertical-align: middle;
         }
         
         .repayment-table th {
-            background: #f3f4f6;
+            background: #f8f9fa;
             font-weight: bold;
             color: #374151;
+            font-size: 8px;
+        }
+        
+        .repayment-table td {
+            font-size: 7px;
         }
 
         .monthly-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 7px;
-            margin: 6px 0;
+            margin: 0;
         }
         
         .monthly-table th,
         .monthly-table td {
-            border: 1px solid #e5e7eb;
+            border: 1px solid #ccc;
             padding: 3px 2px;
             text-align: center;
+            vertical-align: middle;
         }
         
         .monthly-table th {
-            background: #f3f4f6;
+            background: #f8f9fa;
             font-weight: bold;
             color: #374151;
         }
         
-        .footer {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
-            color: #666;
-            font-size: 8px;
-            page-break-inside: avoid;
-        }
-        
-        .disclaimer {
-            background: #f3f4f6;
-            padding: 6px;
-            border-radius: 3px;
-            margin: 8px 0;
-            font-size: 8px;
-            color: #555;
-            page-break-inside: avoid;
-        }
-
         .refinancing-section {
-            margin: 8px 0;
+            margin: 10px 0;
             padding: 8px;
             border: 1px solid #e5e7eb;
             border-radius: 4px;
             background: #fafafa;
             font-size: 9px;
+            break-inside: avoid;
         }
 
         .refinancing-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
             margin: 6px 0;
         }
 
@@ -644,12 +625,94 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
             display: flex;
             justify-content: space-between;
             padding: 2px 0;
-            font-size: 9px;
+            font-size: 8px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+        
+        .no-page-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        
+        .disclaimer {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 8px;
+            color: #555;
+            break-inside: avoid;
+        }
+
+        .footer {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #666;
+            font-size: 8px;
+            break-inside: avoid;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body { 
+                font-size: 10px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .header {
+                margin-bottom: 10px !important;
+            }
+            
+            .section {
+                margin-bottom: 10px !important;
+            }
+            
+            .logo-section img {
+                width: 120px !important;
+                height: auto !important;
+                display: block !important;
+                margin: 0 auto !important;
+            }
+            
+            .repayment-table {
+                font-size: 8px !important;
+            }
+            
+            .repayment-table th,
+            .repayment-table td {
+                padding: 3px 2px !important;
+                font-size: 7px !important;
+            }
+            
+            .monthly-table {
+                font-size: 7px !important;
+            }
+            
+            .monthly-table th,
+            .monthly-table td {
+                padding: 2px 1px !important;
+                font-size: 6px !important;
+            }
+        }
+        
+        /* Ensure consistent rendering across browsers */
+        @media screen and (max-width: 21cm) {
+            body {
+                max-width: 21cm;
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header no-break">
+    <div class="header no-page-break">
         <div class="logo-section">
             <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
         </div>
@@ -664,45 +727,47 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
         </div>
     </div>
 
-    <div class="section">
-        <h2>📅 YEARLY REPAYMENT SCHEDULE</h2>
+    <div class="section no-page-break">
+        <div class="section-title">📅 YEARLY REPAYMENT SCHEDULE</div>
         <div class="loan-details-header">
-            <strong>Loan Amount: ${formatCurrency(loanDetails.amount)} | Loan Period: ${loanDetails.years} years ${loanDetails.months > 0 ? loanDetails.months + ' months' : ''}</strong>
+            Loan Amount: ${formatCurrency(loanDetails.amount)} | Loan Period: ${loanDetails.years} years${loanDetails.months > 0 ? ' ' + loanDetails.months + ' months' : ''}
         </div>
-        <table class="repayment-table">
-            <thead>
-                <tr>
-                    <th>Year</th>
-                    <th>Interest Rate</th>
-                    <th>Beginning Principal</th>
-                    <th>Monthly Installment</th>
-                    <th>Interest Paid</th>
-                    <th>Principal Paid</th>
-                    <th>Ending Principal</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${results.yearlyData.map(year => `
-                <tr>
-                    <td>${year.year}</td>
-                    <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
-                    <td>${formatCurrency(year.beginningPrincipal)}</td>
-                    <td>${formatCurrency(year.monthlyInstalment)}</td>
-                    <td>${formatCurrency(year.interestPaid)}</td>
-                    <td>${formatCurrency(year.principalPaid)}</td>
-                    <td>${formatCurrency(year.endingPrincipal)}</td>
-                </tr>
-                `).join('')}
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table class="repayment-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Interest Rate</th>
+                        <th>Beginning Principal</th>
+                        <th>Monthly Installment</th>
+                        <th>Interest Paid</th>
+                        <th>Principal Paid</th>
+                        <th>Ending Principal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${results.yearlyData.map(year => `
+                    <tr>
+                        <td>${year.year}</td>
+                        <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
+                        <td>${formatCurrency(year.beginningPrincipal)}</td>
+                        <td>${formatCurrency(year.monthlyInstalment)}</td>
+                        <td>${formatCurrency(year.interestPaid)}</td>
+                        <td>${formatCurrency(year.principalPaid)}</td>
+                        <td>${formatCurrency(year.endingPrincipal)}</td>
+                    </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     ${loanType === 'refinancing' && refinancingResults ? `
-    <div class="refinancing-section">
-        <h2 style="color: #1d4ed8; font-size: 12px; margin: 0 0 8px 0; text-align: center;">💰 REFINANCING COMPARISON</h2>
+    <div class="refinancing-section no-page-break">
+        <div class="section-title">💰 REFINANCING COMPARISON</div>
         <div class="refinancing-grid">
             <div class="refinancing-card">
-                <h4 style="color: #666; margin: 0 0 6px 0; font-size: 10px;">Current Loan</h4>
+                <h4 style="color: #666; margin: 0 0 4px 0; font-size: 9px;">Current Loan</h4>
                 <div class="savings-row">
                     <span>Monthly Payment:</span>
                     <span><strong>${formatCurrency(refinancingResults.current.monthlyPayment)}</strong></span>
@@ -713,7 +778,7 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
                 </div>
             </div>
             <div class="refinancing-card">
-                <h4 style="color: #666; margin: 0 0 6px 0; font-size: 10px;">New Package</h4>
+                <h4 style="color: #666; margin: 0 0 4px 0; font-size: 9px;">New Package</h4>
                 <div class="savings-row">
                     <span>Monthly Payment:</span>
                     <span><strong>${formatCurrency(refinancingResults.new.monthlyPayment)}</strong></span>
@@ -724,12 +789,12 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
                 </div>
             </div>
         </div>
-        <div style="text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-            <div class="savings-row" style="justify-content: center; font-size: 10px;">
+        <div style="text-align: center; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e5e7eb;">
+            <div class="savings-row" style="justify-content: center; font-size: 9px;">
                 <span>Monthly Savings:</span>
                 <span style="color: #16a34a; margin-left: 8px; font-weight: bold;">${formatCurrency(Math.abs(refinancingResults.monthlySavings))}</span>
             </div>
-            <div class="savings-row" style="justify-content: center; font-size: 10px;">
+            <div class="savings-row" style="justify-content: center; font-size: 9px;">
                 <span>Total Interest Savings:</span>
                 <span style="color: #16a34a; margin-left: 8px; font-weight: bold;">${formatCurrency(Math.abs(refinancingResults.totalInterestSavings))}</span>
             </div>
@@ -737,38 +802,40 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     </div>
     ` : ''}
 
-    <!-- PAGE 2: Monthly Breakdown for First 5 Years -->
+    <!-- PAGE BREAK: Monthly Breakdown on Page 2 -->
     <div class="page-break">
         <div class="section">
-            <h2>📅 MONTHLY REPAYMENT BREAKDOWN (First 5 Years)</h2>
-            <table class="monthly-table">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Month</th>
-                        <th>Monthly Payment</th>
-                        <th>Interest Paid</th>
-                        <th>Principal Paid</th>
-                        <th>Ending Balance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${first5YearsMonthly.map(month => `
-                    <tr>
-                        <td>Year ${month.year}</td>
-                        <td>${month.monthName}</td>
-                        <td>${formatCurrency(month.monthlyPayment)}</td>
-                        <td>${formatCurrency(month.interestPayment)}</td>
-                        <td>${formatCurrency(month.principalPayment)}</td>
-                        <td>${formatCurrency(month.endingBalance)}</td>
-                    </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+            <div class="section-title">📅 MONTHLY REPAYMENT BREAKDOWN (First 5 Years)</div>
+            <div class="table-container">
+                <table class="monthly-table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Month</th>
+                            <th>Monthly Payment</th>
+                            <th>Interest Paid</th>
+                            <th>Principal Paid</th>
+                            <th>Ending Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${first5YearsMonthly.map(month => `
+                        <tr>
+                            <td>Year ${month.year}</td>
+                            <td>${month.monthName}</td>
+                            <td>${formatCurrency(month.monthlyPayment)}</td>
+                            <td>${formatCurrency(month.interestPayment)}</td>
+                            <td>${formatCurrency(month.principalPayment)}</td>
+                            <td>${formatCurrency(month.endingBalance)}</td>
+                        </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="disclaimer no-break">
+    <div class="disclaimer no-page-break">
         <h4 style="margin: 0 0 4px 0; color: #333; font-size: 9px;">Important Notes</h4>
         <p style="margin: 2px 0;">• This schedule is based on fixed interest rates and regular monthly payments.</p>
         <p style="margin: 2px 0;">• Actual payments may vary based on rate changes and payment timing.</p>
@@ -776,12 +843,12 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
         <p style="margin: 2px 0;">• Consult our specialists for personalized advice and current market rates.</p>
     </div>
 
-    <div class="footer no-break">        
+    <div class="footer no-page-break">        
         <div style="margin-bottom: 6px;">
             📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
         </div>
         
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 8px;">
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 6px;">
             <p style="margin: 0; font-size: 7px;">This report is confidential and intended for loan assessment purposes. 
             Your Trusted Mortgage Advisory Partner</p>
         </div>
@@ -799,17 +866,17 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     setTimeout(() => {
       newWindow.focus();
       newWindow.print();
-    }, 500);
+    }, 1000);
 
     alert(`Repayment schedule report generated successfully! 
 
 📄 FOR BEST PDF RESULTS:
 • Use Chrome or Edge browser for printing
 • In print dialog, select "More settings"
-• Set margins to "Minimum" or "Custom" (0.4 inch)
+• Set margins to "Default" or "Minimum"
 • Choose "A4" paper size
 • Enable "Background graphics"
-• Set scale to "100%" or "Fit to page width"
+• Set scale to "100%"
 • Select "Portrait" orientation`);
 
   } catch (error) {
@@ -817,7 +884,6 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
     alert('There was an error generating the report. Please try again.');
   }
 };
-
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
