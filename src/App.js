@@ -152,142 +152,142 @@ const MonthlyRepaymentCalculator = () => {
   };
 
   // Calculate repayment schedule with proper handling of rate changes (Excel method)
-  const calculateRepaymentSchedule = (principal, rates, years, months, startDate = new Date()) => {
-    const totalMonths = years * 12 + months;
-    let balance = principal;
-    const monthlyData = [];
-    const yearlyData = [];
-    let currentDate = new Date(startDate);
+ const calculateRepaymentSchedule = (principal, rates, years, months, startDate = new Date()) => {
+  const totalMonths = years * 12 + months;
+  let balance = principal;
+  const monthlyData = [];
+  const yearlyData = [];
+  
+  // Pre-calculate monthly payments for each rate period (Excel method)
+  const getMonthlyPaymentForPeriod = (ratePercent, fullTenorYears) => {
+    if (!ratePercent || ratePercent === 0) return principal / (fullTenorYears * 12);
+    const monthlyRate = ratePercent / 100 / 12;
+    const totalPayments = fullTenorYears * 12;
+    return (principal * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
+  };
+  
+  // Get rate and payment for a specific month
+  const getRateAndPaymentForMonth = (monthIndex) => {
+    const yearIndex = Math.floor(monthIndex / 12);
     
-    // Pre-calculate monthly payments for each rate period (Excel method)
-    const getMonthlyPaymentForPeriod = (ratePercent, fullTenorYears) => {
-      if (!ratePercent || ratePercent === 0) return principal / (fullTenorYears * 12);
-      const monthlyRate = ratePercent / 100 / 12;
-      const totalPayments = fullTenorYears * 12;
-      return (principal * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
-    };
+    if (!rates || (typeof rates === 'number')) {
+      const rate = parseFloat(rates) || 0;
+      return {
+        rate: rate,
+        payment: getMonthlyPaymentForPeriod(rate, years + months/12)
+      };
+    }
     
-    // Get rate and payment for a specific month
-    const getRateAndPaymentForMonth = (monthIndex) => {
-      const yearIndex = Math.floor(monthIndex / 12);
+    // For subsequent rates structure
+    if (Array.isArray(rates)) {
+      let currentRate = 0;
       
-      if (!rates || (typeof rates === 'number')) {
-        const rate = parseFloat(rates) || 0;
-        return {
-          rate: rate,
-          payment: getMonthlyPaymentForPeriod(rate, years + months/12)
-        };
-      }
-      
-      // For subsequent rates structure
-      if (Array.isArray(rates)) {
-        let currentRate = 0;
-        
-        if (yearIndex === 0) {
-          // First year uses the base rate (first rate in array or separate base rate)
-          currentRate = parseFloat(rates[0]?.rate || 0);
-        } else {
-          // Find the rate for this year
-          const yearRate = rates.find(r => r.year === yearIndex + 1);
-          if (yearRate && yearRate.rate) {
-            currentRate = parseFloat(yearRate.rate);
-          } else if (yearIndex >= 5) {
-            // If beyond year 5, use 'thereafter' rate
-            const thereafterRate = rates.find(r => r.year === 'thereafter');
-            if (thereafterRate && thereafterRate.rate) {
-              currentRate = parseFloat(thereafterRate.rate);
-            }
+      if (yearIndex === 0) {
+        // First year uses the base rate (first rate in array or separate base rate)
+        currentRate = parseFloat(rates[0]?.rate || 0);
+      } else {
+        // Find the rate for this year
+        const yearRate = rates.find(r => r.year === yearIndex + 1);
+        if (yearRate && yearRate.rate) {
+          currentRate = parseFloat(yearRate.rate);
+        } else if (yearIndex >= 5) {
+          // If beyond year 5, use 'thereafter' rate
+          const thereafterRate = rates.find(r => r.year === 'thereafter');
+          if (thereafterRate && thereafterRate.rate) {
+            currentRate = parseFloat(thereafterRate.rate);
           }
         }
-        
-        return {
-          rate: currentRate,
-          payment: getMonthlyPaymentForPeriod(currentRate, years + months/12)
-        };
       }
       
-      return { rate: 0, payment: 0 };
-    };
-
-    // Calculate monthly schedule
-    for (let monthIndex = 0; monthIndex < totalMonths && balance > 0.01; monthIndex++) {
-      const { rate: currentRate, payment: monthlyPayment } = getRateAndPaymentForMonth(monthIndex);
-      const monthlyRate = currentRate / 100 / 12;
-      const interestPayment = balance * monthlyRate;
-      const principalPayment = Math.min(monthlyPayment - interestPayment, balance);
-      
-      monthlyData.push({
-        month: monthIndex + 1,
-        year: currentDate.getFullYear(),
-        monthName: currentDate.toLocaleDateString('en-US', { month: 'short' }),
+      return {
         rate: currentRate,
-        beginningBalance: balance,
-        monthlyPayment,
-        interestPayment,
-        principalPayment,
-        endingBalance: Math.max(0, balance - principalPayment)
-      });
-      
-      balance = Math.max(0, balance - principalPayment);
-      currentDate.setMonth(currentDate.getMonth() + 1);
+        payment: getMonthlyPaymentForPeriod(currentRate, years + months/12)
+      };
     }
     
-    // Aggregate into yearly data
-    let currentYear = null;
-    let yearData = null;
-    let yearCounter = 1;
+    return { rate: 0, payment: 0 };
+  };
+
+  // Calculate monthly schedule
+  for (let monthIndex = 0; monthIndex < totalMonths && balance > 0.01; monthIndex++) {
+    const { rate: currentRate, payment: monthlyPayment } = getRateAndPaymentForMonth(monthIndex);
+    const monthlyRate = currentRate / 100 / 12;
+    const interestPayment = balance * monthlyRate;
+    const principalPayment = Math.min(monthlyPayment - interestPayment, balance);
     
-    monthlyData.forEach((month, index) => {
-      const monthYear = Math.floor((month.month - 1) / 12) + 1; // Calculate which year this month belongs to
-      
-      if (monthYear !== currentYear) {
-        if (yearData) {
-          yearlyData.push(yearData);
-        }
-        currentYear = monthYear;
-        yearData = {
-          year: `Year ${yearCounter}`,
-          yearNumber: yearCounter,
-          rate: month.rate,
-          beginningPrincipal: month.beginningBalance,
-          monthlyInstalment: month.monthlyPayment,
-          interestPaid: 0,
-          principalPaid: 0,
-          endingPrincipal: month.endingBalance,
-          months: []
-        };
-        yearCounter++;
-      }
-      
-      yearData.interestPaid += month.interestPayment;
-      yearData.principalPaid += month.principalPayment;
-      yearData.endingPrincipal = month.endingBalance;
-      yearData.months.push(month);
-      
-      // Handle rate changes within the year
-      if (month.rate !== yearData.rate && index > 0) {
-        yearData.rate = month.rate; // Use the latest rate for display
-      }
+    // Calculate which month this is (0-11 for Jan-Dec) - FIXED HERE
+    const monthInYear = monthIndex % 12;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    monthlyData.push({
+      month: monthIndex + 1,
+      year: Math.floor(monthIndex / 12) + 1, // Which year (1, 2, 3, etc.)
+      monthName: monthNames[monthInYear], // FIXED: Now always starts with Jan
+      rate: currentRate,
+      beginningBalance: balance,
+      monthlyPayment,
+      interestPayment,
+      principalPayment,
+      endingBalance: Math.max(0, balance - principalPayment)
     });
     
-    if (yearData) {
-      yearlyData.push(yearData);
+    balance = Math.max(0, balance - principalPayment);
+  }
+  
+  // Aggregate into yearly data - UPDATED
+  let currentYear = null;
+  let yearData = null;
+  let yearCounter = 1;
+  
+  monthlyData.forEach((month, index) => {
+    if (month.year !== currentYear) { // FIXED: Use month.year instead of calculated year
+      if (yearData) {
+        yearlyData.push(yearData);
+      }
+      currentYear = month.year;
+      yearData = {
+        year: `Year ${yearCounter}`,
+        yearNumber: yearCounter,
+        rate: month.rate,
+        beginningPrincipal: month.beginningBalance,
+        monthlyInstalment: month.monthlyPayment,
+        interestPaid: 0,
+        principalPaid: 0,
+        endingPrincipal: month.endingBalance,
+        months: []
+      };
+      yearCounter++;
     }
     
-    // Calculate totals
-    const totalInterest = monthlyData.reduce((sum, month) => sum + month.interestPayment, 0);
-    const totalPrincipal = monthlyData.reduce((sum, month) => sum + month.principalPayment, 0);
-    const totalPayable = totalInterest + totalPrincipal;
+    yearData.interestPaid += month.interestPayment;
+    yearData.principalPaid += month.principalPayment;
+    yearData.endingPrincipal = month.endingBalance;
+    yearData.months.push(month);
     
-    return {
-      monthlyData,
-      yearlyData,
-      totalInterest,
-      totalPrincipal,
-      totalPayable,
-      monthlyPayment: monthlyData[0]?.monthlyPayment || 0
-    };
+    // Handle rate changes within the year
+    if (month.rate !== yearData.rate && index > 0) {
+      yearData.rate = month.rate; // Use the latest rate for display
+    }
+  });
+  
+  if (yearData) {
+    yearlyData.push(yearData);
+  }
+  
+  // Calculate totals
+  const totalInterest = monthlyData.reduce((sum, month) => sum + month.interestPayment, 0);
+  const totalPrincipal = monthlyData.reduce((sum, month) => sum + month.principalPayment, 0);
+  const totalPayable = totalInterest + totalPrincipal;
+  
+  return {
+    monthlyData,
+    yearlyData,
+    totalInterest,
+    totalPrincipal,
+    totalPayable,
+    monthlyPayment: monthlyData[0]?.monthlyPayment || 0
   };
+};
 
   // Format currency with 2 decimal places
   const formatCurrency = (amount) => {
@@ -414,35 +414,39 @@ const MonthlyRepaymentCalculator = () => {
   const [showMonthlyBreakdown, setShowMonthlyBreakdown] = useState({});
 
   // PDF Report generation for Monthly Repayment Calculator
-  const generateRepaymentPDFReport = (results, loanType = 'new') => {
-    if (!results) {
-      alert('Please calculate the loan first before generating a report.');
-      return;
-    }
+  // PDF Report generation for Monthly Repayment Calculator (UPDATED VERSION)
+const generateRepaymentPDFReport = (results, loanType = 'new') => {
+  if (!results) {
+    alert('Please calculate the loan first before generating a report.');
+    return;
+  }
 
-    try {
-      const currentDate = new Date().toLocaleDateString('en-SG', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+  try {
+    const currentDate = new Date().toLocaleDateString('en-SG', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
-      const loanDetails = loanType === 'new' ? {
-        type: 'New Loan',
-        amount: parseNumberInput(newLoan.loanAmount) || 0,
-        rate: newLoan.interestRate,
-        years: newLoan.loanPeriodYears,
-        months: newLoan.loanPeriodMonths
-      } : {
-        type: 'Refinancing Package',
-        amount: parseNumberInput(existingLoan.outstandingAmount) || 0,
-        rate: existingLoan.newRate,
-        years: existingLoan.newLoanYears,
-        months: existingLoan.newLoanMonths
-      };
+    const loanDetails = loanType === 'new' ? {
+      type: 'New Loan',
+      amount: parseNumberInput(newLoan.loanAmount) || 0,
+      rate: newLoan.interestRate,
+      years: newLoan.loanPeriodYears,
+      months: newLoan.loanPeriodMonths
+    } : {
+      type: 'Refinancing Package',
+      amount: parseNumberInput(existingLoan.outstandingAmount) || 0,
+      rate: existingLoan.newRate,
+      years: existingLoan.newLoanYears,
+      months: existingLoan.newLoanMonths
+    };
 
-      // Generate professional HTML report
-      const htmlContent = `
+    // Generate first 5 years monthly breakdown
+    const first5YearsMonthly = results.yearlyData.slice(0, 5).map(year => year.months).flat();
+
+    // Generate professional HTML report
+    const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -593,6 +597,31 @@ const MonthlyRepaymentCalculator = () => {
         .repayment-table td:first-child {
             text-align: center;
         }
+
+        .monthly-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8px;
+            margin: 10px 0;
+        }
+        
+        .monthly-table th,
+        .monthly-table td {
+            border: 1px solid #e5e7eb;
+            padding: 4px 2px;
+            text-align: right;
+        }
+        
+        .monthly-table th {
+            background: #f3f4f6;
+            font-weight: bold;
+            color: #374151;
+        }
+        
+        .monthly-table th:first-child,
+        .monthly-table td:first-child {
+            text-align: center;
+        }
         
         .footer {
             margin-top: 20px;
@@ -634,45 +663,13 @@ const MonthlyRepaymentCalculator = () => {
     <div class="section no-break">
         <h2>📋 LOAN SUMMARY</h2>
         <div class="highlight-box">
-            <div class="two-column">
-                <div>
-                    <div class="info-row">
-                        <span class="info-label">Loan Type:</span>
-                        <span class="info-value">${loanDetails.type}</span>
-                    </div>
-                 
-                </div>
-                    <div class="info-row">
-                        <span class="info-label">Loan Amount:</span>
-                        <span class="info-value">${formatCurrency(loanDetails.amount)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Interest Rate:</span>
-                        <span class="info-value">${loanDetails.rate}%</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Loan Period:</span>
-                        <span class="info-value">${loanDetails.years} years ${loanDetails.months > 0 ? loanDetails.months + ' months' : ''}</span>
-                    </div>
-                </div>
-                <div>
-                    <div class="info-row">
-                        <span class="info-label">Monthly Payment:</span>
-                        <span class="info-value">${formatCurrency(results.monthlyPayment)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Total Interest:</span>
-                        <span class="info-value">${formatCurrency(results.totalInterest)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Total Principal:</span>
-                        <span class="info-value">${formatCurrency(results.totalPrincipal)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Total Payable:</span>
-                        <span class="info-value">${formatCurrency(results.totalPayable)}</span>
-                    </div>
-                </div>
+            <div class="info-row">
+                <span class="info-label">Loan Amount:</span>
+                <span class="info-value">${formatCurrency(loanDetails.amount)}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Loan Period:</span>
+                <span class="info-value">${loanDetails.years} years ${loanDetails.months > 0 ? loanDetails.months + ' months' : ''}</span>
             </div>
         </div>
     </div>
@@ -749,6 +746,37 @@ const MonthlyRepaymentCalculator = () => {
     </div>
     ` : ''}
 
+    <!-- PAGE 2: Monthly Breakdown for First 5 Years -->
+    <div class="page-break">
+        <div class="section">
+            <h2>📅 MONTHLY REPAYMENT BREAKDOWN (First 5 Years)</h2>
+            <table class="monthly-table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Monthly Payment</th>
+                        <th>Interest Paid</th>
+                        <th>Principal Paid</th>
+                        <th>Ending Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${first5YearsMonthly.map(month => `
+                    <tr>
+                        <td>Year ${month.year}</td>
+                        <td>${month.monthName}</td>
+                        <td>${formatCurrency(month.monthlyPayment)}</td>
+                        <td>${formatCurrency(month.interestPayment)}</td>
+                        <td>${formatCurrency(month.principalPayment)}</td>
+                        <td>${formatCurrency(month.endingBalance)}</td>
+                    </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="disclaimer no-break">
         <h4 style="margin: 0 0 8px 0; color: #333; font-size: 12px;">Important Notes</h4>
         <p style="margin: 4px 0;">• This schedule is based on fixed interest rates and regular monthly payments.</p>
@@ -769,20 +797,20 @@ const MonthlyRepaymentCalculator = () => {
     </div>
 </body>
 </html>
-      `;
+    `;
 
-      // Create a new window with the HTML content
-      const newWindow = window.open('', '_blank');
-      newWindow.document.write(htmlContent);
-      newWindow.document.close();
-      
-      // Add a small delay to ensure content is loaded, then trigger print
-      setTimeout(() => {
-        newWindow.focus();
-        newWindow.print();
-      }, 500);
+    // Create a new window with the HTML content
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(htmlContent);
+    newWindow.document.close();
+    
+    // Add a small delay to ensure content is loaded, then trigger print
+    setTimeout(() => {
+      newWindow.focus();
+      newWindow.print();
+    }, 500);
 
-      alert(`Repayment schedule report generated successfully! 
+    alert(`Repayment schedule report generated successfully! 
 
 📄 FOR BEST PDF RESULTS:
 • Use Chrome or Edge browser for printing
@@ -793,11 +821,11 @@ const MonthlyRepaymentCalculator = () => {
 • Set scale to "100%" or "Fit to page width"
 • Select "Portrait" orientation`);
 
-    } catch (error) {
-      console.error('Error generating repayment report:', error);
-      alert('There was an error generating the report. Please try again.');
-    }
-  };
+  } catch (error) {
+    console.error('Error generating repayment report:', error);
+    alert('There was an error generating the report. Please try again.');
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -965,18 +993,6 @@ const MonthlyRepaymentCalculator = () => {
 
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Your Repayment Schedule</h3>
-                  
-                  <div className="mb-4 text-sm text-gray-600">
-                    <p>Start date: {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
-                    <p>
-                      Estimated payoff date is{' '}
-                      {new Date(
-                        new Date().getFullYear() + newLoan.loanPeriodYears,
-                        new Date().getMonth() + newLoan.loanPeriodMonths,
-                        1
-                      ).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}.
-                    </p>
-                  </div>
 
                   <div className="grid grid-cols-3 gap-4 mb-6 text-right">
                     <div>
@@ -1297,18 +1313,6 @@ const MonthlyRepaymentCalculator = () => {
 
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Your Repayment Schedule (New Package)</h3>
-                  
-                  <div className="mb-4 text-sm text-gray-600">
-                    <p>Start date: {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
-                    <p>
-                      Estimated payoff date is{' '}
-                      {new Date(
-                        new Date().getFullYear() + existingLoan.newLoanYears,
-                        new Date().getMonth() + existingLoan.newLoanMonths,
-                        1
-                      ).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}.
-                    </p>
-                  </div>
 
                   <div className="grid grid-cols-3 gap-4 mb-6 text-right">
                     <div>
