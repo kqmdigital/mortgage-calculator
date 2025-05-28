@@ -640,21 +640,7 @@ const MonthlyRepaymentCalculator = () => {
                         <span class="info-label">Loan Type:</span>
                         <span class="info-value">${loanDetails.type}</span>
                     </div>
-                  {results && (
-                    <div className="mt-1 text-xs text-gray-600">
-                      <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
-                      {results.averageAge > 0 && (
-                        <p><strong>Average age:</strong> {results.averageAge.toFixed(1)} years</p>
-                      )}
-                      <p className="text-blue-600 font-medium">
-                        {inputs.propertyType === 'hdb' ? 'HDB' : 'Private'} Property Rules:
-                        {inputs.propertyType === 'hdb' 
-                          ? ' 56%-75% loan: Max 25yr (age≤65), ≤55% loan: Max 30yr (age≤75)'
-                          : ' 56%-75% loan: Max 30yr (age≤65), ≤55% loan: Max 35yr (age≤75)'
-                        }
-                      </p>
-                    </div>
-                  )}
+                 
                 </div>
                     <div class="info-row">
                         <span class="info-label">Loan Amount:</span>
@@ -2058,7 +2044,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     ` : ''}
 
     ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && (!results.hdbPass || !results.tdsrPass)) ? `
-        ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && (!results.hdbPass || !results.tdsrPass)) ? `
+    
     <div class="section no-break">
         <h2>💡 FUNDING SOLUTIONS</h2>
         <p style="text-align: center; margin-bottom: 15px;">To meet the ${inputs.propertyType === 'private' ? 'TDSR' : 'MSR and TDSR'} requirements, you need one of the following:</p>
@@ -2449,6 +2435,27 @@ This ensures all content fits properly without being cut off.`);
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
                   </div>
+
+                          <div>
+                  <label className="block text-sm font-medium mb-2">Loan Tenor (Years)</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={inputs.loanTenor}
+                      onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
+                      max={results ? results.maxLoanTenor : "35"}
+                      min="1"
+                      className="w-full pr-12 pl-3 p-3 border rounded-lg"
+                      placeholder="30"
+                      style={{
+                        MozAppearance: 'textfield',
+                        WebkitAppearance: 'none',
+                        appearance: 'none'
+                      }}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                  </div>
+                  {results && (
                     <div className="mt-1 text-xs text-gray-600">
                       <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
                       {results.averageAge > 0 && (
@@ -2463,6 +2470,7 @@ This ensures all content fits properly without being cut off.`);
                       </p>
                     </div>
                   )}
+                      
                 </div>
               </div>
             </div>
