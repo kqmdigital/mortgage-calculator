@@ -2435,26 +2435,6 @@ This ensures all content fits properly without being cut off.`);
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
                   </div>
-
-                          <div>
-                  <label className="block text-sm font-medium mb-2">Loan Tenor (Years)</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={inputs.loanTenor}
-                      onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
-                      max={results ? results.maxLoanTenor : "35"}
-                      min="1"
-                      className="w-full pr-12 pl-3 p-3 border rounded-lg"
-                      placeholder="30"
-                      style={{
-                        MozAppearance: 'textfield',
-                        WebkitAppearance: 'none',
-                        appearance: 'none'
-                      }}
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
-                  </div>
                   {results && (
                     <div className="mt-1 text-xs text-gray-600">
                       <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
@@ -2470,7 +2450,6 @@ This ensures all content fits properly without being cut off.`);
                       </p>
                     </div>
                   )}
-                      
                 </div>
               </div>
             </div>
