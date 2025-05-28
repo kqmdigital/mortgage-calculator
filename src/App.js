@@ -113,7 +113,6 @@ const MonthlyRepaymentCalculator = () => {
     interestRate: '',
     loanPeriodYears: 25,
     loanPeriodMonths: 0,
-    condoUnderConstruction: false,
     showSubsequentRates: false,
     subsequentRates: [
       { year: 2, rate: '' },
@@ -159,25 +158,35 @@ const MonthlyRepaymentCalculator = () => {
 
   // PMT function
   const calculatePMT = (rate, periods, principal) => {
-    if (rate === 0) return principal / periods;
+    if (rate === 0 || !rate) return principal / periods;
     const monthlyRate = rate / 100 / 12;
     const denominator = Math.pow(1 + monthlyRate, periods) - 1;
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
   };
 
-  // Calculate repayment schedule for a loan
+  // Calculate repayment schedule with proper handling of rate changes
   const calculateRepaymentSchedule = (principal, rates, years, months, startDate = new Date()) => {
     const totalMonths = years * 12 + months;
     let balance = principal;
+    const monthlyData = [];
     const yearlyData = [];
     let currentDate = new Date(startDate);
     
-    // Get rates for each year
-    const getRateForYear = (yearIndex) => {
-      if (!rates || rates.length === 0) return rates;
+    // Get rate for a specific month
+    const getRateForMonth = (monthIndex) => {
+      const yearIndex = Math.floor(monthIndex / 12);
+      
+      if (!rates || (typeof rates === 'number')) {
+        return parseFloat(rates) || 0;
+      }
       
       // For subsequent rates structure
       if (Array.isArray(rates)) {
+        if (yearIndex === 0) {
+          // First year uses the base rate (not in array)
+          return parseFloat(rates[0]?.rate || 0);
+        }
+        
         const yearRate = rates.find(r => r.year === yearIndex + 1);
         if (yearRate && yearRate.rate) return parseFloat(yearRate.rate);
         
@@ -187,74 +196,88 @@ const MonthlyRepaymentCalculator = () => {
           if (thereafterRate && thereafterRate.rate) return parseFloat(thereafterRate.rate);
         }
         
-        // Default to first year rate if available
-        return parseFloat(rates[0]?.rate || 0);
+        return 0;
       }
       
-      // For simple rate (number)
-      return parseFloat(rates || 0);
+      return 0;
     };
 
-    // Calculate for each year
-    let monthsProcessed = 0;
-    let yearIndex = 0;
-    
-    while (monthsProcessed < totalMonths && balance > 0) {
-      const rate = Array.isArray(rates) ? getRateForYear(yearIndex) : parseFloat(rates || 0);
-      const monthsInYear = Math.min(12, totalMonths - monthsProcessed);
+    // For each month, calculate payment based on current rate and remaining balance
+    for (let monthIndex = 0; monthIndex < totalMonths && balance > 0.01; monthIndex++) {
+      const currentRate = getRateForMonth(monthIndex);
+      const remainingMonths = totalMonths - monthIndex;
       
-      // Calculate monthly payment for this rate
-      const remainingMonths = totalMonths - monthsProcessed;
-      const monthlyPayment = calculatePMT(rate, remainingMonths, balance);
+      // Recalculate payment for remaining balance and months
+      const monthlyPayment = calculatePMT(currentRate, remainingMonths, balance);
+      const monthlyRate = currentRate / 100 / 12;
+      const interestPayment = balance * monthlyRate;
+      const principalPayment = monthlyPayment - interestPayment;
       
-      let yearInterest = 0;
-      let yearPrincipal = 0;
-      let beginningBalance = balance;
-      
-      // Process each month in the year
-      for (let month = 0; month < monthsInYear; month++) {
-        if (balance <= 0) break;
-        
-        const monthlyRate = rate / 100 / 12;
-        const interestPayment = balance * monthlyRate;
-        const principalPayment = monthlyPayment - interestPayment;
-        
-        yearInterest += interestPayment;
-        yearPrincipal += principalPayment;
-        balance -= principalPayment;
-        
-        if (balance < 0) {
-          yearPrincipal += balance;
-          balance = 0;
-        }
-      }
-      
-      yearlyData.push({
+      monthlyData.push({
+        month: monthIndex + 1,
         year: currentDate.getFullYear(),
-        rate: rate.toFixed(2),
-        beginningPrincipal: beginningBalance,
-        monthlyInstalment: monthlyPayment,
-        interestPaid: yearInterest,
-        principalPaid: yearPrincipal,
-        endingPrincipal: balance
+        monthName: currentDate.toLocaleDateString('en-US', { month: 'short' }),
+        rate: currentRate,
+        beginningBalance: balance,
+        monthlyPayment,
+        interestPayment,
+        principalPayment,
+        endingBalance: Math.max(0, balance - principalPayment)
       });
       
-      currentDate.setFullYear(currentDate.getFullYear() + 1);
-      monthsProcessed += monthsInYear;
-      yearIndex++;
+      balance = Math.max(0, balance - principalPayment);
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    // Aggregate into yearly data
+    let currentYear = null;
+    let yearData = null;
+    
+    monthlyData.forEach((month, index) => {
+      if (month.year !== currentYear) {
+        if (yearData) {
+          yearlyData.push(yearData);
+        }
+        currentYear = month.year;
+        yearData = {
+          year: currentYear,
+          rate: month.rate,
+          beginningPrincipal: month.beginningBalance,
+          monthlyInstalment: month.monthlyPayment,
+          interestPaid: 0,
+          principalPaid: 0,
+          endingPrincipal: month.endingBalance,
+          months: []
+        };
+      }
+      
+      yearData.interestPaid += month.interestPayment;
+      yearData.principalPaid += month.principalPayment;
+      yearData.endingPrincipal = month.endingBalance;
+      yearData.months.push(month);
+      
+      // Update rate if it changes during the year
+      if (month.rate !== yearData.rate && index > 0) {
+        yearData.rate = `${yearData.rate}% / ${month.rate}%`;
+      }
+    });
+    
+    if (yearData) {
+      yearlyData.push(yearData);
     }
     
     // Calculate totals
-    const totalInterest = yearlyData.reduce((sum, year) => sum + year.interestPaid, 0);
-    const totalPrincipal = yearlyData.reduce((sum, year) => sum + year.principalPaid, 0);
+    const totalInterest = monthlyData.reduce((sum, month) => sum + month.interestPayment, 0);
+    const totalPrincipal = monthlyData.reduce((sum, month) => sum + month.principalPayment, 0);
     const totalPayable = totalInterest + totalPrincipal;
     
     return {
+      monthlyData,
       yearlyData,
       totalInterest,
       totalPrincipal,
       totalPayable,
-      monthlyPayment: yearlyData[0]?.monthlyInstalment || 0
+      monthlyPayment: monthlyData[0]?.monthlyPayment || 0
     };
   };
 
@@ -315,11 +338,16 @@ const MonthlyRepaymentCalculator = () => {
     
     if (amount <= 0 || years + months/12 <= 0) return null;
     
-    // Use subsequent rates if enabled, otherwise use single rate
-    const rates = newLoan.showSubsequentRates ? [
-      { year: 1, rate: newLoan.interestRate },
-      ...newLoan.subsequentRates
-    ] : rate;
+    // Use subsequent rates if enabled
+    let rates;
+    if (newLoan.showSubsequentRates) {
+      rates = [
+        { year: 1, rate: newLoan.interestRate },
+        ...newLoan.subsequentRates
+      ];
+    } else {
+      rates = rate;
+    }
     
     return calculateRepaymentSchedule(amount, rates, years, months);
   };
@@ -331,10 +359,15 @@ const MonthlyRepaymentCalculator = () => {
     if (amount <= 0) return null;
     
     // Current loan calculation
-    const currentRates = existingLoan.showCurrentSubsequentRates ? [
-      { year: 1, rate: existingLoan.currentRate },
-      ...existingLoan.currentSubsequentRates
-    ] : parseFloat(existingLoan.currentRate) || 0;
+    let currentRates;
+    if (existingLoan.showCurrentSubsequentRates) {
+      currentRates = [
+        { year: 1, rate: existingLoan.currentRate },
+        ...existingLoan.currentSubsequentRates
+      ];
+    } else {
+      currentRates = parseFloat(existingLoan.currentRate) || 0;
+    }
     
     const currentSchedule = calculateRepaymentSchedule(
       amount,
@@ -344,10 +377,15 @@ const MonthlyRepaymentCalculator = () => {
     );
     
     // New loan calculation
-    const newRates = existingLoan.showNewSubsequentRates ? [
-      { year: 1, rate: existingLoan.newRate },
-      ...existingLoan.newSubsequentRates
-    ] : parseFloat(existingLoan.newRate) || 0;
+    let newRates;
+    if (existingLoan.showNewSubsequentRates) {
+      newRates = [
+        { year: 1, rate: existingLoan.newRate },
+        ...existingLoan.newSubsequentRates
+      ];
+    } else {
+      newRates = parseFloat(existingLoan.newRate) || 0;
+    }
     
     const newSchedule = calculateRepaymentSchedule(
       amount,
@@ -376,12 +414,15 @@ const MonthlyRepaymentCalculator = () => {
       lockInSavings,
       totalInterestSavings,
       netFees,
-      breakEvenMonths: netFees > 0 ? Math.ceil(netFees / monthlySavings) : 0
+      breakEvenMonths: monthlySavings > 0 ? Math.ceil(netFees / monthlySavings) : 0
     };
   };
 
   const newLoanResults = calculateNewLoan();
   const refinancingResults = calculateRefinancing();
+
+  // State for showing monthly breakdown
+  const [showMonthlyBreakdown, setShowMonthlyBreakdown] = useState({});
 
   return (
     <div className="space-y-6">
@@ -476,25 +517,25 @@ const MonthlyRepaymentCalculator = () => {
                 <div className="flex items-center gap-2 mt-4">
                   <input
                     type="checkbox"
-                    id="subsequentRates"
+                    id="showSubsequentRates"
                     checked={newLoan.showSubsequentRates}
                     onChange={(e) => handleNewLoanChange('showSubsequentRates', e.target.checked)}
                     className="rounded"
                   />
-                  <label htmlFor="subsequentRates" className="text-sm font-medium">
+                  <label htmlFor="showSubsequentRates" className="text-sm text-gray-600">
                     Add interest rates for subsequent years
                   </label>
                 </div>
 
                 {newLoan.showSubsequentRates && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-3">
-                    <h4 className="font-medium text-sm">Subsequent Year Rates</h4>
+                  <div className="mt-4 p-4 bg-white rounded-lg space-y-3">
+                    <h4 className="font-medium text-sm mb-3">Subsequent year</h4>
                     {newLoan.subsequentRates.map((rate, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <span className="text-sm w-20">
-                          Year {rate.year === 'thereafter' ? '6+' : rate.year}:
-                        </span>
-                        <div className="relative flex-1">
+                      <div key={index} className="grid grid-cols-2 gap-4">
+                        <div className="text-sm text-gray-600 flex items-center">
+                          {rate.year === 'thereafter' ? 'Thereafter' : `${rate.year}${['st', 'nd', 'rd', 'th', 'th'][rate.year - 2] || 'th'} year`}
+                        </div>
+                        <div className="relative">
                           <input
                             type="number"
                             step="0.01"
@@ -513,19 +554,6 @@ const MonthlyRepaymentCalculator = () => {
                     ))}
                   </div>
                 )}
-
-                <div className="flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
-                    id="condoConstruction"
-                    checked={newLoan.condoUnderConstruction}
-                    onChange={(e) => handleNewLoanChange('condoUnderConstruction', e.target.checked)}
-                    className="rounded"
-                  />
-                  <label htmlFor="condoConstruction" className="text-sm font-medium">
-                    I own a condo under construction
-                  </label>
-                </div>
               </div>
             </div>
           </div>
@@ -544,7 +572,7 @@ const MonthlyRepaymentCalculator = () => {
                       <p className="text-gray-700">
                         You will pay off your home loan by year{' '}
                         <span className="font-semibold">
-                          {new Date().getFullYear() + newLoan.loanPeriodYears}
+                          {new Date().getFullYear() + newLoan.loanPeriodYears + Math.ceil(newLoan.loanPeriodMonths / 12)}
                         </span>
                         , with a total of{' '}
                         <span className="font-semibold text-red-600">
@@ -601,19 +629,65 @@ const MonthlyRepaymentCalculator = () => {
                           <th className="text-right py-2">Interest paid</th>
                           <th className="text-right py-2">Principal paid</th>
                           <th className="text-right py-2">Ending principal</th>
+                          <th className="text-center py-2"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {newLoanResults.yearlyData.map((year, index) => (
-                          <tr key={index} className="border-b hover:bg-gray-50">
-                            <td className="py-3">{year.year}</td>
-                            <td className="text-center py-3">{year.rate}%</td>
-                            <td className="text-right py-3">{formatCurrency(year.beginningPrincipal)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.monthlyInstalment)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.interestPaid)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.principalPaid)}</td>
-                            <td className="text-right py-3">{formatCurrency(year.endingPrincipal)}</td>
-                          </tr>
+                          <React.Fragment key={index}>
+                            <tr className="border-b hover:bg-gray-50">
+                              <td className="py-3">{year.year}</td>
+                              <td className="text-center py-3">{typeof year.rate === 'string' ? year.rate : `${year.rate}%`}</td>
+                              <td className="text-right py-3">{formatCurrency(year.beginningPrincipal)}</td>
+                              <td className="text-right py-3">{formatCurrency(year.monthlyInstalment)}</td>
+                              <td className="text-right py-3">{formatCurrency(year.interestPaid)}</td>
+                              <td className="text-right py-3">{formatCurrency(year.principalPaid)}</td>
+                              <td className="text-right py-3">{formatCurrency(year.endingPrincipal)}</td>
+                              <td className="text-center py-3">
+                                <button
+                                  onClick={() => setShowMonthlyBreakdown(prev => ({
+                                    ...prev,
+                                    [year.year]: !prev[year.year]
+                                  }))}
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  {showMonthlyBreakdown[year.year] ? '−' : '+'}
+                                </button>
+                              </td>
+                            </tr>
+                            {showMonthlyBreakdown[year.year] && (
+                              <tr>
+                                <td colSpan="8" className="p-0">
+                                  <div className="bg-gray-50 p-4">
+                                    <table className="w-full text-xs">
+                                      <thead>
+                                        <tr className="text-gray-600">
+                                          <th className="text-left py-1">(Yr{Math.floor((year.months[0].month - 1) / 12) + 1}) Month</th>
+                                          <th className="text-right py-1">Beginning principal</th>
+                                          <th className="text-right py-1">Monthly instalment</th>
+                                          <th className="text-right py-1">Interest paid</th>
+                                          <th className="text-right py-1">Principal paid</th>
+                                          <th className="text-right py-1">Ending principal</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {year.months.map((month, mIndex) => (
+                                          <tr key={mIndex} className="border-t border-gray-200">
+                                            <td className="py-1">{month.monthName}</td>
+                                            <td className="text-right py-1">{formatCurrency(month.beginningBalance)}</td>
+                                            <td className="text-right py-1">{formatCurrency(month.monthlyPayment)}</td>
+                                            <td className="text-right py-1">{formatCurrency(month.interestPayment)}</td>
+                                            <td className="text-right py-1">{formatCurrency(month.principalPayment)}</td>
+                                            <td className="text-right py-1">{formatCurrency(month.endingBalance)}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         ))}
                       </tbody>
                     </table>
@@ -649,7 +723,7 @@ const MonthlyRepaymentCalculator = () => {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-medium mb-3">Current</h4>
+                  <h4 className="font-medium mb-3">• Current</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Existing interest rate</label>
@@ -746,13 +820,6 @@ const MonthlyRepaymentCalculator = () => {
                         <span className="flex items-center text-gray-500">mths</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="mt-4 text-sm text-gray-600">
-                    Check out our rates{' '}
-                    <a href="#" className="text-blue-600 hover:underline">
-                      (Click here for repricing)
-                    </a>
                   </div>
 
                   <div className="flex items-center gap-2 mt-4">
@@ -874,7 +941,7 @@ const MonthlyRepaymentCalculator = () => {
                       <div 
                         className="bg-orange-400 h-full" 
                         style={{ 
-                          width: `${(refinancingResults.new.monthlyPayment / refinancingResults.current.monthlyPayment * 100).toFixed(0)}%` 
+                          width: `${Math.min(100, (refinancingResults.new.monthlyPayment / refinancingResults.current.monthlyPayment * 100).toFixed(0))}%` 
                         }}
                       ></div>
                     </div>
@@ -883,7 +950,7 @@ const MonthlyRepaymentCalculator = () => {
                       <div className="flex justify-between items-center">
                         <span className="font-medium">Reduction in instalment</span>
                         <span className="font-bold text-xl text-green-600">
-                          {formatCurrency(refinancingResults.monthlySavings)}
+                          {formatCurrency(Math.abs(refinancingResults.monthlySavings))}
                         </span>
                       </div>
                     </div>
@@ -891,14 +958,14 @@ const MonthlyRepaymentCalculator = () => {
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <p className="text-sm text-gray-700">
                         You potentially save{' '}
-                        <span className="font-semibold">{formatCurrency(refinancingResults.firstYearSavings)}</span>{' '}
+                        <span className="font-semibold">{formatCurrency(Math.abs(refinancingResults.firstYearSavings))}</span>{' '}
                         in interest for the first year and{' '}
-                        <span className="font-semibold">{formatCurrency(refinancingResults.lockInSavings)}</span>{' '}
+                        <span className="font-semibold">{formatCurrency(Math.abs(refinancingResults.totalInterestSavings))}</span>{' '}
                         for the entire loan period, if you switch to this new loan package.
                       </p>
                     </div>
                     
-                    {existingLoan.showFeesRebates && refinancingResults.netFees > 0 && (
+                    {existingLoan.showFeesRebates && refinancingResults.netFees > 0 && refinancingResults.monthlySavings > 0 && (
                       <div className="bg-yellow-50 p-4 rounded-lg">
                         <p className="text-sm text-gray-700">
                           <span className="font-medium">Break-even period:</span>{' '}
@@ -918,7 +985,7 @@ const MonthlyRepaymentCalculator = () => {
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4">Your Repayment Schedule</h3>
+                  <h3 className="text-lg font-semibold mb-4">Your Repayment Schedule (New Package)</h3>
                   
                   <div className="mb-4 text-sm text-gray-600">
                     <p>Start date: {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
@@ -964,7 +1031,7 @@ const MonthlyRepaymentCalculator = () => {
                         {refinancingResults.new.yearlyData.map((year, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50">
                             <td className="py-3">{year.year}</td>
-                            <td className="text-center py-3">{year.rate}%</td>
+                            <td className="text-center py-3">{typeof year.rate === 'string' ? year.rate : `${year.rate}%`}</td>
                             <td className="text-right py-3">{formatCurrency(year.beginningPrincipal)}</td>
                             <td className="text-right py-3">{formatCurrency(year.monthlyInstalment)}</td>
                             <td className="text-right py-3">{formatCurrency(year.interestPaid)}</td>
@@ -999,17 +1066,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     
     // Stress test rate (separate field for calculations)
     stressTestRate: 4,
-    
-    // Interest rates for each year
-    interestRateY1: '',      // Year 1
-    interestRateY2: '',      // Year 2
-    interestRateY3: '',      // Year 3
-    interestRateY4: '',      // Year 4
-    interestRateY5: '',      // Year 5
-    interestRateThereafter: '', // Thereafter
-    
-    // Total interest period selection
-    interestPeriodSelection: 5, // Default to 5 years
     
     loanTenor: 30, // Default to 30 years
     
@@ -1123,66 +1179,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
   };
 
-  // Helper function to calculate detailed yearly breakdown
-  const calculateYearlyBreakdown = (loanAmount, rates, loanTenor) => {
-    let balance = loanAmount;
-    const yearlyBreakdown = [];
-    
-    // Calculate for each year (up to 5 years)
-    for (let year = 0; year < 5; year++) {
-      const rate = rates[year] || 0;
-      const monthlyRate = rate / 100 / 12;
-      const installment = calculatePMT(rate, loanTenor * 12, loanAmount);
-      
-      let yearInterest = 0;
-      let yearPrincipal = 0;
-      let monthlyInterest = 0;
-      let monthlyPrincipal = 0;
-      
-      // Calculate for 12 months
-      for (let month = 0; month < 12; month++) {
-        if (balance <= 0) break;
-        
-        const interestPayment = balance * monthlyRate;
-        const principalPayment = installment - interestPayment;
-        
-        yearInterest += interestPayment;
-        yearPrincipal += principalPayment;
-        balance -= principalPayment;
-        
-        if (balance < 0) {
-          yearPrincipal += balance; // Adjust for final payment
-          balance = 0;
-        }
-        
-        // Store monthly amounts (average for the year)
-        if (month === 0) {
-          monthlyInterest = interestPayment;
-          monthlyPrincipal = principalPayment;
-        }
-      }
-      
-      yearlyBreakdown.push({
-        year: year + 1,
-        monthlyInterest,
-        monthlyPrincipal,
-        totalInterest: yearInterest,
-        totalPrincipal: yearPrincipal,
-        monthlyInstallment: installment,
-        rate
-      });
-    }
-    
-    return yearlyBreakdown;
-  };
-
   // Main calculation function
   const calculateMortgage = useCallback(() => {
     const {
       propertyType, purchasePrice, loanPercentage, customLoanAmount, useCustomAmount,
-      stressTestRate, interestRateY1, interestRateY2, interestRateY3, 
-      interestRateY4, interestRateY5, interestRateThereafter, loanTenor,
-      interestPeriodSelection,
+      stressTestRate, loanTenor,
       monthlySalaryA, annualSalaryA, applicantAgeA,
       monthlySalaryB, annualSalaryB, applicantAgeB,
       showFundAmount, pledgeAmount,
@@ -1195,12 +1196,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       purchasePrice: parseNumberInput(purchasePrice) || 0,
       customLoanAmount: parseNumberInput(customLoanAmount) || 0,
       stressTestRate: parseNumberInput(stressTestRate) || 0,
-      interestRateY1: parseNumberInput(interestRateY1) || 0,
-      interestRateY2: parseNumberInput(interestRateY2) || 0,
-      interestRateY3: parseNumberInput(interestRateY3) || 0,
-      interestRateY4: parseNumberInput(interestRateY4) || 0,
-      interestRateY5: parseNumberInput(interestRateY5) || 0,
-      interestRateThereafter: parseNumberInput(interestRateThereafter) || 0,
       loanTenor: parseNumberInput(loanTenor) || 30,
       monthlySalaryA: parseNumberInput(monthlySalaryA) || 0,
       annualSalaryA: parseNumberInput(annualSalaryA) || 0,
@@ -1234,30 +1229,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const loanAmount75 = parsedInputs.purchasePrice * 0.75;
     const loanAmount55 = parsedInputs.purchasePrice * 0.55;
     
-    // Interest rates array
-    const yearlyRates = [
-      parsedInputs.interestRateY1, 
-      parsedInputs.interestRateY2, 
-      parsedInputs.interestRateY3, 
-      parsedInputs.interestRateY4, 
-      parsedInputs.interestRateY5, 
-      parsedInputs.interestRateThereafter
-    ];
-    
-    // Calculate detailed yearly breakdown
-    const yearlyBreakdown = calculateYearlyBreakdown(loanAmount, yearlyRates, parsedInputs.loanTenor);
-    
-    // Calculate total interest for selected period
-    const selectedPeriodTotal = yearlyBreakdown.slice(0, interestPeriodSelection).reduce((sum, breakdown) => sum + breakdown.totalInterest, 0);
-    
-    // Calculate monthly installments for each year/period
+    // Calculate monthly installment using stress test rate
     const monthlyInstallmentStressTest = calculatePMT(parsedInputs.stressTestRate, parsedInputs.loanTenor * 12, loanAmount);
-    const monthlyInstallmentY1 = calculatePMT(parsedInputs.interestRateY1, parsedInputs.loanTenor * 12, loanAmount);
-    const monthlyInstallmentY2 = calculatePMT(parsedInputs.interestRateY2, parsedInputs.loanTenor * 12, loanAmount);
-    const monthlyInstallmentY3 = calculatePMT(parsedInputs.interestRateY3, parsedInputs.loanTenor * 12, loanAmount);
-    const monthlyInstallmentY4 = calculatePMT(parsedInputs.interestRateY4, parsedInputs.loanTenor * 12, loanAmount);
-    const monthlyInstallmentY5 = calculatePMT(parsedInputs.interestRateY5, parsedInputs.loanTenor * 12, loanAmount);
-    const monthlyInstallmentThereafter = calculatePMT(parsedInputs.interestRateThereafter, parsedInputs.loanTenor * 12, loanAmount);
     
     // Use stress test installment for affordability calculation
     const monthlyInstallment = monthlyInstallmentStressTest;
@@ -1319,14 +1292,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       loanAmount55,
       monthlyInstallment,
       monthlyInstallmentStressTest,
-      monthlyInstallmentY1,
-      monthlyInstallmentY2,
-      monthlyInstallmentY3,
-      monthlyInstallmentY4,
-      monthlyInstallmentY5,
-      monthlyInstallmentThereafter,
-      yearlyBreakdown,
-      selectedPeriodTotal,
       combinedMonthlyIncome,
       totalMonthlyIncomeA,
       totalMonthlyIncomeB,
@@ -1374,19 +1339,14 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       'propertyLoanA', 'propertyLoanB', 'applicantAgeA', 'applicantAgeB'
     ];
     
-    const interestRateFields = [
-      'interestRateY1', 'interestRateY2', 'interestRateY3', 
-      'interestRateY4', 'interestRateY5', 'interestRateThereafter'
-    ];
-    
     if (numericFields.includes(field)) {
       const parsedValue = parseNumberInput(value);
       setInputs(prev => ({
         ...prev,
         [field]: parsedValue
       }));
-    } else if (interestRateFields.includes(field) || field === 'stressTestRate') {
-      // Handle interest rates and stress test rate to allow empty values
+    } else if (field === 'stressTestRate') {
+      // Handle stress test rate to allow empty values
       const parsedValue = value === '' ? '' : Number(value);
       setInputs(prev => ({
         ...prev,
@@ -1438,7 +1398,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mortgage Analysis Report - ${propertyTypeText}</title>
+    <title>TDSR/MSR Analysis Report - ${propertyTypeText}</title>
     <style>
         @page {
             size: A4;
@@ -1464,11 +1424,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             
             .no-break { 
                 page-break-inside: avoid; 
-                break-inside: avoid;
-            }
-            
-            .avoid-break {
-                page-break-inside: avoid;
                 break-inside: avoid;
             }
         }
@@ -1502,12 +1457,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             max-width: 150px;
             height: auto;
             display: block;
-        }
-        
-        .company-tagline {
-            color: #666;
-            font-size: 12px;
-            margin: 3px 0 0 0;
         }
         
         .report-info {
@@ -1578,97 +1527,20 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             margin: 10px 0;
         }
         
-        .year-breakdown {
-            background: white; 
-            border: 1px solid #e5e7eb; 
-            border-radius: 6px; 
-            padding: 10px; 
-            margin-bottom: 12px;
-            page-break-inside: avoid;
-            break-inside: avoid;
+        .affordability-result {
+            background: ${results.tdsrPass || results.hdbPass ? '#f0fdf4' : '#fef2f2'};
+            border: 2px solid ${results.tdsrPass || results.hdbPass ? '#22c55e' : '#ef4444'};
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
         }
         
-        .year-header {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 10px; 
-            border-bottom: 1px solid #f0f0f0; 
-            padding-bottom: 6px;
-        }
-        
-        .year-title {
-            margin: 0; 
-            color: #333; 
-            font-size: 13px;
+        .affordability-title {
+            font-size: 16px;
             font-weight: bold;
-        }
-        
-        .year-rate {
-            font-size: 13px; 
-            font-weight: bold; 
-            color: #3b82f6;
-        }
-        
-        .payment-grid {
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 8px; 
+            color: ${results.tdsrPass || results.hdbPass ? '#16a34a' : '#dc2626'};
             margin-bottom: 10px;
-        }
-        
-        .payment-card {
-            text-align: center; 
-            padding: 8px; 
-            border-radius: 4px;
-            font-size: 10px;
-        }
-        
-        .payment-card.interest {
-            background: #fef2f2;
-        }
-        
-        .payment-card.principal {
-            background: #eff6ff;
-        }
-        
-        .payment-card-label {
-            color: #666; 
-            margin-bottom: 3px;
-            font-size: 9px;
-        }
-        
-        .payment-card-value {
-            font-weight: bold; 
-            font-size: 11px;
-        }
-        
-        .payment-card-value.interest {
-            color: #dc2626;
-        }
-        
-        .payment-card-value.principal {
-            color: #2563eb;
-        }
-        
-        .installment-summary {
-            text-align: center; 
-            background: #f0fdf4; 
-            padding: 8px; 
-            border-radius: 4px; 
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        .installment-label {
-            color: #666; 
-            font-size: 9px; 
-            margin-bottom: 3px;
-        }
-        
-        .installment-value {
-            font-weight: bold; 
-            color: #16a34a; 
-            font-size: 12px;
         }
         
         .funding-grid {
@@ -1709,39 +1581,14 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             break-inside: avoid;
         }
         
-        .total-interest-box {
-            background: white; 
-            padding: 8px; 
-            border-radius: 4px; 
-            border: 1px solid #3b82f6; 
-            margin-top: 10px; 
-            text-align: center;
-        }
-        
-        .total-interest-title {
-            margin: 0 0 4px 0; 
-            color: #3b82f6; 
-            font-size: 11px;
-        }
-        
-        .total-interest-value {
-            font-size: 14px; 
-            font-weight: bold; 
-            color: #3b82f6;
-        }
-        
         @media print {
-            .two-column, .payment-grid, .funding-grid { 
+            .two-column, .funding-grid { 
                 grid-template-columns: 1fr 1fr !important; 
-            }
-            
-            .year-breakdown {
-                margin-bottom: 8px;
             }
         }
         
         @media (max-width: 600px) {
-            .two-column, .payment-grid, .funding-grid { 
+            .two-column, .funding-grid { 
                 grid-template-columns: 1fr; 
             }
         }
@@ -1754,11 +1601,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         </div>
         
         <div class="property-type-banner">
-            ${propertyTypeText} Analysis
+            ${propertyTypeText} TDSR/MSR Analysis
         </div>
         
         <div class="report-info">
-            <strong>Mortgage Analysis Report</strong><br>
+            <strong>Mortgage Affordability Assessment Report</strong><br>
             Generated: ${currentDate} | Report ID: KQM-${Date.now()}
         </div>
     </div>
@@ -1794,51 +1641,53 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
                         <span class="info-label">Loan Tenure:</span>
                         <span class="info-value">${inputs.loanTenor} years</span>
                     </div>
-                    ${results.averageAge > 0 ? `
                     <div class="info-row">
-                        <span class="info-label">Average Age:</span>
-                        <span class="info-value">${results.averageAge.toFixed(1)} years</span>
-                    </div>` : ''}
+                        <span class="info-label">Stress Test Rate:</span>
+                        <span class="info-value">${inputs.stressTestRate}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Monthly Installment (Stress):</span>
+                        <span class="info-value">${formatCurrency(results.monthlyInstallmentStressTest)}</span>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="affordability-result">
+        <div class="affordability-title">
+            ${inputs.propertyType === 'private' 
+                ? `TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}`
+                : `MSR Assessment: ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}`
+            }
+        </div>
+        <div style="font-size: 14px;">
+            ${inputs.propertyType === 'private'
+                ? `Required Income: ${formatCurrency(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}`
+                : `Required Income: ${formatCurrency(results.requiredIncomeHDB)} | Deficit/Surplus: ${formatCurrency(results.hdbDeficit)}`
+            }
         </div>
     </div>
 
     ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && !results.hdbPass) ? `
     <div class="section no-break">
         <h2>💡 FUNDING SOLUTIONS</h2>
+        <p style="text-align: center; margin-bottom: 15px;">To meet the ${inputs.propertyType === 'private' ? 'TDSR' : 'MSR'} requirements, you need one of the following:</p>
         
-        ${inputs.propertyType === 'private' && !results.tdsrPass ? `
-        <div style="margin: 15px 0;">
-            <h3 style="color: #dc2626; margin-bottom: 10px;">Private Property Options</h3>
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <strong>Show Fund Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">${formatCurrency(results.cashShowTDSR)}</span>
-                </div>
-                <div class="funding-card">
-                    <strong>Pledge Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">${formatCurrency(results.cashPledgeTDSR)}</span>
-                </div>
+        <div class="funding-grid">
+            <div class="funding-card">
+                <strong>Show Fund Option</strong><br>
+                <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
+                    ${formatCurrency(inputs.propertyType === 'private' ? results.cashShowTDSR : results.cashShowHDB)}
+                </span>
+            </div>
+            <div class="funding-card">
+                <strong>Pledge Option</strong><br>
+                <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
+                    ${formatCurrency(inputs.propertyType === 'private' ? results.cashPledgeTDSR : results.cashPledgeHDB)}
+                </span>
             </div>
         </div>
-        ` : ''}
-        
-        ${inputs.propertyType === 'hdb' && !results.hdbPass ? `
-        <div style="margin: 15px 0;">
-            <h3 style="color: #dc2626; margin-bottom: 10px;">HDB Property Options</h3>
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <strong>Show Fund Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">${formatCurrency(results.cashShowHDB)}</span>
-                </div>
-                <div class="funding-card">
-                    <strong>Pledge Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">${formatCurrency(results.cashPledgeHDB)}</span>
-                </div>
-            </div>
-        </div>
-        ` : ''}
         
         <p style="font-size: 12px; color: #666; text-align: center; margin-top: 15px;">
             <em>Choose either Show Fund OR Pledge option, not both</em>
@@ -1846,51 +1695,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     </div>
     ` : ''}
 
-    <div class="section avoid-break">
-        <h2>📊 DETAILED PAYMENT BREAKDOWN</h2>
-        
-        <h3 style="color: #555; margin: 15px 0 10px 0; font-size: 12px;">Year-by-Year Payment Analysis</h3>
-        
-        ${results.yearlyBreakdown && results.yearlyBreakdown.map((breakdown, index) => `
-        <div class="year-breakdown">
-            <div class="year-header">
-                <h4 class="year-title">Year ${breakdown.year}</h4>
-                <span class="year-rate">${breakdown.rate}% p.a.</span>
-            </div>
-            
-            <div class="payment-grid">
-                <div class="payment-card interest">
-                    <div class="payment-card-label">Monthly Interest Payable</div>
-                    <div class="payment-card-value interest">${formatCurrency(breakdown.monthlyInterest)}</div>
-                </div>
-                <div class="payment-card principal">
-                    <div class="payment-card-label">Monthly Principal Payable</div>
-                    <div class="payment-card-value principal">${formatCurrency(breakdown.monthlyPrincipal)}</div>
-                </div>
-                <div class="payment-card interest">
-                    <div class="payment-card-label">Total Interest Payable</div>
-                    <div class="payment-card-value interest">${formatCurrency(breakdown.totalInterest)}</div>
-                </div>
-                <div class="payment-card principal">
-                    <div class="payment-card-label">Total Principal Payable</div>
-                    <div class="payment-card-value principal">${formatCurrency(breakdown.totalPrincipal)}</div>
-                </div>
-            </div>
-            
-            <div class="installment-summary">
-                <div class="installment-label">Monthly Installment</div>
-                <div class="installment-value">${formatCurrency(breakdown.monthlyInstallment)}</div>
-            </div>
-        </div>
-        `).join('')}
-
-        <div class="total-interest-box">
-            <h4 class="total-interest-title">Total Interest (First ${inputs.interestPeriodSelection} Years)</h4>
-            <div class="total-interest-value">${formatCurrency(results.selectedPeriodTotal || 0)}</div>
-        </div>
-    </div>
-
-    <div class="section page-break">
+    <div class="section">
         <h2>👥 APPLICANT DETAILS</h2>
         
         <div class="two-column">
@@ -1942,14 +1747,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             <div style="font-size: 20px; font-weight: bold; color: #0369a1;">${formatCurrency(results.combinedMonthlyIncome)}</div>
         </div>
         
-        ${((parseNumberInput(inputs.showFundAmount) || 0) > 0 || (parseNumberInput(inputs.pledgeAmount) || 0) > 0) ? `
-        <div style="margin-top: 15px;">
-            <h4 style="color: #555; font-size: 14px;">Additional Funding</h4>
-            ${(parseNumberInput(inputs.showFundAmount) || 0) > 0 ? `<div class="info-row"><span class="info-label">Show Fund:</span><span class="info-value">${formatCurrency(parseNumberInput(inputs.showFundAmount) || 0)}</span></div>` : ''}
-            ${(parseNumberInput(inputs.pledgeAmount) || 0) > 0 ? `<div class="info-row"><span class="info-label">Pledge Amount:</span><span class="info-value">${formatCurrency(parseNumberInput(inputs.pledgeAmount) || 0)}</span></div>` : ''}
-        </div>
-        ` : ''}
-        
         ${results.averageAge > 0 ? `
         <div style="margin-top: 15px;">
             <h4 style="color: #555; font-size: 14px;">Age & Tenor Information</h4>
@@ -1961,15 +1758,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
                 <span class="info-label">Max Loan Tenor:</span>
                 <span class="info-value">${results.maxLoanTenor} years</span>
             </div>
-            <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-top: 8px;">
-                <p style="font-size: 11px; color: #1e40af; margin: 0; line-height: 1.3;">
-                    <strong>${inputs.propertyType === 'hdb' ? 'HDB' : 'Private'} Property Rules:</strong><br>
-                    ${inputs.propertyType === 'hdb' 
-                        ? '• 56%-75% loan: Max 25yr (age≤65)<br>• ≤55% loan: Max 30yr (age≤75)'
-                        : '• 56%-75% loan: Max 30yr (age≤65)<br>• ≤55% loan: Max 35yr (age≤75)'
-                    }
-                </p>
-            </div>
         </div>
         ` : ''}
         
@@ -1978,12 +1766,16 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             <h4 style="color: #555; font-size: 14px;">Monthly Commitments</h4>
             <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.totalCommitments)}</div>
             ${inputs.propertyType === 'hdb' ? `
-                <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                    <strong>HDB MSR Calculation:</strong> Includes property loans only. Car loans and personal loans excluded from MSR.
+                <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                    <strong>HDB MSR Calculation:</strong> Includes property loans only (${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}). 
+                    Car loans and personal loans are excluded from MSR.
                 </p>
             ` : `
-                <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                    <strong>Private Property TDSR Calculation:</strong> Includes all commitments (car loans, personal loans, and property loans).
+                <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                    <strong>Private Property TDSR Calculation:</strong> Includes all commitments:
+                    <br>• Car loans: ${formatCurrency(parseNumberInput(inputs.carLoanA) + parseNumberInput(inputs.carLoanB))}
+                    <br>• Personal loans: ${formatCurrency(parseNumberInput(inputs.personalLoanA) + parseNumberInput(inputs.personalLoanB))}
+                    <br>• Property loans: ${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}
                 </p>
             `}
         </div>
@@ -1994,10 +1786,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         <h4 style="margin: 0 0 8px 0; color: #333; font-size: 12px;">Important Notes</h4>
         <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
         <p style="margin: 4px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
-        <p style="margin: 4px 0;">• Additional fees (legal, valuation, insurance) are not included.</p>
         <p style="margin: 4px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
+        <p style="margin: 4px 0;">• ${inputs.propertyType === 'private' ? 'TDSR limit: 55%' : 'MSR limit: 30%'} of gross monthly income.</p>
+        <p style="margin: 4px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
         <p style="margin: 4px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
-        <p style="margin: 4px 0;">• Interest rates are estimates and may vary.</p>
     </div>
 
     <div class="footer no-break">        
@@ -2151,8 +1943,8 @@ This ensures all content fits properly without being cut off.`);
             </div>
 
             <div className="mt-4">
-              <h3 className="text-lg font-medium mb-3">Interest Rates</h3>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <h3 className="text-lg font-medium mb-3">Loan Parameters</h3>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Stress Test Rate (%)</label>
                   <input
@@ -2199,70 +1991,6 @@ This ensures all content fits properly without being cut off.`);
                       </p>
                     </div>
                   )}
-                </div>
-              </div>
-              
-              <h4 className="font-medium mb-3">Interest Rates by Year</h4>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Year 1 (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.interestRateY1}
-                    onChange={(e) => handleInputChange('interestRateY1', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Year 2 (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.interestRateY2}
-                    onChange={(e) => handleInputChange('interestRateY2', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Year 3 (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.interestRateY3}
-                    onChange={(e) => handleInputChange('interestRateY3', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Year 4 (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.interestRateY4}
-                    onChange={(e) => handleInputChange('interestRateY4', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Year 5 (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.interestRateY5}
-                    onChange={(e) => handleInputChange('interestRateY5', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Thereafter (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.interestRateThereafter}
-                    onChange={(e) => handleInputChange('interestRateThereafter', Number(e.target.value))}
-                    className="w-full p-3 border rounded-lg"
-                  />
                 </div>
               </div>
             </div>
@@ -2493,112 +2221,12 @@ This ensures all content fits properly without being cut off.`);
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-3">Monthly Installments by Year</h3>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-red-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Stress Test ({inputs.stressTestRate}%):</span>
-                      <div className="font-semibold text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
-                      <p className="text-xs text-gray-500">Used for affordability</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Loan Tenor:</span>
-                      <div className="font-semibold">{inputs.loanTenor} years</div>
-                    </div>
+                  <h3 className="font-medium mb-3">Affordability Assessment</h3>
+                  <div className="bg-red-50 p-4 rounded-lg mb-4">
+                    <div className="text-sm text-gray-600 mb-1">Monthly Installment (Stress Test {inputs.stressTestRate}%):</div>
+                    <div className="font-semibold text-xl text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
+                    <p className="text-xs text-gray-500 mt-1">This amount is used for TDSR/MSR calculation</p>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-green-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Year 1 ({inputs.interestRateY1}%):</span>
-                      <div className="font-semibold text-green-600">{formatCurrency(results.monthlyInstallmentY1)}</div>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Year 2 ({inputs.interestRateY2}%):</span>
-                      <div className="font-semibold text-blue-600">{formatCurrency(results.monthlyInstallmentY2)}</div>
-                    </div>
-                    <div className="bg-purple-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Year 3 ({inputs.interestRateY3}%):</span>
-                      <div className="font-semibold text-purple-600">{formatCurrency(results.monthlyInstallmentY3)}</div>
-                    </div>
-                    <div className="bg-yellow-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Year 4 ({inputs.interestRateY4}%):</span>
-                      <div className="font-semibold text-yellow-600">{formatCurrency(results.monthlyInstallmentY4)}</div>
-                    </div>
-                    <div className="bg-pink-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Year 5 ({inputs.interestRateY5}%):</span>
-                      <div className="font-semibold text-pink-600">{formatCurrency(results.monthlyInstallmentY5)}</div>
-                    </div>
-                    <div className="bg-indigo-50 p-3 rounded">
-                      <span className="text-sm text-gray-600">Thereafter ({inputs.interestRateThereafter}%):</span>
-                      <div className="font-semibold text-indigo-600">{formatCurrency(results.monthlyInstallmentThereafter)}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-3">Detailed Payment Breakdown by Year</h3>
-                  {results.yearlyBreakdown && results.yearlyBreakdown.length > 0 && (
-                    <div className="space-y-4">
-                      {results.yearlyBreakdown.map((breakdown, index) => (
-                        <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
-                          <div className="flex justify-between items-center mb-3">
-                            <h4 className="font-semibold text-lg">Year {breakdown.year}</h4>
-                            <span className="text-sm text-gray-600">Rate: {breakdown.rate}%</span>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div className="text-center">
-                              <span className="block text-gray-600">Monthly Interest</span>
-                              <div className="font-semibold text-red-600">{formatCurrency(breakdown.monthlyInterest)}</div>
-                            </div>
-                            <div className="text-center">
-                              <span className="block text-gray-600">Monthly Principal</span>
-                              <div className="font-semibold text-blue-600">{formatCurrency(breakdown.monthlyPrincipal)}</div>
-                            </div>
-                            <div className="text-center">
-                              <span className="block text-gray-600">Total Interest</span>
-                              <div className="font-semibold text-red-600">{formatCurrency(breakdown.totalInterest)}</div>
-                            </div>
-                            <div className="text-center">
-                              <span className="block text-gray-600">Total Principal</span>
-                              <div className="font-semibold text-blue-600">{formatCurrency(breakdown.totalPrincipal)}</div>
-                            </div>
-                          </div>
-                          <div className="mt-3 text-center border-t pt-3">
-                            <span className="text-sm text-gray-600">Monthly Installment: </span>
-                            <span className="font-semibold text-green-600">{formatCurrency(breakdown.monthlyInstallment)}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="mt-4 bg-blue-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="block text-sm font-medium text-blue-800">
-                        Total Interest Period:
-                      </label>
-                      <select
-                        value={inputs.interestPeriodSelection}
-                        onChange={(e) => handleInputChange('interestPeriodSelection', Number(e.target.value))}
-                        className="ml-3 p-2 border border-blue-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value={2}>First 2 Years</option>
-                        <option value={3}>First 3 Years</option>
-                        <option value={5}>First 5 Years</option>
-                      </select>
-                    </div>
-                    <div className="text-center">
-                      <span className="text-sm text-blue-600">
-                        Total Interest ({inputs.interestPeriodSelection === 2 ? 'First 2 Years' : 
-                                       inputs.interestPeriodSelection === 3 ? 'First 3 Years' : 'First 5 Years'}):
-                      </span>
-                      <div className="font-bold text-xl text-blue-800">
-                        {formatCurrency(results.selectedPeriodTotal || 0)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-3">Income Summary</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <span className="text-sm text-gray-600">Combined Monthly Income:</span>
@@ -2706,10 +2334,10 @@ This ensures all content fits properly without being cut off.`);
               className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
             >
               <Download className="w-5 h-5" />
-              Generate Clean Professional Report (PDF)
+              Generate TDSR/MSR Report (PDF)
             </button>
             <p className="text-sm text-gray-500 text-center">
-              Clean, client-ready report for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'} analysis
+              Clean, client-ready report for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'} affordability analysis
             </p>
 
             {/* Formula Information */}
@@ -2727,33 +2355,14 @@ This ensures all content fits properly without being cut off.`);
                 <p className="ml-6">• 56%-75% loan: Max 30 years, borrower age capped at 65 years</p>
                 <p className="ml-6">• ≤55% loan: Max 35 years, borrower age capped at 75 years</p>
                 <p className="ml-4">• <strong>Calculation:</strong> Min(Max_Tenor_Years, Age_Cap - Average_Age)</p>
-                <p className="ml-4">• <strong>Example:</strong> HDB 75% loan, average age 55 → Min(25, 65-55) = 10 years</p>
                 
                 <p><strong>Commitment Inclusions by Property Type:</strong></p>
                 <p className="ml-4"><strong>Private Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
                 <p className="ml-4"><strong>HDB Property (MSR):</strong> Property loans only (car & personal loans excluded)</p>
                 
-                <p><strong>Loan Amount Options:</strong></p>
-                <p className="ml-4">• 75% Option = Purchase Price × 0.75</p>
-                <p className="ml-4">• 55% Option = Purchase Price × 0.55</p>
-                <p className="ml-4">• Custom Amount = User input</p>
-                
-                <p><strong>Monthly Installments:</strong></p>
-                <p className="ml-4">• Stress Test: PMT(Stress Test Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• Year 1: PMT(Year 1 Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• Year 2: PMT(Year 2 Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• Year 3: PMT(Year 3 Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• Year 4: PMT(Year 4 Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• Year 5: PMT(Year 5 Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• Thereafter: PMT(Thereafter Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• <em>Note: Stress test installment used for affordability assessment</em></p>
-                
-                <p><strong>Yearly Interest Calculations:</strong></p>
-                <p className="ml-4">• Uses declining balance method with respective yearly rates</p>
-                <p className="ml-4">• Interest Payment = Outstanding Balance × (Annual Rate ÷ 12)</p>
-                <p className="ml-4">• Principal Payment = Monthly Installment - Interest Payment</p>
-                <p className="ml-4">• New Balance = Previous Balance - Principal Payment</p>
-                <p className="ml-4">• Total Interest Period: Selectable for 2, 3, or 5 years</p>
+                <p><strong>Monthly Installment Calculation:</strong></p>
+                <p className="ml-4">• PMT(Stress Test Rate/12, Loan Tenor×12, Loan Amount)</p>
+                <p className="ml-4">• <em>Note: Stress test installment used for affordability assessment only</em></p>
                 
                 <p><strong>Income Calculations:</strong></p>
                 <p className="ml-4">• Bonus Income = (Annual Salary - Monthly Salary×12) ÷ 12 × 0.7</p>
@@ -2770,13 +2379,6 @@ This ensures all content fits properly without being cut off.`);
                 <p><strong>Cash Requirements (when deficit exists):</strong></p>
                 <p className="ml-4">• Cash to Show = |Deficit| ÷ 0.00625</p>
                 <p className="ml-4">• Cash to Pledge = |Deficit| × 48</p>
-                
-                <p><strong>Constants:</strong></p>
-                <p className="ml-4">• 0.00625 = 0.75% ÷ 12 (monthly yield assumption for show funds)</p>
-                <p className="ml-4">• 48 = Multiplier for pledging calculation (4 years)</p>
-                <p className="ml-4">• 0.7 = 70% recognition factor for bonus income</p>
-                <p className="ml-4">• 0.55 = TDSR limit for private property</p>
-                <p className="ml-4">• 0.3 = MSR limit for HDB property</p>
               </div>
             </div>
           </div>
