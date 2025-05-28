@@ -129,14 +129,6 @@ const MonthlyRepaymentCalculator = () => {
     currentRate: '',
     remainingYears: 10,
     remainingMonths: 0,
-    showCurrentSubsequentRates: false,
-    currentSubsequentRates: [
-      { year: 2, rate: '' },
-      { year: 3, rate: '' },
-      { year: 4, rate: '' },
-      { year: 5, rate: '' },
-      { year: 'thereafter', rate: '' }
-    ],
     // New package details
     newRate: '',
     newLoanYears: 10,
@@ -148,12 +140,7 @@ const MonthlyRepaymentCalculator = () => {
       { year: 4, rate: '' },
       { year: 5, rate: '' },
       { year: 'thereafter', rate: '' }
-    ],
-    showFeesRebates: false,
-    legalSubsidy: '',
-    valuationSubsidy: '',
-    cashRebate: '',
-    lockInPeriod: 2
+    ]
   });
 
   // PMT function
@@ -164,7 +151,7 @@ const MonthlyRepaymentCalculator = () => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
   };
 
-  // Calculate repayment schedule with proper handling of rate changes
+  // Calculate repayment schedule with proper handling of rate changes (Excel method)
   const calculateRepaymentSchedule = (principal, rates, years, months, startDate = new Date()) => {
     const totalMonths = years * 12 + months;
     let balance = principal;
@@ -172,46 +159,62 @@ const MonthlyRepaymentCalculator = () => {
     const yearlyData = [];
     let currentDate = new Date(startDate);
     
-    // Get rate for a specific month
-    const getRateForMonth = (monthIndex) => {
+    // Pre-calculate monthly payments for each rate period (Excel method)
+    const getMonthlyPaymentForPeriod = (ratePercent, fullTenorYears) => {
+      if (!ratePercent || ratePercent === 0) return principal / (fullTenorYears * 12);
+      const monthlyRate = ratePercent / 100 / 12;
+      const totalPayments = fullTenorYears * 12;
+      return (principal * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
+    };
+    
+    // Get rate and payment for a specific month
+    const getRateAndPaymentForMonth = (monthIndex) => {
       const yearIndex = Math.floor(monthIndex / 12);
       
       if (!rates || (typeof rates === 'number')) {
-        return parseFloat(rates) || 0;
+        const rate = parseFloat(rates) || 0;
+        return {
+          rate: rate,
+          payment: getMonthlyPaymentForPeriod(rate, years + months/12)
+        };
       }
       
       // For subsequent rates structure
       if (Array.isArray(rates)) {
+        let currentRate = 0;
+        
         if (yearIndex === 0) {
-          // First year uses the base rate (not in array)
-          return parseFloat(rates[0]?.rate || 0);
+          // First year uses the base rate (first rate in array or separate base rate)
+          currentRate = parseFloat(rates[0]?.rate || 0);
+        } else {
+          // Find the rate for this year
+          const yearRate = rates.find(r => r.year === yearIndex + 1);
+          if (yearRate && yearRate.rate) {
+            currentRate = parseFloat(yearRate.rate);
+          } else if (yearIndex >= 5) {
+            // If beyond year 5, use 'thereafter' rate
+            const thereafterRate = rates.find(r => r.year === 'thereafter');
+            if (thereafterRate && thereafterRate.rate) {
+              currentRate = parseFloat(thereafterRate.rate);
+            }
+          }
         }
         
-        const yearRate = rates.find(r => r.year === yearIndex + 1);
-        if (yearRate && yearRate.rate) return parseFloat(yearRate.rate);
-        
-        // If beyond year 5, use 'thereafter' rate
-        if (yearIndex >= 5) {
-          const thereafterRate = rates.find(r => r.year === 'thereafter');
-          if (thereafterRate && thereafterRate.rate) return parseFloat(thereafterRate.rate);
-        }
-        
-        return 0;
+        return {
+          rate: currentRate,
+          payment: getMonthlyPaymentForPeriod(currentRate, years + months/12)
+        };
       }
       
-      return 0;
+      return { rate: 0, payment: 0 };
     };
 
-    // For each month, calculate payment based on current rate and remaining balance
+    // Calculate monthly schedule
     for (let monthIndex = 0; monthIndex < totalMonths && balance > 0.01; monthIndex++) {
-      const currentRate = getRateForMonth(monthIndex);
-      const remainingMonths = totalMonths - monthIndex;
-      
-      // Recalculate payment for remaining balance and months
-      const monthlyPayment = calculatePMT(currentRate, remainingMonths, balance);
+      const { rate: currentRate, payment: monthlyPayment } = getRateAndPaymentForMonth(monthIndex);
       const monthlyRate = currentRate / 100 / 12;
       const interestPayment = balance * monthlyRate;
-      const principalPayment = monthlyPayment - interestPayment;
+      const principalPayment = Math.min(monthlyPayment - interestPayment, balance);
       
       monthlyData.push({
         month: monthIndex + 1,
@@ -256,9 +259,9 @@ const MonthlyRepaymentCalculator = () => {
       yearData.endingPrincipal = month.endingBalance;
       yearData.months.push(month);
       
-      // Update rate if it changes during the year
+      // Handle rate changes within the year
       if (month.rate !== yearData.rate && index > 0) {
-        yearData.rate = `${yearData.rate}% / ${month.rate}%`;
+        yearData.rate = month.rate; // Use the latest rate for display
       }
     });
     
@@ -281,14 +284,14 @@ const MonthlyRepaymentCalculator = () => {
     };
   };
 
-  // Format currency
+  // Format currency with 2 decimal places
   const formatCurrency = (amount) => {
-    if (!amount && amount !== 0) return 'SGD 0';
+    if (!amount && amount !== 0) return 'SGD 0.00';
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
       currency: 'SGD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
@@ -320,9 +323,9 @@ const MonthlyRepaymentCalculator = () => {
 
   // Handle input changes for existing loan
   const handleExistingLoanChange = (field, value) => {
-    if (field === 'currentSubsequentRates' || field === 'newSubsequentRates') {
+    if (field === 'newSubsequentRates') {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
-    } else if (['outstandingAmount', 'legalSubsidy', 'valuationSubsidy', 'cashRebate'].includes(field)) {
+    } else if (['outstandingAmount'].includes(field)) {
       setExistingLoan(prev => ({ ...prev, [field]: parseNumberInput(value) }));
     } else {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
@@ -358,20 +361,11 @@ const MonthlyRepaymentCalculator = () => {
     
     if (amount <= 0) return null;
     
-    // Current loan calculation
-    let currentRates;
-    if (existingLoan.showCurrentSubsequentRates) {
-      currentRates = [
-        { year: 1, rate: existingLoan.currentRate },
-        ...existingLoan.currentSubsequentRates
-      ];
-    } else {
-      currentRates = parseFloat(existingLoan.currentRate) || 0;
-    }
-    
+    // Current loan calculation (simple single rate)
+    const currentRate = parseFloat(existingLoan.currentRate) || 0;
     const currentSchedule = calculateRepaymentSchedule(
       amount,
-      currentRates,
+      currentRate,
       parseInt(existingLoan.remainingYears) || 0,
       parseInt(existingLoan.remainingMonths) || 0
     );
@@ -394,16 +388,9 @@ const MonthlyRepaymentCalculator = () => {
       parseInt(existingLoan.newLoanMonths) || 0
     );
     
-    // Calculate fees and rebates
-    const totalFees = (parseNumberInput(existingLoan.legalSubsidy) || 0) + 
-                     (parseNumberInput(existingLoan.valuationSubsidy) || 0);
-    const cashRebate = parseNumberInput(existingLoan.cashRebate) || 0;
-    const netFees = totalFees - cashRebate;
-    
     // Calculate savings
     const monthlySavings = currentSchedule.monthlyPayment - newSchedule.monthlyPayment;
     const firstYearSavings = monthlySavings * 12;
-    const lockInSavings = monthlySavings * 12 * (parseInt(existingLoan.lockInPeriod) || 2);
     const totalInterestSavings = currentSchedule.totalInterest - newSchedule.totalInterest;
     
     return {
@@ -411,10 +398,7 @@ const MonthlyRepaymentCalculator = () => {
       new: newSchedule,
       monthlySavings,
       firstYearSavings,
-      lockInSavings,
-      totalInterestSavings,
-      netFees,
-      breakEvenMonths: monthlySavings > 0 ? Math.ceil(netFees / monthlySavings) : 0
+      totalInterestSavings
     };
   };
 
@@ -423,6 +407,390 @@ const MonthlyRepaymentCalculator = () => {
 
   // State for showing monthly breakdown
   const [showMonthlyBreakdown, setShowMonthlyBreakdown] = useState({});
+
+  // PDF Report generation for Monthly Repayment Calculator
+  const generateRepaymentPDFReport = (results, loanType = 'new') => {
+    if (!results) {
+      alert('Please calculate the loan first before generating a report.');
+      return;
+    }
+
+    try {
+      const currentDate = new Date().toLocaleDateString('en-SG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      const loanDetails = loanType === 'new' ? {
+        type: 'New Loan',
+        amount: parseNumberInput(newLoan.loanAmount) || 0,
+        rate: newLoan.interestRate,
+        years: newLoan.loanPeriodYears,
+        months: newLoan.loanPeriodMonths
+      } : {
+        type: 'Refinancing Package',
+        amount: parseNumberInput(existingLoan.outstandingAmount) || 0,
+        rate: existingLoan.newRate,
+        years: existingLoan.newLoanYears,
+        months: existingLoan.newLoanMonths
+      };
+
+      // Generate professional HTML report
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Repayment Schedule - ${loanDetails.type}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.5in 0.75in;
+        }
+        
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            body { 
+                margin: 0; 
+                padding: 0;
+                font-size: 10px;
+                line-height: 1.2;
+            }
+            
+            .page-break { 
+                page-break-before: always; 
+            }
+            
+            .no-break { 
+                page-break-inside: avoid; 
+                break-inside: avoid;
+            }
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.3;
+            color: #333;
+            max-width: 100%;
+            margin: 0;
+            padding: 10px;
+            background: white;
+            font-size: 11px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #1d4ed8;
+        }
+        
+        .logo-section img {
+            max-width: 150px;
+            height: auto;
+            display: block;
+        }
+        
+        .report-info {
+            margin-top: 6px;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .loan-type-banner {
+            background: #1d4ed8;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .section {
+            margin: 15px 0;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #fafafa;
+            page-break-inside: avoid;
+        }
+        
+        .section h2 {
+            color: #1d4ed8;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dotted #ccc;
+            font-size: 11px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .highlight-box {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .repayment-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9px;
+            margin: 10px 0;
+        }
+        
+        .repayment-table th,
+        .repayment-table td {
+            border: 1px solid #e5e7eb;
+            padding: 6px 4px;
+            text-align: right;
+        }
+        
+        .repayment-table th {
+            background: #f3f4f6;
+            font-weight: bold;
+            color: #374151;
+        }
+        
+        .repayment-table th:first-child,
+        .repayment-table td:first-child {
+            text-align: center;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #666;
+            font-size: 9px;
+            page-break-inside: avoid;
+        }
+        
+        .disclaimer {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 9px;
+            color: #555;
+            page-break-inside: avoid;
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-break">
+        <div class="logo-section">
+            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
+        </div>
+        
+        <div class="loan-type-banner">
+            ${loanDetails.type} - Monthly Repayment Schedule
+        </div>
+        
+        <div class="report-info">
+            <strong>Comprehensive Loan Repayment Analysis</strong><br>
+            Generated: ${currentDate} | Report ID: KQM-REP-${Date.now()}
+        </div>
+    </div>
+
+    <div class="section no-break">
+        <h2>📋 LOAN SUMMARY</h2>
+        <div class="highlight-box">
+            <div class="two-column">
+                <div>
+                    <div class="info-row">
+                        <span class="info-label">Loan Type:</span>
+                        <span class="info-value">${loanDetails.type}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Loan Amount:</span>
+                        <span class="info-value">${formatCurrency(loanDetails.amount)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Interest Rate:</span>
+                        <span class="info-value">${loanDetails.rate}%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Loan Period:</span>
+                        <span class="info-value">${loanDetails.years} years ${loanDetails.months > 0 ? loanDetails.months + ' months' : ''}</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="info-row">
+                        <span class="info-label">Monthly Payment:</span>
+                        <span class="info-value">${formatCurrency(results.monthlyPayment)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Interest:</span>
+                        <span class="info-value">${formatCurrency(results.totalInterest)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Principal:</span>
+                        <span class="info-value">${formatCurrency(results.totalPrincipal)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Payable:</span>
+                        <span class="info-value">${formatCurrency(results.totalPayable)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📅 YEARLY REPAYMENT SCHEDULE</h2>
+        <table class="repayment-table">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Interest Rate</th>
+                    <th>Beginning Principal</th>
+                    <th>Monthly Installment</th>
+                    <th>Interest Paid</th>
+                    <th>Principal Paid</th>
+                    <th>Ending Principal</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${results.yearlyData.map(year => `
+                <tr>
+                    <td>${year.year}</td>
+                    <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
+                    <td>${formatCurrency(year.beginningPrincipal)}</td>
+                    <td>${formatCurrency(year.monthlyInstalment)}</td>
+                    <td>${formatCurrency(year.interestPaid)}</td>
+                    <td>${formatCurrency(year.principalPaid)}</td>
+                    <td>${formatCurrency(year.endingPrincipal)}</td>
+                </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+
+    ${loanType === 'refinancing' && refinancingResults ? `
+    <div class="section">
+        <h2>💰 REFINANCING COMPARISON</h2>
+        <div class="highlight-box">
+            <div class="two-column">
+                <div>
+                    <h4 style="color: #666; margin-bottom: 10px;">Current Loan</h4>
+                    <div class="info-row">
+                        <span class="info-label">Monthly Payment:</span>
+                        <span class="info-value">${formatCurrency(refinancingResults.current.monthlyPayment)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Interest:</span>
+                        <span class="info-value">${formatCurrency(refinancingResults.current.totalInterest)}</span>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #666; margin-bottom: 10px;">New Package</h4>
+                    <div class="info-row">
+                        <span class="info-label">Monthly Payment:</span>
+                        <span class="info-value">${formatCurrency(refinancingResults.new.monthlyPayment)}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Interest:</span>
+                        <span class="info-value">${formatCurrency(refinancingResults.new.totalInterest)}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                <div class="info-row" style="justify-content: center; border: none; font-size: 14px;">
+                    <span class="info-label">Monthly Savings:</span>
+                    <span class="info-value" style="color: #16a34a; margin-left: 10px;">${formatCurrency(Math.abs(refinancingResults.monthlySavings))}</span>
+                </div>
+                <div class="info-row" style="justify-content: center; border: none; font-size: 14px;">
+                    <span class="info-label">Total Interest Savings:</span>
+                    <span class="info-value" style="color: #16a34a; margin-left: 10px;">${formatCurrency(Math.abs(refinancingResults.totalInterestSavings))}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    ` : ''}
+
+    <div class="disclaimer no-break">
+        <h4 style="margin: 0 0 8px 0; color: #333; font-size: 12px;">Important Notes</h4>
+        <p style="margin: 4px 0;">• This schedule is based on fixed interest rates and regular monthly payments.</p>
+        <p style="margin: 4px 0;">• Actual payments may vary based on rate changes and payment timing.</p>
+        <p style="margin: 4px 0;">• Early payments can significantly reduce total interest paid.</p>
+        <p style="margin: 4px 0;">• Consult our specialists for personalized advice and current market rates.</p>
+    </div>
+
+    <div class="footer no-break">        
+        <div style="margin-bottom: 8px;">
+            📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
+        </div>
+        
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 10px;">
+            <p style="margin: 0; font-size: 9px;">This report is confidential and intended for loan assessment purposes. 
+            Your Trusted Mortgage Advisory Partner</p>
+        </div>
+    </div>
+</body>
+</html>
+      `;
+
+      // Create a new window with the HTML content
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(htmlContent);
+      newWindow.document.close();
+      
+      // Add a small delay to ensure content is loaded, then trigger print
+      setTimeout(() => {
+        newWindow.focus();
+        newWindow.print();
+      }, 500);
+
+      alert(`Repayment schedule report generated successfully! 
+
+📄 FOR BEST PDF RESULTS:
+• Use Chrome or Edge browser for printing
+• In print dialog, select "More settings"
+• Set margins to "Minimum" or "Custom" (0.5 inch)
+• Choose "A4" paper size
+• Enable "Background graphics"
+• Set scale to "100%" or "Fit to page width"
+• Select "Portrait" orientation`);
+
+    } catch (error) {
+      console.error('Error generating repayment report:', error);
+      alert('There was an error generating the report. Please try again.');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -529,7 +897,7 @@ const MonthlyRepaymentCalculator = () => {
 
                 {newLoan.showSubsequentRates && (
                   <div className="mt-4 p-4 bg-white rounded-lg space-y-3">
-                    <h4 className="font-medium text-sm mb-3">Subsequent year</h4>
+                    <h4 className="font-medium text-sm mb-3">Subsequent year rates</h4>
                     {newLoan.subsequentRates.map((rate, index) => (
                       <div key={index} className="grid grid-cols-2 gap-4">
                         <div className="text-sm text-gray-600 flex items-center">
@@ -692,6 +1060,20 @@ const MonthlyRepaymentCalculator = () => {
                       </tbody>
                     </table>
                   </div>
+                  
+                  {/* Generate Report Button for New Loan */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => generateRepaymentPDFReport(newLoanResults, 'new')}
+                      className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
+                    >
+                      <Download className="w-5 h-5" />
+                      Generate Repayment Schedule Report (PDF)
+                    </button>
+                    <p className="text-sm text-gray-500 text-center mt-2">
+                      Professional report with detailed repayment schedule
+                    </p>
+                  </div>
                 </div>
               </>
             )}
@@ -764,19 +1146,6 @@ const MonthlyRepaymentCalculator = () => {
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2 mt-4">
-                    <input
-                      type="checkbox"
-                      id="currentSubsequentRates"
-                      checked={existingLoan.showCurrentSubsequentRates}
-                      onChange={(e) => handleExistingLoanChange('showCurrentSubsequentRates', e.target.checked)}
-                      className="rounded"
-                    />
-                    <label htmlFor="currentSubsequentRates" className="text-sm font-medium">
-                      Add interest rates for subsequent years
-                    </label>
-                  </div>
                 </div>
 
                 <div className="border-t pt-4">
@@ -835,75 +1204,31 @@ const MonthlyRepaymentCalculator = () => {
                     </label>
                   </div>
 
-                  <div className="flex items-center gap-2 mt-2">
-                    <input
-                      type="checkbox"
-                      id="feesRebates"
-                      checked={existingLoan.showFeesRebates}
-                      onChange={(e) => handleExistingLoanChange('showFeesRebates', e.target.checked)}
-                      className="rounded"
-                    />
-                    <label htmlFor="feesRebates" className="text-sm font-medium">
-                      Additional fees & rebates
-                    </label>
-                  </div>
-
-                  {existingLoan.showFeesRebates && (
+                  {existingLoan.showNewSubsequentRates && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-3">
-                      <h4 className="font-medium text-sm">Fees & Rebates</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-sm mb-1">Legal subsidy</label>
+                      <h4 className="font-medium text-sm mb-3">Subsequent year rates</h4>
+                      {existingLoan.newSubsequentRates.map((rate, index) => (
+                        <div key={index} className="grid grid-cols-2 gap-4">
+                          <div className="text-sm text-gray-600 flex items-center">
+                            {rate.year === 'thereafter' ? 'Thereafter' : `${rate.year}${['st', 'nd', 'rd', 'th', 'th'][rate.year - 2] || 'th'} year`}
+                          </div>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                             <input
-                              type="text"
-                              value={formatNumberInput(existingLoan.legalSubsidy)}
-                              onChange={(e) => handleExistingLoanChange('legalSubsidy', e.target.value)}
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                              placeholder="0"
+                              type="number"
+                              step="0.01"
+                              value={rate.rate}
+                              onChange={(e) => {
+                                const newRates = [...existingLoan.newSubsequentRates];
+                                newRates[index].rate = e.target.value;
+                                handleExistingLoanChange('newSubsequentRates', newRates);
+                              }}
+                              className="w-full pr-8 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                              placeholder="3.75"
                             />
+                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                           </div>
                         </div>
-                        <div>
-                          <label className="block text-sm mb-1">Valuation subsidy</label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                            <input
-                              type="text"
-                              value={formatNumberInput(existingLoan.valuationSubsidy)}
-                              onChange={(e) => handleExistingLoanChange('valuationSubsidy', e.target.value)}
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                              placeholder="0"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm mb-1">Cash rebate</label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                            <input
-                              type="text"
-                              value={formatNumberInput(existingLoan.cashRebate)}
-                              onChange={(e) => handleExistingLoanChange('cashRebate', e.target.value)}
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                              placeholder="0"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm mb-1">Lock-in period</label>
-                          <select
-                            value={existingLoan.lockInPeriod}
-                            onChange={(e) => handleExistingLoanChange('lockInPeriod', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value={1}>1 year</option>
-                            <option value={2}>2 years</option>
-                            <option value={3}>3 years</option>
-                          </select>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -964,23 +1289,6 @@ const MonthlyRepaymentCalculator = () => {
                         for the entire loan period, if you switch to this new loan package.
                       </p>
                     </div>
-                    
-                    {existingLoan.showFeesRebates && refinancingResults.netFees > 0 && refinancingResults.monthlySavings > 0 && (
-                      <div className="bg-yellow-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-medium">Break-even period:</span>{' '}
-                          {refinancingResults.breakEvenMonths} months
-                          <br />
-                          <span className="text-xs text-gray-600">
-                            (Time needed to recover net fees of {formatCurrency(refinancingResults.netFees)})
-                          </span>
-                        </p>
-                      </div>
-                    )}
-                    
-                    <button className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors">
-                      Apply now
-                    </button>
                   </div>
                 </div>
 
@@ -1042,6 +1350,20 @@ const MonthlyRepaymentCalculator = () => {
                       </tbody>
                     </table>
                   </div>
+                  
+                  {/* Generate Report Button for Refinancing */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => generateRepaymentPDFReport(refinancingResults.new, 'refinancing')}
+                      className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors"
+                    >
+                      <Download className="w-5 h-5" />
+                      Generate Refinancing Report (PDF)
+                    </button>
+                    <p className="text-sm text-gray-500 text-center mt-2">
+                      Comprehensive comparison and new repayment schedule
+                    </p>
+                  </div>
                 </div>
               </>
             )}
@@ -1052,7 +1374,7 @@ const MonthlyRepaymentCalculator = () => {
   );
 };
 
-// Main Mortgage Calculator Component (TDSR/MSR)
+// Main TDSR/MSR Calculator Component
 const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   // Reset all values with defaults when component mounts (fresh login)
   const [inputs, setInputs] = useState({
@@ -1326,7 +1648,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
       currency: 'SGD',
-      minimumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
 
@@ -1758,6 +2081,32 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
                 <span class="info-label">Max Loan Tenor:</span>
                 <span class="info-value">${results.maxLoanTenor} years</span>
             </div>
+        </div>
+        ` : ''}
+        
+        ${(parseNumberInput(inputs.showFundAmount) || 0) > 0 || (parseNumberInput(inputs.pledgeAmount) || 0) > 0 ? `
+        <div style="margin-top: 15px;">
+            <h4 style="color: #555; font-size: 14px;">Additional Funding Options</h4>
+            ${(parseNumberInput(inputs.showFundAmount) || 0) > 0 ? `
+            <div class="info-row">
+                <span class="info-label">Show Fund Amount:</span>
+                <span class="info-value">${formatCurrency(parseNumberInput(inputs.showFundAmount))}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Show Fund Monthly Income:</span>
+                <span class="info-value">${formatCurrency((parseNumberInput(inputs.showFundAmount) || 0) * 0.00625)}</span>
+            </div>
+            ` : ''}
+            ${(parseNumberInput(inputs.pledgeAmount) || 0) > 0 ? `
+            <div class="info-row">
+                <span class="info-label">Pledge Amount:</span>
+                <span class="info-value">${formatCurrency(parseNumberInput(inputs.pledgeAmount))}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Pledge Monthly Income:</span>
+                <span class="info-value">${formatCurrency((parseNumberInput(inputs.pledgeAmount) || 0) / 48)}</span>
+            </div>
+            ` : ''}
         </div>
         ` : ''}
         
