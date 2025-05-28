@@ -316,15 +316,18 @@ const MonthlyRepaymentCalculator = () => {
   };
 
   // Handle input changes for new loan
-  const handleNewLoanChange = (field, value) => {
-    if (field === 'subsequentRates') {
-      setNewLoan(prev => ({ ...prev, subsequentRates: value }));
-    } else if (['loanAmount'].includes(field)) {
-      setNewLoan(prev => ({ ...prev, [field]: parseNumberInput(value) }));
-    } else {
-      setNewLoan(prev => ({ ...prev, [field]: value }));
-    }
-  };
+  const handleExistingLoanChange = (field, value) => {
+  if (field === 'newSubsequentRates') {
+    setExistingLoan(prev => ({ ...prev, [field]: value }));
+  } else if (['outstandingAmount'].includes(field)) {
+    setExistingLoan(prev => ({ ...prev, [field]: parseNumberInput(value) }));
+  } else if (['remainingYears', 'remainingMonths', 'newLoanYears', 'newLoanMonths'].includes(field)) {
+    // Parse years and months as numbers to fix year calculation
+    setExistingLoan(prev => ({ ...prev, [field]: parseInt(value) || 0 }));
+  } else {
+    setExistingLoan(prev => ({ ...prev, [field]: value }));
+  }
+};
 
   // Handle input changes for existing loan
   const handleExistingLoanChange = (field, value) => {
@@ -963,7 +966,7 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
                       <p className="text-gray-700">
                         You will pay off your home loan by year{' '}
                         <span className="font-semibold">
-                          {new Date().getFullYear() + newLoan.loanPeriodYears + Math.ceil(newLoan.loanPeriodMonths / 12)}
+                         {new Date().getFullYear() + parseInt(newLoan.loanPeriodYears || 0) + Math.ceil(parseInt(newLoan.loanPeriodMonths || 0) / 12)}
                         </span>
                         , with a total of{' '}
                         <span className="font-semibold text-red-600">
