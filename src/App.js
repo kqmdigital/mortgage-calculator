@@ -3052,14 +3052,14 @@ const ProgressivePaymentCalculator = () => {
 
   // Excel-based drawdown schedule (following the yellow highlighted pattern)
   const excelBasedDrawdownSchedule = [
-    { month: 1, percentage: 6.67, amount: null, stage: 'Upon grant of Option to Purchase' },
-    { month: 8, percentage: 13.33, amount: null, stage: 'Upon signing S&P Agreement' },
-    { month: 15, percentage: 6.67, amount: null, stage: 'Completion of foundation work' },
-    { month: 19, percentage: 6.67, amount: null, stage: 'Completion of reinforced concrete framework' },
-    { month: 23, percentage: 6.67, amount: null, stage: 'Completion of partition walls' },
-    { month: 27, percentage: 6.67, amount: null, stage: 'Completion of roofing/ceiling' },
-    { month: 31, percentage: 33.33, amount: null, stage: 'Temporary Occupation Permit (TOP)' },
-    { month: 43, percentage: 20.0, amount: null, stage: 'Certificate of Statutory Completion' }
+    { month: 1, percentage: 5, amount: null, stage: 'Completion of foundation work' },
+    { month: 9, percentage: 10, amount: null, stage: 'Completion of reinforced concrete framework of unit' },
+    { month: 17, percentage: 5, amount: null, stage: 'Completion of partition walls of unit' },
+    { month: 21, percentage: 5, amount: null, stage: 'Completion of roofing/ceiling of unit' },
+    { month: 25, percentage: 5, amount: null, stage: 'Completion of door sub-frames/ door frames, window frames, electrical wiring, internal plastering and plumbing of unit' },
+    { month: 29, percentage: 5, amount: null, stage: 'Completion of car park, roads and drains serving the housing project' },
+    { month: 33, percentage: 25, amount: null, stage: 'Temporary Occupation Permit (TOP)' },
+    { month: 45, percentage: 15, amount: null, stage: 'Certificate of Statutory Completion' }
   ];
 
   // Legacy default stages for display purposes (20% cash/CPF calculation)
@@ -3648,11 +3648,10 @@ const ProgressivePaymentCalculator = () => {
         {/* Input Section */}
         <div className="space-y-6">
           <div className="bg-red-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-red-800">BUC Property Details (Excel Model)</h3>
+            <h3 className="text-lg font-semibold mb-4 text-red-800">BUC Property Details</h3>
             <div className="bg-white p-3 rounded-lg mb-4 border-l-4 border-red-500">
               <p className="text-sm text-red-700">
-                <strong>Note:</strong> This calculator now follows your Excel calculation model exactly. 
-                Drawdowns occur at months 1, 8, 15, 19, 23, 27, 31, and 43 with monthly payments recalculated after each drawdown.
+                <strong>Note:</strong> Drawdowns occur at months 1, 8, 15, 19, 23, 27, 31, and 43 with monthly payments recalculated after each drawdown.
               </p>
             </div>
             
@@ -3740,7 +3739,6 @@ const ProgressivePaymentCalculator = () => {
                     min="5"
                     max="35"
                   />
-                  <p className="text-xs text-red-600 mt-1">Default: 20 years (Excel model)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Outstanding Mortgages</label>
@@ -3780,24 +3778,9 @@ const ProgressivePaymentCalculator = () => {
 
           <div className="bg-blue-50 p-6 rounded-lg">
             <h3 className="text-lg font-semibold mb-4 text-blue-800">Variable Interest Rate Package</h3>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium mb-2">Current 3M SORA Rate (%)</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={inputs.currentSora}
-                    onChange={(e) => handleInputChange('currentSora', parseFloat(e.target.value) || 3.2)}
-                    className="w-full pr-8 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
-                </div>
-              </div>
-
+                      
               <div className="bg-white p-4 rounded-lg">
-                <h4 className="font-medium mb-3">Interest Rate Structure (Excel Model)</h4>
+                <h4 className="font-medium mb-3">Interest Rate Structure</h4>
                 <div className="space-y-2">
                   {inputs.rates.map((rate, index) => (
                     <div key={index} className="grid grid-cols-3 gap-3 items-center">
@@ -3832,19 +3815,15 @@ const ProgressivePaymentCalculator = () => {
           {results && (
             <>
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4">Excel-Based Payment Summary</h3>
-                <div className="bg-green-100 p-3 rounded-lg mb-4">
-                  <p className="text-sm text-green-800 font-medium">
-                    ✅ Now following your Excel calculation model exactly!
-                  </p>
-                </div>
+                <h3 className="text-lg font-semibold mb-4">Payment Summary</h3>
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Total Cash/CPF Required (20%)</p>
+                    <p className="text-sm text-gray-600">Total Cash/CPF Required</p>
                     <p className="font-semibold text-lg">{formatCurrency(results.totalCashCPF)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total Bank Loan (80%)</p>
+                    <p className="text-sm text-gray-600">Total Bank Loan</p>
                     <p className="font-semibold text-lg">{formatCurrency(results.totalBankLoan)}</p>
                   </div>
                   <div>
