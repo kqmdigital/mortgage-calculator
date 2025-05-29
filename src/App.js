@@ -3037,7 +3037,7 @@ const ProgressivePaymentCalculator = () => {
     numOutstandingMortgages: 0,
     
     rates: [
-      { year: 1, rate: 2.9, description: '3M SORA + 0.30%' },
+      { year: 1, rate: 2.32, description: '3M SORA + 0.30%' },
       { year: 2, rate: 2.9, description: '3M SORA + 0.30%' },
       { year: 3, rate: 2.9, description: '3M SORA + 0.30%' },
       { year: 4, rate: 2.9, description: '3M SORA + 0.30%' },
@@ -3045,82 +3045,82 @@ const ProgressivePaymentCalculator = () => {
       { year: 'thereafter', rate: 3.3, description: '3M SORA + 0.60%' }
     ],
     
-    currentSora: 3.2
+    currentSora: 2.32
   });
 
   const [results, setResults] = useState(null);
 
-  // Default progressive payment stages (drawdown based on purchase price)
+  // CORRECTED: Default progressive payment stages with proper bank loan allocation
   const defaultStages = [
     {
       stage: 'Upon grant of Option to Purchase',
       percentage: 5,
-      paymentMode: 'Cash',
-      estimatedTimeFrame: 1,
-      bankLoanPortion: 0
+      paymentMode: 'Cash/CPF',
+      estimatedTimeFrame: 0, // Immediate
+      bankLoanPortion: 0 // No bank loan at this stage
     },
     {
       stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)',
       percentage: 15,
       paymentMode: 'Cash/CPF',
-      estimatedTimeFrame: 2,
-      bankLoanPortion: 0
+      estimatedTimeFrame: 2, // 2 months after OTP
+      bankLoanPortion: 0 // No bank loan at this stage
     },
     {
       stage: 'Completion of foundation work',
       percentage: 10,
-      paymentMode: 'Cash/CPF (5%) + Bank Loan (5%)',
-      estimatedTimeFrame: 11,
-      bankLoanPortion: 5 // 5% of purchase price from bank loan
+      paymentMode: 'Cash/CPF + Bank Loan',
+      estimatedTimeFrame: 11, // 11 months from S&P
+      bankLoanPortion: 0.5 // 50% of this stage from bank loan
     },
     {
       stage: 'Completion of reinforced concrete framework',
       percentage: 10,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 11,
-      bankLoanPortion: 10
+      estimatedTimeFrame: 6, // 6 months later
+      bankLoanPortion: 1.0 // 100% from bank loan
     },
     {
       stage: 'Completion of partition walls',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 6,
-      bankLoanPortion: 5
+      estimatedTimeFrame: 3,
+      bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of roofing/ceiling',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 6,
-      bankLoanPortion: 5
+      estimatedTimeFrame: 3,
+      bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of door frames, wiring, plumbing',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 6,
-      bankLoanPortion: 5
+      estimatedTimeFrame: 3,
+      bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of car park, roads and drains',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 6,
-      bankLoanPortion: 5
+      estimatedTimeFrame: 3,
+      bankLoanPortion: 1.0
     },
     {
       stage: 'Temporary Occupation Permit (TOP)',
       percentage: 25,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 0,
-      bankLoanPortion: 25
+      estimatedTimeFrame: 3,
+      bankLoanPortion: 1.0
     },
     {
       stage: 'Certificate of Statutory Completion',
       percentage: 15,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 12,
-      bankLoanPortion: 15
+      estimatedTimeFrame: 12, // 12 months after TOP
+      bankLoanPortion: 1.0
     }
   ];
 
@@ -3154,57 +3154,54 @@ const ProgressivePaymentCalculator = () => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / (Math.pow(1 + monthlyRate, periods) - 1);
   };
 
-  // EXCEL-MATCHING: Progressive payment calculation
+  // CORRECTED: Progressive payment calculation matching Excel logic
   const calculateProgressivePayments = () => {
     const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
     
-    // Calculate actual loan amount based on selection
-    let actualLoanAmount;
+    // Calculate selected loan amount
+    let selectedLoanAmount;
     if (inputs.useCustomAmount) {
-      actualLoanAmount = parseNumberInput(inputs.customLoanAmount) || 0;
+      selectedLoanAmount = parseNumberInput(inputs.customLoanAmount) || 0;
     } else {
-      actualLoanAmount = purchasePrice * (inputs.loanPercentage / 100);
+      selectedLoanAmount = purchasePrice * (inputs.loanPercentage / 100);
     }
 
-    if (purchasePrice <= 0 || actualLoanAmount <= 0) return null;
+    if (purchasePrice <= 0 || selectedLoanAmount <= 0) return null;
 
-    // Calculate stages with amounts (drawdowns based on PURCHASE PRICE)
+    // STEP 1: Calculate total bank loan needed based on default stage allocations
+    let totalBankLoanFromStages = 0;
+    defaultStages.forEach(stage => {
+      const stageAmount = purchasePrice * (stage.percentage / 100);
+      const stageBankLoan = stageAmount * stage.bankLoanPortion;
+      totalBankLoanFromStages += stageBankLoan;
+    });
+
+    // STEP 2: Calculate adjustment factor if total exceeds selected loan amount
+    const adjustmentFactor = selectedLoanAmount / totalBankLoanFromStages;
+
+    // STEP 3: Create stages with proper allocation
     const stages = defaultStages.map((stage, index) => {
       const stageAmount = purchasePrice * (stage.percentage / 100);
-      const bankLoanAmount = purchasePrice * (stage.bankLoanPortion / 100); // Based on purchase price
-      const cashCPFAmount = stageAmount - bankLoanAmount;
+      
+      // Calculate bank loan portion for this stage
+      let stageBankLoan = stageAmount * stage.bankLoanPortion;
+      
+      // Apply adjustment factor if needed
+      if (totalBankLoanFromStages > selectedLoanAmount) {
+        stageBankLoan = stageBankLoan * adjustmentFactor;
+      }
+      
+      const cashCPFAmount = stageAmount - stageBankLoan;
       
       return {
         ...stage,
         stageAmount,
-        bankLoanAmount,
-        cashCPFAmount
+        bankLoanAmount: stageBankLoan,
+        cashCPFAmount: Math.max(0, cashCPFAmount)
       };
     });
 
-    // EXCEL-MATCHING: Monthly payment schedule calculation
-    const monthlySchedule = [];
-    const totalMonths = inputs.tenure * 12;
-    
-    // Get interest rate for specific month (12-month intervals)
-    const getInterestRateForMonth = (month) => {
-      const yearIndex = Math.ceil(month / 12); // Year 1, 2, 3, etc.
-      
-      if (yearIndex <= 5) {
-        const rateInfo = inputs.rates.find(r => r.year === yearIndex);
-        return rateInfo ? rateInfo.rate : inputs.rates[0].rate;
-      } else {
-        const thereafterRate = inputs.rates.find(r => r.year === 'thereafter');
-        return thereafterRate ? thereafterRate.rate : inputs.rates[inputs.rates.length - 1].rate;
-      }
-    };
-
-    // Track cumulative drawdowns and loan balance
-    let cumulativeDrawdown = 0;
-    let outstandingBalance = 0;
-    let month = 1;
-    
-    // Create drawdown schedule based on estimated timeframes
+    // STEP 4: Generate drawdown schedule
     const drawdownSchedule = [];
     let currentMonth = 1;
     
@@ -3216,15 +3213,37 @@ const ProgressivePaymentCalculator = () => {
           drawdownAmount: stage.bankLoanAmount
         });
       }
-      currentMonth += stage.estimatedTimeFrame;
+      // Add timeframe to next stage
+      if (index < stages.length - 1) {
+        currentMonth += stage.estimatedTimeFrame;
+      }
     });
+
+    // STEP 5: Calculate monthly payment schedule
+    const monthlySchedule = [];
+    const totalMonths = inputs.tenure * 12;
+    let outstandingBalance = 0;
+    let cumulativeDrawdown = 0;
+    
+    // Get interest rate for specific month
+    const getInterestRateForMonth = (month) => {
+      const yearIndex = Math.ceil(month / 12);
+      
+      if (yearIndex <= 5) {
+        const rateInfo = inputs.rates.find(r => r.year === yearIndex);
+        return rateInfo ? rateInfo.rate : inputs.rates[0].rate;
+      } else {
+        const thereafterRate = inputs.rates.find(r => r.year === 'thereafter');
+        return thereafterRate ? thereafterRate.rate : inputs.rates[inputs.rates.length - 1].rate;
+      }
+    };
 
     // Generate monthly schedule
     for (let month = 1; month <= totalMonths; month++) {
       const currentRate = getInterestRateForMonth(month);
       const monthlyRate = currentRate / 100 / 12;
       
-      // Check if there's a drawdown this month
+      // Check for drawdown this month
       const drawdown = drawdownSchedule.find(d => d.month === month);
       const drawdownAmount = drawdown ? drawdown.drawdownAmount : 0;
       
@@ -3233,30 +3252,43 @@ const ProgressivePaymentCalculator = () => {
       cumulativeDrawdown += drawdownAmount;
       outstandingBalance += drawdownAmount;
       
-      // Calculate monthly payment (Principal + Interest on outstanding balance)
+      // Calculate payments only if there's an outstanding balance
       let monthlyPayment = 0;
       let interestPayment = 0;
       let principalPayment = 0;
       
       if (outstandingBalance > 0) {
-        // Calculate interest on current outstanding balance
+        // Interest on current balance
         interestPayment = outstandingBalance * monthlyRate;
         
-        // Calculate remaining months for amortization
+        // Calculate remaining term for this balance
         const remainingMonths = totalMonths - month + 1;
         
-        // Calculate monthly P&I payment based on current balance and remaining term
-        monthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
-        principalPayment = monthlyPayment - interestPayment;
+        // Calculate full monthly payment (P&I)
+        const fullMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
         
-        // Ensure we don't pay more principal than outstanding
-        if (principalPayment > outstandingBalance) {
-          principalPayment = outstandingBalance;
-          monthlyPayment = principalPayment + interestPayment;
+        // During construction, usually only interest is paid
+        // After TOP, full P&I payments start
+        const isConstructionPhase = month <= 36; // Assume 3 years construction
+        
+        if (isConstructionPhase && drawdownAmount > 0) {
+          // During construction with drawdowns: usually interest-only
+          monthlyPayment = interestPayment;
+          principalPayment = 0;
+        } else if (outstandingBalance > 0) {
+          // Full P&I payment
+          monthlyPayment = fullMonthlyPayment;
+          principalPayment = monthlyPayment - interestPayment;
+          
+          // Don't pay more principal than outstanding
+          if (principalPayment > outstandingBalance) {
+            principalPayment = outstandingBalance;
+            monthlyPayment = principalPayment + interestPayment;
+          }
+          
+          // Update balance
+          outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
         }
-        
-        // Update outstanding balance
-        outstandingBalance -= principalPayment;
       }
       
       const monthInYear = ((month - 1) % 12) + 1;
@@ -3274,38 +3306,32 @@ const ProgressivePaymentCalculator = () => {
         monthlyPayment: monthlyPayment,
         interestPayment: interestPayment,
         principalPayment: principalPayment,
-        endingBalance: Math.max(0, outstandingBalance),
+        endingBalance: outstandingBalance,
         interestRate: currentRate,
         stage: drawdown ? drawdown.stage : null
       });
       
-      // Break if loan is fully paid
-      if (outstandingBalance <= 0.01) break;
+      // Stop if loan is fully paid
+      if (outstandingBalance <= 0.01 && cumulativeDrawdown >= selectedLoanAmount) break;
     }
 
     // Calculate totals
     const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
     const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
     const totalCashCPF = stages.reduce((sum, stage) => sum + stage.cashCPFAmount, 0);
-    
-    // FIXED: Total bank loan should equal actual loan amount selected
-    const totalBankLoan = actualLoanAmount;
-    
-    // Calculate total bank loan from stages (for verification)
-    const totalBankLoanFromStages = stages.reduce((sum, stage) => sum + stage.bankLoanAmount, 0);
+    const totalBankLoan = stages.reduce((sum, stage) => sum + stage.bankLoanAmount, 0);
 
     return {
       stages,
       monthlySchedule,
       purchasePrice,
-      loanAmount: actualLoanAmount,
+      loanAmount: selectedLoanAmount,
       totalCashCPF,
-      totalBankLoan: totalBankLoan, // This should match selected loan amount
-      totalBankLoanFromStages, // This is sum of stage percentages (might be different)
+      totalBankLoan,
       totalInterest,
       totalPrincipal,
       totalPayable: totalInterest + totalPrincipal + totalCashCPF,
-      loanToValueRatio: (actualLoanAmount / purchasePrice) * 100
+      loanToValueRatio: (selectedLoanAmount / purchasePrice) * 100
     };
   };
 
