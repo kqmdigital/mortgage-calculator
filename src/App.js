@@ -3037,12 +3037,12 @@ const ProgressivePaymentCalculator = () => {
     numOutstandingMortgages: 0,
     
     rates: [
-      { year: 1, rate: 2.6, description: '3M SORA(3.20%) + 0.30%' },
-      { year: 2, rate: 2.9, description: '3M SORA + 0.30%' },
-      { year: 3, rate: 2.9, description: '3M SORA + 0.30%' },
-      { year: 4, rate: 2.9, description: '3M SORA + 0.30%' },
-      { year: 5, rate: 3.3, description: '3M SORA + 0.60%' },
-      { year: 'thereafter', rate: 3.3, description: '3M SORA + 0.60%' }
+      { year: 1, rate: 2.6, description: '' },
+      { year: 2, rate: 2.9, description: '' },
+      { year: 3, rate: 2.9, description: '' },
+      { year: 4, rate: 2.9, description: '' },
+      { year: 5, rate: 3.3, description: '' },
+      { year: 'thereafter', rate: 3.3, description: '' }
     ],
     
     currentSora: 3.2 // Updated to match Excel
