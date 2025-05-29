@@ -3547,28 +3547,6 @@ const ProgressivePaymentCalculator = () => {
         </table>
     </div>
 
-    <div class="section no-break">
-        <h2>💰 INTEREST RATE STRUCTURE</h2>
-        <table class="payment-table">
-            <thead>
-                <tr>
-                    <th>Year</th>
-                    <th>Interest Rate</th>
-                    <th>Rate Structure</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${inputs.rates.map(rate => `
-                <tr>
-                    <td>${rate.year}</td>
-                    <td>${rate.rate.toFixed(2)}%</td>
-                    <td>${rate.description}</td>
-                </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    </div>
-
     <div class="page-break">
         <div class="section">
             <h2>📊 MONTHLY PAYMENT SCHEDULE (Excel Model - First 60 Months)</h2>
@@ -3604,17 +3582,6 @@ const ProgressivePaymentCalculator = () => {
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="disclaimer no-break">
-        <h4 style="margin: 0 0 4px 0; color: #333; font-size: 9px;">Important Notes - Excel Model</h4>
-        <p style="margin: 2px 0;">• This schedule follows the exact Excel calculation model provided.</p>
-        <p style="margin: 2px 0;">• Monthly installment is recalculated after each drawdown based on outstanding balance and remaining tenure.</p>
-        <p style="margin: 2px 0;">• Interest is calculated only on drawn down amounts (outstanding balance).</p>
-        <p style="margin: 2px 0;">• Drawdown schedule: Month 1 (6.67%), Month 8 (13.33%), Month 15 (6.67%), Month 19 (6.67%), Month 23 (6.67%), Month 27 (6.67%), Month 31 (33.33%), Month 43 (20.0%).</p>
-        <p style="margin: 2px 0;">• Principal Payment = Monthly Payment - Interest Payment.</p>
-        <p style="margin: 2px 0;">• Ending Balance = Opening Balance + Drawdown - Principal Payment.</p>
-        <p style="margin: 2px 0;">• Consult our specialists for latest rates and personalized advice.</p>
     </div>
 
     <div class="footer no-break">
