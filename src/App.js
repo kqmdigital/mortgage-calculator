@@ -3028,16 +3028,14 @@ This ensures all content fits properly without being cut off.`);
 const ProgressivePaymentCalculator = () => {
   const [inputs, setInputs] = useState({
     purchasePrice: '',
-    loanAmount: '',
-    loanPercentage: 75, // Default 75%
+    loanPercentage: 75,
     useCustomAmount: false,
     customLoanAmount: '',
-    tenure: 25, // Default 25 years
+    tenure: 25,
     otpDate: '',
     topDate: '',
     numOutstandingMortgages: 0,
     
-    // Variable interest rates
     rates: [
       { year: 1, rate: 2.9, description: '3M SORA + 0.30%' },
       { year: 2, rate: 2.9, description: '3M SORA + 0.30%' },
@@ -3047,12 +3045,12 @@ const ProgressivePaymentCalculator = () => {
       { year: 'thereafter', rate: 3.3, description: '3M SORA + 0.60%' }
     ],
     
-    currentSora: 3.2 // Current 3M SORA rate
+    currentSora: 3.2
   });
 
   const [results, setResults] = useState(null);
 
-  // Default progressive payment stages for Singapore BUC properties
+  // Default progressive payment stages (drawdown based on purchase price)
   const defaultStages = [
     {
       stage: 'Upon grant of Option to Purchase',
@@ -3073,7 +3071,7 @@ const ProgressivePaymentCalculator = () => {
       percentage: 10,
       paymentMode: 'Cash/CPF (5%) + Bank Loan (5%)',
       estimatedTimeFrame: 11,
-      bankLoanPortion: 5
+      bankLoanPortion: 5 // 5% of purchase price from bank loan
     },
     {
       stage: 'Completion of reinforced concrete framework',
@@ -3151,28 +3149,29 @@ const ProgressivePaymentCalculator = () => {
 
   // PMT function for calculating monthly installments
   const calculatePMT = (rate, periods, principal) => {
-    if (rate === 0) return principal / periods;
+    if (rate === 0 || !rate) return principal / periods;
     const monthlyRate = rate / 100 / 12;
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / (Math.pow(1 + monthlyRate, periods) - 1);
   };
 
-  // Calculate progressive payment schedule
+  // EXCEL-MATCHING: Progressive payment calculation
   const calculateProgressivePayments = () => {
     const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
-    let loanAmount;
     
+    // Calculate actual loan amount based on selection
+    let actualLoanAmount;
     if (inputs.useCustomAmount) {
-      loanAmount = parseNumberInput(inputs.customLoanAmount) || 0;
+      actualLoanAmount = parseNumberInput(inputs.customLoanAmount) || 0;
     } else {
-      loanAmount = purchasePrice * (inputs.loanPercentage / 100);
+      actualLoanAmount = purchasePrice * (inputs.loanPercentage / 100);
     }
 
-    if (purchasePrice <= 0 || loanAmount <= 0) return null;
+    if (purchasePrice <= 0 || actualLoanAmount <= 0) return null;
 
-    // Calculate stages with amounts
+    // Calculate stages with amounts (drawdowns based on PURCHASE PRICE)
     const stages = defaultStages.map((stage, index) => {
       const stageAmount = purchasePrice * (stage.percentage / 100);
-      const bankLoanAmount = purchasePrice * (stage.bankLoanPortion / 100);
+      const bankLoanAmount = purchasePrice * (stage.bankLoanPortion / 100); // Based on purchase price
       const cashCPFAmount = stageAmount - bankLoanAmount;
       
       return {
@@ -3183,83 +3182,130 @@ const ProgressivePaymentCalculator = () => {
       };
     });
 
-    // Calculate monthly payments schedule
+    // EXCEL-MATCHING: Monthly payment schedule calculation
     const monthlySchedule = [];
-    let currentBalance = 0;
-    let cumulativeBankLoan = 0;
     const totalMonths = inputs.tenure * 12;
     
-    // Get interest rate for specific year
-    const getInterestRate = (year) => {
-      const rateInfo = inputs.rates.find(r => r.year === year || (r.year === 'thereafter' && year >= 6));
-      return rateInfo ? rateInfo.rate : inputs.rates[inputs.rates.length - 1].rate;
+    // Get interest rate for specific month (12-month intervals)
+    const getInterestRateForMonth = (month) => {
+      const yearIndex = Math.ceil(month / 12); // Year 1, 2, 3, etc.
+      
+      if (yearIndex <= 5) {
+        const rateInfo = inputs.rates.find(r => r.year === yearIndex);
+        return rateInfo ? rateInfo.rate : inputs.rates[0].rate;
+      } else {
+        const thereafterRate = inputs.rates.find(r => r.year === 'thereafter');
+        return thereafterRate ? thereafterRate.rate : inputs.rates[inputs.rates.length - 1].rate;
+      }
     };
 
+    // Track cumulative drawdowns and loan balance
+    let cumulativeDrawdown = 0;
+    let outstandingBalance = 0;
     let month = 1;
-    let stageIndex = 0;
-    let remainingMonths = totalMonths;
-
-    // Process each stage
+    
+    // Create drawdown schedule based on estimated timeframes
+    const drawdownSchedule = [];
+    let currentMonth = 1;
+    
     stages.forEach((stage, index) => {
       if (stage.bankLoanAmount > 0) {
-        cumulativeBankLoan += stage.bankLoanAmount;
-        currentBalance = cumulativeBankLoan;
-        
-        // Calculate monthly payment based on current balance and remaining tenure
-        const currentYear = Math.ceil(month / 12);
-        const interestRate = getInterestRate(currentYear);
-        const monthlyPayment = calculatePMT(interestRate, remainingMonths, currentBalance);
-        
-        // Add months until next drawdown
-        const monthsToNextStage = index < stages.length - 1 ? 
-          (stages[index + 1].estimatedTimeFrame || 6) : remainingMonths;
-        
-        for (let i = 0; i < Math.min(monthsToNextStage, remainingMonths); i++) {
-          const monthlyRate = interestRate / 100 / 12;
-          const interestPayment = currentBalance * monthlyRate;
-          const principalPayment = Math.min(monthlyPayment - interestPayment, currentBalance);
-          
-          monthlySchedule.push({
-            month,
-            year: Math.ceil(month / 12),
-            monthInYear: ((month - 1) % 12) + 1,
-            monthName: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][((month - 1) % 12)],
-            openingBalance: currentBalance,
-            drawdownAmount: i === 0 ? stage.bankLoanAmount : 0,
-            monthlyPayment: currentBalance > 0 ? monthlyPayment : 0,
-            interestPayment: currentBalance > 0 ? interestPayment : 0,
-            principalPayment: currentBalance > 0 ? principalPayment : 0,
-            endingBalance: Math.max(0, currentBalance - principalPayment),
-            interestRate: interestRate,
-            stage: i === 0 ? stage.stage : null
-          });
-          
-          currentBalance = Math.max(0, currentBalance - principalPayment);
-          month++;
-          remainingMonths--;
-          
-          if (remainingMonths <= 0 || currentBalance <= 0.01) break;
-        }
+        drawdownSchedule.push({
+          month: currentMonth,
+          stage: stage.stage,
+          drawdownAmount: stage.bankLoanAmount
+        });
       }
+      currentMonth += stage.estimatedTimeFrame;
     });
 
+    // Generate monthly schedule
+    for (let month = 1; month <= totalMonths; month++) {
+      const currentRate = getInterestRateForMonth(month);
+      const monthlyRate = currentRate / 100 / 12;
+      
+      // Check if there's a drawdown this month
+      const drawdown = drawdownSchedule.find(d => d.month === month);
+      const drawdownAmount = drawdown ? drawdown.drawdownAmount : 0;
+      
+      // Update balances
+      const openingBalance = outstandingBalance;
+      cumulativeDrawdown += drawdownAmount;
+      outstandingBalance += drawdownAmount;
+      
+      // Calculate monthly payment (Principal + Interest on outstanding balance)
+      let monthlyPayment = 0;
+      let interestPayment = 0;
+      let principalPayment = 0;
+      
+      if (outstandingBalance > 0) {
+        // Calculate interest on current outstanding balance
+        interestPayment = outstandingBalance * monthlyRate;
+        
+        // Calculate remaining months for amortization
+        const remainingMonths = totalMonths - month + 1;
+        
+        // Calculate monthly P&I payment based on current balance and remaining term
+        monthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
+        principalPayment = monthlyPayment - interestPayment;
+        
+        // Ensure we don't pay more principal than outstanding
+        if (principalPayment > outstandingBalance) {
+          principalPayment = outstandingBalance;
+          monthlyPayment = principalPayment + interestPayment;
+        }
+        
+        // Update outstanding balance
+        outstandingBalance -= principalPayment;
+      }
+      
+      const monthInYear = ((month - 1) % 12) + 1;
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      monthlySchedule.push({
+        month,
+        year: Math.ceil(month / 12),
+        monthInYear,
+        monthName: monthNames[monthInYear - 1],
+        openingBalance: openingBalance,
+        drawdownAmount: drawdownAmount,
+        cumulativeDrawdown,
+        monthlyPayment: monthlyPayment,
+        interestPayment: interestPayment,
+        principalPayment: principalPayment,
+        endingBalance: Math.max(0, outstandingBalance),
+        interestRate: currentRate,
+        stage: drawdown ? drawdown.stage : null
+      });
+      
+      // Break if loan is fully paid
+      if (outstandingBalance <= 0.01) break;
+    }
+
     // Calculate totals
-    const totalInterest = monthlySchedule.reduce((sum, month) => sum + month.interestPayment, 0);
-    const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + month.principalPayment, 0);
+    const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
+    const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
     const totalCashCPF = stages.reduce((sum, stage) => sum + stage.cashCPFAmount, 0);
-    const totalBankLoan = stages.reduce((sum, stage) => sum + stage.bankLoanAmount, 0);
+    
+    // FIXED: Total bank loan should equal actual loan amount selected
+    const totalBankLoan = actualLoanAmount;
+    
+    // Calculate total bank loan from stages (for verification)
+    const totalBankLoanFromStages = stages.reduce((sum, stage) => sum + stage.bankLoanAmount, 0);
 
     return {
       stages,
       monthlySchedule,
       purchasePrice,
-      loanAmount,
+      loanAmount: actualLoanAmount,
       totalCashCPF,
-      totalBankLoan,
+      totalBankLoan: totalBankLoan, // This should match selected loan amount
+      totalBankLoanFromStages, // This is sum of stage percentages (might be different)
       totalInterest,
       totalPrincipal,
-      totalPayable: totalInterest + totalPrincipal + totalCashCPF
+      totalPayable: totalInterest + totalPrincipal + totalCashCPF,
+      loanToValueRatio: (actualLoanAmount / purchasePrice) * 100
     };
   };
 
