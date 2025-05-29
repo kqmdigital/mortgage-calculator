@@ -1852,7 +1852,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         }
         
         .logo-section img {
-            max-width: 150px;
+            max-width: 120px;
             height: auto;
             display: block;
         }
@@ -3379,7 +3379,7 @@ const ProgressivePaymentCalculator = () => {
             padding-bottom: 10px;
             border-bottom: 2px solid #1d4ed8;
         }
-        .logo-section img { width: 140px; height: auto; margin: 0 auto 8px; display: block; }
+        .logo-section img { width: 120px; height: auto; margin: 0 auto 8px; display: block; }
         .property-banner {
             background: #dc2626;
             color: white;
