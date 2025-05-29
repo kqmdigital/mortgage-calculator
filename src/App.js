@@ -3031,13 +3031,13 @@ const ProgressivePaymentCalculator = () => {
     loanPercentage: 75,
     useCustomAmount: false,
     customLoanAmount: '',
-    tenure: 25,
+    tenure: 20, // Updated to match Excel
     otpDate: '',
     topDate: '',
     numOutstandingMortgages: 0,
     
     rates: [
-      { year: 1, rate: 2.32, description: '3M SORA + 0.30%' },
+      { year: 1, rate: 2.6, description: '3M SORA(3.20%) + 0.30%' },
       { year: 2, rate: 2.9, description: '3M SORA + 0.30%' },
       { year: 3, rate: 2.9, description: '3M SORA + 0.30%' },
       { year: 4, rate: 2.9, description: '3M SORA + 0.30%' },
@@ -3045,40 +3045,52 @@ const ProgressivePaymentCalculator = () => {
       { year: 'thereafter', rate: 3.3, description: '3M SORA + 0.60%' }
     ],
     
-    currentSora: 2.32
+    currentSora: 3.2 // Updated to match Excel
   });
 
   const [results, setResults] = useState(null);
 
-  // CORRECTED: Default progressive payment stages with proper bank loan allocation
+  // Excel-based drawdown schedule (following the yellow highlighted pattern)
+  const excelBasedDrawdownSchedule = [
+    { month: 1, percentage: 6.67, amount: null, stage: 'Upon grant of Option to Purchase' },
+    { month: 8, percentage: 13.33, amount: null, stage: 'Upon signing S&P Agreement' },
+    { month: 15, percentage: 6.67, amount: null, stage: 'Completion of foundation work' },
+    { month: 19, percentage: 6.67, amount: null, stage: 'Completion of reinforced concrete framework' },
+    { month: 23, percentage: 6.67, amount: null, stage: 'Completion of partition walls' },
+    { month: 27, percentage: 6.67, amount: null, stage: 'Completion of roofing/ceiling' },
+    { month: 31, percentage: 33.33, amount: null, stage: 'Temporary Occupation Permit (TOP)' },
+    { month: 43, percentage: 20.0, amount: null, stage: 'Certificate of Statutory Completion' }
+  ];
+
+  // Legacy default stages for display purposes (20% cash/CPF calculation)
   const defaultStages = [
     {
       stage: 'Upon grant of Option to Purchase',
       percentage: 5,
       paymentMode: 'Cash/CPF',
-      estimatedTimeFrame: 0, // Immediate
-      bankLoanPortion: 0 // No bank loan at this stage
+      estimatedTimeFrame: 0,
+      bankLoanPortion: 0
     },
     {
       stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)',
       percentage: 15,
       paymentMode: 'Cash/CPF',
-      estimatedTimeFrame: 2, // 2 months after OTP
-      bankLoanPortion: 0 // No bank loan at this stage
+      estimatedTimeFrame: 2,
+      bankLoanPortion: 0
     },
     {
       stage: 'Completion of foundation work',
       percentage: 10,
       paymentMode: 'Cash/CPF + Bank Loan',
-      estimatedTimeFrame: 11, // 11 months from S&P
-      bankLoanPortion: 0.5 // 50% of this stage from bank loan
+      estimatedTimeFrame: 11,
+      bankLoanPortion: 0.5
     },
     {
       stage: 'Completion of reinforced concrete framework',
       percentage: 10,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 6, // 6 months later
-      bankLoanPortion: 1.0 // 100% from bank loan
+      estimatedTimeFrame: 6,
+      bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of partition walls',
@@ -3119,7 +3131,7 @@ const ProgressivePaymentCalculator = () => {
       stage: 'Certificate of Statutory Completion',
       percentage: 15,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 12, // 12 months after TOP
+      estimatedTimeFrame: 12,
       bankLoanPortion: 1.0
     }
   ];
@@ -3154,7 +3166,7 @@ const ProgressivePaymentCalculator = () => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / (Math.pow(1 + monthlyRate, periods) - 1);
   };
 
-  // CORRECTED: Progressive payment calculation matching Excel logic
+  // Excel-based progressive payment calculation
   const calculateProgressivePayments = () => {
     const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
     
@@ -3168,29 +3180,16 @@ const ProgressivePaymentCalculator = () => {
 
     if (purchasePrice <= 0 || selectedLoanAmount <= 0) return null;
 
-    // STEP 1: Calculate total bank loan needed based on default stage allocations
-    let totalBankLoanFromStages = 0;
-    defaultStages.forEach(stage => {
-      const stageAmount = purchasePrice * (stage.percentage / 100);
-      const stageBankLoan = stageAmount * stage.bankLoanPortion;
-      totalBankLoanFromStages += stageBankLoan;
-    });
+    // STEP 1: Create Excel-based drawdown schedule
+    const excelDrawdownSchedule = excelBasedDrawdownSchedule.map(item => ({
+      ...item,
+      amount: selectedLoanAmount * (item.percentage / 100)
+    }));
 
-    // STEP 2: Calculate adjustment factor if total exceeds selected loan amount
-    const adjustmentFactor = selectedLoanAmount / totalBankLoanFromStages;
-
-    // STEP 3: Create stages with proper allocation
+    // STEP 2: Calculate legacy stages for display (20% cash/CPF assumption)
     const stages = defaultStages.map((stage, index) => {
       const stageAmount = purchasePrice * (stage.percentage / 100);
-      
-      // Calculate bank loan portion for this stage
-      let stageBankLoan = stageAmount * stage.bankLoanPortion;
-      
-      // Apply adjustment factor if needed
-      if (totalBankLoanFromStages > selectedLoanAmount) {
-        stageBankLoan = stageBankLoan * adjustmentFactor;
-      }
-      
+      const stageBankLoan = stageAmount * stage.bankLoanPortion;
       const cashCPFAmount = stageAmount - stageBankLoan;
       
       return {
@@ -3201,29 +3200,12 @@ const ProgressivePaymentCalculator = () => {
       };
     });
 
-    // STEP 4: Generate drawdown schedule
-    const drawdownSchedule = [];
-    let currentMonth = 1;
-    
-    stages.forEach((stage, index) => {
-      if (stage.bankLoanAmount > 0) {
-        drawdownSchedule.push({
-          month: currentMonth,
-          stage: stage.stage,
-          drawdownAmount: stage.bankLoanAmount
-        });
-      }
-      // Add timeframe to next stage
-      if (index < stages.length - 1) {
-        currentMonth += stage.estimatedTimeFrame;
-      }
-    });
-
-    // STEP 5: Calculate monthly payment schedule
+    // STEP 3: Generate monthly payment schedule following Excel logic
     const monthlySchedule = [];
     const totalMonths = inputs.tenure * 12;
     let outstandingBalance = 0;
     let cumulativeDrawdown = 0;
+    let currentMonthlyPayment = 0;
     
     // Get interest rate for specific month
     const getInterestRateForMonth = (month) => {
@@ -3238,57 +3220,51 @@ const ProgressivePaymentCalculator = () => {
       }
     };
 
-    // Generate monthly schedule
+    // Generate monthly schedule following Excel logic exactly
     for (let month = 1; month <= totalMonths; month++) {
       const currentRate = getInterestRateForMonth(month);
       const monthlyRate = currentRate / 100 / 12;
       
-      // Check for drawdown this month
-      const drawdown = drawdownSchedule.find(d => d.month === month);
-      const drawdownAmount = drawdown ? drawdown.drawdownAmount : 0;
+      // Check for drawdown this month (based on Excel schedule)
+      const drawdownInfo = excelDrawdownSchedule.find(d => d.month === month);
+      const drawdownAmount = drawdownInfo ? drawdownInfo.amount : 0;
       
-      // Update balances
+      // Store opening balance before any changes
       const openingBalance = outstandingBalance;
-      cumulativeDrawdown += drawdownAmount;
-      outstandingBalance += drawdownAmount;
       
-      // Calculate payments only if there's an outstanding balance
+      // Add drawdown to outstanding balance
+      if (drawdownAmount > 0) {
+        outstandingBalance += drawdownAmount;
+        cumulativeDrawdown += drawdownAmount;
+        
+        // Recalculate monthly payment after drawdown (Excel logic)
+        const remainingMonths = totalMonths - month + 1;
+        currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
+      }
+      
+      // Calculate payments for this month
       let monthlyPayment = 0;
       let interestPayment = 0;
       let principalPayment = 0;
       
       if (outstandingBalance > 0) {
-        // Interest on current balance
+        // Interest payment on outstanding balance
         interestPayment = outstandingBalance * monthlyRate;
         
-        // Calculate remaining term for this balance
-        const remainingMonths = totalMonths - month + 1;
+        // Monthly payment (use current calculated payment)
+        monthlyPayment = currentMonthlyPayment;
         
-        // Calculate full monthly payment (P&I)
-        const fullMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
+        // Principal payment
+        principalPayment = monthlyPayment - interestPayment;
         
-        // During construction, usually only interest is paid
-        // After TOP, full P&I payments start
-        const isConstructionPhase = month <= 36; // Assume 3 years construction
-        
-        if (isConstructionPhase && drawdownAmount > 0) {
-          // During construction with drawdowns: usually interest-only
-          monthlyPayment = interestPayment;
-          principalPayment = 0;
-        } else if (outstandingBalance > 0) {
-          // Full P&I payment
-          monthlyPayment = fullMonthlyPayment;
-          principalPayment = monthlyPayment - interestPayment;
-          
-          // Don't pay more principal than outstanding
-          if (principalPayment > outstandingBalance) {
-            principalPayment = outstandingBalance;
-            monthlyPayment = principalPayment + interestPayment;
-          }
-          
-          // Update balance
-          outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
+        // Ensure principal doesn't exceed outstanding balance
+        if (principalPayment > outstandingBalance) {
+          principalPayment = outstandingBalance;
+          monthlyPayment = principalPayment + interestPayment;
         }
+        
+        // Update outstanding balance
+        outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
       }
       
       const monthInYear = ((month - 1) % 12) + 1;
@@ -3308,7 +3284,7 @@ const ProgressivePaymentCalculator = () => {
         principalPayment: principalPayment,
         endingBalance: outstandingBalance,
         interestRate: currentRate,
-        stage: drawdown ? drawdown.stage : null
+        stage: drawdownInfo ? drawdownInfo.stage : null
       });
       
       // Stop if loan is fully paid
@@ -3319,19 +3295,32 @@ const ProgressivePaymentCalculator = () => {
     const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
     const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
     const totalCashCPF = stages.reduce((sum, stage) => sum + stage.cashCPFAmount, 0);
-    const totalBankLoan = stages.reduce((sum, stage) => sum + stage.bankLoanAmount, 0);
+    const totalBankLoan = selectedLoanAmount; // All drawdowns are bank loan in Excel model
+    
+    // Create Excel-based stages for display
+    const excelStages = excelDrawdownSchedule.map(item => ({
+      stage: item.stage,
+      percentage: item.percentage,
+      stageAmount: item.amount,
+      bankLoanAmount: item.amount, // 100% bank loan in Excel model
+      cashCPFAmount: 0, // No cash/CPF in Excel bank loan model
+      paymentMode: 'Bank Loan',
+      month: item.month
+    }));
 
     return {
-      stages,
+      stages: excelStages, // Use Excel-based stages for display
+      legacyStages: stages, // Keep legacy stages for comparison
       monthlySchedule,
       purchasePrice,
       loanAmount: selectedLoanAmount,
-      totalCashCPF,
+      totalCashCPF: purchasePrice - selectedLoanAmount, // 20% of purchase price
       totalBankLoan,
       totalInterest,
       totalPrincipal,
-      totalPayable: totalInterest + totalPrincipal + totalCashCPF,
-      loanToValueRatio: (selectedLoanAmount / purchasePrice) * 100
+      totalPayable: totalInterest + totalPrincipal + (purchasePrice - selectedLoanAmount),
+      loanToValueRatio: (selectedLoanAmount / purchasePrice) * 100,
+      excelDrawdownSchedule // Include Excel schedule for reference
     };
   };
 
@@ -3352,7 +3341,7 @@ const ProgressivePaymentCalculator = () => {
     setResults(calculateProgressivePayments());
   }, [inputs]);
 
-  // PDF Report Generation
+  // Excel-based PDF Report generation
   const generateProgressivePaymentReport = () => {
     if (!results) {
       alert('Please calculate the progressive payments first before generating a report.');
@@ -3371,7 +3360,7 @@ const ProgressivePaymentCalculator = () => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progressive Payment Schedule - BUC Property</title>
+    <title>Excel-Based Progressive Payment Schedule - BUC Property</title>
     <style>
         @page { size: A4; margin: 0.5in; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -3450,6 +3439,7 @@ const ProgressivePaymentCalculator = () => {
             color: #374151;
         }
         .stage-highlight { background: #fef3c7 !important; font-weight: bold; }
+        .excel-highlight { background: #dcfce7 !important; }
         .page-break { page-break-before: always; }
         .no-break { page-break-inside: avoid; break-inside: avoid; }
         .disclaimer {
@@ -3478,15 +3468,15 @@ const ProgressivePaymentCalculator = () => {
 <body>
     <div class="header no-break">
         <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
-        <div class="property-banner">BUC Property - Progressive Payment Schedule</div>
+        <div class="property-banner">BUC Property - Excel-Based Progressive Payment Schedule</div>
         <div class="report-info">
-            <strong>Built Under Construction Payment Analysis</strong><br>
-            Generated: ${currentDate} | Report ID: KQM-PP-${Date.now()}
+            <strong>Built Under Construction Payment Analysis (Excel Model)</strong><br>
+            Generated: ${currentDate} | Report ID: KQM-PPE-${Date.now()}
         </div>
     </div>
 
     <div class="section no-break">
-        <h2>🏗️ PROJECT SUMMARY</h2>
+        <h2>🏗️ PROJECT SUMMARY (Excel Model)</h2>
         <div class="info-grid">
             <div>
                 <div class="info-row">
@@ -3494,8 +3484,12 @@ const ProgressivePaymentCalculator = () => {
                     <span class="info-value">${formatCurrency(results.purchasePrice)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Loan Amount:</span>
+                    <span class="info-label">Bank Loan Amount:</span>
                     <span class="info-value">${formatCurrency(results.loanAmount)} (${((results.loanAmount/results.purchasePrice)*100).toFixed(1)}%)</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Cash/CPF Required:</span>
+                    <span class="info-value">${formatCurrency(results.totalCashCPF)}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Loan Tenure:</span>
@@ -3504,45 +3498,51 @@ const ProgressivePaymentCalculator = () => {
             </div>
             <div>
                 <div class="info-row">
-                    <span class="info-label">Total Cash/CPF Required:</span>
-                    <span class="info-value">${formatCurrency(results.totalCashCPF)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Total Bank Loan:</span>
-                    <span class="info-value">${formatCurrency(results.totalBankLoan)}</span>
-                </div>
-                <div class="info-row">
                     <span class="info-label">Total Interest Payable:</span>
                     <span class="info-value">${formatCurrency(results.totalInterest)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total Principal:</span>
+                    <span class="info-value">${formatCurrency(results.totalPrincipal)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total Amount Payable:</span>
+                    <span class="info-value">${formatCurrency(results.totalPayable)}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Calculation Model:</span>
+                    <span class="info-value">Excel-Based Drawdown</span>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="section no-break">
-        <h2>📅 PROGRESSIVE PAYMENT STAGES</h2>
+        <h2>📅 EXCEL-BASED DRAWDOWN SCHEDULE</h2>
+        <p style="font-size: 9px; color: #666; margin-bottom: 8px;">Following the exact pattern from your Excel calculation model</p>
         <table class="payment-table">
             <thead>
                 <tr>
-                    <th style="width: 35%;">Construction Stage</th>
+                    <th>Month</th>
+                    <th>Construction Stage</th>
                     <th>%</th>
-                    <th>Stage Amount</th>
-                    <th>Cash/CPF</th>
-                    <th>Bank Loan</th>
-                    <th>Payment Mode</th>
+                    <th>Drawdown Amount</th>
+                    <th>Cumulative</th>
                 </tr>
             </thead>
             <tbody>
-                ${results.stages.map(stage => `
-                <tr>
-                    <td style="text-align: left; padding-left: 4px;">${stage.stage}</td>
-                    <td>${stage.percentage}%</td>
-                    <td>${formatCurrency(stage.stageAmount)}</td>
-                    <td>${formatCurrency(stage.cashCPFAmount)}</td>
-                    <td>${formatCurrency(stage.bankLoanAmount)}</td>
-                    <td style="font-size: 7px;">${stage.paymentMode}</td>
-                </tr>
-                `).join('')}
+                ${results.stages.map((stage, index) => {
+                    const cumulative = results.stages.slice(0, index + 1).reduce((sum, s) => sum + s.stageAmount, 0);
+                    return `
+                    <tr class="excel-highlight">
+                        <td>${stage.month}</td>
+                        <td style="text-align: left; padding-left: 4px;">${stage.stage}</td>
+                        <td>${stage.percentage.toFixed(2)}%</td>
+                        <td>${formatCurrency(stage.stageAmount)}</td>
+                        <td>${formatCurrency(cumulative)}</td>
+                    </tr>
+                    `;
+                }).join('')}
             </tbody>
         </table>
     </div>
@@ -3571,7 +3571,8 @@ const ProgressivePaymentCalculator = () => {
 
     <div class="page-break">
         <div class="section">
-            <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
+            <h2>📊 MONTHLY PAYMENT SCHEDULE (Excel Model - First 60 Months)</h2>
+            <p style="font-size: 9px; color: #666; margin-bottom: 8px;">Monthly installment recalculated after each drawdown (yellow highlight = drawdown months)</p>
             <table class="payment-table">
                 <thead>
                     <tr>
@@ -3588,11 +3589,11 @@ const ProgressivePaymentCalculator = () => {
                 </thead>
                 <tbody>
                     ${results.monthlySchedule.slice(0, 60).map(month => `
-                    <tr class="${month.stage ? 'stage-highlight' : ''}">
+                    <tr class="${month.drawdownAmount > 0 ? 'stage-highlight' : ''}">
                         <td>${month.month}</td>
                         <td>${month.year}</td>
                         <td>${formatCurrency(month.openingBalance)}</td>
-                        <td>${formatCurrency(month.drawdownAmount)}</td>
+                        <td>${month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}</td>
                         <td>${formatCurrency(month.monthlyPayment)}</td>
                         <td>${formatCurrency(month.interestPayment)}</td>
                         <td>${formatCurrency(month.principalPayment)}</td>
@@ -3606,12 +3607,13 @@ const ProgressivePaymentCalculator = () => {
     </div>
 
     <div class="disclaimer no-break">
-        <h4 style="margin: 0 0 4px 0; color: #333; font-size: 9px;">Important Notes</h4>
-        <p style="margin: 2px 0;">• This schedule is for Built Under Construction (BUC) properties with progressive payment structure.</p>
-        <p style="margin: 2px 0;">• Interest is calculated only on drawn down amounts during construction period.</p>
-        <p style="margin: 2px 0;">• Payment stages follow standard Singapore BUC property milestones.</p>
-        <p style="margin: 2px 0;">• Actual construction timeline may vary based on project progress.</p>
-        <p style="margin: 2px 0;">• Interest rates shown are variable and subject to market changes.</p>
+        <h4 style="margin: 0 0 4px 0; color: #333; font-size: 9px;">Important Notes - Excel Model</h4>
+        <p style="margin: 2px 0;">• This schedule follows the exact Excel calculation model provided.</p>
+        <p style="margin: 2px 0;">• Monthly installment is recalculated after each drawdown based on outstanding balance and remaining tenure.</p>
+        <p style="margin: 2px 0;">• Interest is calculated only on drawn down amounts (outstanding balance).</p>
+        <p style="margin: 2px 0;">• Drawdown schedule: Month 1 (6.67%), Month 8 (13.33%), Month 15 (6.67%), Month 19 (6.67%), Month 23 (6.67%), Month 27 (6.67%), Month 31 (33.33%), Month 43 (20.0%).</p>
+        <p style="margin: 2px 0;">• Principal Payment = Monthly Payment - Interest Payment.</p>
+        <p style="margin: 2px 0;">• Ending Balance = Opening Balance + Drawdown - Principal Payment.</p>
         <p style="margin: 2px 0;">• Consult our specialists for latest rates and personalized advice.</p>
     </div>
 
@@ -3620,7 +3622,7 @@ const ProgressivePaymentCalculator = () => {
             📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
         </div>
         <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 6px;">
-            <p style="margin: 0; font-size: 7px;">This report is for guidance only and does not constitute a loan offer. 
+            <p style="margin: 0; font-size: 7px;">This report follows your Excel calculation model and is for guidance only. 
             Your Trusted Mortgage Advisory Partner</p>
         </div>
     </div>
@@ -3637,7 +3639,7 @@ const ProgressivePaymentCalculator = () => {
       newWindow.print();
     }, 1000);
 
-    alert('Progressive payment schedule report generated successfully!');
+    alert('Excel-based progressive payment schedule report generated successfully!\n\nThis report now follows the exact calculation pattern from your Excel file.');
   };
 
   return (
@@ -3646,7 +3648,13 @@ const ProgressivePaymentCalculator = () => {
         {/* Input Section */}
         <div className="space-y-6">
           <div className="bg-red-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-red-800">BUC Property Details</h3>
+            <h3 className="text-lg font-semibold mb-4 text-red-800">BUC Property Details (Excel Model)</h3>
+            <div className="bg-white p-3 rounded-lg mb-4 border-l-4 border-red-500">
+              <p className="text-sm text-red-700">
+                <strong>Note:</strong> This calculator now follows your Excel calculation model exactly. 
+                Drawdowns occur at months 1, 8, 15, 19, 23, 27, 31, and 43 with monthly payments recalculated after each drawdown.
+              </p>
+            </div>
             
             <div className="space-y-4">
               <div>
@@ -3658,7 +3666,7 @@ const ProgressivePaymentCalculator = () => {
                     value={formatNumberInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                     className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                    placeholder="1,500,000.00"
+                    placeholder="2,300,000.00"
                   />
                 </div>
               </div>
@@ -3713,7 +3721,7 @@ const ProgressivePaymentCalculator = () => {
                           value={formatNumberInput(inputs.customLoanAmount)}
                           onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                           className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                          placeholder="1,000,000.00"
+                          placeholder="1,725,000.00"
                         />
                       </div>
                     </div>
@@ -3727,11 +3735,12 @@ const ProgressivePaymentCalculator = () => {
                   <input
                     type="number"
                     value={inputs.tenure}
-                    onChange={(e) => handleInputChange('tenure', parseInt(e.target.value) || 25)}
+                    onChange={(e) => handleInputChange('tenure', parseInt(e.target.value) || 20)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
                     min="5"
                     max="35"
                   />
+                  <p className="text-xs text-red-600 mt-1">Default: 20 years (Excel model)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Outstanding Mortgages</label>
@@ -3788,7 +3797,7 @@ const ProgressivePaymentCalculator = () => {
               </div>
 
               <div className="bg-white p-4 rounded-lg">
-                <h4 className="font-medium mb-3">Interest Rate Structure</h4>
+                <h4 className="font-medium mb-3">Interest Rate Structure (Excel Model)</h4>
                 <div className="space-y-2">
                   {inputs.rates.map((rate, index) => (
                     <div key={index} className="grid grid-cols-3 gap-3 items-center">
@@ -3823,14 +3832,19 @@ const ProgressivePaymentCalculator = () => {
           {results && (
             <>
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4">Payment Summary</h3>
+                <h3 className="text-lg font-semibold mb-4">Excel-Based Payment Summary</h3>
+                <div className="bg-green-100 p-3 rounded-lg mb-4">
+                  <p className="text-sm text-green-800 font-medium">
+                    ✅ Now following your Excel calculation model exactly!
+                  </p>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Total Cash/CPF Required</p>
+                    <p className="text-sm text-gray-600">Total Cash/CPF Required (20%)</p>
                     <p className="font-semibold text-lg">{formatCurrency(results.totalCashCPF)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total Bank Loan</p>
+                    <p className="text-sm text-gray-600">Total Bank Loan (80%)</p>
                     <p className="font-semibold text-lg">{formatCurrency(results.totalBankLoan)}</p>
                   </div>
                   <div>
@@ -3845,35 +3859,48 @@ const ProgressivePaymentCalculator = () => {
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Progressive Payment Stages</h3>
+                <h3 className="text-lg font-semibold mb-4">Excel-Based Drawdown Schedule</h3>
+                <div className="bg-yellow-50 p-3 rounded-lg mb-4">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Following your Excel model:</strong> Monthly installments are recalculated after each drawdown based on outstanding balance and remaining tenure.
+                  </p>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2">Stage</th>
+                        <th className="text-center py-2">Month</th>
+                        <th className="text-left py-2">Construction Stage</th>
                         <th className="text-center py-2">%</th>
-                        <th className="text-center py-2">Amount</th>
-                        <th className="text-center py-2">Cash/CPF</th>
-                        <th className="text-center py-2">Bank Loan</th>
+                        <th className="text-center py-2">Drawdown Amount</th>
+                        <th className="text-center py-2">Cumulative</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {results.stages.map((stage, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="py-3 text-left">{stage.stage}</td>
-                          <td className="py-3 text-center">{stage.percentage}%</td>
-                          <td className="py-3 text-center">{formatCurrency(stage.stageAmount)}</td>
-                          <td className="py-3 text-center">{formatCurrency(stage.cashCPFAmount)}</td>
-                          <td className="py-3 text-center">{formatCurrency(stage.bankLoanAmount)}</td>
-                        </tr>
-                      ))}
+                      {results.stages.map((stage, index) => {
+                        const cumulative = results.stages.slice(0, index + 1).reduce((sum, s) => sum + s.stageAmount, 0);
+                        return (
+                          <tr key={index} className="border-b hover:bg-green-50">
+                            <td className="py-3 text-center font-medium text-green-600">{stage.month}</td>
+                            <td className="py-3 text-left">{stage.stage}</td>
+                            <td className="py-3 text-center">{stage.percentage.toFixed(2)}%</td>
+                            <td className="py-3 text-center font-semibold">{formatCurrency(stage.stageAmount)}</td>
+                            <td className="py-3 text-center text-blue-600">{formatCurrency(cumulative)}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Monthly Payment Schedule (First 24 Months)</h3>
+                <h3 className="text-lg font-semibold mb-4">Monthly Payment Schedule (Excel Model - First 36 Months)</h3>
+                <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Key Feature:</strong> Monthly payment automatically recalculates after each drawdown. Yellow rows indicate drawdown months.
+                  </p>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -3885,20 +3912,22 @@ const ProgressivePaymentCalculator = () => {
                         <th className="text-center py-2">Interest</th>
                         <th className="text-center py-2">Principal</th>
                         <th className="text-center py-2">Ending Balance</th>
+                        <th className="text-center py-2">Rate</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {results.monthlySchedule.slice(0, 24).map((month, index) => (
-                        <tr key={index} className={`border-b hover:bg-gray-50 ${month.stage ? 'bg-yellow-50' : ''}`}>
-                          <td className="py-2 text-center">{month.month}</td>
+                      {results.monthlySchedule.slice(0, 36).map((month, index) => (
+                        <tr key={index} className={`border-b hover:bg-gray-50 ${month.drawdownAmount > 0 ? 'bg-yellow-100' : ''}`}>
+                          <td className="py-2 text-center font-medium">{month.month}</td>
                           <td className="py-2 text-center">{formatCurrency(month.openingBalance)}</td>
                           <td className="py-2 text-center text-green-600 font-medium">
                             {month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}
                           </td>
-                          <td className="py-2 text-center">{formatCurrency(month.monthlyPayment)}</td>
+                          <td className="py-2 text-center font-semibold text-blue-600">{formatCurrency(month.monthlyPayment)}</td>
                           <td className="py-2 text-center">{formatCurrency(month.interestPayment)}</td>
                           <td className="py-2 text-center">{formatCurrency(month.principalPayment)}</td>
                           <td className="py-2 text-center">{formatCurrency(month.endingBalance)}</td>
+                          <td className="py-2 text-center">{month.interestRate.toFixed(2)}%</td>
                         </tr>
                       ))}
                     </tbody>
@@ -3911,10 +3940,10 @@ const ProgressivePaymentCalculator = () => {
                 className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-red-700 transition-colors"
               >
                 <Download className="w-5 h-5" />
-                Generate Progressive Payment Report (PDF)
+                Generate Excel-Based Progressive Payment Report (PDF)
               </button>
               <p className="text-sm text-gray-500 text-center">
-                Detailed BUC property payment schedule with construction milestones
+                Detailed BUC property payment schedule following your exact Excel calculation model
               </p>
             </>
           )}
