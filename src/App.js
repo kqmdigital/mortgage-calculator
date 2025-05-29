@@ -3206,6 +3206,7 @@ const calculateDrawdownSchedule = () => {
 
   // Excel-based progressive payment calculation
 // CORRECTED Progressive Payment Calculation Function - Excel Logic
+// CORRECTED Progressive Payment Calculation Function - Bank Loan Starts Month 1
 const calculateProgressivePayments = () => {
   const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
   
@@ -3219,18 +3220,18 @@ const calculateProgressivePayments = () => {
 
   if (purchasePrice <= 0 || selectedLoanAmount <= 0) return null;
 
-  // Get the date-based drawdown schedule
-  const drawdownSchedule = calculateDrawdownSchedule();
-
-  // CORRECTED: Calculate drawdown schedule with proper Cash/CPF vs Bank Loan split
+  // Get the construction stage drawdown schedule
+  const constructionSchedule = calculateDrawdownSchedule();
+  
   // Calculate total Cash/CPF requirement (Purchase Price - Loan Amount)
   const totalCashCPFRequired = purchasePrice - selectedLoanAmount;
   let runningCashCPFAllocated = 0;
   let totalCashCPF = 0;
   let totalBankLoanDrawdowns = 0;
   
-  const calculatedDrawdownSchedule = drawdownSchedule.map(item => {
-    const drawdownAmount = purchasePrice * (item.percentage / 100);
+  // Calculate Cash/CPF vs Bank Loan split for each construction stage
+  const calculatedDrawdownSchedule = constructionSchedule.map(item => {
+    const stageAmount = purchasePrice * (item.percentage / 100);
     let cashCPFAmount = 0;
     let bankLoanAmount = 0;
     
@@ -3239,12 +3240,12 @@ const calculateProgressivePayments = () => {
     
     if (remainingCashCPFNeeded > 0) {
       // Still need Cash/CPF - allocate as much as needed from this stage
-      cashCPFAmount = Math.min(drawdownAmount, remainingCashCPFNeeded);
-      bankLoanAmount = drawdownAmount - cashCPFAmount;
+      cashCPFAmount = Math.min(stageAmount, remainingCashCPFNeeded);
+      bankLoanAmount = stageAmount - cashCPFAmount;
     } else {
       // Cash/CPF requirement already fulfilled - all bank loan
       cashCPFAmount = 0;
-      bankLoanAmount = drawdownAmount;
+      bankLoanAmount = stageAmount;
     }
     
     runningCashCPFAllocated += cashCPFAmount;
@@ -3253,27 +3254,58 @@ const calculateProgressivePayments = () => {
     
     return {
       ...item,
-      amount: drawdownAmount,
+      amount: stageAmount,
       cashCPFAmount,
       bankLoanAmount
     };
   });
 
-  // Generate monthly payment schedule
-  const monthlySchedule = [];
-  const totalMonths = inputs.tenure * 12;
-  let outstandingBalance = 0;
-  let cumulativeDrawdown = 0;
-  let currentMonthlyPayment = 0;
+  // Extract all bank loan amounts and create a progressive drawdown schedule starting from Month 1
+  const bankLoanAmounts = calculatedDrawdownSchedule
+    .filter(stage => stage.bankLoanAmount > 0)
+    .map(stage => stage.bankLoanAmount);
   
-  // Track when loan servicing starts (after first bank loan drawdown)
-  let loanServicingStarted = false;
-  let firstBankDrawdownMonth = calculatedDrawdownSchedule.find(item => !item.isInitial)?.month || 1;
+  // Create bank loan drawdown schedule starting from Month 1
+  const bankLoanDrawdownSchedule = [];
+  let currentMonth = 1;
+  const totalMonths = inputs.tenure * 12;
+  
+  // Distribute bank loan amounts starting from Month 1
+  // Use a pattern similar to your Excel: first drawdown, then spread others over the loan period
+  if (bankLoanAmounts.length > 0) {
+    // First drawdown in Month 1
+    bankLoanDrawdownSchedule.push({
+      month: 1,
+      amount: bankLoanAmounts[0],
+      stage: 'Initial bank loan drawdown'
+    });
+    
+    // Distribute remaining drawdowns over the loan period
+    if (bankLoanAmounts.length > 1) {
+      const remainingAmounts = bankLoanAmounts.slice(1);
+      const intervalMonths = Math.floor(totalMonths / remainingAmounts.length);
+      
+      remainingAmounts.forEach((amount, index) => {
+        const drawdownMonth = Math.min(totalMonths, 1 + (index + 1) * intervalMonths);
+        bankLoanDrawdownSchedule.push({
+          month: drawdownMonth,
+          amount: amount,
+          stage: `Bank loan drawdown ${index + 2}`
+        });
+      });
+    }
+  }
+
+  // Generate monthly payment schedule - LOAN SERVICING STARTS FROM MONTH 1
+  const monthlySchedule = [];
+  let outstandingBalance = 0;
+  let cumulativeBankLoanDrawdown = 0;
+  let currentMonthlyPayment = 0;
+  const firstBankDrawdownMonth = 1; // Always starts from Month 1
   
   // Get interest rate for specific month
   const getInterestRateForMonth = (month) => {
-    // Calculate years from loan servicing start
-    const monthsFromLoanStart = Math.max(0, month - firstBankDrawdownMonth + 1);
+    const monthsFromLoanStart = month;
     const yearIndex = Math.ceil(monthsFromLoanStart / 12);
     
     if (yearIndex <= 5) {
@@ -3286,53 +3318,46 @@ const calculateProgressivePayments = () => {
   };
 
   // Calculate maximum month needed for schedule
-  const maxMonth = Math.max(
-    totalMonths,
-    calculatedDrawdownSchedule[calculatedDrawdownSchedule.length - 1]?.month || 0
-  );
+  const maxMonth = Math.max(totalMonths, 60);
 
   // Generate monthly schedule
   for (let month = 1; month <= maxMonth; month++) {
     const currentRate = getInterestRateForMonth(month);
     const monthlyRate = currentRate / 100 / 12;
     
-    // Check for drawdown this month
-    const drawdownInfo = calculatedDrawdownSchedule.find(d => d.month === month);
-    let bankLoanDrawdown = 0;
+    // Check for bank loan drawdown this month
+    const bankDrawdownInfo = bankLoanDrawdownSchedule.find(bd => bd.month === month);
+    const bankLoanDrawdownAmount = bankDrawdownInfo ? bankDrawdownInfo.amount : 0;
     
-    // Only count bank loan drawdowns for loan calculations
-    if (drawdownInfo && drawdownInfo.bankLoanAmount > 0) {
-      bankLoanDrawdown = drawdownInfo.bankLoanAmount;
-      if (!loanServicingStarted) {
-        loanServicingStarted = true;
-      }
-    }
+    // Check for construction stage this month
+    const constructionStageInfo = calculatedDrawdownSchedule.find(stage => stage.month === month);
+    const cashCPFDrawdown = constructionStageInfo ? constructionStageInfo.cashCPFAmount : 0;
     
     // Store opening balance before any changes
     const openingBalance = outstandingBalance;
     
     // Add bank loan drawdown to outstanding balance
-    if (bankLoanDrawdown > 0) {
-      outstandingBalance += bankLoanDrawdown;
-      cumulativeDrawdown += bankLoanDrawdown;
+    if (bankLoanDrawdownAmount > 0) {
+      outstandingBalance += bankLoanDrawdownAmount;
+      cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
       
       // Recalculate monthly payment after drawdown using remaining months
-      const remainingMonths = Math.max(1, totalMonths - (month - firstBankDrawdownMonth));
+      const remainingMonths = Math.max(1, totalMonths - month + 1);
       currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
     }
     
-    // Calculate payments for this month
+    // Calculate payments for this month - ALWAYS CALCULATE IF THERE'S OUTSTANDING BALANCE
     let monthlyPayment = 0;
     let interestPayment = 0;
     let principalPayment = 0;
     
-    // Only calculate loan payments if loan servicing has started and there's outstanding balance
-    if (loanServicingStarted && outstandingBalance > 0 && month >= firstBankDrawdownMonth) {
-      // Interest payment on opening balance
+    // Calculate loan payments if there's outstanding balance (starts from Month 1)
+    if (outstandingBalance > 0) {
+      // Interest payment on opening balance (before drawdown)
       interestPayment = openingBalance * monthlyRate;
       
       // Monthly payment (use current calculated payment)
-      monthlyPayment = currentMonthlyPayment;
+      monthlyPayment = currentMonthlyPayment || 0;
       
       // Principal payment
       principalPayment = Math.max(0, monthlyPayment - interestPayment);
@@ -3367,23 +3392,28 @@ const calculateProgressivePayments = () => {
         year: 'numeric', month: 'short', day: 'numeric' 
       }) : null,
       openingBalance: openingBalance,
-      drawdownAmount: bankLoanDrawdown,
-      totalDrawdownAmount: drawdownInfo?.amount || 0,
-      cashCPFDrawdown: drawdownInfo?.cashCPFAmount || 0,
-      cumulativeDrawdown,
+      drawdownAmount: bankLoanDrawdownAmount,
+      totalDrawdownAmount: constructionStageInfo?.amount || 0,
+      cashCPFDrawdown: cashCPFDrawdown,
+      cumulativeDrawdown: cumulativeBankLoanDrawdown,
       monthlyPayment: monthlyPayment,
       interestPayment: interestPayment,
       principalPayment: principalPayment,
       endingBalance: outstandingBalance,
       interestRate: currentRate,
-      stage: drawdownInfo ? drawdownInfo.stage : null,
-      isInitialPayment: drawdownInfo?.isInitial || false,
-      paymentMode: drawdownInfo?.isInitial ? 'Cash/CPF' : 
-                  (bankLoanDrawdown > 0 ? 'Bank Loan Drawdown' : 'Loan Servicing')
+      stage: constructionStageInfo ? constructionStageInfo.stage : 
+             (bankDrawdownInfo ? bankDrawdownInfo.stage : null),
+      isInitialPayment: constructionStageInfo?.isInitial || false,
+      hasConstructionStage: !!constructionStageInfo,
+      hasBankDrawdown: !!bankDrawdownInfo,
+      paymentMode: !constructionStageInfo && !bankDrawdownInfo ? 'Loan Servicing' :
+                  (constructionStageInfo?.isInitial ? 'Cash/CPF' : 
+                  (bankLoanDrawdownAmount > 0 ? 'Bank Loan Drawdown' : 
+                  (constructionStageInfo ? 'Construction Stage' : 'Loan Servicing')))
     });
     
-    // Stop if loan is fully paid and all drawdowns completed
-    if (outstandingBalance <= 0.01 && month >= calculatedDrawdownSchedule[calculatedDrawdownSchedule.length - 1]?.month) {
+    // Stop if loan is fully paid
+    if (outstandingBalance <= 0.01 && cumulativeBankLoanDrawdown >= totalBankLoanDrawdowns) {
       break;
     }
   }
@@ -3392,11 +3422,10 @@ const calculateProgressivePayments = () => {
   const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
   const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
   
-  // Create display stages with corrected amounts and payment modes
+  // Create display stages for the drawdown table
   const displayStages = calculatedDrawdownSchedule.map(item => {
     let paymentMode;
     if (item.cashCPFAmount > 0 && item.bankLoanAmount > 0) {
-      // Mixed payment - show percentages
       const cashCPFPercentage = ((item.cashCPFAmount / purchasePrice) * 100).toFixed(1);
       const bankLoanPercentage = ((item.bankLoanAmount / purchasePrice) * 100).toFixed(1);
       paymentMode = `Cash/CPF (${cashCPFPercentage}%) + Bank Loan (${bankLoanPercentage}%)`;
@@ -3429,12 +3458,13 @@ const calculateProgressivePayments = () => {
     loanAmount: selectedLoanAmount,
     totalCashCPF,
     totalBankLoan: totalBankLoanDrawdowns,
-    totalCashCPFRequired, // Add this for validation
+    totalCashCPFRequired,
     totalInterest,
     totalPrincipal,
     totalPayable: totalInterest + totalPrincipal + totalCashCPF,
     loanToValueRatio: (selectedLoanAmount / purchasePrice) * 100,
     drawdownSchedule: calculatedDrawdownSchedule,
+    bankLoanDrawdownSchedule,
     firstBankDrawdownMonth,
     timelineCalculated: !!(inputs.otpDate && inputs.topDate)
   };
