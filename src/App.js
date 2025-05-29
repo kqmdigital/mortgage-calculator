@@ -501,11 +501,11 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
         }
         
         .logo-section img {
-            width: 120px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
+    width: 100px !important;
+    height: auto !important;
+    display: block;
+    margin: 0 auto;
+}
         
         .loan-type-banner {
             background: #1d4ed8;
@@ -682,11 +682,11 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
             }
             
             .logo-section img {
-                width: 120px !important;
-                height: auto !important;
-                display: block !important;
-                margin: 0 auto !important;
-            }
+    width: 100px !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
             
             .repayment-table {
                 font-size: 8px !important;
@@ -1851,11 +1851,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             margin-bottom: 6px;
         }
         
-        .logo-section img {
-            max-width: 120px;
-            height: auto;
-            display: block;
-        }
+       .logo-section img {
+    max-width: 100px !important;
+    width: 100px !important;
+    height: auto !important;
+    display: block;
+}
         
         .report-info {
             margin-top: 6px;
