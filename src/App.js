@@ -152,14 +152,14 @@ const MonthlyRepaymentCalculator = () => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
   };
 
-  // Calculate repayment schedule with proper handling of rate changes (Excel method)
+  // Calculate repayment schedule with proper handling of rate changes
  const calculateRepaymentSchedule = (principal, rates, years, months, startDate = new Date()) => {
   const totalMonths = years * 12 + months;
   let balance = principal;
   const monthlyData = [];
   const yearlyData = [];
   
-  // Pre-calculate monthly payments for each rate period (Excel method)
+  // Pre-calculate monthly payments for each rate period
   const getMonthlyPaymentForPeriod = (ratePercent, fullTenorYears) => {
     if (!ratePercent || ratePercent === 0) return principal / (fullTenorYears * 12);
     const monthlyRate = ratePercent / 100 / 12;
@@ -1627,7 +1627,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const monthlyInstallment = monthlyInstallmentStressTest;
     
     // Calculate bonus income (70% of excess annual salary over base)
-    // Base salary is monthly salary * 12 (matching Excel R10/S10 calculation)
+    
     const baseSalaryA = parsedInputs.monthlySalaryA * 12;
     const baseSalaryB = parsedInputs.monthlySalaryB * 12;
     const bonusIncomeA = Math.max(0, (parsedInputs.annualSalaryA - baseSalaryA) / 12) * 0.7;
@@ -3032,7 +3032,7 @@ const ProgressivePaymentCalculator = () => {
     loanPercentage: 75,
     useCustomAmount: false,
     customLoanAmount: '',
-    tenure: 20, // Updated to match Excel
+    tenure: 20,
     otpDate: '',
     topDate: '',
     numOutstandingMortgages: 0,
@@ -3046,7 +3046,7 @@ const ProgressivePaymentCalculator = () => {
       { year: 'thereafter', rate: 3.3, description: '' }
     ],
     
-    currentSora: 3.2 // Updated to match Excel
+    currentSora: 3.2
   });
 
   const [results, setResults] = useState(null);
@@ -3362,7 +3362,7 @@ const generateProgressivePaymentReport = () => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel-Based Progressive Payment Schedule - BUC Property</title>
+    <title>Progressive Payment Schedule - BUC Property</title>
     <style>
         @page { size: A4; margin: 0.4in; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -3490,15 +3490,15 @@ const generateProgressivePaymentReport = () => {
         <div class="logo-section">
             <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
         </div>
-        <div class="property-banner">BUC Property - Excel-Based Progressive Payment Schedule</div>
+        <div class="property-banner">BUC Property - Progressive Payment Schedule</div>
         <div class="report-info">
-            <strong>Built Under Construction Payment Analysis (Excel Model)</strong><br>
+            <strong>Built Under Construction Payment Analysis</strong><br>
             Generated: ${currentDate} | Report ID: KQM-PPE-${Date.now()}
         </div>
     </div>
 
     <div class="compact-section no-break">
-        <h2>🏗️ PROJECT SUMMARY (Excel Model)</h2>
+        <h2>🏗️ PROJECT SUMMARY</h2>
         <div class="info-grid">
             <div>
                 <div class="info-row">
@@ -3533,7 +3533,7 @@ const generateProgressivePaymentReport = () => {
                 </div>
                 <div class="info-row">
                     <span class="info-label">Calculation Model:</span>
-                    <span class="info-value">Excel-Based Drawdown</span>
+                    <span class="info-value">Drawdown</span>
                 </div>
             </div>
         </div>
@@ -3541,7 +3541,7 @@ const generateProgressivePaymentReport = () => {
 
     <div class="compact-section no-break">
         <h2>📅 DRAWDOWN SCHEDULE</h2>
-        <p style="font-size: 8px; color: #666; margin-bottom: 6px;">Following the exact pattern from your Excel calculation model</p>
+       
         <table class="payment-table">
             <thead>
                 <tr>
@@ -3571,7 +3571,7 @@ const generateProgressivePaymentReport = () => {
 
     <div class="page-break">
         <div class="section">
-            <h2>📊 MONTHLY PAYMENT SCHEDULE (Excel Model - First 60 Months)</h2>
+            <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
             <p style="font-size: 8px; color: #666; margin-bottom: 6px;">Monthly installment recalculated after each drawdown (yellow highlight = drawdown months)</p>
             <table class="payment-table">
                 <thead>
@@ -3611,8 +3611,7 @@ const generateProgressivePaymentReport = () => {
             📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
         </div>
         <div style="border-top: 1px solid #e5e7eb; padding-top: 4px; margin-top: 4px;">
-            <p style="margin: 0; font-size: 6px;">This report follows your Excel calculation model and is for guidance only. 
-            Your Trusted Mortgage Advisory Partner</p>
+        
         </div>
     </div>
 </body>
@@ -3628,7 +3627,7 @@ const generateProgressivePaymentReport = () => {
       newWindow.print();
     }, 1000);
 
-    alert('Excel-based progressive payment schedule report generated successfully!\n\nThis report now follows the exact calculation pattern from your Excel file with optimized layout - smaller logo and both summary tables fit on page 1!');
+    alert('Progressive payment schedule report generated successfully!');
 };
 
   return (
@@ -3863,7 +3862,7 @@ const generateProgressivePaymentReport = () => {
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Monthly Payment Schedule (Excel Model - First 36 Months)</h3>
+                <h3 className="text-lg font-semibold mb-4">Monthly Payment Schedule (First 36 Months)</h3>
                 <div className="bg-blue-50 p-3 rounded-lg mb-4">
                   <p className="text-sm text-blue-800">
                     <strong>Key Feature:</strong> Monthly payment automatically recalculates after each drawdown. Yellow rows indicate drawdown months.
@@ -3908,10 +3907,10 @@ const generateProgressivePaymentReport = () => {
                 className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-red-700 transition-colors"
               >
                 <Download className="w-5 h-5" />
-                Generate Excel-Based Progressive Payment Report (PDF)
+                Generate Progressive Payment Report (PDF)
               </button>
               <p className="text-sm text-gray-500 text-center">
-                Detailed BUC property payment schedule following your exact Excel calculation model
+                Detailed BUC property payment schedule
               </p>
             </>
           )}
