@@ -3928,7 +3928,7 @@ const ProgressivePaymentCalculator = () => {
           )}
         </div>
       </div>
-    </div>
+    
   );
 };
 // Main Calculator Wrapper Component
