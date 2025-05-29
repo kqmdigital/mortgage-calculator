@@ -3841,7 +3841,7 @@ const ProgressivePaymentCalculator = () => {
                 <h3 className="text-lg font-semibold mb-4">Excel-Based Drawdown Schedule</h3>
                 <div className="bg-yellow-50 p-3 rounded-lg mb-4">
                   <p className="text-sm text-yellow-800">
-                    <strong>Following your Excel model:</strong> Monthly installments are recalculated after each drawdown based on outstanding balance and remaining tenure.
+                    Monthly installments are recalculated after each drawdown based on outstanding balance and remaining tenure.
                   </p>
                 </div>
                 <div className="overflow-x-auto">
