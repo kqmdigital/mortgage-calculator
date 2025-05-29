@@ -3183,7 +3183,7 @@ const ProgressivePaymentCalculator = () => {
     // STEP 1: Create Excel-based drawdown schedule
     const excelDrawdownSchedule = excelBasedDrawdownSchedule.map(item => ({
       ...item,
-      amount: selectedLoanAmount * (item.percentage / 100)
+      amount: purchasePrice * (item.percentage / 100)  // ✅ Using purchase price
     }));
 
     // STEP 2: Calculate legacy stages for display (20% cash/CPF assumption)
@@ -3518,7 +3518,7 @@ const ProgressivePaymentCalculator = () => {
     </div>
 
     <div class="section no-break">
-        <h2>📅 EXCEL-BASED DRAWDOWN SCHEDULE</h2>
+        <h2>📅 DRAWDOWN SCHEDULE</h2>
         <p style="font-size: 9px; color: #666; margin-bottom: 8px;">Following the exact pattern from your Excel calculation model</p>
         <table class="payment-table">
             <thead>
@@ -3838,7 +3838,7 @@ const ProgressivePaymentCalculator = () => {
               </div>
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Excel-Based Drawdown Schedule</h3>
+                <h3 className="text-lg font-semibold mb-4">Drawdown Schedule</h3>
                 <div className="bg-yellow-50 p-3 rounded-lg mb-4">
                   <p className="text-sm text-yellow-800">
                     Monthly installments are recalculated after each drawdown based on outstanding balance and remaining tenure.
