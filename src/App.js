@@ -3068,7 +3068,7 @@ const ProgressivePaymentCalculator = () => {
       stage: 'Upon grant of Option to Purchase',
       percentage: 5,
       paymentMode: 'Cash/CPF',
-      estimatedTimeFrame: 0,
+      estimatedTimeFrame: 1,
       bankLoanPortion: 0
     },
     {
@@ -3082,49 +3082,49 @@ const ProgressivePaymentCalculator = () => {
       stage: 'Completion of foundation work',
       percentage: 10,
       paymentMode: 'Cash/CPF + Bank Loan',
-      estimatedTimeFrame: 11,
+      estimatedTimeFrame: 8,
       bankLoanPortion: 0.5
     },
     {
       stage: 'Completion of reinforced concrete framework',
       percentage: 10,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 6,
+      estimatedTimeFrame: 8,
       bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of partition walls',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 3,
+      estimatedTimeFrame: 4,
       bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of roofing/ceiling',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 3,
+      estimatedTimeFrame: 4,
       bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of door frames, wiring, plumbing',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 3,
+      estimatedTimeFrame: 4,
       bankLoanPortion: 1.0
     },
     {
       stage: 'Completion of car park, roads and drains',
       percentage: 5,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 3,
+      estimatedTimeFrame: 4,
       bankLoanPortion: 1.0
     },
     {
       stage: 'Temporary Occupation Permit (TOP)',
       percentage: 25,
       paymentMode: 'Bank Loan',
-      estimatedTimeFrame: 3,
+      estimatedTimeFrame: 0,
       bankLoanPortion: 1.0
     },
     {
