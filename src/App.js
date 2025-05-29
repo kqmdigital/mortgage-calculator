@@ -3343,19 +3343,20 @@ const ProgressivePaymentCalculator = () => {
   }, [inputs]);
 
   // Excel-based PDF Report generation
-  const generateProgressivePaymentReport = () => {
-    if (!results) {
-      alert('Please calculate the progressive payments first before generating a report.');
-      return;
-    }
+// Excel-based PDF Report generation
+const generateProgressivePaymentReport = () => {
+  if (!results) {
+    alert('Please calculate the progressive payments first before generating a report.');
+    return;
+  }
 
-    const currentDate = new Date().toLocaleDateString('en-SG', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const currentDate = new Date().toLocaleDateString('en-SG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
-    const htmlContent = `
+  const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3363,12 +3364,12 @@ const ProgressivePaymentCalculator = () => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel-Based Progressive Payment Schedule - BUC Property</title>
     <style>
-        @page { size: A4; margin: 0.5in; }
+        @page { size: A4; margin: 0.4in; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            font-size: 11px;
-            line-height: 1.3;
+            font-size: 10px;
+            line-height: 1.2;
             color: #333;
             background: white;
             -webkit-print-color-adjust: exact !important;
@@ -3376,24 +3377,29 @@ const ProgressivePaymentCalculator = () => {
         }
         .header {
             text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
             border-bottom: 2px solid #1d4ed8;
         }
-        .logo-section img { width: 100px; height: auto; margin: 0 auto 8px; display: block; }
+        .logo-section img { 
+            width: 60px !important; 
+            height: auto !important; 
+            margin: 0 auto 4px; 
+            display: block; 
+        }
         .property-banner {
             background: #dc2626;
             color: white;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            margin: 8px 0;
+            margin: 4px 0;
         }
-        .report-info { font-size: 9px; color: #666; margin-top: 6px; }
+        .report-info { font-size: 8px; color: #666; margin-top: 4px; }
         .section {
-            margin: 12px 0;
-            padding: 10px;
+            margin: 8px 0;
+            padding: 8px;
             border: 1px solid #e5e7eb;
             border-radius: 4px;
             background: #fafafa;
@@ -3401,36 +3407,36 @@ const ProgressivePaymentCalculator = () => {
         }
         .section h2 {
             color: #1d4ed8;
-            font-size: 13px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 4px;
+            padding-bottom: 3px;
         }
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 8px 0;
+            gap: 6px;
+            margin: 6px 0;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 3px 0;
+            padding: 2px 0;
             border-bottom: 1px dotted #ccc;
-            font-size: 10px;
+            font-size: 9px;
         }
         .info-label { font-weight: 600; color: #555; }
         .info-value { font-weight: bold; color: #333; }
         .payment-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8px;
-            margin: 8px 0;
+            font-size: 7px;
+            margin: 6px 0;
         }
         .payment-table th,
         .payment-table td {
             border: 1px solid #ccc;
-            padding: 4px 2px;
+            padding: 3px 2px;
             text-align: center;
             vertical-align: middle;
         }
@@ -3438,37 +3444,52 @@ const ProgressivePaymentCalculator = () => {
             background: #f8f9fa;
             font-weight: bold;
             color: #374151;
+            font-size: 7px;
+        }
+        .payment-table td {
+            font-size: 6px;
         }
         .stage-highlight { background: #fef3c7 !important; font-weight: bold; }
         .excel-highlight { background: #dcfce7 !important; }
         .page-break { page-break-before: always; }
         .no-break { page-break-inside: avoid; break-inside: avoid; }
+        .compact-section {
+            margin: 6px 0;
+            padding: 6px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background: #fafafa;
+            break-inside: avoid;
+        }
         .disclaimer {
             background: #f8f9fa;
-            padding: 8px;
+            padding: 6px;
             border-radius: 4px;
-            margin: 8px 0;
-            font-size: 8px;
+            margin: 6px 0;
+            font-size: 7px;
             color: #555;
         }
         .footer {
-            margin-top: 15px;
-            padding-top: 8px;
+            margin-top: 10px;
+            padding-top: 6px;
             border-top: 1px solid #e5e7eb;
             text-align: center;
             color: #666;
-            font-size: 8px;
+            font-size: 7px;
         }
         @media print {
-            body { font-size: 10px !important; }
-            .payment-table { font-size: 7px !important; }
-            .payment-table th, .payment-table td { padding: 2px 1px !important; }
+            body { font-size: 9px !important; }
+            .payment-table { font-size: 6px !important; }
+            .payment-table th, .payment-table td { padding: 2px 1px !important; font-size: 6px !important; }
+            .logo-section img { width: 60px !important; height: auto !important; }
         }
     </style>
 </head>
 <body>
     <div class="header no-break">
-        <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
+        <div class="logo-section">
+            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
+        </div>
         <div class="property-banner">BUC Property - Excel-Based Progressive Payment Schedule</div>
         <div class="report-info">
             <strong>Built Under Construction Payment Analysis (Excel Model)</strong><br>
@@ -3476,7 +3497,7 @@ const ProgressivePaymentCalculator = () => {
         </div>
     </div>
 
-    <div class="section no-break">
+    <div class="compact-section no-break">
         <h2>🏗️ PROJECT SUMMARY (Excel Model)</h2>
         <div class="info-grid">
             <div>
@@ -3518,9 +3539,9 @@ const ProgressivePaymentCalculator = () => {
         </div>
     </div>
 
-    <div class="section no-break">
+    <div class="compact-section no-break">
         <h2>📅 DRAWDOWN SCHEDULE</h2>
-        <p style="font-size: 9px; color: #666; margin-bottom: 8px;">Following the exact pattern from your Excel calculation model</p>
+        <p style="font-size: 8px; color: #666; margin-bottom: 6px;">Following the exact pattern from your Excel calculation model</p>
         <table class="payment-table">
             <thead>
                 <tr>
@@ -3538,7 +3559,7 @@ const ProgressivePaymentCalculator = () => {
                     <tr class="excel-highlight">
                         <td>${stage.month}</td>
                         <td style="text-align: left; padding-left: 4px;">${stage.stage}</td>
-                        <td>${stage.percentage.toFixed(2)}%</td>
+                        <td>${stage.percentage.toFixed(1)}%</td>
                         <td>${formatCurrency(stage.stageAmount)}</td>
                         <td>${formatCurrency(cumulative)}</td>
                     </tr>
@@ -3551,7 +3572,7 @@ const ProgressivePaymentCalculator = () => {
     <div class="page-break">
         <div class="section">
             <h2>📊 MONTHLY PAYMENT SCHEDULE (Excel Model - First 60 Months)</h2>
-            <p style="font-size: 9px; color: #666; margin-bottom: 8px;">Monthly installment recalculated after each drawdown (yellow highlight = drawdown months)</p>
+            <p style="font-size: 8px; color: #666; margin-bottom: 6px;">Monthly installment recalculated after each drawdown (yellow highlight = drawdown months)</p>
             <table class="payment-table">
                 <thead>
                     <tr>
@@ -3577,7 +3598,7 @@ const ProgressivePaymentCalculator = () => {
                         <td>${formatCurrency(month.interestPayment)}</td>
                         <td>${formatCurrency(month.principalPayment)}</td>
                         <td>${formatCurrency(month.endingBalance)}</td>
-                        <td>${month.interestRate.toFixed(2)}%</td>
+                        <td>${month.interestRate.toFixed(1)}%</td>
                     </tr>
                     `).join('')}
                 </tbody>
@@ -3586,11 +3607,11 @@ const ProgressivePaymentCalculator = () => {
     </div>
 
     <div class="footer no-break">
-        <div style="margin-bottom: 6px;">
+        <div style="margin-bottom: 4px;">
             📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
         </div>
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 6px;">
-            <p style="margin: 0; font-size: 7px;">This report follows your Excel calculation model and is for guidance only. 
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 4px; margin-top: 4px;">
+            <p style="margin: 0; font-size: 6px;">This report follows your Excel calculation model and is for guidance only. 
             Your Trusted Mortgage Advisory Partner</p>
         </div>
     </div>
@@ -3607,8 +3628,8 @@ const ProgressivePaymentCalculator = () => {
       newWindow.print();
     }, 1000);
 
-    alert('Excel-based progressive payment schedule report generated successfully!\n\nThis report now follows the exact calculation pattern from your Excel file.');
-  };
+    alert('Excel-based progressive payment schedule report generated successfully!\n\nThis report now follows the exact calculation pattern from your Excel file with optimized layout - smaller logo and both summary tables fit on page 1!');
+};
 
   return (
     <div className="space-y-6">
