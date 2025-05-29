@@ -3651,7 +3651,7 @@ const ProgressivePaymentCalculator = () => {
             <h3 className="text-lg font-semibold mb-4 text-red-800">BUC Property Details</h3>
             <div className="bg-white p-3 rounded-lg mb-4 border-l-4 border-red-500">
               <p className="text-sm text-red-700">
-                <strong>Note:</strong> Drawdowns occur at months 1, 8, 15, 19, 23, 27, 31, and 43 with monthly payments recalculated after each drawdown.
+                <strong>Note:</strong> Drawdowns occur at months 1, 9, 17, 21, 25, 29, 33, and 45 with monthly payments recalculated after each drawdown.
               </p>
             </div>
             
