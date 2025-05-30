@@ -3768,63 +3768,50 @@ const generateProgressivePaymentReport = () => {
         </div>
     </div>
 
-    <div class="page-break">
-        <div class="section">
-            <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
-            <p style="font-size: 8px; color: #666; margin-bottom: 6px;">
-                Bank loan servicing starts from Month ${results.firstBankDrawdownMonth}. 
-                Monthly installment recalculated after each drawdown.
-            </p>
-            <table class="payment-table">
-                <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Date</th>
-                        <th>Opening Balance</th>
-                        <th>Drawdown</th>
-                        <th>Monthly Payment</th>
-                        <th>Interest</th>
-                        <th>Principal</th>
-                        <th>Ending Balance</th>
-                        <th>Rate</th>
-                        <th>Mode</th>
+   <div class="page-break">
+    <div class="section">
+        <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
+       <p style="font-size: 8px; color: #666; margin-bottom: 6px;">
+    Bank loan servicing starts from Month 1 when first bank drawdown occurs. 
+    Monthly installment recalculated after each drawdown.
+</p>
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Month</th>
+                    <th>Opening Balance</th>
+                    <th>Drawdown</th>
+                    <th>Monthly Payment</th>
+                    <th>Interest</th>
+                    <th>Principal</th>
+                    <th>Ending Balance</th>
+                    <th>Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${results.monthlySchedule.slice(0, 60).map(month => {
+                    const rowClass = month.isInitialPayment ? 'cash-highlight' :
+                                   month.drawdownAmount > 0 ? 'drawdown-highlight' : '';
+                    return `
+                    <tr class="${rowClass}">
+                        <td>Year ${month.year}</td>
+                        <td>Month ${month.month}</td>
+                        <td>${formatCurrency(month.openingBalance)}</td>
+                        <td>${month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}</td>
+                        <td>${month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}</td>
+                        <td>${month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}</td>
+                        <td>${month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}</td>
+                        <td>${formatCurrency(month.endingBalance)}</td>
+                        <td>${month.interestRate.toFixed(1)}%</td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${results.monthlySchedule.slice(0, 60).map(month => {
-                        const rowClass = month.isInitialPayment ? 'cash-highlight' :
-                                       month.drawdownAmount > 0 ? 'drawdown-highlight' : '';
-                        return `
-                        <tr class="${rowClass}">
-                            <td>${month.month}</td>
-                            <td style="font-size: 5px;">${month.actualDate || 'Est.'}</td>
-                            <td>${formatCurrency(month.openingBalance)}</td>
-                            <td>${month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}</td>
-                            <td>${month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}</td>
-                            <td>${month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}</td>
-                            <td>${month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}</td>
-                            <td>${formatCurrency(month.endingBalance)}</td>
-                            <td>${month.interestRate.toFixed(1)}%</td>
-                            <td style="font-size: 5px;">${month.isInitialPayment ? 'Cash/CPF' :
-                                           month.drawdownAmount > 0 ? 'Drawdown' : 'Servicing'}</td>
-                        </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <div class="disclaimer no-break">
-        <h4 style="margin: 0 0 4px 0; color: #333; font-size: 9px;">Important Notes</h4>
-        <p style="margin: 2px 0;">• ${results.timelineCalculated ? 
-            'Timeline calculated based on actual OTP and TOP dates provided.' : 
-            'Default timeline used - provide OTP and TOP dates for accurate calculations.'}</p>
-        <p style="margin: 2px 0;">• Monthly payments recalculate automatically after each bank loan drawdown.</p>
-        <p style="margin: 2px 0;">• Initial payments (5% + 15%) are typically Cash/CPF before bank loan activation.</p>
-        <p style="margin: 2px 0;">• Interest rates may vary based on market conditions and bank packages.</p>
-        <p style="margin: 2px 0;">• Consult our specialists for personalized advice and current market rates.</p>
-    </div>
 
     <div class="footer no-break">
         <div style="margin-bottom: 4px;">
