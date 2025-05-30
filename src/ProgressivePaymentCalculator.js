@@ -244,11 +244,11 @@ const ProgressivePaymentCalculator = () => {
     };
   };
 
-  // Generate bank loan drawdown schedule (ONLY bank loan portions)
+  // Generate bank loan drawdown schedule (ONLY bank loan portions with actual amounts)
   const generateBankLoanDrawdownSchedule = (completeSchedule) => {
     if (!completeSchedule) return [];
     
-    // Filter only stages that have bank loan components
+    // Filter only stages that have ACTUAL bank loan components (amount > 0)
     const bankDrawdownStages = completeSchedule.stages
       .filter(stage => stage.bankLoanAmount > 0);
 
@@ -383,9 +383,7 @@ const ProgressivePaymentCalculator = () => {
       const drawdown = bankDrawdownSchedule.find(d => d.bankLoanMonth === bankLoanMonth);
       const bankLoanDrawdownAmount = drawdown ? drawdown.bankLoanAmount : 0;
       
-      const openingBalance = outstandingBalance;
-      
-      // Add bank loan drawdown to outstanding balance
+      // Add bank loan drawdown to outstanding balance FIRST (happens at start of month)
       if (bankLoanDrawdownAmount > 0) {
         outstandingBalance += bankLoanDrawdownAmount;
         cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
@@ -396,6 +394,9 @@ const ProgressivePaymentCalculator = () => {
         currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
       }
       
+      // Opening balance for this month (AFTER drawdown is added)
+      const openingBalance = outstandingBalance;
+      
       // Calculate loan servicing for this month
       let monthlyPayment = 0;
       let interestPayment = 0;
@@ -405,7 +406,7 @@ const ProgressivePaymentCalculator = () => {
       if (outstandingBalance > 0) {
         const monthlyRate = currentRate / 100 / 12;
         
-        // Interest on opening balance (before any drawdown)
+        // Interest payment on opening balance (which includes any drawdown for this month)
         interestPayment = openingBalance * monthlyRate;
         
         // Use current monthly payment
@@ -420,7 +421,7 @@ const ProgressivePaymentCalculator = () => {
           monthlyPayment = principalPayment + interestPayment;
         }
         
-        // Update outstanding balance
+        // Update outstanding balance AFTER payment
         outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
       }
       
@@ -430,11 +431,11 @@ const ProgressivePaymentCalculator = () => {
       monthlySchedule.push({
         month: bankLoanMonth,
         year: year,
-        openingBalance: openingBalance,
+        openingBalance: openingBalance, // This includes the drawdown for Month 1
         drawdownAmount: bankLoanDrawdownAmount,
         cumulativeDrawdown: cumulativeBankLoanDrawdown,
         monthlyPayment: monthlyPayment,
-        interestPayment: interestPayment,
+        interestPayment: interestPayment, // Interest starts from Month 1
         principalPayment: principalPayment,
         endingBalance: outstandingBalance,
         interestRate: currentRate,
@@ -1171,8 +1172,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <h3 className="text-lg font-semibold mb-4">Bank Loan Drawdown Schedule</h3>
                   <div className="bg-green-50 p-3 rounded-lg mb-4">
                     <p className="text-sm text-green-800">
-                      <strong>Bank Loan Timeline:</strong> Bank loan months calculated dynamically based on construction stage estimated times. 
-                      First bank drawdown = Month 1, subsequent drawdowns use cumulative estimated time from previous bank loan stages.
+                      <strong>Bank Loan Timeline:</strong> Only shows stages with actual bank loan amounts {'>'} $0. 
+                      Month 1 Opening Balance = First Bank Drawdown Amount, interest kicks in immediately from Month 1.
                     </p>
                   </div>
                   <div className="overflow-x-auto">
