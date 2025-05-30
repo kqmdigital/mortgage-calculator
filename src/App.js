@@ -3260,53 +3260,78 @@ const calculateProgressivePayments = () => {
   // Get the construction stage drawdown schedule
   const constructionSchedule = calculateDrawdownSchedule();
   
-  // Calculate total Cash/CPF requirement (Purchase Price - Loan Amount)
-  const totalCashCPFRequired = purchasePrice - selectedLoanAmount;
-  let runningCashCPFAllocated = 0;
+ // Excel logic: Calculate Cash/CPF vs Bank Loan split based on LTV ratio
+  const ltvRatio = selectedLoanAmount / purchasePrice;
+  const cashCPFRatio = 1 - ltvRatio;
+  
   let totalCashCPF = 0;
   let totalBankLoanDrawdowns = 0;
   
-  // Calculate Cash/CPF vs Bank Loan split for each construction stage
-  const calculatedDrawdownSchedule = constructionSchedule.map(item => {
-    const stageAmount = purchasePrice * (item.percentage / 100);
-    let cashCPFAmount = 0;
-    let bankLoanAmount = 0;
-    
-    // Calculate how much Cash/CPF is still needed
-    const remainingCashCPFNeeded = Math.max(0, totalCashCPFRequired - runningCashCPFAllocated);
-    
-    if (remainingCashCPFNeeded > 0) {
-      // Still need Cash/CPF - allocate as much as needed from this stage
-      cashCPFAmount = Math.min(stageAmount, remainingCashCPFNeeded);
-      bankLoanAmount = stageAmount - cashCPFAmount;
-    } else {
-      // Cash/CPF requirement already fulfilled - all bank loan
-      cashCPFAmount = 0;
-      bankLoanAmount = stageAmount;
-    }
-    
-    runningCashCPFAllocated += cashCPFAmount;
-    totalCashCPF += cashCPFAmount;
-    totalBankLoanDrawdowns += bankLoanAmount;
-    
-    return {
-      ...item,
-      amount: stageAmount,
-      cashCPFAmount,
-      bankLoanAmount
-    };
-  });
+  // Calculate Cash/CPF vs Bank Loan split for each construction stage (Excel DDcal logic)
+const calculatedDrawdownSchedule = constructionSchedule.map((item, index) => {
+  const stageAmount = item.amount;
+  let cashCPFAmount = 0;
+  let bankLoanAmount = 0;
+  
+  if (item.isInitial) {
+    // Initial payments are always Cash/CPF (Excel rows 11-12)
+    cashCPFAmount = stageAmount;
+    bankLoanAmount = 0;
+  } else {
+    // Construction stages: use bank loan percentage from Excel
+    bankLoanAmount = stageAmount * (item.bankLoanPercentage || 0);
+    cashCPFAmount = stageAmount - bankLoanAmount;
+  }
+  
+  totalCashCPF += cashCPFAmount;
+  totalBankLoanDrawdowns += bankLoanAmount;
+  
+  return {
+    ...item,
+    amount: stageAmount,
+    cashCPFAmount,
+    bankLoanAmount
+  };
+});
 
-  // Find the first month where bank loan drawdown occurs
-  const firstBankLoanStage = calculatedDrawdownSchedule.find(stage => stage.bankLoanAmount > 0);
-  const firstBankDrawdownMonth = firstBankLoanStage ? firstBankLoanStage.month : null;
+// CORRECTED: Ensure first bank loan drawdown happens at Month 1
+// Find the first non-initial stage with bank loan
+const firstBankStageIndex = calculatedDrawdownSchedule.findIndex(stage => 
+  !stage.isInitial && stage.bankLoanAmount > 0
+);
+
+if (firstBankStageIndex !== -1) {
+  // Store the original month for reference
+  const originalFirstBankMonth = calculatedDrawdownSchedule[firstBankStageIndex].month;
+  
+  // Set first bank loan stage to Month 1
+  calculatedDrawdownSchedule[firstBankStageIndex].month = 1;
+  
+  // Calculate the offset to adjust all subsequent stages
+  const monthOffset = 1 - originalFirstBankMonth;
+  
+  // Adjust all subsequent non-initial stages by the same offset
+  for (let i = firstBankStageIndex + 1; i < calculatedDrawdownSchedule.length; i++) {
+    if (!calculatedDrawdownSchedule[i].isInitial) {
+      calculatedDrawdownSchedule[i].month = calculatedDrawdownSchedule[i].month + monthOffset;
+      // Ensure months don't go negative or too close together
+      if (calculatedDrawdownSchedule[i].month <= calculatedDrawdownSchedule[i-1].month) {
+        calculatedDrawdownSchedule[i].month = calculatedDrawdownSchedule[i-1].month + 1;
+      }
+    }
+  }
+}
+
+// Sort the schedule by month to ensure proper order
+calculatedDrawdownSchedule.sort((a, b) => a.month - b.month);
+
+const firstBankDrawdownMonth = 1;
 
   // Generate monthly payment schedule
   const monthlySchedule = [];
   const totalMonths = inputs.tenure * 12;
   let outstandingBalance = 0;
   let cumulativeBankLoanDrawdown = 0;
-  let currentMonthlyPayment = 0;
   let loanServicingStarted = false;
   
   // Get interest rate for specific month
@@ -3459,21 +3484,21 @@ for (let month = 1; month <= maxMonth; month++) {
   });
 
   return {
-    stages: displayStages,
-    monthlySchedule,
-    purchasePrice,
-    loanAmount: selectedLoanAmount,
-    totalCashCPF,
-    totalBankLoan: totalBankLoanDrawdowns,
-    totalCashCPFRequired,
-    totalInterest,
-    totalPrincipal,
-    totalPayable: totalInterest + totalPrincipal + totalCashCPF,
-    loanToValueRatio: (selectedLoanAmount / purchasePrice) * 100,
-    drawdownSchedule: calculatedDrawdownSchedule,
-    firstBankDrawdownMonth,
-    timelineCalculated: !!(inputs.otpDate && inputs.topDate)
-  };
+  stages: displayStages,
+  monthlySchedule,
+  purchasePrice,
+  loanAmount: selectedLoanAmount,
+  totalCashCPF,
+  totalBankLoan: totalBankLoanDrawdowns,
+  totalCashCPFRequired: purchasePrice - selectedLoanAmount,
+  totalInterest,
+  totalPrincipal,
+  totalPayable: totalInterest + selectedLoanAmount + totalCashCPF, // CORRECTED: Interest + Loan Principal + Cash/CPF
+  loanToValueRatio: (selectedLoanAmount / purchasePrice) * 100,
+  drawdownSchedule: calculatedDrawdownSchedule,
+  firstBankDrawdownMonth: 1,
+  timelineCalculated: !!(inputs.otpDate && inputs.topDate)
+};
 };
   
   const handleInputChange = (field, value) => {
@@ -4023,27 +4048,28 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
           {results && (
             <>
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-4">Payment Summary</h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Cash/CPF Required</p>
-                    <p className="font-semibold text-lg">{formatCurrency(results.totalCashCPF)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total Bank Loan</p>
-                    <p className="font-semibold text-lg">{formatCurrency(results.totalBankLoan)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total Interest Payable</p>
-                    <p className="font-semibold text-lg text-red-600">{formatCurrency(results.totalInterest)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total Amount Payable</p>
-                    <p className="font-semibold text-lg">{formatCurrency(results.totalPayable)}</p>
-                  </div>
-                </div>
-              </div>
+  <h3 className="text-lg font-semibold mb-4">Payment Summary</h3>
+  
+  <div className="grid grid-cols-2 gap-4">
+    <div>
+      <p className="text-sm text-gray-600">Total Cash/CPF Required</p>
+      <p className="font-semibold text-lg">{formatCurrency(results.totalCashCPF)}</p>
+    </div>
+    <div>
+      <p className="text-sm text-gray-600">Total Bank Loan</p>
+      <p className="font-semibold text-lg">{formatCurrency(results.totalBankLoan)}</p>
+    </div>
+    <div>
+      <p className="text-sm text-gray-600">Total Interest Payable</p>
+      <p className="font-semibold text-lg text-red-600">{formatCurrency(results.totalInterest)}</p>
+    </div>
+    <div>
+      <p className="text-sm text-gray-600">Total Amount Payable</p>
+      <p className="font-semibold text-lg">{formatCurrency(results.totalPayable)}</p>
+      <p className="text-xs text-gray-500 mt-1">Cash/CPF + Loan + Interest</p>
+    </div>
+  </div>
+</div>
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
   <h3 className="text-lg font-semibold mb-4">Drawdown Schedule</h3>
@@ -4122,7 +4148,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
   <div className="bg-blue-50 p-3 rounded-lg mb-4">
     <p className="text-sm text-blue-800">
       <strong>Key Features:</strong> 
-      • Bank loan servicing starts after first drawdown (Month {results.firstBankDrawdownMonth})
+      • Bank loan servicing starts from Month 1 when first drawdown occurs
       • Monthly payments recalculate after each subsequent drawdown
       • Initial payments (blue rows) are Cash/CPF only
     </p>
@@ -4131,8 +4157,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
     <table className="w-full text-sm">
       <thead>
         <tr className="border-b">
+          <th className="text-center py-2">Year</th>
           <th className="text-center py-2">Month</th>
-          <th className="text-center py-2">Date</th>
           <th className="text-center py-2">Opening Balance</th>
           <th className="text-center py-2">Drawdown</th>
           <th className="text-center py-2">Monthly Payment</th>
@@ -4140,7 +4166,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
           <th className="text-center py-2">Principal</th>
           <th className="text-center py-2">Ending Balance</th>
           <th className="text-center py-2">Rate</th>
-          <th className="text-center py-2">Mode</th>
         </tr>
       </thead>
       <tbody>
@@ -4149,8 +4174,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
             month.isInitialPayment ? 'bg-blue-50' : 
             month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
           }`}>
-            <td className="py-2 text-center font-medium">{month.month}</td>
-            <td className="py-2 text-center text-xs">{month.actualDate || 'Est.'}</td>
+            <td className="py-2 text-center font-medium">Year {month.year}</td>
+            <td className="py-2 text-center font-medium">Month {month.month}</td>
             <td className="py-2 text-center">{formatCurrency(month.openingBalance)}</td>
             <td className="py-2 text-center">
               {month.drawdownAmount > 0 ? (
@@ -4170,16 +4195,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
             </td>
             <td className="py-2 text-center">{formatCurrency(month.endingBalance)}</td>
             <td className="py-2 text-center">{month.interestRate.toFixed(2)}%</td>
-            <td className="py-2 text-center">
-              <span className={`px-1 py-0.5 rounded text-xs ${
-                month.isInitialPayment ? 'bg-blue-100 text-blue-800' :
-                month.drawdownAmount > 0 ? 'bg-yellow-100 text-yellow-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {month.isInitialPayment ? 'Cash/CPF' :
-                 month.drawdownAmount > 0 ? 'Drawdown' : 'Servicing'}
-              </span>
-            </td>
           </tr>
         ))}
       </tbody>
