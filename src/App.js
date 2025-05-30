@@ -3051,122 +3051,160 @@ const ProgressivePaymentCalculator = () => {
 
   const [results, setResults] = useState(null);
 
-  // ADD THIS ENTIRE NEW FUNCTION:
+// CORRECTED: Excel-based drawdown schedule calculation following DDcal logic
 const calculateDrawdownSchedule = () => {
+  const purchasePrice = parseNumberInput(inputs.purchasePrice) || 2300000;
+  
   if (!inputs.otpDate || !inputs.topDate) {
-    // Return default schedule if dates not provided
-    return [
-      { month: 1, percentage: 5, amount: null, stage: 'Upon grant of Option to Purchase', isInitial: true },
-      { month: 2, percentage: 15, amount: null, stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)', isInitial: true },
-      { month: 12, percentage: 10, amount: null, stage: 'Completion of foundation work' },
-      { month: 20, percentage: 10, amount: null, stage: 'Completion of reinforced concrete framework of unit' },
-      { month: 28, percentage: 5, amount: null, stage: 'Completion of partition walls of unit' },
-      { month: 32, percentage: 5, amount: null, stage: 'Completion of roofing/ceiling of unit' },
-      { month: 36, percentage: 5, amount: null, stage: 'Completion of door sub-frames/ door frames, window frames, electrical wiring, internal plastering and plumbing of unit' },
-      { month: 40, percentage: 5, amount: null, stage: 'Completion of car park, roads and drains serving the housing project' },
-      { month: 44, percentage: 25, amount: null, stage: 'Temporary Occupation Permit (TOP)' },
-      { month: 56, percentage: 15, amount: null, stage: 'Certificate of Statutory Completion' }
+    // Return Excel-based default schedule using 42-month timeline
+    const totalProjectMonths = 42; // Default from Excel J4
+    const constructionMonths = 39; // Default from Excel J5 (42-1-2)
+    
+    // Excel percentage weights for construction stages (DDcal C13:C18)
+    const stageWeights = [0.1, 0.1, 0.05, 0.05, 0.05, 0.05]; // Foundation to car park
+    const totalWeight = stageWeights.reduce((sum, weight) => sum + weight, 0);
+    
+    // Calculate time intervals based on Excel formula: ROUNDUP($J$5*(C13/SUM($C$13:$C$18)),0)
+    const stageIntervals = stageWeights.map(weight => 
+      Math.round(constructionMonths * (weight / totalWeight))
+    );
+    
+    // Build schedule following Excel N column logic
+    const schedule = [
+      { month: 1, percentage: 5, amount: purchasePrice * 0.05, stage: 'Upon grant of Option to Purchase', isInitial: true, bankLoanPercentage: 0 },
+      { month: 2, percentage: 15, amount: purchasePrice * 0.15, stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)', isInitial: true, bankLoanPercentage: 0 }
     ];
+    
+    // Calculate construction stage months using Excel N14:N20 logic
+    let currentMonth = 1; // Start from month 1 (N14 logic)
+    const constructionStages = [
+      { percentage: 10, stage: 'Completion of foundation work', bankLoanPercentage: 0.052 },
+      { percentage: 10, stage: 'Completion of reinforced concrete framework of unit', bankLoanPercentage: 0.10 },
+      { percentage: 5, stage: 'Completion of partition walls of unit', bankLoanPercentage: 0.05 },
+      { percentage: 5, stage: 'Completion of roofing/ceiling of unit', bankLoanPercentage: 0.05 },
+      { percentage: 5, stage: 'Completion of door sub-frames/window frames/electrical wiring', bankLoanPercentage: 0.05 },
+      { percentage: 5, stage: 'Completion of car park, roads and drains', bankLoanPercentage: 0.05 }
+    ];
+    
+    constructionStages.forEach((stageInfo, index) => {
+      currentMonth += stageIntervals[index]; // Excel logic: N = previous N + E
+      schedule.push({
+        month: currentMonth,
+        percentage: stageInfo.percentage,
+        amount: purchasePrice * (stageInfo.percentage / 100),
+        stage: stageInfo.stage,
+        bankLoanPercentage: stageInfo.bankLoanPercentage
+      });
+    });
+    
+    // TOP and CSC
+    const topMonth = totalProjectMonths - 11; // TOP is before CSC
+    schedule.push(
+      { 
+        month: topMonth, 
+        percentage: 25, 
+        amount: purchasePrice * 0.25, 
+        stage: 'Temporary Occupation Permit (TOP)', 
+        isTOP: true, 
+        bankLoanPercentage: 0.25 
+      },
+      { 
+        month: topMonth + 12, // CSC is 12 months after TOP (Excel E20 = 12)
+        percentage: 15, 
+        amount: purchasePrice * 0.15, 
+        stage: 'Certificate of Statutory Completion', 
+        bankLoanPercentage: 0.15 
+      }
+    );
+    
+    return schedule.sort((a, b) => a.month - b.month);
   }
 
+  // When dates are provided, calculate dynamically
   const otpDate = new Date(inputs.otpDate);
   const topDate = new Date(inputs.topDate);
   
-  // Calculate months between OTP and TOP
-  const monthsDiff = (topDate.getFullYear() - otpDate.getFullYear()) * 12 + 
-                     (topDate.getMonth() - otpDate.getMonth());
+  // Excel I4 logic: Calculate days between OTP and TOP
+  const daysDiff = (topDate.getTime() - otpDate.getTime()) / (24 * 60 * 60 * 1000);
   
-  // Calculate drawdown schedule based on actual timeline
+  // Excel J4 logic: ROUNDDOWN((days/365)*12,0)
+  const totalProjectMonths = Math.floor((daysDiff / 365) * 12);
+  
+  // Excel J5 logic: J4 - E11 - E12 (total - OTP - S&P)
+  const constructionMonths = totalProjectMonths - 1 - 2; // Subtract OTP(1) and S&P(2) months
+  
+  // Excel percentage weights for construction stages (DDcal C13:C18)
+  const stageWeights = [0.1, 0.1, 0.05, 0.05, 0.05, 0.05]; // Foundation to car park
+  const totalWeight = stageWeights.reduce((sum, weight) => sum + weight, 0);
+  
+  // Excel E13:E18 logic: ROUNDUP($J$5*(C13/SUM($C$13:$C$18)),0)
+  const stageIntervals = stageWeights.map(weight => 
+    Math.round(constructionMonths * (weight / totalWeight))
+  );
+  
+  // Build the schedule following Excel DDcal logic
   const schedule = [
     { 
       month: 1, 
       percentage: 5, 
-      amount: null, 
+      amount: purchasePrice * 0.05, 
       stage: 'Upon grant of Option to Purchase', 
       isInitial: true,
+      bankLoanPercentage: 0,
       actualDate: otpDate
     },
     { 
       month: 2, 
       percentage: 15, 
-      amount: null, 
+      amount: purchasePrice * 0.15, 
       stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)', 
       isInitial: true,
-      actualDate: new Date(otpDate.getTime() + (8 * 7 * 24 * 60 * 60 * 1000)) // 8 weeks after OTP
+      bankLoanPercentage: 0,
+      actualDate: new Date(otpDate.getTime() + (8 * 7 * 24 * 60 * 60 * 1000))
     }
   ];
 
-  // Construction phases based on timeline between S&P and TOP
-  const constructionStartMonth = 3; // After S&P Agreement
-  const constructionPeriod = Math.max(monthsDiff - 2, 24); // At least 24 months construction
-  
-  // Calculate construction milestones
-  const foundationMonth = constructionStartMonth + Math.round(constructionPeriod * 0.2);
-  const frameworkMonth = constructionStartMonth + Math.round(constructionPeriod * 0.4);
-  const partitionMonth = constructionStartMonth + Math.round(constructionPeriod * 0.6);
-  const roofingMonth = constructionStartMonth + Math.round(constructionPeriod * 0.7);
-  const fittingMonth = constructionStartMonth + Math.round(constructionPeriod * 0.8);
-  const infrastructureMonth = constructionStartMonth + Math.round(constructionPeriod * 0.9);
-  const topMonth = monthsDiff;
-  const cscMonth = topMonth + 12; // CSC typically 12 months after TOP
+  // Calculate construction stage months using Excel N14:N20 logic
+  let currentMonth = 1; // Excel N14 = 1 (first bank loan month)
+  const constructionStages = [
+    { percentage: 10, stage: 'Completion of foundation work', bankLoanPercentage: 0.052 },
+    { percentage: 10, stage: 'Completion of reinforced concrete framework of unit', bankLoanPercentage: 0.10 },
+    { percentage: 5, stage: 'Completion of partition walls of unit', bankLoanPercentage: 0.05 },
+    { percentage: 5, stage: 'Completion of roofing/ceiling of unit', bankLoanPercentage: 0.05 },
+    { percentage: 5, stage: 'Completion of door sub-frames/window frames/electrical wiring', bankLoanPercentage: 0.05 },
+    { percentage: 5, stage: 'Completion of car park, roads and drains', bankLoanPercentage: 0.05 }
+  ];
 
-  // Add construction phases
+  constructionStages.forEach((stageInfo, index) => {
+    // Excel N column logic: N = previous N + E (accumulate intervals)
+    currentMonth += stageIntervals[index];
+    schedule.push({
+      month: currentMonth,
+      percentage: stageInfo.percentage,
+      amount: purchasePrice * (stageInfo.percentage / 100),
+      stage: stageInfo.stage,
+      bankLoanPercentage: stageInfo.bankLoanPercentage,
+      actualDate: new Date(otpDate.getTime() + (currentMonth - 1) * 30 * 24 * 60 * 60 * 1000)
+    });
+  });
+
+  // TOP and CSC following Excel logic
   schedule.push(
     { 
-      month: foundationMonth, 
-      percentage: 10, 
-      amount: null, 
-      stage: 'Completion of foundation work',
-      actualDate: new Date(otpDate.getTime() + (foundationMonth - 1) * 30 * 24 * 60 * 60 * 1000)
-    },
-    { 
-      month: frameworkMonth, 
-      percentage: 10, 
-      amount: null, 
-      stage: 'Completion of reinforced concrete framework of unit',
-      actualDate: new Date(otpDate.getTime() + (frameworkMonth - 1) * 30 * 24 * 60 * 60 * 1000)
-    },
-    { 
-      month: partitionMonth, 
-      percentage: 5, 
-      amount: null, 
-      stage: 'Completion of partition walls of unit',
-      actualDate: new Date(otpDate.getTime() + (partitionMonth - 1) * 30 * 24 * 60 * 60 * 1000)
-    },
-    { 
-      month: roofingMonth, 
-      percentage: 5, 
-      amount: null, 
-      stage: 'Completion of roofing/ceiling of unit',
-      actualDate: new Date(otpDate.getTime() + (roofingMonth - 1) * 30 * 24 * 60 * 60 * 1000)
-    },
-    { 
-      month: fittingMonth, 
-      percentage: 5, 
-      amount: null, 
-      stage: 'Completion of door sub-frames/ door frames, window frames, electrical wiring, internal plastering and plumbing of unit',
-      actualDate: new Date(otpDate.getTime() + (fittingMonth - 1) * 30 * 24 * 60 * 60 * 1000)
-    },
-    { 
-      month: infrastructureMonth, 
-      percentage: 5, 
-      amount: null, 
-      stage: 'Completion of car park, roads and drains serving the housing project',
-      actualDate: new Date(otpDate.getTime() + (infrastructureMonth - 1) * 30 * 24 * 60 * 60 * 1000)
-    },
-    { 
-      month: topMonth, 
+      month: totalProjectMonths - 11, // TOP is 11 months before end to allow for CSC
       percentage: 25, 
-      amount: null, 
+      amount: purchasePrice * 0.25, 
       stage: 'Temporary Occupation Permit (TOP)',
       isTOP: true,
+      bankLoanPercentage: 0.25,
       actualDate: topDate
     },
     { 
-      month: cscMonth, 
+      month: totalProjectMonths + 1, // Excel N20 logic: N19 + E20 (TOP month + 12)
       percentage: 15, 
-      amount: null, 
+      amount: purchasePrice * 0.15, 
       stage: 'Certificate of Statutory Completion',
+      bankLoanPercentage: 0.15,
       actualDate: new Date(topDate.getTime() + (12 * 30 * 24 * 60 * 60 * 1000))
     }
   );
@@ -3293,102 +3331,99 @@ const calculateProgressivePayments = () => {
     calculatedDrawdownSchedule[calculatedDrawdownSchedule.length - 1]?.month || 0
   );
 
-  // Generate monthly schedule
-  for (let month = 1; month <= maxMonth; month++) {
-    const currentRate = getInterestRateForMonth(month);
-    const monthlyRate = currentRate / 100 / 12;
+ // Generate monthly schedule following Excel Drawdown sheet structure
+for (let month = 1; month <= maxMonth; month++) {
+  const currentRate = getInterestRateForMonth(month);
+  const monthlyRate = currentRate / 100 / 12;
+  
+  // Check for construction stage this month
+  const stageInfo = calculatedDrawdownSchedule.find(stage => stage.month === month);
+  const bankLoanDrawdownAmount = stageInfo ? stageInfo.bankLoanAmount : 0;
+  const cashCPFDrawdown = stageInfo ? stageInfo.cashCPFAmount : 0;
+  
+  // Store opening balance before any changes (Excel column E)
+  const openingBalance = outstandingBalance;
+  
+  // Add bank loan drawdown to outstanding balance (Excel logic: E = previous I + C)
+  if (bankLoanDrawdownAmount > 0) {
+    outstandingBalance += bankLoanDrawdownAmount;
+    cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
     
-    // Check for construction stage this month (this is where bank loan drawdowns happen)
-    const stageInfo = calculatedDrawdownSchedule.find(stage => stage.month === month);
-    const bankLoanDrawdownAmount = stageInfo ? stageInfo.bankLoanAmount : 0;
-    const cashCPFDrawdown = stageInfo ? stageInfo.cashCPFAmount : 0;
-    
-    // Store opening balance before any changes
-    const openingBalance = outstandingBalance;
-    
-    // Add bank loan drawdown to outstanding balance (happens at construction stage months)
-    if (bankLoanDrawdownAmount > 0) {
-      outstandingBalance += bankLoanDrawdownAmount;
-      cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
-      
-      if (!loanServicingStarted) {
-        loanServicingStarted = true;
-      }
-      
-      // Recalculate monthly payment after drawdown using remaining months
-      const remainingMonths = Math.max(1, totalMonths - (month - firstBankDrawdownMonth));
-      currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
-    }
-    
-    // Calculate payments for this month
-    let monthlyPayment = 0;
-    let interestPayment = 0;
-    let principalPayment = 0;
-    
-    // Calculate loan payments if loan servicing has started and there's outstanding balance
-    if (loanServicingStarted && outstandingBalance > 0 && month >= firstBankDrawdownMonth) {
-      // Interest payment on opening balance (before drawdown)
-      interestPayment = openingBalance * monthlyRate;
-      
-      // Monthly payment (use current calculated payment)
-      monthlyPayment = currentMonthlyPayment || 0;
-      
-      // Principal payment
-      principalPayment = Math.max(0, monthlyPayment - interestPayment);
-      
-      // Ensure principal doesn't exceed outstanding balance
-      if (principalPayment > outstandingBalance) {
-        principalPayment = outstandingBalance;
-        monthlyPayment = principalPayment + interestPayment;
-      }
-      
-      // Update outstanding balance
-      outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
-    }
-    
-    const monthInYear = ((month - 1) % 12) + 1;
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
-    // Calculate actual date for this month
-    let actualDate = null;
-    if (inputs.otpDate) {
-      const otpDate = new Date(inputs.otpDate);
-      actualDate = new Date(otpDate.getTime() + (month - 1) * 30 * 24 * 60 * 60 * 1000);
-    }
-    
-    monthlySchedule.push({
-      month,
-      year: Math.ceil(month / 12),
-      monthInYear,
-      monthName: monthNames[monthInYear - 1],
-      actualDate: actualDate ? actualDate.toLocaleDateString('en-SG', { 
-        year: 'numeric', month: 'short', day: 'numeric' 
-      }) : null,
-      openingBalance: openingBalance,
-      drawdownAmount: bankLoanDrawdownAmount,
-      totalDrawdownAmount: stageInfo?.amount || 0,
-      cashCPFDrawdown: cashCPFDrawdown,
-      cumulativeDrawdown: cumulativeBankLoanDrawdown,
-      monthlyPayment: monthlyPayment,
-      interestPayment: interestPayment,
-      principalPayment: principalPayment,
-      endingBalance: outstandingBalance,
-      interestRate: currentRate,
-      stage: stageInfo ? stageInfo.stage : null,
-      isInitialPayment: stageInfo?.isInitial || false,
-      hasConstructionStage: !!stageInfo,
-      hasBankDrawdown: bankLoanDrawdownAmount > 0,
-      paymentMode: !stageInfo ? 'Servicing' :
-                  (stageInfo.isInitial ? 'Cash/CPF' : 
-                  (bankLoanDrawdownAmount > 0 ? 'Drawdown' : 'Construction'))
-    });
-    
-    // Stop if loan is fully paid
-    if (outstandingBalance <= 0.01 && cumulativeBankLoanDrawdown >= totalBankLoanDrawdowns) {
-      break;
+    if (!loanServicingStarted) {
+      loanServicingStarted = true;
     }
   }
+  
+  // Calculate payments for this month (Excel columns F, G, H, I)
+  let monthlyPayment = 0;
+  let interestPayment = 0;
+  let principalPayment = 0;
+  
+  // Calculate loan payments if there's outstanding balance (Excel logic)
+  if (outstandingBalance > 0 && loanServicingStarted) {
+    // Interest payment on current balance (Excel column H: E*(J/12))
+    interestPayment = outstandingBalance * monthlyRate;
+    
+    // Monthly payment using PMT function (Excel column F)
+    const remainingMonths = Math.max(1, totalMonths - month + 1);
+    monthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
+    
+    // Principal payment (Excel column G: F - H)
+    principalPayment = Math.max(0, monthlyPayment - interestPayment);
+    
+    // Ensure principal doesn't exceed outstanding balance
+    if (principalPayment > outstandingBalance) {
+      principalPayment = outstandingBalance;
+      monthlyPayment = principalPayment + interestPayment;
+    }
+    
+    // Update outstanding balance (Excel column I: E - G)
+    outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
+  }
+  
+  const monthInYear = ((month - 1) % 12) + 1;
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  // Calculate actual date for this month
+  let actualDate = null;
+  if (inputs.otpDate) {
+    const otpDate = new Date(inputs.otpDate);
+    actualDate = new Date(otpDate.getTime() + (month - 1) * 30 * 24 * 60 * 60 * 1000);
+  }
+  
+  monthlySchedule.push({
+    month,
+    year: Math.ceil(month / 12),
+    monthInYear,
+    monthName: monthNames[monthInYear - 1],
+    actualDate: actualDate ? actualDate.toLocaleDateString('en-SG', { 
+      year: 'numeric', month: 'short', day: 'numeric' 
+    }) : null,
+    openingBalance: openingBalance,
+    drawdownAmount: bankLoanDrawdownAmount,
+    totalDrawdownAmount: stageInfo?.amount || 0,
+    cashCPFDrawdown: cashCPFDrawdown,
+    cumulativeDrawdown: cumulativeBankLoanDrawdown,
+    monthlyPayment: monthlyPayment,
+    interestPayment: interestPayment,
+    principalPayment: principalPayment,
+    endingBalance: outstandingBalance,
+    interestRate: currentRate,
+    stage: stageInfo ? stageInfo.stage : null,
+    isInitialPayment: stageInfo?.isInitial || false,
+    hasConstructionStage: !!stageInfo,
+    hasBankDrawdown: bankLoanDrawdownAmount > 0,
+    paymentMode: !stageInfo ? 'Servicing' :
+                (stageInfo.isInitial ? 'Cash/CPF' : 
+                (bankLoanDrawdownAmount > 0 ? 'Drawdown' : 'Construction'))
+  });
+  
+  // Stop if loan is fully paid and beyond construction
+  if (outstandingBalance <= 0.01 && month > 60) {
+    break;
+  }
+}
 
   // Calculate totals
   const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
