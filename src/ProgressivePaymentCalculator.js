@@ -229,18 +229,10 @@ const ProgressivePaymentCalculator = () => {
       totalCashCPF += cashCPFAmount;
       totalBankLoan += bankLoanAmount;
       
-      // Calculate actual date if OTP date is provided
-      let actualDate = null;
-      if (inputs.otpDate) {
-        const otpDate = new Date(inputs.otpDate);
-        actualDate = new Date(otpDate.getTime() + (stage.month - 1) * 30 * 24 * 60 * 60 * 1000);
-      }
-      
       return {
         ...stage,
         cashCPFAmount,
-        bankLoanAmount,
-        actualDate
+        bankLoanAmount
       };
     });
 
@@ -275,9 +267,7 @@ const ProgressivePaymentCalculator = () => {
           bankLoanMonth: bankLoanMonth,
           stage: stage.stage,
           bankLoanAmount: stage.bankLoanAmount,
-          percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100,
-          estimatedTime: stage.estimatedTime,
-          actualDate: stage.actualDate
+          estimatedTime: stage.estimatedTime
         });
       } else {
         // For subsequent drawdowns, increment bank loan month based on estimated time
@@ -297,9 +287,7 @@ const ProgressivePaymentCalculator = () => {
           bankLoanMonth: bankLoanMonth,
           stage: stage.stage,
           bankLoanAmount: stage.bankLoanAmount,
-          percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100,
-          estimatedTime: stage.estimatedTime,
-          actualDate: stage.actualDate
+          estimatedTime: stage.estimatedTime
         });
       }
     });
@@ -367,7 +355,8 @@ const ProgressivePaymentCalculator = () => {
         totalPrincipal: 0,
         totalPayable: completeSchedule.totalCashCPF,
         firstBankDrawdownMonth: null,
-        timelineCalculated: !!(inputs.otpDate && inputs.topDate)
+        timelineCalculated: !!(inputs.otpDate && inputs.topDate),
+        yearlyInterest: { year1: 0, year2: 0, year3: 0, year4: 0 }
       };
     }
 
@@ -388,9 +377,6 @@ const ProgressivePaymentCalculator = () => {
       const drawdown = bankDrawdownSchedule.find(d => d.bankLoanMonth === bankLoanMonth);
       const bankLoanDrawdownAmount = drawdown ? drawdown.bankLoanAmount : 0;
       
-      // Store opening balance before drawdown
-      const openingBalance = outstandingBalance;
-      
       // Add bank loan drawdown to outstanding balance FIRST (happens at start of month)
       if (bankLoanDrawdownAmount > 0) {
         outstandingBalance += bankLoanDrawdownAmount;
@@ -401,6 +387,9 @@ const ProgressivePaymentCalculator = () => {
         const currentRate = getInterestRateForMonth(bankLoanMonth);
         currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
       }
+      
+      // For Month 1, opening balance should equal the first drawdown amount
+      const openingBalance = bankLoanMonth === 1 ? outstandingBalance : outstandingBalance;
       
       // Calculate loan servicing for this month
       let monthlyPayment = 0;
@@ -433,21 +422,9 @@ const ProgressivePaymentCalculator = () => {
       // Calculate year for interest rate display
       const year = Math.ceil(bankLoanMonth / 12);
       
-      // Calculate actual date for this month
-      let actualDate = null;
-      if (inputs.otpDate) {
-        const otpDate = new Date(inputs.otpDate);
-        // For bank loan months, calculate from the first bank loan drawdown date
-        const firstDrawdownDate = bankDrawdownSchedule[0]?.actualDate || otpDate;
-        actualDate = new Date(firstDrawdownDate.getTime() + (bankLoanMonth - 1) * 30 * 24 * 60 * 60 * 1000);
-      }
-      
       monthlySchedule.push({
         month: bankLoanMonth,
         year: year,
-        actualDate: actualDate ? actualDate.toLocaleDateString('en-SG', { 
-          year: 'numeric', month: 'short', day: 'numeric' 
-        }) : null,
         openingBalance: openingBalance,
         drawdownAmount: bankLoanDrawdownAmount,
         cumulativeDrawdown: cumulativeBankLoanDrawdown,
@@ -468,6 +445,14 @@ const ProgressivePaymentCalculator = () => {
     // Calculate totals
     const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
     const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
+    
+    // Calculate yearly interest breakdown
+    const yearlyInterest = {
+      year1: monthlySchedule.filter(m => m.year === 1).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
+      year2: monthlySchedule.filter(m => m.year === 2).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
+      year3: monthlySchedule.filter(m => m.year === 3).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
+      year4: monthlySchedule.filter(m => m.year === 4).reduce((sum, month) => sum + (month.interestPayment || 0), 0)
+    };
     
     // Create display stages with payment mode information (for project timeline)
     const displayStages = completeSchedule.stages.map(stage => {
@@ -490,9 +475,6 @@ const ProgressivePaymentCalculator = () => {
         cashCPFAmount: stage.cashCPFAmount,
         paymentMode,
         month: stage.month, // Project timeline month
-        actualDate: stage.actualDate ? stage.actualDate.toLocaleDateString('en-SG', { 
-          year: 'numeric', month: 'short', day: 'numeric' 
-        }) : null,
         isInitial: stage.isInitial || false,
         isTOP: stage.isTOP || false,
         isCSC: stage.isCSC || false
@@ -512,7 +494,8 @@ const ProgressivePaymentCalculator = () => {
       totalPayable: totalInterest + totalPrincipal + completeSchedule.totalCashCPF,
       loanToValueRatio: (completeSchedule.selectedLoanAmount / completeSchedule.purchasePrice) * 100,
       firstBankDrawdownMonth: bankDrawdownSchedule.length > 0 ? 1 : null,
-      timelineCalculated: !!(inputs.otpDate && inputs.topDate)
+      timelineCalculated: !!(inputs.otpDate && inputs.topDate),
+      yearlyInterest
     };
   };
   
@@ -717,20 +700,20 @@ const ProgressivePaymentCalculator = () => {
             </div>
             <div>
                 <div class="info-row">
-                    <span class="info-label">Total Interest Payable:</span>
-                    <span class="info-value">${formatCurrency(results.totalInterest)}</span>
+                    <span class="info-label">1st Year Interest:</span>
+                    <span class="info-value">${formatCurrency(results.yearlyInterest.year1)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Total Principal:</span>
-                    <span class="info-value">${formatCurrency(results.totalPrincipal)}</span>
+                    <span class="info-label">2nd Year Interest:</span>
+                    <span class="info-value">${formatCurrency(results.yearlyInterest.year2)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Total Amount Payable:</span>
-                    <span class="info-value">${formatCurrency(results.totalPayable)}</span>
+                    <span class="info-label">3rd Year Interest:</span>
+                    <span class="info-value">${formatCurrency(results.yearlyInterest.year3)}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Timeline Source:</span>
-                    <span class="info-value">${results.timelineCalculated ? 'Date-Based' : 'Estimated'}</span>
+                    <span class="info-label">4th Year Interest:</span>
+                    <span class="info-value">${formatCurrency(results.yearlyInterest.year4)}</span>
                 </div>
             </div>
         </div>
@@ -743,7 +726,6 @@ const ProgressivePaymentCalculator = () => {
             <thead>
                 <tr>
                     <th>Project Month</th>
-                    <th>Date</th>
                     <th>Construction Stage</th>
                     <th>%</th>
                     <th>Total Amount</th>
@@ -760,7 +742,6 @@ const ProgressivePaymentCalculator = () => {
                     return `
                     <tr class="${rowClass}">
                         <td>${stage.month}</td>
-                        <td style="font-size: 6px;">${stage.actualDate || 'Est.'}</td>
                         <td style="text-align: left; padding-left: 4px;">${stage.stage}</td>
                         <td>${stage.percentage.toFixed(1)}%</td>
                         <td>${formatCurrency(stage.stageAmount)}</td>
@@ -772,10 +753,6 @@ const ProgressivePaymentCalculator = () => {
                 }).join('')}
             </tbody>
         </table>
-        
-        <div style="margin-top: 6px; font-size: 7px; color: #666;">
-            <strong>Legend:</strong> Blue = Cash/CPF Only | Yellow = Mixed/Bank Loan | Green = TOP | Purple = CSC
-        </div>
     </div>
 
     ${results.bankDrawdownSchedule.length > 0 ? `
@@ -787,12 +764,10 @@ const ProgressivePaymentCalculator = () => {
         <table class="payment-table">
             <thead>
                 <tr>
-                    <th>Drawdown #</th>
                     <th>Project Month</th>
                     <th>Bank Loan Month</th>
                     <th>Construction Stage</th>
                     <th>Bank Loan Amount</th>
-                    <th>% of Loan</th>
                 </tr>
             </thead>
             <tbody>
@@ -801,12 +776,10 @@ const ProgressivePaymentCalculator = () => {
                                    drawdown.stage.includes('TOP') ? 'top-highlight' : 'drawdown-highlight';
                     return `
                     <tr class="${rowClass}">
-                        <td>${index + 1}</td>
                         <td>${drawdown.projectMonth}</td>
                         <td><strong>${drawdown.bankLoanMonth}</strong></td>
                         <td style="text-align: left; padding-left: 4px;">${drawdown.stage}</td>
                         <td>${formatCurrency(drawdown.bankLoanAmount)}</td>
-                        <td>${drawdown.percentage.toFixed(1)}%</td>
                     </tr>
                     `;
                 }).join('')}
@@ -827,7 +800,6 @@ const ProgressivePaymentCalculator = () => {
                 <thead>
                     <tr>
                         <th>Month</th>
-                        <th>Date</th>
                         <th>Opening Balance</th>
                         <th>Bank Drawdown</th>
                         <th>Monthly Payment</th>
@@ -843,7 +815,6 @@ const ProgressivePaymentCalculator = () => {
                         return `
                         <tr class="${rowClass}">
                             <td>${month.month}</td>
-                            <td style="font-size: 6px;">${month.actualDate || 'Est.'}</td>
                             <td>${formatCurrency(month.openingBalance)}</td>
                             <td>${month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}</td>
                             <td>${month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}</td>
@@ -896,11 +867,12 @@ const ProgressivePaymentCalculator = () => {
 📄 Timeline Source: ${results.timelineCalculated ? 'Date-Based Calculations' : 'Default Estimates'}
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and Expected TOP dates.' : ''}
 
-✅ Key Features:
-• Certificate of Statutory Completion correctly positioned 12 months after TOP
-• Separate bank loan timeline from project construction timeline
-• Excel formula logic for construction stage timing calculations
-• 60-month payment schedule included
+✅ Updated Features:
+• Yearly interest breakdown (1st-4th year) included
+• Date columns removed from all tables
+• Streamlined Bank Loan Drawdown Schedule
+• Month 1 opening balance correctly set to first drawdown amount
+• Legends removed from all tables
 
 📄 FOR BEST PDF RESULTS:
 - Use Chrome or Edge browser for printing
@@ -1172,7 +1144,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
         <div className="space-y-6">
           {results && (
             <>
-              {/* Summary Cards */}
+              {/* Updated Summary Cards - Replace Interest Payable & Total Payable with Yearly Interest */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
                   <div className="flex items-center gap-3">
@@ -1192,12 +1164,12 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border border-red-200 shadow-sm">
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="w-8 h-8 text-red-600" />
+                    <BarChart3 className="w-8 h-8 text-orange-600" />
                     <div>
-                      <p className="text-sm text-red-600 font-medium">Interest Payable</p>
-                      <p className="text-xl font-bold text-red-700">{formatCurrency(results.totalInterest)}</p>
+                      <p className="text-sm text-orange-600 font-medium">1st Yr Interest</p>
+                      <p className="text-xl font-bold text-orange-700">{formatCurrency(results.yearlyInterest.year1)}</p>
                     </div>
                   </div>
                 </div>
@@ -1205,14 +1177,36 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <div className="flex items-center gap-3">
                     <Building className="w-8 h-8 text-purple-600" />
                     <div>
-                      <p className="text-sm text-purple-600 font-medium">Total Payable</p>
-                      <p className="text-xl font-bold text-purple-700">{formatCurrency(results.totalPayable)}</p>
+                      <p className="text-sm text-purple-600 font-medium">2nd Yr Interest</p>
+                      <p className="text-xl font-bold text-purple-700">{formatCurrency(results.yearlyInterest.year2)}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Construction Payment Schedule */}
+              {/* Additional Yearly Interest Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-xl border border-pink-200 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="w-8 h-8 text-pink-600" />
+                    <div>
+                      <p className="text-sm text-pink-600 font-medium">3rd Yr Interest</p>
+                      <p className="text-xl font-bold text-pink-700">{formatCurrency(results.yearlyInterest.year3)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-200 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-8 h-8 text-indigo-600" />
+                    <div>
+                      <p className="text-sm text-indigo-600 font-medium">4th Yr Interest</p>
+                      <p className="text-xl font-bold text-indigo-700">{formatCurrency(results.yearlyInterest.year4)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Construction Payment Schedule - Remove Date Column */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Construction Payment Schedule</h3>
@@ -1230,7 +1224,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <thead>
                       <tr className="border-b-2 border-gray-200">
                         <th className="text-center py-3 font-medium text-gray-700">Project Month</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Date</th>
                         <th className="text-left py-3 font-medium text-gray-700">Construction Stage</th>
                         <th className="text-center py-3 font-medium text-gray-700">%</th>
                         <th className="text-center py-3 font-medium text-gray-700">Total Amount</th>
@@ -1248,7 +1241,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                           stage.bankLoanAmount > 0 ? 'bg-yellow-50' : 'bg-gray-50'
                         }`}>
                           <td className="py-4 text-center font-medium">{stage.month}</td>
-                          <td className="py-4 text-center text-xs text-gray-600">{stage.actualDate || 'Est.'}</td>
                           <td className="py-4 text-left">{stage.stage}</td>
                           <td className="py-4 text-center">{stage.percentage.toFixed(1)}%</td>
                           <td className="py-4 text-center font-semibold">{formatCurrency(stage.stageAmount)}</td>
@@ -1278,30 +1270,9 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     </tbody>
                   </table>
                 </div>
-
-                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                  <div className="flex flex-wrap gap-4 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-100 rounded-full border border-blue-300"></div>
-                      <span>Cash/CPF Only</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-yellow-100 rounded-full border border-yellow-300"></div>
-                      <span>Bank Loan Component</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-100 rounded-full border border-green-300"></div>
-                      <span>TOP Completion</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-purple-100 rounded-full border border-purple-300"></div>
-                      <span>CSC (12 months after TOP)</span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Bank Loan Drawdown Schedule */}
+              {/* Bank Loan Drawdown Schedule - Remove Columns */}
               {results.bankDrawdownSchedule.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
@@ -1318,12 +1289,10 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b-2 border-gray-200">
-                          <th className="text-center py-3 font-medium text-gray-700">Drawdown #</th>
                           <th className="text-center py-3 font-medium text-gray-700">Project Month</th>
                           <th className="text-center py-3 font-medium text-gray-700">Bank Loan Month</th>
                           <th className="text-left py-3 font-medium text-gray-700">Construction Stage</th>
                           <th className="text-center py-3 font-medium text-gray-700">Bank Loan Amount</th>
-                          <th className="text-center py-3 font-medium text-gray-700">% of Total Loan</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1332,7 +1301,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                             drawdown.stage.includes('Certificate of Statutory Completion') ? 'bg-purple-50' : 
                             drawdown.stage.includes('TOP') ? 'bg-green-50' : 'bg-yellow-50'
                           }`}>
-                            <td className="py-4 text-center font-medium">{index + 1}</td>
                             <td className="py-4 text-center">{drawdown.projectMonth}</td>
                             <td className="py-4 text-center">
                               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">
@@ -1343,7 +1311,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                             <td className="py-4 text-center font-semibold text-green-600">
                               {formatCurrency(drawdown.bankLoanAmount)}
                             </td>
-                            <td className="py-4 text-center">{drawdown.percentage.toFixed(1)}%</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1352,7 +1319,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               )}
 
-              {/* Monthly Payment Schedule */}
+              {/* Monthly Payment Schedule - Remove Date Column */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Monthly Payment Schedule (First 60 Months)</h3>
@@ -1360,7 +1327,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <p className="text-sm text-green-800">
                       <strong>Bank Loan Servicing:</strong> 
                       {results.firstBankDrawdownMonth ? (
-                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown. Certificate of Statutory Completion included in timeline.`
+                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown. Month 1 opening balance equals first drawdown amount.`
                       ) : (
                         ' 100% Cash/CPF payment - No bank loan servicing required.'
                       )}
@@ -1373,7 +1340,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <thead>
                       <tr className="border-b-2 border-gray-200">
                         <th className="text-center py-3 font-medium text-gray-700">Month</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Date</th>
                         <th className="text-center py-3 font-medium text-gray-700">Opening Balance</th>
                         <th className="text-center py-3 font-medium text-gray-700">Bank Drawdown</th>
                         <th className="text-center py-3 font-medium text-gray-700">Monthly Payment</th>
@@ -1389,7 +1355,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                           month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
                         }`}>
                           <td className="py-3 text-center font-medium">{month.month}</td>
-                          <td className="py-3 text-center text-xs text-gray-600">{month.actualDate || 'Est.'}</td>
                           <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
                           <td className="py-3 text-center">
                             {month.drawdownAmount > 0 ? (
@@ -1416,19 +1381,6 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     </tbody>
                   </table>
                 </div>
-                
-                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                  <div className="flex flex-wrap gap-4 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-yellow-100 rounded-full border border-yellow-300"></div>
-                      <span>Bank Drawdown Month</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-gray-100 rounded-full border border-gray-300"></div>
-                      <span>Regular Servicing</span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* Generate Report Button */}
@@ -1440,7 +1392,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <Download className="w-6 h-6" />
                   <div className="text-left">
                     <div className="text-lg">Generate Progressive Payment Report</div>
-                    <div className="text-sm text-red-500">Professional PDF with Excel-based calculations</div>
+                    <div className="text-sm text-red-500">Professional PDF with yearly interest breakdown</div>
                   </div>
                 </button>
               </div>
