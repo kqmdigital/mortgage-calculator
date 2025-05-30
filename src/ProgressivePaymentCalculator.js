@@ -184,18 +184,44 @@ const ProgressivePaymentCalculator = () => {
   const generateBankLoanDrawdownSchedule = (completeSchedule) => {
     if (!completeSchedule) return [];
     
-    // Filter only stages that have bank loan components and create drawdown schedule
+    // Filter only stages that have bank loan components
     const bankDrawdownStages = completeSchedule.stages
-      .filter(stage => stage.bankLoanAmount > 0)
-      .map((stage, index) => ({
-        drawdownMonth: index + 1, // Bank loan drawdown months start from 1
-        actualMonth: stage.month, // Actual project month
-        stage: stage.stage,
-        bankLoanAmount: stage.bankLoanAmount,
-        percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100
-      }));
+      .filter(stage => stage.bankLoanAmount > 0);
 
-    return bankDrawdownStages;
+    if (bankDrawdownStages.length === 0) return [];
+
+    // Calculate bank loan servicing months based on cumulative estimated time
+    const bankLoanSchedule = [];
+    let currentBankLoanMonth = 1; // First bank loan drawdown is always Month 1
+
+    bankDrawdownStages.forEach((stage, index) => {
+      if (index === 0) {
+        // First bank loan drawdown starts at Month 1
+        bankLoanSchedule.push({
+          projectMonth: stage.month,
+          bankLoanMonth: currentBankLoanMonth,
+          stage: stage.stage,
+          bankLoanAmount: stage.bankLoanAmount,
+          percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100,
+          estimatedTime: stage.estimatedTime
+        });
+      } else {
+        // For subsequent drawdowns, add the estimated time from the previous stage
+        const previousStage = bankDrawdownStages[index - 1];
+        currentBankLoanMonth += previousStage.estimatedTime;
+        
+        bankLoanSchedule.push({
+          projectMonth: stage.month,
+          bankLoanMonth: currentBankLoanMonth,
+          stage: stage.stage,
+          bankLoanAmount: stage.bankLoanAmount,
+          percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100,
+          estimatedTime: stage.estimatedTime
+        });
+      }
+    });
+
+    return bankLoanSchedule;
   };
 
   // Helper functions
@@ -262,30 +288,36 @@ const ProgressivePaymentCalculator = () => {
       };
     }
 
-    // Generate monthly payment schedule
+    // Generate bank loan servicing schedule (separate from project timeline)
     const monthlySchedule = [];
     const totalMonths = inputs.tenure * 12;
     let outstandingBalance = 0;
     let cumulativeBankLoanDrawdown = 0;
-    let loanServicingStarted = false;
     let currentMonthlyPayment = 0;
     
-    // Find first bank drawdown month (in actual project timeline)
-    const firstBankDrawdown = bankDrawdownSchedule[0];
-    const firstBankDrawdownMonth = firstBankDrawdown ? firstBankDrawdown.actualMonth : null;
-    
-    // Calculate maximum month needed for schedule (extend beyond loan period if needed for final payments)
-    const lastStageMonth = Math.max(...completeSchedule.stages.map(s => s.month));
-    const maxMonth = Math.max(totalMonths, lastStageMonth);
+    if (bankDrawdownSchedule.length === 0) {
+      // No bank loan - return empty schedule
+      return {
+        ...completeSchedule,
+        bankDrawdownSchedule: [],
+        monthlySchedule: [],
+        totalInterest: 0,
+        totalPrincipal: 0,
+        totalPayable: completeSchedule.totalCashCPF,
+        firstBankDrawdownMonth: null,
+        timelineCalculated: !!(inputs.otpDate && inputs.topDate)
+      };
+    }
 
-    // Generate monthly schedule
-    for (let projectMonth = 1; projectMonth <= maxMonth; projectMonth++) {
+    // Find the maximum bank loan month to determine schedule length
+    const maxBankLoanMonth = Math.max(...bankDrawdownSchedule.map(d => d.bankLoanMonth));
+    const scheduleLength = Math.max(totalMonths, maxBankLoanMonth);
+
+    // Generate bank loan servicing schedule (starts from month 1)
+    for (let bankLoanMonth = 1; bankLoanMonth <= scheduleLength; bankLoanMonth++) {
       // Check if there's a bank loan drawdown this month
-      const drawdown = bankDrawdownSchedule.find(d => d.actualMonth === projectMonth);
+      const drawdown = bankDrawdownSchedule.find(d => d.bankLoanMonth === bankLoanMonth);
       const bankLoanDrawdownAmount = drawdown ? drawdown.bankLoanAmount : 0;
-      
-      // Check if there's any stage payment this month (for display purposes)
-      const stageInfo = completeSchedule.stages.find(stage => stage.month === projectMonth);
       
       const openingBalance = outstandingBalance;
       
@@ -294,15 +326,9 @@ const ProgressivePaymentCalculator = () => {
         outstandingBalance += bankLoanDrawdownAmount;
         cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
         
-        if (!loanServicingStarted) {
-          loanServicingStarted = true;
-        }
-        
         // Recalculate monthly payment based on new outstanding balance and remaining tenure
-        // Calculate months from first bank drawdown
-        const monthsFromFirstDrawdown = projectMonth - firstBankDrawdownMonth + 1;
-        const remainingMonths = Math.max(1, totalMonths - monthsFromFirstDrawdown + 1);
-        const currentRate = getInterestRateForMonth(monthsFromFirstDrawdown);
+        const remainingMonths = Math.max(1, totalMonths - bankLoanMonth + 1);
+        const currentRate = getInterestRateForMonth(bankLoanMonth);
         currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
       }
       
@@ -310,11 +336,9 @@ const ProgressivePaymentCalculator = () => {
       let monthlyPayment = 0;
       let interestPayment = 0;
       let principalPayment = 0;
-      let currentRate = 0;
+      const currentRate = getInterestRateForMonth(bankLoanMonth);
       
-      if (loanServicingStarted && outstandingBalance > 0) {
-        const monthsFromFirstDrawdown = projectMonth - firstBankDrawdownMonth + 1;
-        currentRate = getInterestRateForMonth(monthsFromFirstDrawdown);
+      if (outstandingBalance > 0) {
         const monthlyRate = currentRate / 100 / 12;
         
         // Interest on opening balance (before any drawdown)
@@ -336,42 +360,22 @@ const ProgressivePaymentCalculator = () => {
         outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
       }
       
-      // Calculate actual date for this month
-      let actualDate = null;
-      if (inputs.otpDate) {
-        const otpDate = new Date(inputs.otpDate);
-        actualDate = new Date(otpDate.getTime() + (projectMonth - 1) * 30 * 24 * 60 * 60 * 1000);
-      }
-      
-      const monthInYear = ((projectMonth - 1) % 12) + 1;
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      // Calculate year for interest rate display
+      const year = Math.ceil(bankLoanMonth / 12);
       
       monthlySchedule.push({
-        month: projectMonth,
-        year: Math.ceil(projectMonth / 12),
-        monthInYear,
-        monthName: monthNames[monthInYear - 1],
-        actualDate: actualDate ? actualDate.toLocaleDateString('en-SG', { 
-          year: 'numeric', month: 'short', day: 'numeric' 
-        }) : null,
+        month: bankLoanMonth,
+        year: year,
         openingBalance: openingBalance,
         drawdownAmount: bankLoanDrawdownAmount,
-        totalStageAmount: stageInfo?.stageAmount || 0,
-        cashCPFDrawdown: stageInfo?.cashCPFAmount || 0,
         cumulativeDrawdown: cumulativeBankLoanDrawdown,
         monthlyPayment: monthlyPayment,
         interestPayment: interestPayment,
         principalPayment: principalPayment,
         endingBalance: outstandingBalance,
         interestRate: currentRate,
-        stage: stageInfo ? stageInfo.stage : null,
-        isInitialPayment: stageInfo?.isInitial || false,
-        hasConstructionStage: !!stageInfo,
-        hasBankDrawdown: bankLoanDrawdownAmount > 0,
-        paymentMode: !stageInfo ? 'Servicing' :
-                    (stageInfo.isCashCPFOnly ? 'Cash/CPF' : 
-                    (bankLoanDrawdownAmount > 0 ? 'Mixed' : 'Servicing'))
+        stage: drawdown ? drawdown.stage : null,
+        hasBankDrawdown: bankLoanDrawdownAmount > 0
       });
       
       // Stop if loan is fully paid and all drawdowns completed
@@ -384,7 +388,7 @@ const ProgressivePaymentCalculator = () => {
     const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
     const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
     
-    // Create display stages with payment mode information
+    // Create display stages with payment mode information (for project timeline)
     const displayStages = completeSchedule.stages.map(stage => {
       let paymentMode;
       if (stage.cashCPFAmount > 0 && stage.bankLoanAmount > 0) {
@@ -404,8 +408,7 @@ const ProgressivePaymentCalculator = () => {
         bankLoanAmount: stage.bankLoanAmount,
         cashCPFAmount: stage.cashCPFAmount,
         paymentMode,
-        month: stage.month,
-        actualDate: null, // Will be calculated if dates provided
+        month: stage.month, // Project timeline month
         isInitial: stage.isInitial || false,
         isTOP: stage.isTOP || false
       };
@@ -423,7 +426,7 @@ const ProgressivePaymentCalculator = () => {
       totalPrincipal,
       totalPayable: totalInterest + totalPrincipal + completeSchedule.totalCashCPF,
       loanToValueRatio: (completeSchedule.selectedLoanAmount / completeSchedule.purchasePrice) * 100,
-      firstBankDrawdownMonth,
+      firstBankDrawdownMonth: bankDrawdownSchedule.length > 0 ? 1 : null, // Always starts from month 1 in bank loan schedule
       timelineCalculated: !!(inputs.otpDate && inputs.topDate)
     };
   };
@@ -1102,15 +1105,15 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <h3 className="text-lg font-semibold mb-4">Bank Loan Drawdown Schedule</h3>
                   <div className="bg-green-50 p-3 rounded-lg mb-4">
                     <p className="text-sm text-green-800">
-                      <strong>Bank Loan Only:</strong> This table shows only the bank loan drawdown portions, following cumulative timing from construction stages.
+                      <strong>Bank Loan Only:</strong> This table shows only the bank loan drawdown portions. Bank loan servicing starts from Month 1.
                     </p>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-center py-2">Drawdown #</th>
                           <th className="text-center py-2">Project Month</th>
+                          <th className="text-center py-2">Bank Loan Month</th>
                           <th className="text-left py-2">Construction Stage</th>
                           <th className="text-center py-2">Bank Loan Amount</th>
                           <th className="text-center py-2">% of Total Loan</th>
@@ -1119,8 +1122,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                       <tbody>
                         {results.bankDrawdownSchedule.map((drawdown, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50 bg-yellow-50">
-                            <td className="py-3 text-center font-medium">{index + 1}</td>
-                            <td className="py-3 text-center">{drawdown.actualMonth}</td>
+                            <td className="py-3 text-center font-medium">{drawdown.projectMonth}</td>
+                            <td className="py-3 text-center font-medium text-blue-600">{drawdown.bankLoanMonth}</td>
                             <td className="py-3 text-left">{drawdown.stage}</td>
                             <td className="py-3 text-center font-semibold text-green-600">
                               {formatCurrency(drawdown.bankLoanAmount)}
