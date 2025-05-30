@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign } from 'lucide-react';
 import './App.css';
+import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 
 // Employee credentials (in production, store these securely)
@@ -3063,40 +3063,53 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         </div>
       </div>
 
-      {/* Calculator Type Selection - UPDATED TO INCLUDE 2 OPTIONS */}
-      <div className="mb-8">
-        <div className="bg-gray-100 p-2 rounded-lg inline-flex">
-          <button
-            onClick={() => setCalculatorType('tdsr')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-              calculatorType === 'tdsr'
-                ? 'bg-white text-blue-600 shadow-md'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            <TrendingUp className="w-5 h-5" />
-            TDSR/MSR Calculator
-          </button>
-          <button
-            onClick={() => setCalculatorType('repayment')}
-            className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-              calculatorType === 'repayment'
-                ? 'bg-white text-blue-600 shadow-md'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            <DollarSign className="w-5 h-5" />
-            Monthly Repayment Calculator
-          </button>
-        </div>
-      </div>
+     {/* Calculator Type Selection - UPDATED TO INCLUDE 3 OPTIONS */}
+<div className="mb-8">
+  <div className="bg-gray-100 p-2 rounded-lg inline-flex">
+    <button
+      onClick={() => setCalculatorType('tdsr')}
+      className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
+        calculatorType === 'tdsr'
+          ? 'bg-white text-blue-600 shadow-md'
+          : 'text-gray-600 hover:text-gray-800'
+      }`}
+    >
+      <TrendingUp className="w-5 h-5" />
+      TDSR/MSR Calculator
+    </button>
+    <button
+      onClick={() => setCalculatorType('repayment')}
+      className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
+        calculatorType === 'repayment'
+          ? 'bg-white text-blue-600 shadow-md'
+          : 'text-gray-600 hover:text-gray-800'
+      }`}
+    >
+      <DollarSign className="w-5 h-5" />
+      Monthly Repayment Calculator
+    </button>
+    <button
+      onClick={() => setCalculatorType('progressive')}
+      className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
+        calculatorType === 'progressive'
+          ? 'bg-white text-red-600 shadow-md'
+          : 'text-gray-600 hover:text-gray-800'
+      }`}
+    >
+      <BarChart3 className="w-5 h-5" />
+      Progressive Payment Calculator
+    </button>
+  </div>
+</div>
 
-      {/* Calculator Content - UPDATED TO INCLUDE 2 OPTIONS */}
-      {calculatorType === 'tdsr' ? (
-        <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
-      ) : (
-        <MonthlyRepaymentCalculator />
-      )}
+      {/* Calculator Content - UPDATED TO INCLUDE PROGRESSIVE CALCULATOR */}
+{calculatorType === 'tdsr' ? (
+  <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
+) : calculatorType === 'repayment' ? (
+  <MonthlyRepaymentCalculator />
+) : (
+  <ProgressivePaymentCalculator />
+)}
     </div>
   );
 };
