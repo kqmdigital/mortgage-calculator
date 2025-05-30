@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 import './App.css';
+import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 
 // Employee credentials (in production, store these securely)
 const EMPLOYEE_CREDENTIALS = {
