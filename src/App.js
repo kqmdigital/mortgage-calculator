@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import './App.css';
-import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
+import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award } from 'lucide-react';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 
 // Employee credentials (in production, store these securely)
@@ -24,7 +24,7 @@ const LoginScreen = ({ onLogin }) => {
     setError('');
 
     // Simulate loading delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     if (EMPLOYEE_CREDENTIALS[username] === password) {
       onLogin(username);
@@ -35,69 +35,127 @@ const LoginScreen = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-8 h-8 text-blue-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Employee Access</h1>
-          <p className="text-gray-600 mt-2">Comprehensive Mortgage Calculator Portal</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your username"
-              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your password"
-              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-600 text-sm">{error}</p>
+      <div className="relative z-10 max-w-md w-full">
+        {/* Login Card */}
+        <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8 transform hover:scale-105 transition-all duration-300">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+              <Shield className="w-10 h-10 text-white" />
             </div>
-          )}
-
-          <button
-            onClick={handleLogin}
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <div className="text-sm text-gray-500">
-            <p className="font-medium mb-2">Demo Credentials:</p>
-            <div className="space-y-1">
-              <p>• admin / admin123</p>
-              <p>• manager / manager456</p>
-              <p>• analyst / analyst789</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Employee Portal
+            </h1>
+            <p className="text-gray-600 mt-2 font-medium">KeyQuest Mortgage Calculator Suite</p>
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <Sparkles className="w-4 h-4 text-yellow-500" />
+              <span className="text-sm text-gray-500">Professional Financial Tools</span>
+              <Sparkles className="w-4 h-4 text-yellow-500" />
             </div>
           </div>
+
+          {/* Form */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Username
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 placeholder-gray-400"
+                  placeholder="Enter your username"
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                />
+                <Users className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 placeholder-gray-400"
+                  placeholder="Enter your password"
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                />
+                <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <p className="text-red-700 text-sm font-medium">{error}</p>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleLogin}
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Authenticating...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  <span>Access Portal</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Demo Credentials */}
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Award className="w-4 h-4 text-blue-600" />
+                <span className="font-semibold text-gray-700 text-sm">Demo Access</span>
+              </div>
+              <div className="space-y-2 text-xs text-gray-600">
+                <div className="flex justify-between">
+                  <span className="font-medium">Admin:</span>
+                  <span className="font-mono bg-white px-2 py-1 rounded">admin / admin123</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Manager:</span>
+                  <span className="font-mono bg-white px-2 py-1 rounded">manager / manager456</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Analyst:</span>
+                  <span className="font-mono bg-white px-2 py-1 rounded">analyst / analyst789</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-6">
+          <p className="text-white/70 text-sm">
+            © 2025 KeyQuest Mortgage. Secure Professional Platform.
+          </p>
         </div>
       </div>
     </div>
@@ -2353,62 +2411,86 @@ This ensures all content fits properly without being cut off.`);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Input Section */}
+        {/* Enhanced Input Section */}
         <div className="space-y-6">
           {/* Property Type Selection */}
-          <div className="bg-purple-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-purple-800">Property Type</h2>
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                <Building className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-purple-800">Property Type Selection</h2>
+                <p className="text-sm text-purple-600">Choose your property category</p>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => handleInputChange('propertyType', 'private')}
-                className={`p-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
                   inputs.propertyType === 'private'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg transform scale-105'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:shadow-md hover:scale-102'
                 }`}
               >
-                <Building className="w-5 h-5" />
-                <span className="font-medium">Private Property</span>
+                <Building className="w-8 h-8" />
+                <div className="text-center">
+                  <div className="font-semibold">Private Property</div>
+                  <div className="text-xs opacity-75">TDSR Assessment</div>
+                </div>
               </button>
               <button
                 onClick={() => handleInputChange('propertyType', 'hdb')}
-                className={`p-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
                   inputs.propertyType === 'hdb'
-                    ? 'border-green-500 bg-green-50 text-green-700'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-green-300'
+                    ? 'border-green-500 bg-green-50 text-green-700 shadow-lg transform scale-105'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-green-300 hover:shadow-md hover:scale-102'
                 }`}
               >
-                <Home className="w-5 h-5" />
-                <span className="font-medium">HDB Property</span>
+                <Home className="w-8 h-8" />
+                <div className="text-center">
+                  <div className="font-semibold">HDB Property</div>
+                  <div className="text-xs opacity-75">MSR + TDSR Assessment</div>
+                </div>
               </button>
             </div>
           </div>
 
-          <div className="bg-blue-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">Loan Details</h2>
-            <div className="grid grid-cols-1 gap-4">
+          {/* Enhanced Loan Details */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Purchase Price (SGD)</label>
+                <h2 className="text-xl font-semibold text-blue-800">Loan Configuration</h2>
+                <p className="text-sm text-blue-600">Set your loan parameters</p>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="1,000,000.00"
                   />
                 </div>
               </div>
             </div>
             
-            <div className="mt-4">
-              <label className="block text-sm font-medium mb-2">Loan Amount Options</label>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-4">
-                  <label className="flex items-center">
+            <div className="mt-6">
+              <label className="block text-sm font-semibold mb-3 text-gray-700">Loan Amount Options</label>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <label className="group">
                     <input
                       type="radio"
                       name="loanOption"
@@ -2417,11 +2499,21 @@ This ensures all content fits properly without being cut off.`);
                         handleInputChange('useCustomAmount', false);
                         handleInputChange('loanPercentage', 75);
                       }}
-                      className="mr-2"
+                      className="sr-only"
                     />
-                    75% ({formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)})
+                    <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
+                      !inputs.useCustomAmount && inputs.loanPercentage === 75
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
+                    }`}>
+                      <div className="font-semibold text-lg">75%</div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
+                      </div>
+                    </div>
                   </label>
-                  <label className="flex items-center">
+                  
+                  <label className="group">
                     <input
                       type="radio"
                       name="loanOption"
@@ -2430,31 +2522,49 @@ This ensures all content fits properly without being cut off.`);
                         handleInputChange('useCustomAmount', false);
                         handleInputChange('loanPercentage', 55);
                       }}
-                      className="mr-2"
+                      className="sr-only"
                     />
-                    55% ({formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)})
+                    <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
+                      !inputs.useCustomAmount && inputs.loanPercentage === 55
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
+                    }`}>
+                      <div className="font-semibold text-lg">55%</div>
+                      <div className="text-xs text-gray-600 mt-1">
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
+                      </div>
+                    </div>
                   </label>
-                  <label className="flex items-center">
+                  
+                  <label className="group">
                     <input
                       type="radio"
                       name="loanOption"
                       checked={inputs.useCustomAmount}
                       onChange={() => handleInputChange('useCustomAmount', true)}
-                      className="mr-2"
+                      className="sr-only"
                     />
-                    Custom Amount
+                    <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
+                      inputs.useCustomAmount
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
+                    }`}>
+                      <div className="font-semibold text-lg">Custom</div>
+                      <div className="text-xs text-gray-600 mt-1">Amount</div>
+                    </div>
                   </label>
                 </div>
+                
                 {inputs.useCustomAmount && (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Custom Loan Amount (SGD)</label>
+                  <div className="mt-4 animate-fadeIn">
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Loan Amount</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                       <input
                         type="text"
                         value={formatNumberInput(inputs.customLoanAmount)}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
-                        className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                        className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                         placeholder="750,000.00"
                       />
                     </div>
@@ -2463,18 +2573,18 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
 
-            <div className="mt-4">
-              <h3 className="text-lg font-medium mb-3">Loan Parameters</h3>
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Loan Parameters</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Stress Test Rate (%)</label>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Stress Test Rate (%)</label>
                   <div className="relative">
                     <input
                       type="number"
                       step="0.01"
                       value={inputs.stressTestRate}
                       onChange={(e) => handleInputChange('stressTestRate', Number(e.target.value))}
-                      className="w-full pr-8 pl-3 p-3 border rounded-lg bg-red-50"
+                      className="w-full pr-8 pl-3 py-3 border border-gray-300 rounded-xl bg-red-50 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
                       placeholder="4.00"
                       style={{
                         MozAppearance: 'textfield',
@@ -2482,12 +2592,12 @@ This ensures all content fits properly without being cut off.`);
                         appearance: 'none'
                       }}
                     />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">%</span>
                   </div>
-                  <p className="text-xs text-red-600 mt-1">Used for affordability calculation</p>
+                  <p className="text-xs text-red-600 mt-1 font-medium">Used for affordability calculation</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Loan Tenor (Years)</label>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Loan Tenor (Years)</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -2495,7 +2605,7 @@ This ensures all content fits properly without being cut off.`);
                       onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
                       max={results ? results.maxLoanTenor : "35"}
                       min="1"
-                      className="w-full pr-12 pl-3 p-3 border rounded-lg"
+                      className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                       placeholder="30"
                       style={{
                         MozAppearance: 'textfield',
@@ -2503,10 +2613,10 @@ This ensures all content fits properly without being cut off.`);
                         appearance: 'none'
                       }}
                     />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
                   </div>
                   {results && (
-                    <div className="mt-1 text-xs text-gray-600">
+                    <div className="mt-2 text-xs text-gray-600 space-y-1">
                       <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
                       {results.averageAge > 0 && (
                         <p><strong>Average age:</strong> {results.averageAge.toFixed(1)} years</p>
@@ -2525,125 +2635,142 @@ This ensures all content fits properly without being cut off.`);
             </div>
           </div>
 
-          <div className="bg-green-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-green-800">Applicant Information</h2>
-            <div className="grid grid-cols-2 gap-6">
+          {/* Enhanced Applicant Information */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <h3 className="font-medium mb-3">Applicant A</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Monthly Salary (SGD)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.monthlySalaryA)}
-                        onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
-                        className="w-full pl-12 pr-3 p-2 border rounded"
-                        placeholder="8,000.00"
-                      />
-                    </div>
+                <h2 className="text-xl font-semibold text-green-800">Applicant Details</h2>
+                <p className="text-sm text-green-600">Income and demographic information</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-800 text-lg border-b border-green-200 pb-2">Primary Applicant</h3>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.monthlySalaryA)}
+                      onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
+                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      placeholder="8,000.00"
+                    />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Annual Salary (SGD)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.annualSalaryA)}
-                        onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
-                        className="w-full pl-12 pr-3 p-2 border rounded"
-                        placeholder="120,000.00"
-                      />
-                    </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.annualSalaryA)}
+                      onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
+                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      placeholder="120,000.00"
+                    />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Age (Years)</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.applicantAgeA)}
-                        onChange={(e) => handleInputChange('applicantAgeA', e.target.value)}
-                        className="w-full pr-12 pl-3 p-2 border rounded"
-                        placeholder="35"
-                      />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
-                    </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Age (Years)</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.applicantAgeA)}
+                      onChange={(e) => handleInputChange('applicantAgeA', e.target.value)}
+                      className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      placeholder="35"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
                   </div>
                 </div>
               </div>
-              <div>
-                <h3 className="font-medium mb-3">Applicant B</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Monthly Salary (SGD)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.monthlySalaryB)}
-                        onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
-                        className="w-full pl-12 pr-3 p-2 border rounded"
-                        placeholder="6,000.00"
-                      />
-                    </div>
+              
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-800 text-lg border-b border-green-200 pb-2">Co-Applicant (Optional)</h3>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.monthlySalaryB)}
+                      onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
+                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      placeholder="6,000.00"
+                    />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Annual Salary (SGD)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.annualSalaryB)}
-                        onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
-                        className="w-full pl-12 pr-3 p-2 border rounded"
-                        placeholder="90,000.00"
-                      />
-                    </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.annualSalaryB)}
+                      onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
+                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      placeholder="90,000.00"
+                    />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Age (Years)</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.applicantAgeB)}
-                        onChange={(e) => handleInputChange('applicantAgeB', e.target.value)}
-                        className="w-full pr-12 pl-3 p-2 border rounded"
-                        placeholder="32"
-                      />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
-                    </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Age (Years)</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.applicantAgeB)}
+                      onChange={(e) => handleInputChange('applicantAgeB', e.target.value)}
+                      className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      placeholder="32"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-yellow-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-yellow-800">Additional Funding Options</h2>
+          {/* Enhanced Additional Funding */}
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-yellow-800">Additional Funding Solutions</h2>
+                <p className="text-sm text-yellow-600">Show fund and pledge options</p>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Show Fund Amount (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Show Fund Amount (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.showFundAmount)}
                     onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="500,000.00"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Pledge Amount (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Pledge Amount (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.pledgeAmount)}
                     onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="300,000.00"
                   />
                 </div>
@@ -2651,83 +2778,93 @@ This ensures all content fits properly without being cut off.`);
             </div>
           </div>
 
-          <div className="bg-red-50 p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-red-800">Existing Commitments</h2>
+          {/* Enhanced Existing Commitments */}
+          <div className="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border border-red-200 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-red-800">Existing Monthly Commitments</h2>
+                <p className="text-sm text-red-600">Current loan obligations</p>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Car Loan (A) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Car Loan (A) - Monthly Payment (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanA)}
                     onChange={(e) => handleInputChange('carLoanA', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="800.00"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Car Loan (B) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Car Loan (B) - Monthly Payment (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanB)}
                     onChange={(e) => handleInputChange('carLoanB', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="600.00"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Personal Loan (A) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Personal Loan (A) - Monthly Payment (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanA)}
                     onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="500.00"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Personal Loan (B) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Personal Loan (B) - Monthly Payment (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanB)}
                     onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="300.00"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Property Loan (A) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Property Loan (A) - Monthly Payment (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanA)}
                     onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="2,000.00"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Property Loan (B) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Property Loan (B) - Monthly Payment (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanB)}
                     onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
-                    className="w-full pl-12 pr-3 p-3 border rounded-lg"
+                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
                     placeholder="1,500.00"
                   />
                 </div>
@@ -2735,8 +2872,8 @@ This ensures all content fits properly without being cut off.`);
             </div>
             
             {inputs.propertyType === 'hdb' && (
-              <div className="mt-4 p-3 bg-yellow-100 rounded-lg">
-                <p className="text-sm text-yellow-800">
+              <div className="mt-4 p-4 bg-yellow-100 rounded-xl border border-yellow-300">
+                <p className="text-sm text-yellow-800 font-medium">
                   <strong>Note for HDB (MSR Calculation):</strong> Only property loans are included in MSR calculation. 
                   Car loans and personal loans are excluded from MSR but may still affect overall affordability.
                 </p>
@@ -2744,8 +2881,8 @@ This ensures all content fits properly without being cut off.`);
             )}
             
             {inputs.propertyType === 'private' && (
-              <div className="mt-4 p-3 bg-blue-100 rounded-lg">
-                <p className="text-sm text-blue-800">
+              <div className="mt-4 p-4 bg-blue-100 rounded-xl border border-blue-300">
+                <p className="text-sm text-blue-800 font-medium">
                   <strong>Note for Private Property (TDSR Calculation):</strong> All commitments are included in TDSR calculation
                   (car loans, personal loans, AND property loans).
                 </p>
@@ -2754,13 +2891,13 @@ This ensures all content fits properly without being cut off.`);
           </div>
         </div>
 
-        {/* Results Section */}
+        {/* Enhanced Results Section */}
         {results && (
           <div className="space-y-6">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Calculation Results</h2>
-                <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+            <div className="bg-gradient-to-br from-gray-50 to-slate-100 p-6 rounded-xl border border-gray-200 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Assessment Results</h2>
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
                   inputs.propertyType === 'private' 
                     ? 'bg-blue-100 text-blue-800' 
                     : 'bg-green-100 text-green-800'
@@ -2768,46 +2905,47 @@ This ensures all content fits properly without being cut off.`);
                   {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'}
                 </div>
               </div>
+              
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-medium mb-3">Loan Information</h3>
+                  <h3 className="font-semibold mb-4 text-gray-800">Loan Configuration</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Selected Loan Amount:</span>
-                      <div className="font-semibold text-blue-600">{formatCurrency(results.loanAmount)}</div>
+                      <div className="font-bold text-xl text-blue-600">{formatCurrency(results.loanAmount)}</div>
                     </div>
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">75% Loan Option:</span>
-                      <div className="font-medium">{formatCurrency(results.loanAmount75)}</div>
+                      <div className="font-semibold text-gray-700">{formatCurrency(results.loanAmount75)}</div>
                     </div>
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">55% Loan Option:</span>
-                      <div className="font-medium">{formatCurrency(results.loanAmount55)}</div>
+                      <div className="font-semibold text-gray-700">{formatCurrency(results.loanAmount55)}</div>
                     </div>
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Loan-to-Value Ratio:</span>
-                      <div className="font-medium">{((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</div>
+                      <div className="font-semibold text-gray-700">{((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-3">Affordability Assessment</h3>
-                  <div className="bg-red-50 p-4 rounded-lg mb-4">
+                  <h3 className="font-semibold mb-4 text-gray-800">Affordability Assessment</h3>
+                  <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-200">
                     <div className="text-sm text-gray-600 mb-1">Monthly Installment (Stress Test {inputs.stressTestRate}%):</div>
-                    <div className="font-semibold text-xl text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
+                    <div className="font-bold text-2xl text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
                     <p className="text-xs text-gray-500 mt-1">This amount is used for TDSR/MSR calculation</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Combined Monthly Income:</span>
-                      <div className="font-semibold">{formatCurrency(results.combinedMonthlyIncome)}</div>
+                      <div className="font-bold text-xl text-green-600">{formatCurrency(results.combinedMonthlyIncome)}</div>
                     </div>
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">
                         {inputs.propertyType === 'hdb' ? 'MSR Commitments (Property Only):' : 'Total Commitments (All Loans):'}
                       </span>
-                      <div className="font-semibold">{formatCurrency(results.totalCommitments)}</div>
+                      <div className="font-bold text-xl text-red-600">{formatCurrency(results.totalCommitments)}</div>
                       <div className="text-xs text-gray-500">
                         {inputs.propertyType === 'hdb' 
                           ? 'MSR: Property loans only' 
@@ -2817,7 +2955,7 @@ This ensures all content fits properly without being cut off.`);
                       {inputs.propertyType === 'hdb' && results.totalCommitmentsTDSR > 0 && (
                         <div className="mt-2">
                           <span className="text-sm text-gray-600">TDSR Commitments (All Loans):</span>
-                          <div className="font-semibold">{formatCurrency(results.totalCommitmentsTDSR)}</div>
+                          <div className="font-bold text-lg text-red-600">{formatCurrency(results.totalCommitmentsTDSR)}</div>
                           <div className="text-xs text-gray-500">TDSR: Car, personal & property loans</div>
                         </div>
                       )}
@@ -2829,38 +2967,38 @@ This ensures all content fits properly without being cut off.`);
 
             {/* Property-specific Results */}
             {inputs.propertyType === 'private' && (
-              <div className={`p-6 rounded-lg border-2 ${results.tdsrPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  {results.tdsrPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+              <div className={`p-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${results.tdsrPass ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                  {results.tdsrPass ? <CheckCircle className="text-green-600 w-8 h-8" /> : <XCircle className="text-red-600 w-8 h-8" />}
                   Private Property (TDSR 55%)
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
                     <span className="text-sm text-gray-600">Required Income:</span>
-                    <div className="font-semibold">{formatCurrency(results.requiredIncomeTDSR)}</div>
+                    <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeTDSR)}</div>
                   </div>
-                  <div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
                     <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                    <div className={`font-semibold ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`font-bold text-xl ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {formatCurrency(results.tdsrDeficit)}
                     </div>
                   </div>
                 </div>
                 {!results.tdsrPass && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h4 className="font-medium mb-2">Cash Requirements (Choose One):</h4>
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold mb-4">Cash Requirements (Choose One):</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
+                      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                         <span className="text-sm text-gray-600">Cash to Show:</span>
-                        <div className="font-semibold text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
+                        <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
                       </div>
-                      <div className="text-center">
+                      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                         <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                        <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
+                        <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
                       </div>
                     </div>
-                    <div className="text-center mt-2">
-                      <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                    <div className="text-center mt-4">
+                      <span className="text-sm font-semibold text-gray-700 bg-yellow-200 px-4 py-2 rounded-full">OR</span>
                     </div>
                   </div>
                 )}
@@ -2868,92 +3006,92 @@ This ensures all content fits properly without being cut off.`);
             )}
 
             {inputs.propertyType === 'hdb' && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* MSR 30% Assessment */}
-                <div className={`p-6 rounded-lg border-2 ${results.hdbPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    {results.hdbPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+                <div className={`p-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${results.hdbPass ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                    {results.hdbPass ? <CheckCircle className="text-green-600 w-8 h-8" /> : <XCircle className="text-red-600 w-8 h-8" />}
                     HDB Property (MSR 30%)
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Required Income:</span>
-                      <div className="font-semibold">{formatCurrency(results.requiredIncomeHDB)}</div>
+                      <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeHDB)}</div>
                     </div>
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                      <div className={`font-semibold ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={`font-bold text-xl ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(results.hdbDeficit)}
                       </div>
                     </div>
                   </div>
                   {!results.hdbPass && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h4 className="font-medium mb-2">MSR Cash Requirements (Choose One):</h4>
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                      <h4 className="font-semibold mb-4">MSR Cash Requirements (Choose One):</h4>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center">
+                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                           <span className="text-sm text-gray-600">Cash to Show:</span>
-                          <div className="font-semibold text-red-600">{formatCurrency(results.cashShowHDB)}</div>
+                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowHDB)}</div>
                         </div>
-                        <div className="text-center">
+                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                           <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                          <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
+                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
                         </div>
                       </div>
-                      <div className="text-center mt-2">
-                        <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                      <div className="text-center mt-4">
+                        <span className="text-sm font-semibold text-gray-700 bg-yellow-200 px-4 py-2 rounded-full">OR</span>
                       </div>
                     </div>
                   )}
                 </div>
 
                 {/* TDSR 55% Assessment for HDB */}
-                <div className={`p-6 rounded-lg border-2 ${results.tdsrPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    {results.tdsrPass ? <CheckCircle className="text-green-600" /> : <XCircle className="text-red-600" />}
+                <div className={`p-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${results.tdsrPass ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                    {results.tdsrPass ? <CheckCircle className="text-green-600 w-8 h-8" /> : <XCircle className="text-red-600 w-8 h-8" />}
                     HDB Property (TDSR 55%)
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Required Income:</span>
-                      <div className="font-semibold">{formatCurrency(results.requiredIncomeTDSR)}</div>
+                      <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeTDSR)}</div>
                     </div>
-                    <div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                      <div className={`font-semibold ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={`font-bold text-xl ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(results.tdsrDeficit)}
                       </div>
                     </div>
                   </div>
                   {!results.tdsrPass && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h4 className="font-medium mb-2">TDSR Cash Requirements (Choose One):</h4>
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                      <h4 className="font-semibold mb-4">TDSR Cash Requirements (Choose One):</h4>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center">
+                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                           <span className="text-sm text-gray-600">Cash to Show:</span>
-                          <div className="font-semibold text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
+                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
                         </div>
-                        <div className="text-center">
+                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                           <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                          <div className="font-semibold text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
+                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
                         </div>
                       </div>
-                      <div className="text-center mt-2">
-                        <span className="text-sm font-medium text-gray-700 bg-yellow-100 px-3 py-1 rounded-full">OR</span>
+                      <div className="text-center mt-4">
+                        <span className="text-sm font-semibold text-gray-700 bg-yellow-200 px-4 py-2 rounded-full">OR</span>
                       </div>
                     </div>
                   )}
                 </div>
 
                 {/* Overall HDB Assessment */}
-                <div className={`p-4 rounded-lg border-2 text-center ${(results.hdbPass && results.tdsrPass) ? 'bg-green-100 border-green-300' : 'bg-red-100 border-red-300'}`}>
-                  <h4 className="font-bold text-lg">
+                <div className={`p-6 rounded-xl border-2 text-center shadow-lg transition-all duration-300 ${(results.hdbPass && results.tdsrPass) ? 'bg-green-100 border-green-400' : 'bg-red-100 border-red-400'}`}>
+                  <h4 className="font-bold text-2xl">
                     Overall HDB Assessment: {(results.hdbPass && results.tdsrPass) ? 
                       <span className="text-green-700">PASS ✓</span> : 
                       <span className="text-red-700">FAIL ✗</span>
                     }
                   </h4>
-                  <p className="text-sm mt-2 text-gray-600">
+                  <p className="text-sm mt-3 text-gray-600">
                     {(results.hdbPass && results.tdsrPass) ? 
                       'You meet both MSR (30%) and TDSR (55%) requirements.' :
                       'You must pass BOTH MSR (30%) AND TDSR (55%) tests for HDB loan approval.'
@@ -2964,59 +3102,50 @@ This ensures all content fits properly without being cut off.`);
             )}
 
             {/* Generate Report Button */}
-            <button
-              onClick={generatePDFReport}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
-            >
-              <Download className="w-5 h-5" />
-              Generate TDSR/MSR Report (PDF)
-            </button>
-            <p className="text-sm text-gray-500 text-center">
-              Clean, client-ready report for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'} affordability analysis
-            </p>
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-1 shadow-lg">
+              <button
+                onClick={generatePDFReport}
+                className="w-full bg-white text-blue-600 py-4 px-6 rounded-lg font-bold text-lg flex items-center justify-center gap-3 hover:bg-gray-50 transition-all duration-200 transform hover:scale-105"
+              >
+                <Download className="w-6 h-6" />
+                <div className="text-left">
+                  <div>Generate TDSR/MSR Analysis Report</div>
+                  <div className="text-sm text-blue-500">Professional PDF for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'}</div>
+                </div>
+              </button>
+            </div>
 
             {/* Formula Information */}
-            <div className="bg-blue-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Info className="text-blue-600" />
-                Key Formulas Used
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-3 text-blue-800">
+                <Info className="text-blue-600 w-6 h-6" />
+                Key Calculation Formulas
               </h3>
-              <div className="text-sm space-y-2 text-gray-700">
-                <p><strong>Maximum Loan Tenor Rules:</strong></p>
-                <p className="ml-4"><strong>HDB Property:</strong></p>
-                <p className="ml-6">• 56%-75% loan: Max 25 years, borrower age capped at 65 years</p>
-                <p className="ml-6">• ≤55% loan: Max 30 years, borrower age capped at 75 years</p>
-                <p className="ml-4"><strong>Private Property:</strong></p>
-                <p className="ml-6">• 56%-75% loan: Max 30 years, borrower age capped at 65 years</p>
-                <p className="ml-6">• ≤55% loan: Max 35 years, borrower age capped at 75 years</p>
-                <p className="ml-4">• <strong>Calculation:</strong> Min(Max_Tenor_Years, Age_Cap - Average_Age)</p>
+              <div className="text-sm space-y-3 text-gray-700">
+                <div className="bg-white p-3 rounded-lg border border-blue-100">
+                  <p className="font-semibold text-blue-700">Maximum Loan Tenor Rules:</p>
+                  <p className="ml-4 text-xs mt-1"><strong>HDB Property:</strong></p>
+                  <p className="ml-6 text-xs">• 56%-75% loan: Max 25 years, borrower age capped at 65 years</p>
+                  <p className="ml-6 text-xs">• ≤55% loan: Max 30 years, borrower age capped at 75 years</p>
+                  <p className="ml-4 text-xs mt-1"><strong>Private Property:</strong></p>
+                  <p className="ml-6 text-xs">• 56%-75% loan: Max 30 years, borrower age capped at 65 years</p>
+                  <p className="ml-6 text-xs">• ≤55% loan: Max 35 years, borrower age capped at 75 years</p>
+                </div>
                 
-                <p><strong>Commitment Inclusions by Property Type:</strong></p>
-                <p className="ml-4"><strong>Private Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
-                <p className="ml-4"><strong>HDB Property (MSR):</strong> Property loans only (car & personal loans excluded)</p>
-                <p className="ml-4"><strong>HDB Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
-                <p className="ml-4"><em>Note: HDB properties must pass BOTH MSR (30%) AND TDSR (55%) tests</em></p>
+                <div className="bg-white p-3 rounded-lg border border-blue-100">
+                  <p className="font-semibold text-blue-700">Commitment Inclusions by Property Type:</p>
+                  <p className="ml-4 text-xs"><strong>Private Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
+                  <p className="ml-4 text-xs"><strong>HDB Property (MSR):</strong> Property loans only (car & personal loans excluded)</p>
+                  <p className="ml-4 text-xs"><strong>HDB Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
+                  <p className="ml-4 text-xs italic">Note: HDB properties must pass BOTH MSR (30%) AND TDSR (55%) tests</p>
+                </div>
                 
-                <p><strong>Monthly Installment Calculation:</strong></p>
-                <p className="ml-4">• PMT(Stress Test Rate/12, Loan Tenor×12, Loan Amount)</p>
-                <p className="ml-4">• <em>Note: Stress test installment used for affordability assessment only</em></p>
-                
-                <p><strong>Income Calculations:</strong></p>
-                <p className="ml-4">• Bonus Income = (Annual Salary - Monthly Salary×12) ÷ 12 × 0.7</p>
-                <p className="ml-4">• Show Fund Income = Show Fund Amount × 0.00625 (0.625% monthly yield)</p>
-                <p className="ml-4">• Pledge Income = Pledge Amount ÷ 48 (48-month distribution)</p>
-                <p className="ml-4">• Combined Income = Sum of all income sources from both applicants</p>
-                
-                <p><strong>Affordability Ratios:</strong></p>
-                <p className="ml-4">• <strong>TDSR 55% (Private):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
-                <p className="ml-4">• <strong>MSR 30% (HDB):</strong> Combined Monthly Income × 0.3 - Property Loans Only</p>
-                <p className="ml-4">• <strong>TDSR 55% (HDB):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
-                <p className="ml-4">• Required Income TDSR = (Stress Test Installment + All Commitments) ÷ 0.55</p>
-                <p className="ml-4">• Required Income HDB MSR = (Stress Test Installment + Property Loans Only) ÷ 0.3</p>
-                
-                <p><strong>Cash Requirements (when deficit exists):</strong></p>
-                <p className="ml-4">• Cash to Show = |Deficit| ÷ 0.00625</p>
-                <p className="ml-4">• Cash to Pledge = |Deficit| × 48</p>
+                <div className="bg-white p-3 rounded-lg border border-blue-100">
+                  <p className="font-semibold text-blue-700">Affordability Ratios:</p>
+                  <p className="ml-4 text-xs">• <strong>TDSR 55% (Private):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
+                  <p className="ml-4 text-xs">• <strong>MSR 30% (HDB):</strong> Combined Monthly Income × 0.3 - Property Loans Only</p>
+                  <p className="ml-4 text-xs">• <strong>TDSR 55% (HDB):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
+                </div>
               </div>
             </div>
           </div>
@@ -3028,92 +3157,144 @@ This ensures all content fits properly without being cut off.`);
 
 // Main Calculator Wrapper Component
 const MortgageCalculator = ({ currentUser, onLogout }) => {
-  const [calculatorType, setCalculatorType] = useState('tdsr'); // 'tdsr' or 'repayment'
+  const [calculatorType, setCalculatorType] = useState('tdsr'); // 'tdsr', 'repayment', or 'progressive'
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white">
-      {/* Header with Logo */}
-      <div className="mb-8">
-        <div className="flex justify-center mb-6">
-          <img 
-            src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
-            alt="KeyQuest Mortgage Logo" 
-            className="h-32 w-auto"
-          />
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-              <Calculator className="text-blue-600" />
-              Comprehensive Mortgage Calculator
-            </h1>
-            <p className="text-gray-600 mt-2">Professional mortgage analysis and planning tools</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Enhanced Header */}
+        <div className="mb-8">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <img 
+                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
+                alt="KeyQuest Mortgage Logo" 
+                className="h-32 w-auto rounded-2xl shadow-lg"
+              />
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">Logged in as: <span className="font-medium">{currentUser}</span></p>
+          
+          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+                  <Calculator className="text-blue-600 w-10 h-10" />
+                  Comprehensive Mortgage Calculator Suite
+                </h1>
+                <p className="text-gray-600 mt-3 text-lg">Professional mortgage analysis and planning tools for Singapore property market</p>
+                <div className="flex items-center gap-4 mt-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Shield className="w-4 h-4 text-green-500" />
+                    <span>Bank-Grade Calculations</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Award className="w-4 h-4 text-yellow-500" />
+                    <span>MAS Compliant</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Users className="w-4 h-4 text-blue-500" />
+                    <span>Professional Tools</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
+                  <p className="text-sm text-gray-600">Logged in as:</p>
+                  <p className="font-bold text-gray-800 text-lg">{currentUser}</p>
+                  <button
+                    onClick={onLogout}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Calculator Type Selection */}
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-lg p-2 inline-flex border border-gray-200">
             <button
-              onClick={onLogout}
-              className="mt-1 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              onClick={() => setCalculatorType('tdsr')}
+              className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
+                calculatorType === 'tdsr'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
             >
-              <LogOut className="w-4 h-4" />
-              Logout
+              <TrendingUp className="w-5 h-5" />
+              <div className="text-left">
+                <div>TDSR/MSR Calculator</div>
+                <div className="text-xs opacity-75">Affordability Assessment</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCalculatorType('repayment')}
+              className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
+                calculatorType === 'repayment'
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <DollarSign className="w-5 h-5" />
+              <div className="text-left">
+                <div>Monthly Repayment Calculator</div>
+                <div className="text-xs opacity-75">Payment Schedules</div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCalculatorType('progressive')}
+              className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
+                calculatorType === 'progressive'
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <BarChart3 className="w-5 h-5" />
+              <div className="text-left">
+                <div>Progressive Payment Calculator</div>
+                <div className="text-xs opacity-75">BUC Properties</div>
+              </div>
             </button>
           </div>
         </div>
+
+        {/* Calculator Content */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="p-8">
+            {calculatorType === 'tdsr' ? (
+              <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
+            ) : calculatorType === 'repayment' ? (
+              <MonthlyRepaymentCalculator />
+            ) : (
+              <ProgressivePaymentCalculator />
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-12 text-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <p className="text-gray-600 text-sm">
+              © 2025 KeyQuest Mortgage. Professional Financial Analysis Platform.
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
+              <span>📧 info@keyquestmortgage.sg</span>
+              <span>📞 +65 XXXX XXXX</span>
+              <span>🌐 www.keyquestmortgage.sg</span>
+            </div>
+          </div>
+        </div>
       </div>
-
-     {/* Calculator Type Selection - UPDATED TO INCLUDE 3 OPTIONS */}
-<div className="mb-8">
-  <div className="bg-gray-100 p-2 rounded-lg inline-flex">
-    <button
-      onClick={() => setCalculatorType('tdsr')}
-      className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-        calculatorType === 'tdsr'
-          ? 'bg-white text-blue-600 shadow-md'
-          : 'text-gray-600 hover:text-gray-800'
-      }`}
-    >
-      <TrendingUp className="w-5 h-5" />
-      TDSR/MSR Calculator
-    </button>
-    <button
-      onClick={() => setCalculatorType('repayment')}
-      className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-        calculatorType === 'repayment'
-          ? 'bg-white text-blue-600 shadow-md'
-          : 'text-gray-600 hover:text-gray-800'
-      }`}
-    >
-      <DollarSign className="w-5 h-5" />
-      Monthly Repayment Calculator
-    </button>
-    <button
-      onClick={() => setCalculatorType('progressive')}
-      className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-        calculatorType === 'progressive'
-          ? 'bg-white text-red-600 shadow-md'
-          : 'text-gray-600 hover:text-gray-800'
-      }`}
-    >
-      <BarChart3 className="w-5 h-5" />
-      Progressive Payment Calculator
-    </button>
-  </div>
-</div>
-
-      {/* Calculator Content - UPDATED TO INCLUDE PROGRESSIVE CALCULATOR */}
-{calculatorType === 'tdsr' ? (
-  <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
-) : calculatorType === 'repayment' ? (
-  <MonthlyRepaymentCalculator />
-) : (
-  <ProgressivePaymentCalculator />
-)}
     </div>
   );
 };
-
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
