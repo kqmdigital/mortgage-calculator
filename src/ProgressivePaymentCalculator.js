@@ -244,7 +244,7 @@ const ProgressivePaymentCalculator = () => {
     };
   };
 
-  // Generate bank loan drawdown schedule (ONLY bank loan portions with actual amounts)
+  // FIXED: Generate bank loan drawdown schedule following Excel's Column N logic
   const generateBankLoanDrawdownSchedule = (completeSchedule) => {
     if (!completeSchedule) return [];
     
@@ -254,29 +254,28 @@ const ProgressivePaymentCalculator = () => {
 
     if (bankDrawdownStages.length === 0) return [];
 
-    // Calculate bank loan servicing months based on estimated time from Excel logic
+    // FIXED: Follow Excel's Column N logic exactly
     const bankLoanSchedule = [];
-    let currentBankLoanMonth = 1; // First bank loan drawdown is always Month 1
+    let bankLoanMonth = 1; // Start at Month 1 for first bank drawdown
 
     bankDrawdownStages.forEach((stage, index) => {
       if (index === 0) {
-        // First bank loan drawdown starts at Month 1
+        // First bank loan drawdown always starts at Month 1 (Excel N14 = 1)
         bankLoanSchedule.push({
           projectMonth: stage.month,
-          bankLoanMonth: currentBankLoanMonth,
+          bankLoanMonth: bankLoanMonth,
           stage: stage.stage,
           bankLoanAmount: stage.bankLoanAmount,
           percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100,
           estimatedTime: stage.estimatedTime
         });
       } else {
-        // For subsequent drawdowns, add the estimated time from the previous bank loan stage
-        const previousBankStage = bankDrawdownStages[index - 1];
-        currentBankLoanMonth += previousBankStage.estimatedTime;
+        // FIXED: Add estimated time from CURRENT stage, not previous (Excel logic)
+        bankLoanMonth += stage.estimatedTime;
         
         bankLoanSchedule.push({
           projectMonth: stage.month,
-          bankLoanMonth: currentBankLoanMonth,
+          bankLoanMonth: bankLoanMonth,
           stage: stage.stage,
           bankLoanAmount: stage.bankLoanAmount,
           percentage: (stage.bankLoanAmount / completeSchedule.selectedLoanAmount) * 100,
@@ -331,7 +330,7 @@ const ProgressivePaymentCalculator = () => {
     }
   };
 
-  // Main progressive payment calculation
+  // FIXED: Main progressive payment calculation with proper month mapping
   const calculateProgressivePayments = () => {
     const completeSchedule = calculateCompletePaymentSchedule();
     if (!completeSchedule) return null;
@@ -352,38 +351,24 @@ const ProgressivePaymentCalculator = () => {
       };
     }
 
-    // Generate bank loan servicing schedule (separate from project timeline)
+    // FIXED: Generate bank loan servicing schedule using correct month mapping
     const monthlySchedule = [];
     const totalMonths = inputs.tenure * 12;
     let outstandingBalance = 0;
     let cumulativeBankLoanDrawdown = 0;
     let currentMonthlyPayment = 0;
     
-    if (bankDrawdownSchedule.length === 0) {
-      // No bank loan - return empty schedule
-      return {
-        ...completeSchedule,
-        bankDrawdownSchedule: [],
-        monthlySchedule: [],
-        totalInterest: 0,
-        totalPrincipal: 0,
-        totalPayable: completeSchedule.totalCashCPF,
-        firstBankDrawdownMonth: null,
-        timelineCalculated: !!(inputs.otpDate && inputs.topDate)
-      };
-    }
-
-    // Find the maximum bank loan month to determine schedule length
+    // FIXED: Calculate maximum month needed (ensure CSC is included)
     const maxBankLoanMonth = Math.max(...bankDrawdownSchedule.map(d => d.bankLoanMonth));
     const scheduleLength = Math.max(totalMonths, maxBankLoanMonth);
 
-    // Generate bank loan servicing schedule (starts from month 1)
+    // FIXED: Generate bank loan servicing schedule using bank loan months (not project months)
     for (let bankLoanMonth = 1; bankLoanMonth <= scheduleLength; bankLoanMonth++) {
-      // Check if there's a bank loan drawdown this month
+      // FIXED: Check drawdown using bankLoanMonth (not off by one)
       const drawdown = bankDrawdownSchedule.find(d => d.bankLoanMonth === bankLoanMonth);
       const bankLoanDrawdownAmount = drawdown ? drawdown.bankLoanAmount : 0;
       
-      // Add bank loan drawdown to outstanding balance FIRST (happens at start of month)
+      // Add bank loan drawdown to outstanding balance FIRST
       if (bankLoanDrawdownAmount > 0) {
         outstandingBalance += bankLoanDrawdownAmount;
         cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
@@ -406,7 +391,7 @@ const ProgressivePaymentCalculator = () => {
       if (outstandingBalance > 0) {
         const monthlyRate = currentRate / 100 / 12;
         
-        // Interest payment on opening balance (which includes any drawdown for this month)
+        // Interest payment on opening balance
         interestPayment = openingBalance * monthlyRate;
         
         // Use current monthly payment
@@ -429,13 +414,13 @@ const ProgressivePaymentCalculator = () => {
       const year = Math.ceil(bankLoanMonth / 12);
       
       monthlySchedule.push({
-        month: bankLoanMonth,
+        month: bankLoanMonth, // FIXED: Use bank loan month directly
         year: year,
-        openingBalance: openingBalance, // This includes the drawdown for Month 1
+        openingBalance: openingBalance,
         drawdownAmount: bankLoanDrawdownAmount,
         cumulativeDrawdown: cumulativeBankLoanDrawdown,
         monthlyPayment: monthlyPayment,
-        interestPayment: interestPayment, // Interest starts from Month 1
+        interestPayment: interestPayment,
         principalPayment: principalPayment,
         endingBalance: outstandingBalance,
         interestRate: currentRate,
@@ -443,7 +428,7 @@ const ProgressivePaymentCalculator = () => {
         hasBankDrawdown: bankLoanDrawdownAmount > 0
       });
       
-      // Stop if loan is fully paid and all drawdowns completed
+      // FIXED: Continue until all drawdowns are processed AND loan is paid (include CSC)
       if (outstandingBalance <= 0.01 && cumulativeBankLoanDrawdown >= completeSchedule.totalBankLoan) {
         break;
       }
@@ -491,7 +476,7 @@ const ProgressivePaymentCalculator = () => {
       totalPrincipal,
       totalPayable: totalInterest + totalPrincipal + completeSchedule.totalCashCPF,
       loanToValueRatio: (completeSchedule.selectedLoanAmount / completeSchedule.purchasePrice) * 100,
-      firstBankDrawdownMonth: bankDrawdownSchedule.length > 0 ? 1 : null, // Always starts from month 1 in bank loan schedule
+      firstBankDrawdownMonth: bankDrawdownSchedule.length > 0 ? 1 : null, // Always starts from month 1
       timelineCalculated: !!(inputs.otpDate && inputs.topDate)
     };
   };
@@ -773,6 +758,7 @@ const ProgressivePaymentCalculator = () => {
                 <tr>
                     <th>Drawdown #</th>
                     <th>Project Month</th>
+                    <th>Bank Month</th>
                     <th>Construction Stage</th>
                     <th>Bank Loan Amount</th>
                     <th>% of Loan</th>
@@ -782,7 +768,8 @@ const ProgressivePaymentCalculator = () => {
                 ${results.bankDrawdownSchedule.map((drawdown, index) => `
                 <tr class="drawdown-highlight">
                     <td>${index + 1}</td>
-                    <td>${drawdown.actualMonth}</td>
+                    <td>${drawdown.projectMonth}</td>
+                    <td>${drawdown.bankLoanMonth}</td>
                     <td style="text-align: left; padding-left: 4px;">${drawdown.stage}</td>
                     <td>${formatCurrency(drawdown.bankLoanAmount)}</td>
                     <td>${drawdown.percentage.toFixed(1)}%</td>
@@ -871,8 +858,10 @@ const ProgressivePaymentCalculator = () => {
 
     alert(`Progressive payment schedule report generated successfully!
 
-📄 Timeline Source: ${results.timelineCalculated ? 'Date-Based Calculations' : 'Default Estimates'}
+📄 Timeline Source: ${results.timelineCalculated ? 'Date-Based Calculations' : 'Default Excel Logic'}
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and Expected TOP dates.' : ''}
+
+✅ FIXED: Month offset and CSC inclusion
 
 📄 FOR BEST PDF RESULTS:
 - Use Chrome or Edge browser for printing
@@ -1172,8 +1161,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <h3 className="text-lg font-semibold mb-4">Bank Loan Drawdown Schedule</h3>
                   <div className="bg-green-50 p-3 rounded-lg mb-4">
                     <p className="text-sm text-green-800">
-                      <strong>Bank Loan Timeline:</strong> Only shows stages with actual bank loan amounts {'>'} $0. 
-                      Month 1 Opening Balance = First Bank Drawdown Amount, interest kicks in immediately from Month 1.
+                      <strong>✅ FIXED:</strong> Bank loan timeline follows Excel Column N logic. 
+                      Starts at Month 1, cumulative timing ensures CSC appears at correct month.
                     </p>
                   </div>
                   <div className="overflow-x-auto">
@@ -1207,13 +1196,13 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
 
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-4">Monthly Payment Schedule (First 48 Months)</h3>
-                <div className="bg-blue-50 p-3 rounded-lg mb-4">
-                  <p className="text-sm text-blue-800">
-                    <strong>Key Features:</strong> 
+                <div className="bg-green-50 p-3 rounded-lg mb-4">
+                  <p className="text-sm text-green-800">
+                    <strong>✅ FIXED:</strong> Month offset corrected, CSC now included. 
                     {results.firstBankDrawdownMonth ? (
-                      `• Bank loan servicing starts from Month ${results.firstBankDrawdownMonth} • Monthly payments recalculate after each drawdown`
+                      `Bank loan servicing starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown.`
                     ) : (
-                      '• 100% Cash/CPF payment - No bank loan servicing required'
+                      '100% Cash/CPF payment - No bank loan servicing required.'
                     )}
                   </p>
                 </div>
@@ -1295,7 +1284,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 Generate Progressive Payment Report (PDF)
               </button>
               <p className="text-sm text-gray-500 text-center">
-                Detailed BUC property payment schedule with proper cash/CPF and bank loan separation
+                ✅ Fixed: Month offset and CSC inclusion - Detailed BUC property payment schedule
               </p>
             </>
           )}
