@@ -27,73 +27,130 @@ const ProgressivePaymentCalculator = () => {
 
   const [results, setResults] = useState(null);
 
-  // Define construction stages (these are the overall payment stages, including cash/CPF)
+  // Define construction stages with their weights (from Excel DDcal sheet)
   const getConstructionStages = () => {
     return [
       { 
         stage: 'Upon grant of Option to Purchase', 
         percentage: 5, 
-        estimatedTime: 1, 
+        weight: 0, // Not part of construction weight calculation
         isCashCPFOnly: true,
         isInitial: true 
       },
       { 
         stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)', 
         percentage: 15, 
-        estimatedTime: 1, 
+        weight: 0, // Not part of construction weight calculation
         isCashCPFOnly: true,
         isInitial: true 
       },
       { 
         stage: 'Completion of foundation work', 
         percentage: 10, 
-        estimatedTime: 10, // Months from previous stage
+        weight: 0.1, // 10% weight in construction
         isCashCPFOnly: false 
       },
       { 
         stage: 'Completion of reinforced concrete framework of unit', 
         percentage: 10, 
-        estimatedTime: 8, // Cumulative timing
+        weight: 0.1, // 10% weight in construction
         isCashCPFOnly: false 
       },
       { 
         stage: 'Completion of partition walls of unit', 
         percentage: 5, 
-        estimatedTime: 8, 
+        weight: 0.05, // 5% weight in construction
         isCashCPFOnly: false 
       },
       { 
         stage: 'Completion of roofing/ceiling of unit', 
         percentage: 5, 
-        estimatedTime: 4, 
+        weight: 0.05, // 5% weight in construction
         isCashCPFOnly: false 
       },
       { 
         stage: 'Completion of door sub-frames/ door frames, window frames, electrical wiring, internal plastering and plumbing of unit', 
         percentage: 5, 
-        estimatedTime: 4, 
+        weight: 0.05, // 5% weight in construction
         isCashCPFOnly: false 
       },
       { 
         stage: 'Completion of car park, roads and drains serving the housing project', 
         percentage: 5, 
-        estimatedTime: 4, 
+        weight: 0.05, // 5% weight in construction
         isCashCPFOnly: false 
       },
       { 
         stage: 'Temporary Occupation Permit (TOP)', 
         percentage: 25, 
-        estimatedTime: 4, 
+        weight: 0, // TOP happens at end of construction
         isCashCPFOnly: false,
         isTOP: true 
       },
       { 
         stage: 'Certificate of Statutory Completion', 
         percentage: 15, 
-        estimatedTime: 12, // 12 months after TOP
+        weight: 0, // CSC is 12 months after TOP
         isCashCPFOnly: false 
       }
     ];
+  };
+
+  // Calculate dynamic estimated times based on OTP and TOP dates (Excel logic)
+  const calculateEstimatedTimes = () => {
+    // If user provides both OTP and TOP dates, calculate based on timeline
+    if (inputs.otpDate && inputs.topDate) {
+      const otpDate = new Date(inputs.otpDate);
+      const topDate = new Date(inputs.topDate);
+      
+      // Calculate months between OTP and TOP
+      const monthsDiff = (topDate.getFullYear() - otpDate.getFullYear()) * 12 + 
+                         (topDate.getMonth() - otpDate.getMonth());
+      
+      // Total construction time = TOP_date - OTP_time - S&P_time
+      // Following Excel formula: J5 = J4 - E11 - E12
+      const totalConstructionTime = monthsDiff - 1 - 1; // Subtract OTP(1) and S&P(1) times
+      
+      return calculateConstructionEstimatedTimes(totalConstructionTime);
+    } else {
+      // Use default construction time (e.g., 37 months as in Excel example)
+      const defaultConstructionTime = 37;
+      return calculateConstructionEstimatedTimes(defaultConstructionTime);
+    }
+  };
+
+  // Calculate individual stage estimated times using Excel formula logic
+  const calculateConstructionEstimatedTimes = (totalConstructionTime) => {
+    const stages = getConstructionStages();
+    
+    // Calculate total weight for construction stages only (C13:C18 in Excel)
+    const constructionStages = stages.filter(stage => stage.weight > 0);
+    const totalWeight = constructionStages.reduce((sum, stage) => sum + stage.weight, 0);
+    
+    return stages.map(stage => {
+      let estimatedTime;
+      
+      if (stage.isInitial) {
+        // OTP and S&P have fixed times
+        estimatedTime = stage.stage.includes('Option to Purchase') ? 1 : 1;
+      } else if (stage.isTOP) {
+        // TOP happens at end of construction (no additional time)
+        estimatedTime = 0;
+      } else if (stage.stage.includes('Certificate of Statutory Completion')) {
+        // CSC is always 12 months after TOP
+        estimatedTime = 12;
+      } else if (stage.weight > 0) {
+        // Construction stages use Excel formula: ROUNDUP(totalTime * (weight/totalWeight), 0)
+        estimatedTime = Math.ceil(totalConstructionTime * (stage.weight / totalWeight));
+      } else {
+        estimatedTime = 0;
+      }
+      
+      return {
+        ...stage,
+        estimatedTime
+      };
+    });
   };
 
   // Calculate the complete payment schedule (cash/CPF + bank loan breakdown)
@@ -110,20 +167,27 @@ const ProgressivePaymentCalculator = () => {
 
     if (purchasePrice <= 0 || selectedLoanAmount <= 0) return null;
 
-    const constructionStages = getConstructionStages();
+    // Get construction stages with dynamic estimated times
+    const constructionStagesWithTimes = calculateEstimatedTimes();
     const totalCashCPFRequired = purchasePrice - selectedLoanAmount;
     
-    // Calculate actual months for each stage
+    // Calculate actual months for each stage using cumulative logic
     let cumulativeMonth = 1;
-    const stagesWithTiming = constructionStages.map((stage, index) => {
+    const stagesWithTiming = constructionStagesWithTimes.map((stage, index) => {
       if (index === 0) {
         // OTP stage starts at month 1
         cumulativeMonth = 1;
       } else if (index === 1) {
-        // S&P Agreement at month 2 (8 weeks ≈ 2 months from OTP)
+        // S&P Agreement at month 2 (fixed in Excel)
         cumulativeMonth = 2;
+      } else if (stage.isTOP) {
+        // TOP happens at end of construction (current cumulative month)
+        // Don't add estimated time for TOP
+      } else if (stage.stage.includes('Certificate of Statutory Completion')) {
+        // CSC is 12 months after TOP
+        cumulativeMonth += stage.estimatedTime;
       } else {
-        // Add estimated time to get next stage month
+        // Construction stages: add estimated time to get next stage month
         cumulativeMonth += stage.estimatedTime;
       }
       
@@ -190,7 +254,7 @@ const ProgressivePaymentCalculator = () => {
 
     if (bankDrawdownStages.length === 0) return [];
 
-    // Calculate bank loan servicing months based on cumulative estimated time
+    // Calculate bank loan servicing months based on estimated time from Excel logic
     const bankLoanSchedule = [];
     let currentBankLoanMonth = 1; // First bank loan drawdown is always Month 1
 
@@ -206,9 +270,9 @@ const ProgressivePaymentCalculator = () => {
           estimatedTime: stage.estimatedTime
         });
       } else {
-        // For subsequent drawdowns, add the estimated time from the previous stage
-        const previousStage = bankDrawdownStages[index - 1];
-        currentBankLoanMonth += previousStage.estimatedTime;
+        // For subsequent drawdowns, add the estimated time from the previous bank loan stage
+        const previousBankStage = bankDrawdownStages[index - 1];
+        currentBankLoanMonth += previousBankStage.estimatedTime;
         
         bankLoanSchedule.push({
           projectMonth: stage.month,
@@ -837,8 +901,9 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
             {(inputs.otpDate && inputs.topDate) && (
               <div className="bg-green-100 p-3 rounded-lg mb-4 border-l-4 border-green-500">
                 <p className="text-sm text-green-800">
-                  <strong>✓ Timeline Calculated:</strong> Drawdown schedule automatically calculated based on your project timeline 
-                  from {new Date(inputs.otpDate).toLocaleDateString('en-SG')} to {new Date(inputs.topDate).toLocaleDateString('en-SG')}.
+                  <strong>✓ Timeline Calculated:</strong> Construction stages and estimated times automatically calculated based on your project timeline 
+                  from {new Date(inputs.otpDate).toLocaleDateString('en-SG')} to {new Date(inputs.topDate).toLocaleDateString('en-SG')}. 
+                  Each stage gets proportional time based on Excel formula logic.
                 </p>
               </div>
             )}
@@ -1029,7 +1094,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 
                 <div className="bg-blue-50 p-3 rounded-lg mb-4">
                   <p className="text-sm text-blue-800">
-                    <strong>Payment Allocation:</strong> Cash/CPF payments are allocated first, remaining amounts come from bank loan drawdowns.
+                    <strong>Dynamic Estimated Times:</strong> Construction stage timing calculated using Excel formula logic - each stage gets proportional time based on its weight and total project duration.
+                    {results.timelineCalculated ? ' Timeline based on your OTP and TOP dates.' : ' Using default construction timeline.'}
                   </p>
                 </div>
                 
@@ -1105,7 +1171,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <h3 className="text-lg font-semibold mb-4">Bank Loan Drawdown Schedule</h3>
                   <div className="bg-green-50 p-3 rounded-lg mb-4">
                     <p className="text-sm text-green-800">
-                      <strong>Bank Loan Only:</strong> This table shows only the bank loan drawdown portions. Bank loan servicing starts from Month 1.
+                      <strong>Bank Loan Timeline:</strong> Bank loan months calculated dynamically based on construction stage estimated times. 
+                      First bank drawdown = Month 1, subsequent drawdowns use cumulative estimated time from previous bank loan stages.
                     </p>
                   </div>
                   <div className="overflow-x-auto">
