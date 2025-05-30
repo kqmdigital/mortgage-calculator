@@ -372,30 +372,41 @@ const ProgressivePaymentCalculator = () => {
     const scheduleLength = Math.max(totalMonths, maxBankLoanMonth);
 
     // Generate bank loan servicing schedule (starts from month 1)
+    let previousRate = 0;
+    
     for (let bankLoanMonth = 1; bankLoanMonth <= scheduleLength; bankLoanMonth++) {
       // Check if there's a bank loan drawdown this month
       const drawdown = bankDrawdownSchedule.find(d => d.bankLoanMonth === bankLoanMonth);
       const bankLoanDrawdownAmount = drawdown ? drawdown.bankLoanAmount : 0;
       
+      // Get current interest rate
+      const currentRate = getInterestRateForMonth(bankLoanMonth);
+      
       // Add bank loan drawdown to outstanding balance FIRST (happens at start of month)
       if (bankLoanDrawdownAmount > 0) {
         outstandingBalance += bankLoanDrawdownAmount;
         cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
-        
-        // Recalculate monthly payment based on new outstanding balance and remaining tenure
+      }
+      
+      // Recalculate monthly payment if:
+      // 1. There's a new drawdown, OR
+      // 2. Interest rate has changed from previous month, OR
+      // 3. This is the first month with outstanding balance
+      const rateChanged = currentRate !== previousRate;
+      const shouldRecalculate = bankLoanDrawdownAmount > 0 || rateChanged || (bankLoanMonth === 1 && outstandingBalance > 0);
+      
+      if (shouldRecalculate && outstandingBalance > 0) {
         const remainingMonths = Math.max(1, totalMonths - bankLoanMonth + 1);
-        const currentRate = getInterestRateForMonth(bankLoanMonth);
         currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
       }
       
-      // For Month 1, opening balance should equal the first drawdown amount
-      const openingBalance = bankLoanMonth === 1 ? outstandingBalance : outstandingBalance;
+      // Store opening balance (after any drawdown)
+      const openingBalance = outstandingBalance;
       
       // Calculate loan servicing for this month
       let monthlyPayment = 0;
       let interestPayment = 0;
       let principalPayment = 0;
-      const currentRate = getInterestRateForMonth(bankLoanMonth);
       
       if (outstandingBalance > 0) {
         const monthlyRate = currentRate / 100 / 12;
@@ -418,6 +429,9 @@ const ProgressivePaymentCalculator = () => {
         // Update outstanding balance AFTER payment
         outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
       }
+      
+      // Update previous rate for next iteration
+      previousRate = currentRate;
       
       // Calculate year for interest rate display
       const year = Math.ceil(bankLoanMonth / 12);
@@ -793,7 +807,7 @@ const ProgressivePaymentCalculator = () => {
             <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
             <p style="font-size: 9px; color: #666; margin-bottom: 8px;">
                 ${results.firstBankDrawdownMonth ? 
-                  `Bank loan servicing starts from Month ${results.firstBankDrawdownMonth}. Monthly installment recalculates after each drawdown.` : 
+                  `Bank loan servicing starts from Month ${results.firstBankDrawdownMonth}. Monthly installment recalculates after each drawdown AND when interest rates change.` : 
                   'No bank loan drawdowns - 100% Cash/CPF payment.'}
             </p>
             <table class="payment-table">
@@ -834,7 +848,7 @@ const ProgressivePaymentCalculator = () => {
         <h4 style="margin: 0 0 6px 0; color: #333; font-size: 10px;">Important Notes</h4>
         <p style="margin: 3px 0;">• Bank loan drawdown schedule uses separate timeline from project construction schedule.</p>
         <p style="margin: 3px 0;">• Certificate of Statutory Completion (CSC) is always 12 months after TOP in bank loan timeline.</p>
-        <p style="margin: 3px 0;">• Monthly payments recalculate automatically after each bank loan drawdown.</p>
+        <p style="margin: 3px 0;">• Monthly payments recalculate automatically after each bank loan drawdown AND when interest rates change.</p>
         <p style="margin: 3px 0;">• Construction stage timing calculated using Excel formula: ROUNDUP(TotalTime × (Weight/SumWeights), 0).</p>
         <p style="margin: 3px 0;">• Initial payments (OTP + S&P) are Cash/CPF only before bank loan activation.</p>
         <p style="margin: 3px 0;">• Interest rates may vary based on market conditions and bank packages.</p>
@@ -1327,7 +1341,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <p className="text-sm text-green-800">
                       <strong>Bank Loan Servicing:</strong> 
                       {results.firstBankDrawdownMonth ? (
-                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown. Month 1 opening balance equals first drawdown amount.`
+                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown AND when interest rates change. Month 1 opening balance equals first drawdown amount.`
                       ) : (
                         ' 100% Cash/CPF payment - No bank loan servicing required.'
                       )}
