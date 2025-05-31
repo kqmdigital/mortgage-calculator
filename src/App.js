@@ -1747,8 +1747,8 @@ This ensures all content fits properly without being cut off.`);
               >
                 <Download className="w-6 h-6" />
                 <div className="text-left">
-                  <div>Generate TDSR/MSR Analysis Report</div>
-                  <div className="text-sm text-blue-500">Professional PDF for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'}</div>
+                  <div>Generate TDSR/MSR Analysis Report for {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'}</div>
+                 
                 </div>
               </button>
             </div>
