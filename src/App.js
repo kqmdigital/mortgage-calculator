@@ -57,9 +57,7 @@ const LoginScreen = ({ onLogin }) => {
             </h1>
             <p className="text-gray-600 mt-2 font-medium">KeyQuest Mortgage Calculator Suite</p>
             <div className="flex items-center justify-center gap-2 mt-3">
-              <Sparkles className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm text-gray-500">Professional Financial Tools</span>
-              <Sparkles className="w-4 h-4 text-yellow-500" />
+            
             </div>
           </div>
 
@@ -127,35 +125,14 @@ const LoginScreen = ({ onLogin }) => {
             </button>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Award className="w-4 h-4 text-blue-600" />
-                <span className="font-semibold text-gray-700 text-sm">Demo Access</span>
-              </div>
-              <div className="space-y-2 text-xs text-gray-600">
-                <div className="flex justify-between">
-                  <span className="font-medium">Admin:</span>
-                  <span className="font-mono bg-white px-2 py-1 rounded">admin / admin123</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Manager:</span>
-                  <span className="font-mono bg-white px-2 py-1 rounded">manager / manager456</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium">Analyst:</span>
-                  <span className="font-mono bg-white px-2 py-1 rounded">analyst / analyst789</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        
+          
         </div>
 
         {/* Footer */}
         <div className="text-center mt-6">
           <p className="text-white/70 text-sm">
-            © 2025 KeyQuest Mortgage. Secure Professional Platform.
+            © 2025 KeyQuest Mortgage
           </p>
         </div>
       </div>
@@ -1028,7 +1005,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
 
     <div class="footer no-break">        
         <div style="margin-bottom: 8px;">
-            📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
+            📧 kenneth@keyquestmortgage.com.sg | 📞 +65 9795 2338 
         </div>
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 10px;">
@@ -1135,7 +1112,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.purchasePrice)}
@@ -1220,7 +1197,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="mt-4 animate-fadeIn">
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Loan Amount</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                      
                       <input
                         type="text"
                         value={formatNumberInput(inputs.customLoanAmount)}
@@ -1265,7 +1242,7 @@ This ensures all content fits properly without being cut off.`);
                       value={inputs.loanTenor}
                       onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
                       max={results ? results.maxLoanTenor : "35"}
-                      min="1"
+                      min="0"
                       className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                       placeholder="30"
                       style={{
@@ -1314,7 +1291,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    
                     <input
                       type="text"
                       value={formatNumberInput(inputs.monthlySalaryA)}
@@ -1327,7 +1304,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    
                     <input
                       type="text"
                       value={formatNumberInput(inputs.annualSalaryA)}
@@ -1357,7 +1334,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    
                     <input
                       type="text"
                       value={formatNumberInput(inputs.monthlySalaryB)}
@@ -1370,7 +1347,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                    
                     <input
                       type="text"
                       value={formatNumberInput(inputs.annualSalaryB)}
@@ -1405,15 +1382,15 @@ This ensures all content fits properly without being cut off.`);
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-yellow-800">Additional Funding Solutions</h2>
-                <p className="text-sm text-yellow-600">Show fund and pledge options</p>
+                <p className="text-sm text-yellow-600">Show fund and pledge amount options</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Show Fund Amount (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Show Fund (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.showFundAmount)}
@@ -1424,9 +1401,9 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Pledge Amount (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Pledging (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.pledgeAmount)}
@@ -1453,9 +1430,9 @@ This ensures all content fits properly without being cut off.`);
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Car Loan (A) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (A) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanA)}
@@ -1466,9 +1443,9 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Car Loan (B) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (B) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanB)}
@@ -1479,9 +1456,9 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Personal Loan (A) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (A) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanA)}
@@ -1492,9 +1469,9 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Personal Loan (B) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (B) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanB)}
@@ -1505,9 +1482,9 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Property Loan (A) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (A) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanA)}
@@ -1518,9 +1495,9 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Property Loan (B) - Monthly Payment (SGD)</label>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (B) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">SGD</span>
+                  
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanB)}
@@ -1845,21 +1822,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
                   <Calculator className="text-blue-600 w-10 h-10" />
                   Comprehensive Mortgage Calculator Suite
                 </h1>
-                <p className="text-gray-600 mt-3 text-lg">Professional mortgage analysis and planning tools for Singapore property market</p>
-                <div className="flex items-center gap-4 mt-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Shield className="w-4 h-4 text-green-500" />
-                    <span>Bank-Grade Calculations</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Award className="w-4 h-4 text-yellow-500" />
-                    <span>MAS Compliant</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Users className="w-4 h-4 text-blue-500" />
-                    <span>Professional Tools</span>
-                  </div>
-                </div>
+              
               </div>
               <div className="text-right">
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
@@ -1943,12 +1906,12 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         <div className="mt-12 text-center">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <p className="text-gray-600 text-sm">
-              © 2025 KeyQuest Mortgage. Professional Financial Analysis Platform.
+              © 2025 KeyQuest Mortgage
             </p>
             <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
-              <span>📧 info@keyquestmortgage.sg</span>
-              <span>📞 +65 XXXX XXXX</span>
-              <span>🌐 www.keyquestmortgage.sg</span>
+              <span>📧 kenneth@keyquestmortgage.com.sg</span>
+              <span>📞 +65 9795 2338</span>
+              <span></span>
             </div>
           </div>
         </div>
