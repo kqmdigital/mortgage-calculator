@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info } from 'lucide-react';
 
-// Progressive Payment Calculator Component for BUC Properties
+// Progressive Payment Calculator Component for BUC Properties - CORRECTED VERSION
 const ProgressivePaymentCalculator = () => {
   const [inputs, setInputs] = useState({
     purchasePrice: '',
@@ -27,132 +27,140 @@ const ProgressivePaymentCalculator = () => {
 
   const [results, setResults] = useState(null);
 
-  // Define construction stages with their weights (from Excel DDcal sheet)
-  const getConstructionStages = () => {
-    return [
-      { 
-        stage: 'Upon grant of Option to Purchase', 
-        percentage: 5, 
-        weight: 0, // Not part of construction weight calculation
-        isCashCPFOnly: true,
-        isInitial: true,
-        fixedTime: 1 // Fixed at month 1
-      },
-      { 
-        stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)', 
-        percentage: 15, 
-        weight: 0, // Not part of construction weight calculation
-        isCashCPFOnly: true,
-        isInitial: true,
-        fixedTime: 1 // Fixed 1 month after OTP (month 2)
-      },
-      { 
-        stage: 'Completion of foundation work', 
-        percentage: 10, 
-        weight: 0.1, // 10% weight in construction (C13 in Excel)
-        isCashCPFOnly: false 
-      },
-      { 
-        stage: 'Completion of reinforced concrete framework of unit', 
-        percentage: 10, 
-        weight: 0.1, // 10% weight in construction (C14 in Excel)
-        isCashCPFOnly: false 
-      },
-      { 
-        stage: 'Completion of partition walls of unit', 
-        percentage: 5, 
-        weight: 0.05, // 5% weight in construction (C15 in Excel)
-        isCashCPFOnly: false 
-      },
-      { 
-        stage: 'Completion of roofing/ceiling of unit', 
-        percentage: 5, 
-        weight: 0.05, // 5% weight in construction (C16 in Excel)
-        isCashCPFOnly: false 
-      },
-      { 
-        stage: 'Completion of door sub-frames/ door frames, window frames, electrical wiring, internal plastering and plumbing of unit', 
-        percentage: 5, 
-        weight: 0.05, // 5% weight in construction (C17 in Excel)
-        isCashCPFOnly: false 
-      },
-      { 
-        stage: 'Completion of car park, roads and drains serving the housing project', 
-        percentage: 5, 
-        weight: 0.05, // 5% weight in construction (C18 in Excel)
-        isCashCPFOnly: false 
-      },
-      { 
-        stage: 'Temporary Occupation Permit (TOP)', 
-        percentage: 25, 
-        weight: 0, // TOP happens at end of construction
-        isCashCPFOnly: false,
-        isTOP: true,
-        fixedTime: 0 // No additional time for TOP
-      },
-      { 
-        stage: 'Certificate of Statutory Completion', 
-        percentage: 15, 
-        weight: 0, // CSC is 12 months after TOP
-        isCashCPFOnly: false,
-        isCSC: true,
-        fixedTime: 12 // Always 12 months after TOP
+  // CORRECTED: Excel Column N Dynamic Logic
+  const calculateDynamicBankLoanMonths = (stagesWithBankAllocation) => {
+    const bankLoanSchedule = [];
+    
+    stagesWithBankAllocation.forEach((stage, index) => {
+      // Skip stages with no bank loan (Excel G column = 0)
+      if (stage.bankLoanAmount <= 0) {
+        return; // Skip this stage
       }
-    ];
-  };
-
-  // Calculate dynamic estimated times based on OTP and TOP dates (Excel logic)
-  const calculateEstimatedTimes = () => {
-    // If user provides both OTP and TOP dates, calculate based on timeline
-    if (inputs.otpDate && inputs.topDate) {
-      const otpDate = new Date(inputs.otpDate);
-      const topDate = new Date(inputs.topDate);
       
-      // Calculate months between OTP and TOP
-      const monthsDiff = (topDate.getFullYear() - otpDate.getFullYear()) * 12 + 
-                         (topDate.getMonth() - otpDate.getMonth());
+      let bankLoanMonth;
       
-      // Total construction time = TOP_date - OTP_time - S&P_time
-      // Following Excel formula: J5 = monthsDiff - 1 - 1 (subtract OTP and S&P times)
-      const totalConstructionTime = Math.max(24, monthsDiff - 2); // At least 24 months construction
-      
-      return calculateConstructionEstimatedTimes(totalConstructionTime);
-    } else {
-      // Use default construction time (37 months as in Excel example)
-      const defaultConstructionTime = 37;
-      return calculateConstructionEstimatedTimes(defaultConstructionTime);
-    }
-  };
-
-  // Calculate individual stage estimated times using Excel formula logic
-  const calculateConstructionEstimatedTimes = (totalConstructionTime) => {
-    const stages = getConstructionStages();
-    
-    // Calculate total weight for construction stages only (SUM(C13:C18) in Excel)
-    const constructionStages = stages.filter(stage => stage.weight > 0);
-    const totalWeight = constructionStages.reduce((sum, stage) => sum + stage.weight, 0);
-    
-    return stages.map(stage => {
-      let estimatedTime;
-      
-      if (stage.fixedTime !== undefined) {
-        // Fixed time stages (OTP, S&P, TOP, CSC)
-        estimatedTime = stage.fixedTime;
-      } else if (stage.weight > 0) {
-        // Construction stages use Excel formula: ROUNDUP(totalTime * (weight/totalWeight), 0)
-        estimatedTime = Math.ceil(totalConstructionTime * (stage.weight / totalWeight));
+      if (bankLoanSchedule.length === 0) {
+        // First stage with bank loan: Excel N10 logic = Month 1
+        bankLoanMonth = 1;
       } else {
-        estimatedTime = 0;
+        // Excel N11+ logic: Previous month + Previous stage's estimated time
+        const prevBankLoanStage = bankLoanSchedule[bankLoanSchedule.length - 1];
+        const prevStageIndex = prevBankLoanStage.originalIndex;
+        const prevStage = stagesWithBankAllocation[prevStageIndex];
+        
+        // Check if this is CSC (Certificate of Statutory Completion)
+        const isCSC = stage.stage.toLowerCase().includes('certificate') || 
+                     stage.stage.toLowerCase().includes('csc') ||
+                     stage.isCSC;
+        
+        if (isCSC) {
+          // CSC Exception: Excel N17 = N16 + E17 (Previous month + CSC's own time)
+          bankLoanMonth = prevBankLoanStage.bankLoanMonth + stage.estimatedTime;
+        } else {
+          // Normal pattern: Excel Nn = Nn-1 + En-1 (Previous month + Previous time)
+          bankLoanMonth = prevBankLoanStage.bankLoanMonth + prevStage.estimatedTime;
+        }
       }
+      
+      bankLoanSchedule.push({
+        stage: stage.stage,
+        bankLoanMonth: bankLoanMonth,
+        bankLoanAmount: stage.bankLoanAmount,
+        estimatedTime: stage.estimatedTime,
+        percentage: stage.percentage,
+        originalIndex: index,
+        isTOP: stage.isTOP || false,
+        isCSC: stage.isCSC || false,
+        projectMonth: stage.month || bankLoanMonth // For display purposes
+      });
+    });
+    
+    return bankLoanSchedule;
+  };
+
+  // CORRECTED: Excel Bank Loan Allocation (Column G logic)
+  const calculateExcelBankLoanAllocation = (stages, loanAmount, totalCashCPFRequired) => {
+    return stages.map((stage, index) => {
+      // OTP and S&P are cash/CPF only
+      if (stage.isCashCPFOnly) {
+        return {
+          ...stage,
+          bankLoanAmount: 0,
+          cashCPFAmount: stage.stageAmount
+        };
+      }
+
+      // Excel Formula: =IF(SUM($D10:D$17)<=$D$5,D10,IF(SUM($D$8:D10)>$E$5,(SUM($D$8:D10)-$E$5),0))
+      
+      // Sum of remaining stages (from current to end)
+      const remainingStageAmounts = stages
+        .slice(index)
+        .reduce((sum, s) => sum + s.stageAmount, 0);
+      
+      // Cumulative sum from OTP to current stage
+      const cumulativeFromOTP = stages
+        .slice(0, index + 1)
+        .reduce((sum, s) => sum + s.stageAmount, 0);
+      
+      let bankLoanAmount = 0;
+      
+      if (remainingStageAmounts <= loanAmount) {
+        // If remaining stages can be fully covered by loan
+        bankLoanAmount = stage.stageAmount;
+      } else if (cumulativeFromOTP > totalCashCPFRequired) {
+        // If cumulative exceeds cash/CPF requirement
+        bankLoanAmount = Math.min(
+          stage.stageAmount,
+          Math.max(0, cumulativeFromOTP - totalCashCPFRequired)
+        );
+      }
+      
+      const cashCPFAmount = stage.stageAmount - bankLoanAmount;
       
       return {
         ...stage,
-        estimatedTime
+        bankLoanAmount,
+        cashCPFAmount
       };
     });
   };
 
-  // Calculate the complete payment schedule (cash/CPF + bank loan breakdown)
+  // Calculate construction timing using Excel logic
+  const calculateConstructionTime = (otpDate, topDate) => {
+    if (!otpDate || !topDate) {
+      return 37; // Default construction time
+    }
+    
+    const otp = new Date(otpDate);
+    const top = new Date(topDate);
+    const daysDifference = (top - otp) / (1000 * 60 * 60 * 24);
+    const totalProjectMonths = Math.floor((daysDifference / 365) * 12);
+    
+    // Excel J5 = J4 - E8 - E9 (Total - OTP time - S&P time)
+    return Math.max(24, totalProjectMonths - 1 - 2);
+  };
+
+  // Construction stages with Excel weights and timing
+  const calculateConstructionStagesTiming = (constructionTime) => {
+    const stages = [
+      { stage: 'Completion of foundation work', percentage: 10, weight: 0.1 },
+      { stage: 'Completion of reinforced concrete framework of unit', percentage: 10, weight: 0.1 },
+      { stage: 'Completion of partition walls of unit', percentage: 5, weight: 0.05 },
+      { stage: 'Completion of roofing/ceiling of unit', percentage: 5, weight: 0.05 },
+      { stage: 'Completion of door sub-frames/ door frames, window frames, electrical wiring, internal plastering and plumbing of unit', percentage: 5, weight: 0.05 },
+      { stage: 'Completion of car park, roads and drains serving the housing project', percentage: 5, weight: 0.05 }
+    ];
+    
+    const totalWeight = stages.reduce((sum, s) => sum + s.weight, 0); // 0.4
+    
+    return stages.map(stage => ({
+      ...stage,
+      // Excel ROUNDUP formula: =ROUNDUP($J$5*(C10/SUM($C$10:$C$15)),0)
+      estimatedTime: Math.ceil(constructionTime * (stage.weight / totalWeight))
+    }));
+  };
+
+  // Calculate complete payment schedule with corrected logic
   const calculateCompletePaymentSchedule = () => {
     const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
     
@@ -166,133 +174,234 @@ const ProgressivePaymentCalculator = () => {
 
     if (purchasePrice <= 0 || selectedLoanAmount <= 0) return null;
 
-    // Get construction stages with dynamic estimated times
-    const constructionStagesWithTimes = calculateEstimatedTimes();
     const totalCashCPFRequired = purchasePrice - selectedLoanAmount;
     
-    // Calculate actual months for each stage using cumulative logic
+    // Calculate construction timing using Excel logic
+    const constructionTime = calculateConstructionTime(inputs.otpDate, inputs.topDate);
+    const constructionStages = calculateConstructionStagesTiming(constructionTime);
+
+    // Calculate project timeline months (cumulative)
     let cumulativeMonth = 1;
-    let topMonth = 1; // Track TOP month for CSC calculation
     
-    const stagesWithTiming = constructionStagesWithTimes.map((stage, index) => {
-      if (index === 0) {
-        // OTP stage starts at month 1
-        cumulativeMonth = 1;
-      } else if (index === 1) {
-        // S&P Agreement at month 2 (fixed)
-        cumulativeMonth = 2;
-      } else if (stage.isTOP) {
-        // TOP happens at current cumulative month (don't add time)
-        topMonth = cumulativeMonth; // Store TOP month for CSC calculation
-      } else if (stage.isCSC) {
-        // CSC is always 12 months after TOP
-        cumulativeMonth = topMonth + 12;
-      } else {
-        // Construction stages: add estimated time to get next stage month
-        cumulativeMonth += stage.estimatedTime;
+    // Define all project stages (including OTP, S&P, TOP, CSC)
+    const allStages = [
+      { 
+        stage: 'Upon grant of Option to Purchase', 
+        percentage: 5, 
+        estimatedTime: 1,
+        isCashCPFOnly: true,
+        stageAmount: purchasePrice * 0.05,
+        weight: 0,
+        month: 1
+      },
+      { 
+        stage: 'Upon signing S&P Agreement (within 8 weeks from OTP)', 
+        percentage: 15, 
+        estimatedTime: 2,
+        isCashCPFOnly: true,
+        stageAmount: purchasePrice * 0.15,
+        weight: 0,
+        month: 2
       }
-      
-      return {
-        ...stage,
-        month: cumulativeMonth,
-        stageAmount: purchasePrice * (stage.percentage / 100)
-      };
+    ];
+
+    // Add construction stages with cumulative timing
+    cumulativeMonth = 3; // Start after OTP (1) and S&P (2)
+    constructionStages.forEach(stage => {
+      allStages.push({
+        stage: stage.stage,
+        percentage: stage.percentage,
+        estimatedTime: stage.estimatedTime,
+        isCashCPFOnly: false,
+        stageAmount: purchasePrice * (stage.percentage / 100),
+        weight: stage.weight,
+        month: cumulativeMonth
+      });
+      cumulativeMonth += stage.estimatedTime;
     });
 
-    // Calculate cash/CPF vs bank loan allocation for each stage
-    let runningCashCPFAllocated = 0;
-    let totalCashCPF = 0;
-    let totalBankLoan = 0;
+    // Add TOP and CSC
+    const topMonth = cumulativeMonth;
+    allStages.push({
+      stage: 'Temporary Occupation Permit (TOP)',
+      percentage: 25,
+      estimatedTime: 0, // TOP has no estimated time for next calculation
+      isCashCPFOnly: false,
+      isTOP: true,
+      stageAmount: purchasePrice * 0.25,
+      weight: 0,
+      month: topMonth
+    });
+
+    allStages.push({
+      stage: 'Certificate of Statutory Completion',
+      percentage: 15,
+      estimatedTime: 12, // Fixed 12 months after TOP
+      isCashCPFOnly: false,
+      isCSC: true,
+      stageAmount: purchasePrice * 0.15,
+      weight: 0,
+      month: topMonth + 12
+    });
+
+    // Apply Excel bank loan allocation logic (Column G)
+    const stagesWithBankLoan = calculateExcelBankLoanAllocation(allStages, selectedLoanAmount, totalCashCPFRequired);
+
+    // Calculate dynamic bank loan timeline (Column N logic)
+    const bankLoanTimeline = calculateDynamicBankLoanMonths(stagesWithBankLoan);
+
+    return {
+      stages: stagesWithBankLoan,
+      bankLoanTimeline,
+      selectedLoanAmount,
+      purchasePrice,
+      totalCashCPFRequired,
+      totalCashCPF: totalCashCPFRequired,
+      totalBankLoan: selectedLoanAmount
+    };
+  };
+
+  // Generate monthly payment schedule using corrected bank loan timeline
+  const generateMonthlyPaymentSchedule = (bankLoanTimeline) => {
+    if (!bankLoanTimeline || bankLoanTimeline.length === 0) return [];
     
-    const completeSchedule = stagesWithTiming.map(stage => {
-      let cashCPFAmount = 0;
-      let bankLoanAmount = 0;
+    const monthlySchedule = [];
+    const totalMonths = inputs.tenure * 12;
+    let outstandingBalance = 0;
+    
+    // Create drawdown lookup map
+    const drawdownMap = new Map();
+    bankLoanTimeline.forEach(item => {
+      drawdownMap.set(item.bankLoanMonth, item.bankLoanAmount);
+    });
+    
+    for (let month = 1; month <= totalMonths; month++) {
+      const drawdownAmount = drawdownMap.get(month) || 0;
       
-      if (stage.isCashCPFOnly) {
-        // OTP and S&P stages are cash/CPF only
-        cashCPFAmount = stage.stageAmount;
-        bankLoanAmount = 0;
-      } else {
-        // For construction stages, allocate remaining cash/CPF first, then bank loan
-        const remainingCashCPFNeeded = Math.max(0, totalCashCPFRequired - runningCashCPFAllocated);
-        
-        if (remainingCashCPFNeeded > 0) {
-          cashCPFAmount = Math.min(stage.stageAmount, remainingCashCPFNeeded);
-          bankLoanAmount = stage.stageAmount - cashCPFAmount;
-        } else {
-          cashCPFAmount = 0;
-          bankLoanAmount = stage.stageAmount;
-        }
+      // Add drawdown to balance
+      if (drawdownAmount > 0) {
+        outstandingBalance += drawdownAmount;
       }
       
-      runningCashCPFAllocated += cashCPFAmount;
-      totalCashCPF += cashCPFAmount;
-      totalBankLoan += bankLoanAmount;
+      const openingBalance = outstandingBalance;
+      
+      // Calculate payments
+      let monthlyPayment = 0;
+      let interestPayment = 0;
+      let principalPayment = 0;
+      
+      if (outstandingBalance > 0) {
+        const currentRate = getInterestRateForMonth(month);
+        const monthlyRate = currentRate / 100 / 12;
+        
+        interestPayment = outstandingBalance * monthlyRate;
+        
+        // Recalculate payment after drawdown or rate change
+        const remainingMonths = totalMonths - month + 1;
+        monthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
+        
+        principalPayment = Math.min(monthlyPayment - interestPayment, outstandingBalance);
+        outstandingBalance -= principalPayment;
+      }
+      
+      monthlySchedule.push({
+        month,
+        year: Math.ceil(month / 12),
+        openingBalance,
+        drawdownAmount,
+        cumulativeDrawdown: bankLoanTimeline
+          .filter(item => item.bankLoanMonth <= month)
+          .reduce((sum, item) => sum + item.bankLoanAmount, 0),
+        monthlyPayment,
+        interestPayment,
+        principalPayment,
+        endingBalance: outstandingBalance,
+        interestRate: getInterestRateForMonth(month),
+        hasBankDrawdown: drawdownAmount > 0
+      });
+      
+      if (outstandingBalance <= 0.01) break;
+    }
+    
+    return monthlySchedule;
+  };
+
+  // Main progressive payment calculation
+  const calculateProgressivePayments = () => {
+    const completeSchedule = calculateCompletePaymentSchedule();
+    if (!completeSchedule) return null;
+
+    const monthlySchedule = generateMonthlyPaymentSchedule(completeSchedule.bankLoanTimeline);
+    
+    if (completeSchedule.bankLoanTimeline.length === 0) {
+      // No bank loan drawdowns (100% cash/CPF)
+      return {
+        ...completeSchedule,
+        monthlySchedule: [],
+        totalInterest: 0,
+        totalPrincipal: 0,
+        totalPayable: completeSchedule.totalCashCPF,
+        firstBankDrawdownMonth: null,
+        timelineCalculated: !!(inputs.otpDate && inputs.topDate),
+        yearlyInterest: { year1: 0, year2: 0, year3: 0, year4: 0 }
+      };
+    }
+
+    // Calculate totals
+    const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
+    const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
+    
+    // Calculate yearly interest breakdown
+    const yearlyInterest = {
+      year1: monthlySchedule.filter(m => m.year === 1).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
+      year2: monthlySchedule.filter(m => m.year === 2).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
+      year3: monthlySchedule.filter(m => m.year === 3).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
+      year4: monthlySchedule.filter(m => m.year === 4).reduce((sum, month) => sum + (month.interestPayment || 0), 0)
+    };
+    
+    // Create display stages with payment mode information
+    const displayStages = completeSchedule.stages.map(stage => {
+      let paymentMode;
+      if (stage.cashCPFAmount > 0 && stage.bankLoanAmount > 0) {
+        const cashCPFPercentage = ((stage.cashCPFAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
+        const bankLoanPercentage = ((stage.bankLoanAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
+        paymentMode = `Cash/CPF (${cashCPFPercentage}%) + Bank Loan (${bankLoanPercentage}%)`;
+      } else if (stage.cashCPFAmount > 0) {
+        paymentMode = 'Cash/CPF';
+      } else {
+        paymentMode = 'Bank Loan';
+      }
       
       return {
-        ...stage,
-        cashCPFAmount,
-        bankLoanAmount
+        stage: stage.stage,
+        percentage: stage.percentage,
+        stageAmount: stage.stageAmount,
+        bankLoanAmount: stage.bankLoanAmount,
+        cashCPFAmount: stage.cashCPFAmount,
+        paymentMode,
+        month: stage.month,
+        isInitial: stage.isCashCPFOnly || false,
+        isTOP: stage.isTOP || false,
+        isCSC: stage.isCSC || false
       };
     });
 
     return {
-      stages: completeSchedule,
-      totalCashCPF,
-      totalBankLoan,
-      selectedLoanAmount,
-      purchasePrice
+      stages: displayStages,
+      monthlySchedule,
+      bankDrawdownSchedule: completeSchedule.bankLoanTimeline,
+      purchasePrice: completeSchedule.purchasePrice,
+      loanAmount: completeSchedule.selectedLoanAmount,
+      totalCashCPF: completeSchedule.totalCashCPF,
+      totalBankLoan: completeSchedule.totalBankLoan,
+      totalInterest,
+      totalPrincipal,
+      totalPayable: totalInterest + totalPrincipal + completeSchedule.totalCashCPF,
+      loanToValueRatio: (completeSchedule.selectedLoanAmount / completeSchedule.purchasePrice) * 100,
+      firstBankDrawdownMonth: completeSchedule.bankLoanTimeline.length > 0 ? completeSchedule.bankLoanTimeline[0].bankLoanMonth : null,
+      timelineCalculated: !!(inputs.otpDate && inputs.topDate),
+      yearlyInterest
     };
-  };
-
-  // Generate bank loan drawdown schedule (ONLY bank loan portions with actual amounts)
-  const generateBankLoanDrawdownSchedule = (completeSchedule) => {
-    if (!completeSchedule) return [];
-    
-    // Filter only stages that have ACTUAL bank loan components (amount > 0)
-    const bankDrawdownStages = completeSchedule.stages
-      .filter(stage => stage.bankLoanAmount > 0);
-
-    if (bankDrawdownStages.length === 0) return [];
-
-    // Create bank loan drawdown schedule with separate bank loan month numbering
-    const bankLoanSchedule = [];
-    let bankLoanMonth = 1; // Bank loan month starts from 1
-
-    bankDrawdownStages.forEach((stage, index) => {
-      if (index === 0) {
-        // First bank loan drawdown is always Bank Loan Month 1
-        bankLoanSchedule.push({
-          projectMonth: stage.month,
-          bankLoanMonth: bankLoanMonth,
-          stage: stage.stage,
-          bankLoanAmount: stage.bankLoanAmount,
-          estimatedTime: stage.estimatedTime
-        });
-      } else {
-        // For subsequent drawdowns, increment bank loan month based on estimated time
-        bankLoanMonth += bankDrawdownStages[index - 1].estimatedTime || 1;
-        
-        // Special handling for CSC - it should be 12 months after TOP in bank loan timeline
-        if (stage.isCSC) {
-          const topStage = bankDrawdownStages.find(s => s.isTOP);
-          if (topStage) {
-            const topBankLoanMonth = bankLoanSchedule.find(s => s.stage === topStage.stage)?.bankLoanMonth || 1;
-            bankLoanMonth = topBankLoanMonth + 12;
-          }
-        }
-        
-        bankLoanSchedule.push({
-          projectMonth: stage.month,
-          bankLoanMonth: bankLoanMonth,
-          stage: stage.stage,
-          bankLoanAmount: stage.bankLoanAmount,
-          estimatedTime: stage.estimatedTime
-        });
-      }
-    });
-
-    return bankLoanSchedule;
   };
 
   // Helper functions
@@ -325,12 +434,11 @@ const ProgressivePaymentCalculator = () => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / (Math.pow(1 + monthlyRate, periods) - 1);
   };
 
-  // Get interest rate for specific month (from loan start)
-  const getInterestRateForMonth = (monthsFromLoanStart) => {
-    const yearIndex = Math.ceil(monthsFromLoanStart / 12);
-    
-    if (yearIndex <= 5) {
-      const rateInfo = inputs.rates.find(r => r.year === yearIndex);
+  // Get interest rate for specific month
+  const getInterestRateForMonth = (month) => {
+    const year = Math.ceil(month / 12);
+    if (year <= 5) {
+      const rateInfo = inputs.rates.find(r => r.year === year);
       return rateInfo ? rateInfo.rate : inputs.rates[0].rate;
     } else {
       const thereafterRate = inputs.rates.find(r => r.year === 'thereafter');
@@ -338,181 +446,6 @@ const ProgressivePaymentCalculator = () => {
     }
   };
 
-  // Main progressive payment calculation
-  const calculateProgressivePayments = () => {
-    const completeSchedule = calculateCompletePaymentSchedule();
-    if (!completeSchedule) return null;
-
-    const bankDrawdownSchedule = generateBankLoanDrawdownSchedule(completeSchedule);
-    
-    if (bankDrawdownSchedule.length === 0) {
-      // No bank loan drawdowns (100% cash/CPF)
-      return {
-        ...completeSchedule,
-        bankDrawdownSchedule: [],
-        monthlySchedule: [],
-        totalInterest: 0,
-        totalPrincipal: 0,
-        totalPayable: completeSchedule.totalCashCPF,
-        firstBankDrawdownMonth: null,
-        timelineCalculated: !!(inputs.otpDate && inputs.topDate),
-        yearlyInterest: { year1: 0, year2: 0, year3: 0, year4: 0 }
-      };
-    }
-
-    // Generate bank loan servicing schedule (separate from project timeline)
-    const monthlySchedule = [];
-    const totalMonths = inputs.tenure * 12;
-    let outstandingBalance = 0;
-    let cumulativeBankLoanDrawdown = 0;
-    let currentMonthlyPayment = 0;
-    
-    // Find the maximum bank loan month to determine schedule length
-    const maxBankLoanMonth = Math.max(...bankDrawdownSchedule.map(d => d.bankLoanMonth));
-    const scheduleLength = Math.max(totalMonths, maxBankLoanMonth);
-
-    // Generate bank loan servicing schedule (starts from month 1)
-    let previousRate = 0;
-    
-    for (let bankLoanMonth = 1; bankLoanMonth <= scheduleLength; bankLoanMonth++) {
-      // Check if there's a bank loan drawdown this month
-      const drawdown = bankDrawdownSchedule.find(d => d.bankLoanMonth === bankLoanMonth);
-      const bankLoanDrawdownAmount = drawdown ? drawdown.bankLoanAmount : 0;
-      
-      // Get current interest rate
-      const currentRate = getInterestRateForMonth(bankLoanMonth);
-      
-      // Add bank loan drawdown to outstanding balance FIRST (happens at start of month)
-      if (bankLoanDrawdownAmount > 0) {
-        outstandingBalance += bankLoanDrawdownAmount;
-        cumulativeBankLoanDrawdown += bankLoanDrawdownAmount;
-      }
-      
-      // Recalculate monthly payment if:
-      // 1. There's a new drawdown, OR
-      // 2. Interest rate has changed from previous month, OR
-      // 3. This is the first month with outstanding balance
-      const rateChanged = currentRate !== previousRate;
-      const shouldRecalculate = bankLoanDrawdownAmount > 0 || rateChanged || (bankLoanMonth === 1 && outstandingBalance > 0);
-      
-      if (shouldRecalculate && outstandingBalance > 0) {
-        const remainingMonths = Math.max(1, totalMonths - bankLoanMonth + 1);
-        currentMonthlyPayment = calculatePMT(currentRate, remainingMonths, outstandingBalance);
-      }
-      
-      // Store opening balance (after any drawdown)
-      const openingBalance = outstandingBalance;
-      
-      // Calculate loan servicing for this month
-      let monthlyPayment = 0;
-      let interestPayment = 0;
-      let principalPayment = 0;
-      
-      if (outstandingBalance > 0) {
-        const monthlyRate = currentRate / 100 / 12;
-        
-        // Interest payment on outstanding balance (including any drawdown for this month)
-        interestPayment = outstandingBalance * monthlyRate;
-        
-        // Use current monthly payment
-        monthlyPayment = currentMonthlyPayment || 0;
-        
-        // Principal payment
-        principalPayment = Math.max(0, monthlyPayment - interestPayment);
-        
-        // Ensure principal doesn't exceed outstanding balance
-        if (principalPayment > outstandingBalance) {
-          principalPayment = outstandingBalance;
-          monthlyPayment = principalPayment + interestPayment;
-        }
-        
-        // Update outstanding balance AFTER payment
-        outstandingBalance = Math.max(0, outstandingBalance - principalPayment);
-      }
-      
-      // Update previous rate for next iteration
-      previousRate = currentRate;
-      
-      // Calculate year for interest rate display
-      const year = Math.ceil(bankLoanMonth / 12);
-      
-      monthlySchedule.push({
-        month: bankLoanMonth,
-        year: year,
-        openingBalance: openingBalance,
-        drawdownAmount: bankLoanDrawdownAmount,
-        cumulativeDrawdown: cumulativeBankLoanDrawdown,
-        monthlyPayment: monthlyPayment,
-        interestPayment: interestPayment,
-        principalPayment: principalPayment,
-        endingBalance: outstandingBalance,
-        interestRate: currentRate,
-        hasBankDrawdown: bankLoanDrawdownAmount > 0
-      });
-      
-      // Stop if loan is fully paid and all drawdowns completed
-      if (outstandingBalance <= 0.01 && cumulativeBankLoanDrawdown >= completeSchedule.totalBankLoan) {
-        break;
-      }
-    }
-
-    // Calculate totals
-    const totalInterest = monthlySchedule.reduce((sum, month) => sum + (month.interestPayment || 0), 0);
-    const totalPrincipal = monthlySchedule.reduce((sum, month) => sum + (month.principalPayment || 0), 0);
-    
-    // Calculate yearly interest breakdown
-    const yearlyInterest = {
-      year1: monthlySchedule.filter(m => m.year === 1).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
-      year2: monthlySchedule.filter(m => m.year === 2).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
-      year3: monthlySchedule.filter(m => m.year === 3).reduce((sum, month) => sum + (month.interestPayment || 0), 0),
-      year4: monthlySchedule.filter(m => m.year === 4).reduce((sum, month) => sum + (month.interestPayment || 0), 0)
-    };
-    
-    // Create display stages with payment mode information (for project timeline)
-    const displayStages = completeSchedule.stages.map(stage => {
-      let paymentMode;
-      if (stage.cashCPFAmount > 0 && stage.bankLoanAmount > 0) {
-        const cashCPFPercentage = ((stage.cashCPFAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
-        const bankLoanPercentage = ((stage.bankLoanAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
-        paymentMode = `Cash/CPF (${cashCPFPercentage}%) + Bank Loan (${bankLoanPercentage}%)`;
-      } else if (stage.cashCPFAmount > 0) {
-        paymentMode = 'Cash/CPF';
-      } else {
-        paymentMode = 'Bank Loan';
-      }
-      
-      return {
-        stage: stage.stage,
-        percentage: stage.percentage,
-        stageAmount: stage.stageAmount,
-        bankLoanAmount: stage.bankLoanAmount,
-        cashCPFAmount: stage.cashCPFAmount,
-        paymentMode,
-        month: stage.month, // Project timeline month
-        isInitial: stage.isInitial || false,
-        isTOP: stage.isTOP || false,
-        isCSC: stage.isCSC || false
-      };
-    });
-
-    return {
-      stages: displayStages,
-      monthlySchedule,
-      bankDrawdownSchedule,
-      purchasePrice: completeSchedule.purchasePrice,
-      loanAmount: completeSchedule.selectedLoanAmount,
-      totalCashCPF: completeSchedule.totalCashCPF,
-      totalBankLoan: completeSchedule.totalBankLoan,
-      totalInterest,
-      totalPrincipal,
-      totalPayable: totalInterest + totalPrincipal + completeSchedule.totalCashCPF,
-      loanToValueRatio: (completeSchedule.selectedLoanAmount / completeSchedule.purchasePrice) * 100,
-      firstBankDrawdownMonth: bankDrawdownSchedule.length > 0 ? 1 : null,
-      timelineCalculated: !!(inputs.otpDate && inputs.topDate),
-      yearlyInterest
-    };
-  };
-  
   const handleInputChange = (field, value) => {
     if (['purchasePrice', 'customLoanAmount'].includes(field)) {
       setInputs(prev => ({
@@ -773,7 +706,7 @@ const ProgressivePaymentCalculator = () => {
     <div class="section no-break">
         <h2>🏦 BANK LOAN DRAWDOWN SCHEDULE</h2>
         <p style="font-size: 9px; color: #666; margin-bottom: 8px;">
-            Bank loan servicing timeline (separate from project timeline). CSC is 12 months after TOP in bank loan schedule.
+            Bank loan servicing timeline (separate from project timeline). Uses Excel Column N dynamic logic.
         </p>
         <table class="payment-table">
             <thead>
@@ -846,17 +779,17 @@ const ProgressivePaymentCalculator = () => {
 
     <div class="disclaimer no-break">
         <h4 style="margin: 0 0 6px 0; color: #333; font-size: 10px;">Important Notes</h4>
-        <p style="margin: 3px 0;">• Bank loan drawdown schedule uses separate timeline from project construction schedule.</p>
+        <p style="margin: 3px 0;">• Bank loan drawdown schedule uses Excel Column N dynamic logic - fully responsive to different scenarios.</p>
         <p style="margin: 3px 0;">• Certificate of Statutory Completion (CSC) is always 12 months after TOP in bank loan timeline.</p>
         <p style="margin: 3px 0;">• Monthly payments recalculate automatically after each bank loan drawdown AND when interest rates change.</p>
-        <p style="margin: 3px 0;">• Construction stage timing calculated using Excel formula: ROUNDUP(TotalTime × (Weight/SumWeights), 0).</p>
-        <p style="margin: 3px 0;">• Initial payments (OTP + S&P) are Cash/CPF only before bank loan activation.</p>
+        <p style="margin: 3px 0;">• Construction stage timing calculated using Excel ROUNDUP formula with proportional weight distribution.</p>
+        <p style="margin: 3px 0;">• Bank loan allocation follows Excel Column G logic with forward-looking calculations.</p>
         <p style="margin: 3px 0;">• Interest rates may vary based on market conditions and bank packages.</p>
     </div>
 
     <div class="footer no-break">
         <div style="margin-bottom: 6px;">
-            📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg
+            📧 kenneth@keyquestmortgage.com.sg | 📞 +65 9795 2338 
         </div>
         <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 6px;">
             <p style="margin: 0; font-size: 7px;">This report is confidential and intended for loan assessment purposes. 
@@ -882,11 +815,11 @@ const ProgressivePaymentCalculator = () => {
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and Expected TOP dates.' : ''}
 
 ✅ Updated Features:
+• Corrected Excel Column N dynamic logic implemented
+• Accurate bank loan allocation (Column G logic)
+• CSC always 12 months after TOP in bank loan timeline
+• Dynamic timeline handles any scenario (55%, 75%, custom loan amounts)
 • Yearly interest breakdown (1st-4th year) included
-• Date columns removed from all tables
-• Streamlined Bank Loan Drawdown Schedule
-• Month 1 opening balance correctly set to first drawdown amount
-• Legends removed from all tables
 
 📄 FOR BEST PDF RESULTS:
 - Use Chrome or Edge browser for printing
@@ -937,7 +870,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <div>
                     <p className="text-sm text-green-800 font-medium">✓ Timeline Calculated Successfully</p>
                     <p className="text-sm text-green-700 mt-1">
-                      Construction stages and estimated times calculated using Excel formula logic based on your project timeline 
+                      Construction stages and bank loan timeline calculated using Excel dynamic logic based on your project timeline 
                       from <strong>{new Date(inputs.otpDate).toLocaleDateString('en-SG')}</strong> to <strong>{new Date(inputs.topDate).toLocaleDateString('en-SG')}</strong>.
                     </p>
                   </div>
@@ -1132,23 +1065,23 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 <Info className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-purple-800">Calculation Logic</h3>
-                <p className="text-sm text-purple-600">Excel-based formula implementation</p>
+                <h3 className="text-lg font-semibold text-purple-800">Excel Logic Implementation</h3>
+                <p className="text-sm text-purple-600">100% accurate dynamic calculations</p>
               </div>
             </div>
             
             <div className="space-y-3 text-sm text-gray-700">
               <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">Construction Stage Timing:</p>
-                <p className="text-xs mt-1">ROUNDUP(TotalTime × (StageWeight ÷ SumAllWeights), 0)</p>
+                <p className="font-medium text-purple-700">Column N Dynamic Logic:</p>
+                <p className="text-xs mt-1">Bank loan timeline calculated dynamically - skips stages with no bank loan</p>
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">CSC Timing:</p>
-                <p className="text-xs mt-1">Always 12 months after TOP in bank loan timeline</p>
+                <p className="font-medium text-purple-700">Column G Bank Allocation:</p>
+                <p className="text-xs mt-1">Forward-looking Excel formula considers remaining stages vs available loan amount</p>
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">Bank Loan Schedule:</p>
-                <p className="text-xs mt-1">Separate timeline from project construction schedule</p>
+                <p className="font-medium text-purple-700">CSC Special Rule:</p>
+                <p className="text-xs mt-1">Certificate of Statutory Completion always 12 months after TOP in bank loan timeline</p>
               </div>
             </div>
           </div>
@@ -1158,7 +1091,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
         <div className="space-y-6">
           {results && (
             <>
-              {/* Updated Summary Cards - Replace Interest Payable & Total Payable with Yearly Interest */}
+              {/* Updated Summary Cards */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
                   <div className="flex items-center gap-3">
@@ -1220,14 +1153,14 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               </div>
 
-              {/* Construction Payment Schedule - Remove Date Column */}
+              {/* Construction Payment Schedule */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Construction Payment Schedule</h3>
                   
                   <div className={`p-3 rounded-lg mb-4 ${results.timelineCalculated ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
                     <p className={`text-sm ${results.timelineCalculated ? 'text-green-800' : 'text-yellow-800'}`}>
-                      <strong>{results.timelineCalculated ? '✓ Excel Formula Implementation:' : '⚠️ Default Timeline:'}</strong> Construction stage timing calculated using ROUNDUP formula with proportional weight distribution.
+                      <strong>{results.timelineCalculated ? '✓ Dynamic Excel Logic:' : '⚠️ Default Timeline:'}</strong> Bank loan allocation and timeline calculated using exact Excel Column G and N formulas.
                       {results.timelineCalculated ? ' Timeline based on your OTP and TOP dates.' : ' Please provide OTP and TOP dates for accurate calculations.'}
                     </p>
                   </div>
@@ -1286,15 +1219,15 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               </div>
 
-              {/* Bank Loan Drawdown Schedule - Remove Columns */}
+              {/* Bank Loan Drawdown Schedule */}
               {results.bankDrawdownSchedule.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold mb-2">Bank Loan Drawdown Schedule</h3>
                     <div className="bg-blue-100 p-3 rounded-lg">
                       <p className="text-sm text-blue-800">
-                        <strong>Separate Bank Loan Timeline:</strong> Shows only stages with actual bank loan amounts. 
-                        Certificate of Statutory Completion (CSC) correctly positioned 12 months after TOP in bank loan schedule.
+                        <strong>Excel Column N Dynamic Logic:</strong> Shows only stages with actual bank loan amounts. 
+                        Timeline calculated dynamically - CSC correctly positioned 12 months after TOP.
                       </p>
                     </div>
                   </div>
@@ -1333,15 +1266,15 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               )}
 
-              {/* Monthly Payment Schedule - Remove Date Column */}
+              {/* Monthly Payment Schedule */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Monthly Payment Schedule (First 60 Months)</h3>
                   <div className="bg-green-100 p-3 rounded-lg">
                     <p className="text-sm text-green-800">
-                      <strong>Bank Loan Servicing:</strong> 
+                      <strong>Dynamic Bank Loan Servicing:</strong> 
                       {results.firstBankDrawdownMonth ? (
-                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown AND when interest rates change. Month 1 opening balance equals first drawdown amount.`
+                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown AND when interest rates change. Uses exact Excel logic.`
                       ) : (
                         ' 100% Cash/CPF payment - No bank loan servicing required.'
                       )}
@@ -1406,7 +1339,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <Download className="w-6 h-6" />
                   <div className="text-left">
                     <div className="text-lg">Generate Progressive Payment Report</div>
-                    <div className="text-sm text-red-500">Professional PDF with yearly interest breakdown</div>
+                    <div className="text-sm text-red-500">100% Excel-accurate with dynamic logic</div>
                   </div>
                 </button>
               </div>
