@@ -47,31 +47,11 @@ button:active {
   transform: translateY(0);
 }
 
-/* Mobile-friendly button touches */
-@media (max-width: 768px) {
-  button {
-    min-height: 44px; /* Apple's recommended touch target size */
-    padding: 12px 16px;
-  }
-  
-  button:hover {
-    transform: none; /* Disable hover effects on touch devices */
-  }
-}
-
 /* Card hover effects */
 .card-hover:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-}
-
-/* Disable card hover on mobile */
-@media (max-width: 768px) {
-  .card-hover:hover {
-    transform: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
 }
 
 /* Loading animation */
@@ -173,14 +153,6 @@ button:active {
 
 .hover\:scale-105:hover {
   transform: scale(1.05);
-}
-
-/* Mobile: Disable scale effects */
-@media (max-width: 768px) {
-  .hover\:scale-102:hover,
-  .hover\:scale-105:hover {
-    transform: none;
-  }
 }
 
 /* Smooth transitions for all interactive elements */
@@ -301,13 +273,6 @@ button:active {
   background: #a1a1a1;
 }
 
-/* Mobile scrollbar - thinner */
-@media (max-width: 768px) {
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-}
-
 /* Enhanced hover effects for interactive elements */
 .group:hover .group-hover\:scale-105 {
   transform: scale(1.05);
@@ -315,13 +280,6 @@ button:active {
 
 .group:hover .group-hover\:shadow-md {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Mobile: Disable group hover effects */
-@media (max-width: 768px) {
-  .group:hover .group-hover\:scale-105 {
-    transform: none;
-  }
 }
 
 /* Custom radio button styling */
@@ -340,21 +298,6 @@ textarea:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Mobile form enhancements */
-@media (max-width: 768px) {
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="password"],
-  input[type="date"],
-  select,
-  textarea {
-    font-size: 16px; /* Prevents zoom on iOS */
-    min-height: 44px; /* Better touch targets */
-    padding: 12px 16px;
-  }
 }
 
 /* Pulse animation for loading states */
@@ -402,7 +345,7 @@ textarea:focus {
   animation: slideInFromRight 0.5s ease-out;
 }
 
-/* ENHANCED RESPONSIVE DESIGN FOR MOBILE */
+/* Enhanced responsive design */
 @media (max-width: 1024px) {
   .lg\:grid-cols-2 {
     grid-template-columns: 1fr;
@@ -414,15 +357,10 @@ textarea:focus {
 }
 
 @media (max-width: 768px) {
-  /* Grid layouts - force single column on mobile */
-  .md\:grid-cols-2,
-  .grid-cols-2,
-  .grid-cols-3 {
-    grid-template-columns: 1fr !important;
-    gap: 1rem;
+  .md\:grid-cols-2 {
+    grid-template-columns: 1fr;
   }
   
-  /* Specific mobile grid classes */
   .mobile-stack {
     flex-direction: column;
   }
@@ -431,73 +369,29 @@ textarea:focus {
     width: 100%;
   }
   
-  /* Adjust padding for mobile - more generous */
+  /* Adjust padding for mobile */
   .p-6 {
-    padding: 1.5rem;
-  }
-  
-  .p-8 {
-    padding: 2rem;
-  }
-  
-  /* Specific mobile padding utilities */
-  .mobile-p-4 {
     padding: 1rem;
   }
   
-  .mobile-px-4 {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  .mobile-py-6 {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
-  
-  /* Adjust margins for mobile */
-  .mb-8 {
-    margin-bottom: 1.5rem;
-  }
-  
-  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 1.5rem;
-  }
-  
-  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 1rem;
+  .p-8 {
+    padding: 1.5rem;
   }
   
   /* Adjust text sizes for mobile */
   .text-4xl {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+  
+  .text-3xl {
     font-size: 1.875rem;
     line-height: 2.25rem;
   }
   
-  .text-3xl {
+  .text-2xl {
     font-size: 1.5rem;
     line-height: 2rem;
-  }
-  
-  .text-2xl {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-  }
-  
-  .text-xl {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
-  
-  /* Mobile-specific text sizes */
-  .mobile-text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-  
-  .mobile-text-base {
-    font-size: 1rem;
-    line-height: 1.5rem;
   }
 }
 
@@ -508,91 +402,6 @@ textarea:focus {
   
   .sm\:gap-4 {
     gap: 1rem;
-  }
-  
-  /* Force all grids to single column on small mobile */
-  .grid {
-    grid-template-columns: 1fr !important;
-  }
-  
-  /* Even smaller padding on very small screens */
-  .p-6 {
-    padding: 1rem;
-  }
-  
-  .p-8 {
-    padding: 1.25rem;
-  }
-  
-  /* Smaller text on very small screens */
-  .text-4xl {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
-  
-  .text-3xl {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-  }
-}
-
-/* MOBILE TABLE STYLES */
-@media (max-width: 768px) {
-  /* Make tables scroll horizontally on mobile */
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-  }
-  
-  /* Smaller table text on mobile */
-  table {
-    font-size: 0.75rem;
-    min-width: 600px; /* Ensure minimum width for readability */
-  }
-  
-  th, td {
-    padding: 0.5rem 0.25rem;
-    white-space: nowrap;
-  }
-  
-  /* Mobile table headers */
-  th {
-    background-color: #f9fafb;
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.7rem;
-  }
-  
-  /* Mobile table alternating rows */
-  tr:nth-child(even) {
-    background-color: #f9fafb;
-  }
-  
-  tr:hover {
-    background-color: #f3f4f6;
-  }
-}
-
-/* MOBILE FORM ENHANCEMENTS */
-@media (max-width: 768px) {
-  /* Better form field spacing */
-  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 1.5rem;
-  }
-  
-  /* Mobile-friendly select dropdowns */
-  select {
-    background-size: 16px;
-    background-position: right 12px center;
-  }
-  
-  /* Better label spacing */
-  label {
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    display: block;
   }
 }
 
@@ -643,7 +452,6 @@ textarea:focus {
   transition: all 0.2s ease-in-out;
   border: none;
   cursor: pointer;
-  min-height: 44px; /* Better touch targets */
 }
 
 .btn-primary:hover {
@@ -661,7 +469,6 @@ textarea:focus {
   transition: all 0.2s ease-in-out;
   border: 2px solid #e5e7eb;
   cursor: pointer;
-  min-height: 44px; /* Better touch targets */
 }
 
 .btn-secondary:hover {
@@ -669,21 +476,6 @@ textarea:focus {
   color: #3b82f6;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* Mobile button adjustments */
-@media (max-width: 768px) {
-  .btn-primary,
-  .btn-secondary {
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    min-height: 48px;
-  }
-  
-  .btn-primary:hover,
-  .btn-secondary:hover {
-    transform: none;
-  }
 }
 
 /* Loading and skeleton states */
@@ -712,14 +504,6 @@ textarea:focus {
 input[type="checkbox"] {
   accent-color: #3b82f6;
   transform: scale(1.1);
-}
-
-/* Mobile checkbox adjustments */
-@media (max-width: 768px) {
-  input[type="checkbox"] {
-    transform: scale(1.3);
-    margin-right: 0.75rem;
-  }
 }
 
 /* Enhanced table styling */
@@ -803,43 +587,4 @@ tr:hover {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
-}
-
-/* MOBILE-SPECIFIC UTILITY CLASSES */
-@media (max-width: 768px) {
-  .mobile-hidden {
-    display: none !important;
-  }
-  
-  .mobile-visible {
-    display: block !important;
-  }
-  
-  .mobile-flex {
-    display: flex !important;
-  }
-  
-  .mobile-flex-col {
-    flex-direction: column !important;
-  }
-  
-  .mobile-text-center {
-    text-align: center !important;
-  }
-  
-  .mobile-w-full {
-    width: 100% !important;
-  }
-  
-  .mobile-mb-4 {
-    margin-bottom: 1rem !important;
-  }
-  
-  .mobile-mt-4 {
-    margin-top: 1rem !important;
-  }
-  
-  .mobile-space-y-4 > :not([hidden]) ~ :not([hidden]) {
-    margin-top: 1rem !important;
-  }
 }
