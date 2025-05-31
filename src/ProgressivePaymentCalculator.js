@@ -476,7 +476,11 @@ const ProgressivePaymentCalculator = () => {
     // Create display stages with payment mode information (for project timeline)
     const displayStages = completeSchedule.stages.map(stage => {
       let paymentMode;
-      if (stage.cashCPFAmount > 0 && stage.bankLoanAmount > 1) { // Use same threshold
+      
+      // Special handling for OTP stage - show as "Cash" only
+      if (stage.stage.includes('Option to Purchase')) {
+        paymentMode = 'Cash';
+      } else if (stage.cashCPFAmount > 0 && stage.bankLoanAmount > 1) { // Use same threshold
         const cashCPFPercentage = ((stage.cashCPFAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
         const bankLoanPercentage = ((stage.bankLoanAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
         paymentMode = `Cash/CPF (${cashCPFPercentage}%) + Bank Loan (${bankLoanPercentage}%)`;
@@ -855,6 +859,7 @@ const ProgressivePaymentCalculator = () => {
         <h4 style="margin: 0 0 6px 0; color: #333; font-size: 10px;">Important Notes</h4>
         <p style="margin: 3px 0;">• Bank loan drawdown schedule excludes stages with insignificant amounts (≤ $1.00).</p>
         <p style="margin: 3px 0;">• Monthly Payment Schedule starts from the first meaningful bank loan drawdown.</p>
+        <p style="margin: 3px 0;">• Option to Purchase (OTP) payment is typically made in Cash only, not CPF.</p>
         <p style="margin: 3px 0;">• Certificate of Statutory Completion (CSC) is always 12 months after TOP in bank loan timeline.</p>
         <p style="margin: 3px 0;">• Monthly payments recalculate automatically after each bank loan drawdown AND when interest rates change.</p>
         <p style="margin: 3px 0;">• Construction stage timing calculated using Excel formula: ROUNDUP(TotalTime × (Weight/SumWeights), 0).</p>
@@ -889,11 +894,12 @@ const ProgressivePaymentCalculator = () => {
 📄 Timeline Source: ${results.timelineCalculated ? 'Date-Based Calculations' : 'Default Estimates'}
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and TOP dates.' : ''}
 
-✅ CRITICAL FIX APPLIED: 
+✅ CRITICAL FIXES APPLIED: 
 • Bank Loan Drawdown Schedule now filters amounts > $1.00 (not just > $0)
 • Monthly Payment Schedule starts from first meaningful drawdown
 • Floating-point precision issues resolved
 • Opening balance correctly shows first actual drawdown amount
+• OTP payment mode correctly shows as "Cash" (not "Cash/CPF")
 
 📄 FOR BEST PDF RESULTS:
 - Use Chrome or Edge browser for printing
@@ -1148,6 +1154,10 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
               <div className="bg-white p-3 rounded-lg border border-purple-100">
                 <p className="font-medium text-purple-700">Construction Stage Timing:</p>
                 <p className="text-xs mt-1">ROUNDUP(TotalTime × (StageWeight ÷ SumAllWeights), 0)</p>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-purple-100">
+                <p className="font-medium text-purple-700">Payment Mode Classification:</p>
+                <p className="text-xs mt-1">OTP = "Cash" only, S&P = "Cash/CPF", Construction = Mixed</p>
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
                 <p className="font-medium text-purple-700">CSC Timing:</p>
