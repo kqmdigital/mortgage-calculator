@@ -1112,7 +1112,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.purchasePrice)}
@@ -1197,7 +1197,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="mt-4 animate-fadeIn">
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Loan Amount</label>
                     <div className="relative">
-                      
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                       <input
                         type="text"
                         value={formatNumberInput(inputs.customLoanAmount)}
@@ -1291,7 +1291,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.monthlySalaryA)}
@@ -1304,7 +1304,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.annualSalaryA)}
@@ -1334,7 +1334,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.monthlySalaryB)}
@@ -1347,7 +1347,7 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.annualSalaryB)}
@@ -1390,7 +1390,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Show Fund (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.showFundAmount)}
@@ -1403,7 +1403,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Pledging (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.pledgeAmount)}
@@ -1432,7 +1432,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (A) (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanA)}
@@ -1445,7 +1445,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (B) (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanB)}
@@ -1458,7 +1458,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (A) (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanA)}
@@ -1471,7 +1471,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (B) (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanB)}
@@ -1484,7 +1484,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (A) (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanA)}
@@ -1497,7 +1497,7 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (B) (SGD)</label>
                 <div className="relative">
-                  
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanB)}
