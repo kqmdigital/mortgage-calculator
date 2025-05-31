@@ -821,11 +821,11 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
           {/* Input Section */}
           <div className="space-y-6">
             <div className="bg-blue-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold mb-4">Loan details</h3>
+              <h3 className="text-lg font-semibold mb-4">Loan Details</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Loan amount (SGD)</label>
+                  <label className="block text-sm font-medium mb-2">Loan Amount (SGD)</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
