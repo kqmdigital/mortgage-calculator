@@ -1051,9 +1051,7 @@ const generateRepaymentPDFReport = (results, loanType = 'new') => {
                       <Download className="w-5 h-5" />
                       Generate Repayment Schedule Report (PDF)
                     </button>
-                    <p className="text-sm text-gray-500 text-center mt-2">
-                      Professional report with detailed repayment schedule
-                    </p>
+                    
                   </div>
                 </div>
               </>
