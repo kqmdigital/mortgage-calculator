@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Home } from 'lucide-react';
 
 // Monthly Repayment Calculator Component
 const MonthlyRepaymentCalculator = () => {
