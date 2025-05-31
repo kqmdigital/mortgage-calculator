@@ -898,15 +898,15 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
   };
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="space-y-6 md:space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Enhanced Input Section */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Project Information Card */}
-          <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-xl border border-red-200 shadow-sm">
+          <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 md:p-6 rounded-xl border border-red-200 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-                <Building className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                <Building className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-red-800">BUC Property Details</h3>
@@ -918,7 +918,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
             {(!inputs.otpDate || !inputs.topDate) && (
               <div className="bg-yellow-100 p-4 rounded-lg mb-4 border-l-4 border-yellow-500">
                 <div className="flex items-start gap-3">
-                  <Calendar className="w-5 h-5 text-yellow-600 mt-0.5" />
+                  <Calendar className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-yellow-800 font-medium">⚠️ Timeline Configuration Required</p>
                     <p className="text-sm text-yellow-700 mt-1">
@@ -933,7 +933,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
             {(inputs.otpDate && inputs.topDate) && (
               <div className="bg-green-100 p-4 rounded-lg mb-4 border-l-4 border-green-500">
                 <div className="flex items-start gap-3">
-                  <TrendingUp className="w-5 h-5 text-green-600 mt-0.5" />
+                  <TrendingUp className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-green-800 font-medium">✓ Timeline Calculated Successfully</p>
                     <p className="text-sm text-green-700 mt-1">
@@ -954,7 +954,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     type="text"
                     value={formatNumberInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full pl-12 pr-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     placeholder="2,300,000.00"
                   />
                 </div>
@@ -963,8 +963,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
               <div>
                 <label className="block text-sm font-medium mb-3 text-gray-700">Loan Amount Options</label>
                 <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 min-h-[80px]">
                       <input
                         type="radio"
                         name="loanOption"
@@ -982,7 +982,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                         </div>
                       </div>
                     </label>
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 min-h-[80px]">
                       <input
                         type="radio"
                         name="loanOption"
@@ -1000,7 +1000,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                         </div>
                       </div>
                     </label>
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 min-h-[80px]">
                       <input
                         type="radio"
                         name="loanOption"
@@ -1024,7 +1024,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                           type="text"
                           value={formatNumberInput(inputs.customLoanAmount)}
                           onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
-                          className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          className="w-full pl-12 pr-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                           placeholder="1,725,000.00"
                         />
                       </div>
@@ -1033,7 +1033,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
                   <div className="relative">
@@ -1041,7 +1041,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                       type="number"
                       value={inputs.tenure}
                       onChange={(e) => handleInputChange('tenure', parseInt(e.target.value) || 20)}
-                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       min="5"
                       max="35"
                     />
@@ -1054,21 +1054,21 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     type="number"
                     value={inputs.numOutstandingMortgages}
                     onChange={(e) => handleInputChange('numOutstandingMortgages', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     min="0"
                     max="5"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">OTP Date</label>
                   <input
                     type="date"
                     value={inputs.otpDate}
                     onChange={(e) => handleInputChange('otpDate', e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                 </div>
                 <div>
@@ -1077,7 +1077,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     type="date"
                     value={inputs.topDate}
                     onChange={(e) => handleInputChange('topDate', e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-3 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   />
                 </div>
               </div>
@@ -1085,10 +1085,10 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
           </div>
 
           {/* Interest Rate Configuration */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-6 rounded-xl border border-blue-200 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-blue-800">Variable Interest Rate Package</h3>
@@ -1100,7 +1100,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
               <h4 className="font-medium mb-3 text-gray-700">Interest Rate Structure</h4>
               <div className="space-y-3">
                 {inputs.rates.map((rate, index) => (
-                  <div key={index} className="grid grid-cols-3 gap-4 items-center">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                     <div className="text-sm font-medium text-gray-600">
                       {rate.year === 'thereafter' ? 'Year 6 onwards' : `Year ${rate.year}`}
                     </div>
@@ -1114,7 +1114,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                           newRates[index].rate = parseFloat(e.target.value) || 0;
                           handleInputChange('rates', newRates);
                         }}
-                        className="w-full pr-8 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full pr-8 pl-3 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
                       <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">%</span>
                     </div>
@@ -1126,10 +1126,10 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
           </div>
 
           {/* Excel Formula Information */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200 shadow-sm">
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 md:p-6 rounded-xl border border-purple-200 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                <Info className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                <Info className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-purple-800">Calculation Logic</h3>
@@ -1155,74 +1155,74 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
         </div>
 
         {/* Enhanced Results Section */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {results && (
             <>
               {/* Updated Summary Cards - Replace Interest Payable & Total Payable with Yearly Interest */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 md:p-6 rounded-xl border border-green-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <DollarSign className="w-8 h-8 text-green-600" />
+                    <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
                     <div>
                       <p className="text-sm text-green-600 font-medium">Cash/CPF Required</p>
-                      <p className="text-xl font-bold text-green-700">{formatCurrency(results.totalCashCPF)}</p>
+                      <p className="text-lg md:text-xl font-bold text-green-700">{formatCurrency(results.totalCashCPF)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 md:p-6 rounded-xl border border-blue-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-8 h-8 text-blue-600" />
+                    <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                     <div>
                       <p className="text-sm text-blue-600 font-medium">Total Bank Loan</p>
-                      <p className="text-xl font-bold text-blue-700">{formatCurrency(results.totalBankLoan)}</p>
+                      <p className="text-lg md:text-xl font-bold text-blue-700">{formatCurrency(results.totalBankLoan)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200 shadow-sm">
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 md:p-6 rounded-xl border border-orange-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="w-8 h-8 text-orange-600" />
+                    <BarChart3 className="w-6 h-6 md:w-8 md:h-8 text-orange-600" />
                     <div>
                       <p className="text-sm text-orange-600 font-medium">1st Yr Interest</p>
-                      <p className="text-xl font-bold text-orange-700">{formatCurrency(results.yearlyInterest.year1)}</p>
+                      <p className="text-lg md:text-xl font-bold text-orange-700">{formatCurrency(results.yearlyInterest.year1)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-6 rounded-xl border border-purple-200 shadow-sm">
+                <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-4 md:p-6 rounded-xl border border-purple-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <Building className="w-8 h-8 text-purple-600" />
+                    <Building className="w-6 h-6 md:w-8 md:h-8 text-purple-600" />
                     <div>
                       <p className="text-sm text-purple-600 font-medium">2nd Yr Interest</p>
-                      <p className="text-xl font-bold text-purple-700">{formatCurrency(results.yearlyInterest.year2)}</p>
+                      <p className="text-lg md:text-xl font-bold text-purple-700">{formatCurrency(results.yearlyInterest.year2)}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Additional Yearly Interest Cards */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-xl border border-pink-200 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-4 md:p-6 rounded-xl border border-pink-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-8 h-8 text-pink-600" />
+                    <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-pink-600" />
                     <div>
                       <p className="text-sm text-pink-600 font-medium">3rd Yr Interest</p>
-                      <p className="text-xl font-bold text-pink-700">{formatCurrency(results.yearlyInterest.year3)}</p>
+                      <p className="text-lg md:text-xl font-bold text-pink-700">{formatCurrency(results.yearlyInterest.year3)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-xl border border-indigo-200 shadow-sm">
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 md:p-6 rounded-xl border border-indigo-200 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <DollarSign className="w-8 h-8 text-indigo-600" />
+                    <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-indigo-600" />
                     <div>
                       <p className="text-sm text-indigo-600 font-medium">4th Yr Interest</p>
-                      <p className="text-xl font-bold text-indigo-700">{formatCurrency(results.yearlyInterest.year4)}</p>
+                      <p className="text-lg md:text-xl font-bold text-indigo-700">{formatCurrency(results.yearlyInterest.year4)}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Construction Payment Schedule - Remove Date Column */}
+              {/* Construction Payment Schedule - Mobile Responsive */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 md:p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Construction Payment Schedule</h3>
                   
                   <div className={`p-3 rounded-lg mb-4 ${results.timelineCalculated ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
@@ -1233,17 +1233,17 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   </div>
                 </div>
                 
-                <div className="p-6 overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="p-4 md:p-6 table-container overflow-x-auto border border-gray-200 rounded-lg">
+                  <table className="w-full text-sm min-w-[700px]">
                     <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-center py-3 font-medium text-gray-700">Project Month</th>
-                        <th className="text-left py-3 font-medium text-gray-700">Construction Stage</th>
-                        <th className="text-center py-3 font-medium text-gray-700">%</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Total Amount</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Cash/CPF</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Bank Loan</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Payment Mode</th>
+                      <tr className="border-b-2 border-gray-200 bg-gray-50">
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Project Month</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-700">Construction Stage</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">%</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Total Amount</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Cash/CPF</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Bank Loan</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Payment Mode</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1254,22 +1254,22 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                           stage.isCSC ? 'bg-purple-50' : 
                           stage.bankLoanAmount > 0 ? 'bg-yellow-50' : 'bg-gray-50'
                         }`}>
-                          <td className="py-4 text-center font-medium">{stage.month}</td>
-                          <td className="py-4 text-left">{stage.stage}</td>
-                          <td className="py-4 text-center">{stage.percentage.toFixed(1)}%</td>
-                          <td className="py-4 text-center font-semibold">{formatCurrency(stage.stageAmount)}</td>
-                          <td className="py-4 text-center">
+                          <td className="py-4 px-2 text-center font-medium">{stage.month}</td>
+                          <td className="py-4 px-2 text-left text-xs md:text-sm">{stage.stage}</td>
+                          <td className="py-4 px-2 text-center">{stage.percentage.toFixed(1)}%</td>
+                          <td className="py-4 px-2 text-center font-semibold">{formatCurrency(stage.stageAmount)}</td>
+                          <td className="py-4 px-2 text-center">
                             {stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}
                           </td>
-                          <td className="py-4 text-center">
+                          <td className="py-4 px-2 text-center">
                             {stage.bankLoanAmount > 0 ? (
                               <span className="text-green-600 font-medium">
                                 {formatCurrency(stage.bankLoanAmount)}
                               </span>
                             ) : '-'}
                           </td>
-                          <td className="py-4 text-center">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          <td className="py-4 px-2 text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                               stage.isInitial ? 'bg-blue-100 text-blue-800' : 
                               stage.isTOP ? 'bg-green-100 text-green-800' :
                               stage.isCSC ? 'bg-purple-100 text-purple-800' :
@@ -1286,10 +1286,10 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               </div>
 
-              {/* Bank Loan Drawdown Schedule - Remove Columns */}
+              {/* Bank Loan Drawdown Schedule - Mobile Responsive */}
               {results.bankDrawdownSchedule.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 md:p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold mb-2">Bank Loan Drawdown Schedule</h3>
                     <div className="bg-blue-100 p-3 rounded-lg">
                       <p className="text-sm text-blue-800">
@@ -1299,14 +1299,14 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     </div>
                   </div>
                   
-                  <div className="p-6 overflow-x-auto">
-                    <table className="w-full text-sm">
+                  <div className="p-4 md:p-6 table-container overflow-x-auto border border-gray-200 rounded-lg">
+                    <table className="w-full text-sm min-w-[500px]">
                       <thead>
-                        <tr className="border-b-2 border-gray-200">
-                          <th className="text-center py-3 font-medium text-gray-700">Project Month</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Bank Loan Month</th>
-                          <th className="text-left py-3 font-medium text-gray-700">Construction Stage</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Bank Loan Amount</th>
+                        <tr className="border-b-2 border-gray-200 bg-gray-50">
+                          <th className="text-center py-3 px-2 font-medium text-gray-700">Project Month</th>
+                          <th className="text-center py-3 px-2 font-medium text-gray-700">Bank Loan Month</th>
+                          <th className="text-left py-3 px-2 font-medium text-gray-700">Construction Stage</th>
+                          <th className="text-center py-3 px-2 font-medium text-gray-700">Bank Loan Amount</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1315,14 +1315,14 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                             drawdown.stage.includes('Certificate of Statutory Completion') ? 'bg-purple-50' : 
                             drawdown.stage.includes('TOP') ? 'bg-green-50' : 'bg-yellow-50'
                           }`}>
-                            <td className="py-4 text-center">{drawdown.projectMonth}</td>
-                            <td className="py-4 text-center">
+                            <td className="py-4 px-2 text-center">{drawdown.projectMonth}</td>
+                            <td className="py-4 px-2 text-center">
                               <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">
                                 {drawdown.bankLoanMonth}
                               </span>
                             </td>
-                            <td className="py-4 text-left">{drawdown.stage}</td>
-                            <td className="py-4 text-center font-semibold text-green-600">
+                            <td className="py-4 px-2 text-left text-xs md:text-sm">{drawdown.stage}</td>
+                            <td className="py-4 px-2 text-center font-semibold text-green-600">
                               {formatCurrency(drawdown.bankLoanAmount)}
                             </td>
                           </tr>
@@ -1333,9 +1333,9 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 </div>
               )}
 
-              {/* Monthly Payment Schedule - Remove Date Column */}
+              {/* Monthly Payment Schedule - Mobile Responsive */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 md:p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Monthly Payment Schedule (First 60 Months)</h3>
                   <div className="bg-green-100 p-3 rounded-lg">
                     <p className="text-sm text-green-800">
@@ -1349,18 +1349,18 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   </div>
                 </div>
                 
-                <div className="p-6 overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="p-4 md:p-6 table-container overflow-x-auto border border-gray-200 rounded-lg">
+                  <table className="w-full text-sm min-w-[700px]">
                     <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-center py-3 font-medium text-gray-700">Month</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Opening Balance</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Bank Drawdown</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Monthly Payment</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Interest</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Principal</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Ending Balance</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Rate</th>
+                      <tr className="border-b-2 border-gray-200 bg-gray-50">
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Month</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Opening Balance</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Bank Drawdown</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Monthly Payment</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Interest</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Principal</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Ending Balance</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-700">Rate</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1368,26 +1368,26 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                         <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
                           month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
                         }`}>
-                          <td className="py-3 text-center font-medium">{month.month}</td>
-                          <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
-                          <td className="py-3 text-center">
+                          <td className="py-3 px-2 text-center font-medium">{month.month}</td>
+                          <td className="py-3 px-2 text-center">{formatCurrency(month.openingBalance)}</td>
+                          <td className="py-3 px-2 text-center">
                             {month.drawdownAmount > 0 ? (
                               <span className="text-green-600 font-medium">
                                 {formatCurrency(month.drawdownAmount)}
                               </span>
                             ) : '-'}
                           </td>
-                          <td className="py-3 text-center font-semibold text-blue-600">
+                          <td className="py-3 px-2 text-center font-semibold text-blue-600">
                             {month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}
                           </td>
-                          <td className="py-3 text-center">
+                          <td className="py-3 px-2 text-center">
                             {month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}
                           </td>
-                          <td className="py-3 text-center">
+                          <td className="py-3 px-2 text-center">
                             {month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}
                           </td>
-                          <td className="py-3 text-center">{formatCurrency(month.endingBalance)}</td>
-                          <td className="py-3 text-center">
+                          <td className="py-3 px-2 text-center">{formatCurrency(month.endingBalance)}</td>
+                          <td className="py-3 px-2 text-center">
                             {month.interestRate > 0 ? `${month.interestRate.toFixed(2)}%` : '-'}
                           </td>
                         </tr>
@@ -1401,12 +1401,12 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
               <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-1 shadow-lg">
                 <button
                   onClick={generateProgressivePaymentReport}
-                  className="w-full bg-white text-red-600 py-4 px-6 rounded-lg font-semibold flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors"
+                  className="w-full bg-white text-red-600 py-3 md:py-4 px-6 rounded-lg font-semibold flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors text-base"
                 >
-                  <Download className="w-6 h-6" />
-                  <div className="text-left">
-                    <div className="text-lg">Generate Progressive Payment Report</div>
-                    <div className="text-sm text-red-500">Professional PDF with yearly interest breakdown</div>
+                  <Download className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
+                  <div className="text-center">
+                    <div className="text-sm md:text-lg">Generate Progressive Payment Report</div>
+                    <div className="text-xs md:text-sm text-red-500">Professional PDF with yearly interest breakdown</div>
                   </div>
                 </button>
               </div>
