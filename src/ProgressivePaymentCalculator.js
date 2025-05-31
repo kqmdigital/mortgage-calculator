@@ -139,7 +139,8 @@ const ProgressivePaymentCalculator = () => {
         // Fixed time stages (OTP, S&P, TOP, CSC)
         estimatedTime = stage.fixedTime;
       } else if (stage.weight > 0) {
-        // Construction stages use Excel formula: ROUNDUP(totalTime * (weight/totalWeight), 0)
+        // CORRECTED: Excel formula implementation - ROUNDUP($J$5*(C_row/SUM($C$13:$C$18)),0)
+        // This calculates the DURATION of each stage, not the cumulative timeline
         estimatedTime = Math.ceil(totalConstructionTime * (stage.weight / totalWeight));
       } else {
         estimatedTime = 0;
@@ -170,7 +171,7 @@ const ProgressivePaymentCalculator = () => {
     const constructionStagesWithTimes = calculateEstimatedTimes();
     const totalCashCPFRequired = purchasePrice - selectedLoanAmount;
     
-    // Calculate actual months for each stage using cumulative logic
+    // Calculate actual months for each stage using cumulative logic (Excel DDcal logic)
     let cumulativeMonth = 1;
     let topMonth = 1; // Track TOP month for CSC calculation
     
@@ -179,16 +180,18 @@ const ProgressivePaymentCalculator = () => {
         // OTP stage starts at month 1
         cumulativeMonth = 1;
       } else if (index === 1) {
-        // S&P Agreement at month 2 (fixed)
+        // S&P Agreement at month 2 (fixed 1 month after OTP)
         cumulativeMonth = 2;
       } else if (stage.isTOP) {
-        // TOP happens at current cumulative month (don't add time)
+        // TOP happens at current cumulative month (end of construction)
         topMonth = cumulativeMonth; // Store TOP month for CSC calculation
+        // Don't increment for TOP since it happens at the completion of previous stage
       } else if (stage.isCSC) {
         // CSC is always 12 months after TOP
         cumulativeMonth = topMonth + 12;
       } else {
-        // Construction stages: add estimated time to get next stage month
+        // CORRECTED: Construction stages add their estimated duration to cumulative timeline
+        // This follows Excel logic where each stage duration contributes to timeline
         cumulativeMonth += stage.estimatedTime;
       }
       
@@ -249,47 +252,44 @@ const ProgressivePaymentCalculator = () => {
   const generateBankLoanDrawdownSchedule = (completeSchedule) => {
     if (!completeSchedule) return [];
     
-    // FIXED: Filter only stages that have MEANINGFUL bank loan amounts (> 1 cent to handle floating point precision)
+    // FIXED: Filter only stages that have MEANINGFUL bank loan amounts (> 1 to handle floating point precision)
     const bankDrawdownStages = completeSchedule.stages
       .filter(stage => stage.bankLoanAmount > 1);
 
     if (bankDrawdownStages.length === 0) return [];
 
-    // Create bank loan drawdown schedule with separate bank loan month numbering
+    // CORRECTED: Bank loan months based on project timeline positions, not estimated durations
     const bankLoanSchedule = [];
-    let bankLoanMonth = 1; // Bank loan month starts from 1
+    const firstDrawdownProjectMonth = bankDrawdownStages[0].month;
 
     bankDrawdownStages.forEach((stage, index) => {
+      let bankLoanMonth;
+      
       if (index === 0) {
         // First bank loan drawdown is always Bank Loan Month 1
-        bankLoanSchedule.push({
-          projectMonth: stage.month,
-          bankLoanMonth: bankLoanMonth,
-          stage: stage.stage,
-          bankLoanAmount: stage.bankLoanAmount,
-          estimatedTime: stage.estimatedTime
-        });
-      } else {
-        // For subsequent drawdowns, increment bank loan month based on estimated time
-        bankLoanMonth += bankDrawdownStages[index - 1].estimatedTime || 1;
-        
-        // Special handling for CSC - it should be 12 months after TOP in bank loan timeline
-        if (stage.isCSC) {
-          const topStage = bankDrawdownStages.find(s => s.isTOP);
-          if (topStage) {
-            const topBankLoanMonth = bankLoanSchedule.find(s => s.stage === topStage.stage)?.bankLoanMonth || 1;
-            bankLoanMonth = topBankLoanMonth + 12;
-          }
+        bankLoanMonth = 1;
+      } else if (stage.isCSC) {
+        // Special handling for CSC - always 12 months after TOP in bank loan timeline
+        const topStage = bankDrawdownStages.find(s => s.isTOP);
+        if (topStage) {
+          const topBankLoanMonth = bankLoanSchedule.find(s => s.stage === topStage.stage)?.bankLoanMonth || 1;
+          bankLoanMonth = topBankLoanMonth + 12;
+        } else {
+          // Fallback if no TOP stage found
+          bankLoanMonth = 1 + (stage.month - firstDrawdownProjectMonth);
         }
-        
-        bankLoanSchedule.push({
-          projectMonth: stage.month,
-          bankLoanMonth: bankLoanMonth,
-          stage: stage.stage,
-          bankLoanAmount: stage.bankLoanAmount,
-          estimatedTime: stage.estimatedTime
-        });
+      } else {
+        // FIXED: Calculate bank loan month based on project timeline difference from first drawdown
+        bankLoanMonth = 1 + (stage.month - firstDrawdownProjectMonth);
       }
+      
+      bankLoanSchedule.push({
+        projectMonth: stage.month,
+        bankLoanMonth: bankLoanMonth,
+        stage: stage.stage,
+        bankLoanAmount: stage.bankLoanAmount,
+        estimatedTime: stage.estimatedTime
+      });
     });
 
     return bankLoanSchedule;
@@ -660,6 +660,7 @@ const ProgressivePaymentCalculator = () => {
             font-size: 7px;
         }
         .cash-highlight { background: #dbeafe !important; font-weight: bold; }
+        .otp-highlight { background: #fed7aa !important; font-weight: bold; } /* Special highlight for OTP (Cash only) */
         .drawdown-highlight { background: #fef3c7 !important; font-weight: bold; }
         .top-highlight { background: #dcfce7 !important; font-weight: bold; }
         .csc-highlight { background: #f3e8ff !important; font-weight: bold; }
@@ -746,6 +747,9 @@ const ProgressivePaymentCalculator = () => {
 
     <div class="section no-break">
         <h2>📅 CONSTRUCTION PAYMENT SCHEDULE</h2>
+        <p style="font-size: 9px; color: #666; margin-bottom: 8px;">
+            Payment modes: OTP = Cash only | S&P = Cash/CPF | Construction stages = Mixed allocation
+        </p>
        
         <table class="payment-table">
             <thead>
@@ -761,7 +765,8 @@ const ProgressivePaymentCalculator = () => {
             </thead>
             <tbody>
                 ${results.stages.map((stage) => {
-                    const rowClass = stage.isInitial ? 'cash-highlight' : 
+                    const rowClass = stage.stage.includes('Option to Purchase') ? 'otp-highlight' : // Special highlight for OTP (Cash only)
+                                   stage.isInitial ? 'cash-highlight' : 
                                    stage.isTOP ? 'top-highlight' : 
                                    stage.isCSC ? 'csc-highlight' : 'drawdown-highlight';
                     return `
@@ -784,7 +789,7 @@ const ProgressivePaymentCalculator = () => {
     <div class="section no-break">
         <h2>🏦 BANK LOAN DRAWDOWN SCHEDULE</h2>
         <p style="font-size: 9px; color: #666; margin-bottom: 8px;">
-            Bank loan servicing timeline (separate from project timeline). Only includes stages with meaningful bank loan amounts (> $1.00).
+            Bank loan servicing timeline (separate from project timeline). Bank months calculated from project timeline positions, not stage durations.
         </p>
         <table class="payment-table">
             <thead>
@@ -818,7 +823,7 @@ const ProgressivePaymentCalculator = () => {
             <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
             <p style="font-size: 9px; color: #666; margin-bottom: 8px;">
                 ${results.firstBankDrawdownMonth ? 
-                  `Bank loan servicing starts from Month ${results.firstBankDrawdownMonth} (first meaningful bank drawdown > $1.00). Monthly installment recalculates after each drawdown AND when interest rates change.` : 
+                  `Bank loan servicing starts from Month ${results.firstBankDrawdownMonth} (first meaningful bank drawdown > $1.00). Bank months calculated from project timeline positions. Monthly installment recalculates after each drawdown AND when interest rates change.` : 
                   'No bank loan drawdowns - 100% Cash/CPF payment.'}
             </p>
             <table class="payment-table">
@@ -857,13 +862,13 @@ const ProgressivePaymentCalculator = () => {
 
     <div class="disclaimer no-break">
         <h4 style="margin: 0 0 6px 0; color: #333; font-size: 10px;">Important Notes</h4>
-        <p style="margin: 3px 0;">• Bank loan drawdown schedule excludes stages with insignificant amounts (≤ $1.00).</p>
+        <p style="margin: 3px 0;">• Bank loan drawdown schedule uses project timeline positions (not estimated durations).</p>
         <p style="margin: 3px 0;">• Monthly Payment Schedule starts from the first meaningful bank loan drawdown.</p>
         <p style="margin: 3px 0;">• Option to Purchase (OTP) payment is typically made in Cash only, not CPF.</p>
         <p style="margin: 3px 0;">• Certificate of Statutory Completion (CSC) is always 12 months after TOP in bank loan timeline.</p>
+        <p style="margin: 3px 0;">• Construction stage durations calculated using Excel formula: ROUNDUP(ConstructionTime × (Weight÷TotalWeights), 0).</p>
+        <p style="margin: 3px 0;">• Stage estimated times represent duration of work, not gaps between payments.</p>
         <p style="margin: 3px 0;">• Monthly payments recalculate automatically after each bank loan drawdown AND when interest rates change.</p>
-        <p style="margin: 3px 0;">• Construction stage timing calculated using Excel formula: ROUNDUP(TotalTime × (Weight/SumWeights), 0).</p>
-        <p style="margin: 3px 0;">• Initial payments (OTP + S&P) are Cash/CPF only before bank loan activation.</p>
         <p style="margin: 3px 0;">• Interest rates may vary based on market conditions and bank packages.</p>
     </div>
 
@@ -894,12 +899,17 @@ const ProgressivePaymentCalculator = () => {
 📄 Timeline Source: ${results.timelineCalculated ? 'Date-Based Calculations' : 'Default Estimates'}
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and TOP dates.' : ''}
 
-✅ CRITICAL FIXES APPLIED: 
-• Bank Loan Drawdown Schedule now filters amounts > $1.00 (not just > $0)
-• Monthly Payment Schedule starts from first meaningful drawdown
+✅ EXCEL FORMULA LOGIC IMPLEMENTED: 
+• Stage durations: ROUNDUP(ConstructionTime × (Weight÷TotalWeights), 0)
+• Bank drawdown timeline based on project positions (not durations)
+• CSC correctly placed 12 months after TOP in bank timeline
+• OTP payment mode shows as "Cash" (not "Cash/CPF")
 • Floating-point precision issues resolved
-• Opening balance correctly shows first actual drawdown amount
-• OTP payment mode correctly shows as "Cash" (not "Cash/CPF")
+
+📊 Construction Time Breakdown:
+• Total Project Time = User Timeline or Default (40 months)
+• Construction Time = Total - OTP (1) - S&P (2) = 37 months
+• Stage weights: Foundation(10%), Framework(10%), Others(5% each)
 
 📄 FOR BEST PDF RESULTS:
 - Use Chrome or Edge browser for printing
@@ -1152,20 +1162,20 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
             
             <div className="space-y-3 text-sm text-gray-700">
               <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">Construction Stage Timing:</p>
-                <p className="text-xs mt-1">ROUNDUP(TotalTime × (StageWeight ÷ SumAllWeights), 0)</p>
+                <p className="font-medium text-purple-700">Excel Construction Time Formula:</p>
+                <p className="text-xs mt-1">ROUNDUP(ConstructionTime × (StageWeight ÷ TotalWeights), 0)</p>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-purple-100">
+                <p className="font-medium text-purple-700">Timeline Calculation:</p>
+                <p className="text-xs mt-1">Total = UserTimeline or 40mo, Construction = Total - OTP(1) - S&P(2)</p>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-purple-100">
+                <p className="font-medium text-purple-700">Bank Drawdown Logic:</p>
+                <p className="text-xs mt-1">Uses project timeline positions, not stage durations</p>
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
                 <p className="font-medium text-purple-700">Payment Mode Classification:</p>
                 <p className="text-xs mt-1">OTP = "Cash" only, S&P = "Cash/CPF", Construction = Mixed</p>
-              </div>
-              <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">CSC Timing:</p>
-                <p className="text-xs mt-1">Always 12 months after TOP in bank loan timeline</p>
-              </div>
-              <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">Bank Loan Filter:</p>
-                <p className="text-xs mt-1">Only includes meaningful amounts (> $1.00) to handle precision</p>
               </div>
             </div>
           </div>
@@ -1245,7 +1255,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <div className={`p-3 rounded-lg mb-4 ${results.timelineCalculated ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
                     <p className={`text-sm ${results.timelineCalculated ? 'text-green-800' : 'text-yellow-800'}`}>
                       <strong>{results.timelineCalculated ? '✓ Timeline Scheduled:' : '⚠️ Default Timeline:'}</strong>
-                      {results.timelineCalculated ? ' Timeline based on your OTP and TOP dates.' : ' Please provide OTP and TOP dates for accurate calculations.'}
+                      {results.timelineCalculated ? ' Timeline based on your OTP and TOP dates. ' : ' Please provide OTP and TOP dates for accurate calculations. '}
+                      <span className="text-xs">Note: OTP payment is typically Cash only.</span>
                     </p>
                   </div>
                 </div>
@@ -1266,6 +1277,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <tbody>
                       {results.stages.map((stage, index) => (
                         <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
+                          stage.stage.includes('Option to Purchase') ? 'bg-orange-50' : // Special highlight for OTP (Cash only)
                           stage.isInitial ? 'bg-blue-50' : 
                           stage.isTOP ? 'bg-green-50' : 
                           stage.isCSC ? 'bg-purple-50' : 
@@ -1287,6 +1299,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                           </td>
                           <td className="py-4 text-center">
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              stage.stage.includes('Option to Purchase') ? 'bg-orange-100 text-orange-800' : // Special styling for OTP (Cash only)
                               stage.isInitial ? 'bg-blue-100 text-blue-800' : 
                               stage.isTOP ? 'bg-green-100 text-green-800' :
                               stage.isCSC ? 'bg-purple-100 text-purple-800' :
@@ -1310,7 +1323,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <h3 className="text-lg font-semibold mb-2">Bank Loan Drawdown Schedule</h3>
                     <div className="bg-blue-100 p-3 rounded-lg">
                       <p className="text-sm text-blue-800">
-                        <strong>Separate Bank Loan Timeline:</strong> Shows only stages with meaningful bank loan amounts (> $1.00) to exclude floating-point precision issues.
+                        <strong>Separate Bank Loan Timeline:</strong> Bank months calculated from project timeline positions. Only shows stages with meaningful bank loan amounts (> $1.00).
                       </p>
                     </div>
                   </div>
@@ -1357,7 +1370,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <p className="text-sm text-green-800">
                       <strong>Bank Loan Servicing:</strong> 
                       {results.firstBankDrawdownMonth ? (
-                        ` Starts from Month ${results.firstBankDrawdownMonth} (first meaningful bank drawdown > $1.00). Monthly payments recalculate after each drawdown AND when interest rates change.`
+                        ` Starts from Month ${results.firstBankDrawdownMonth} (first meaningful bank drawdown > $1.00). Bank months calculated from project timeline positions. Monthly payments recalculate after each drawdown AND when interest rates change.`
                       ) : (
                         ' 100% Cash/CPF payment - No bank loan servicing required.'
                       )}
