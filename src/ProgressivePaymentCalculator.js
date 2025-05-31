@@ -1042,7 +1042,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                       value={inputs.tenure}
                       onChange={(e) => handleInputChange('tenure', parseInt(e.target.value) || 20)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      min="5"
+                      min="0"
                       max="35"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
@@ -1227,7 +1227,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   
                   <div className={`p-3 rounded-lg mb-4 ${results.timelineCalculated ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
                     <p className={`text-sm ${results.timelineCalculated ? 'text-green-800' : 'text-yellow-800'}`}>
-                      <strong>{results.timelineCalculated ? '✓ Excel Formula Implementation:' : '⚠️ Default Timeline:'}</strong> Construction stage timing calculated using ROUNDUP formula with proportional weight distribution.
+                      <strong>{results.timelineCalculated ? '✓ Timeline Scheduled:' : '⚠️ Default Timeline:'}</strong>
                       {results.timelineCalculated ? ' Timeline based on your OTP and TOP dates.' : ' Please provide OTP and TOP dates for accurate calculations.'}
                     </p>
                   </div>
@@ -1293,8 +1293,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <h3 className="text-lg font-semibold mb-2">Bank Loan Drawdown Schedule</h3>
                     <div className="bg-blue-100 p-3 rounded-lg">
                       <p className="text-sm text-blue-800">
-                        <strong>Separate Bank Loan Timeline:</strong> Shows only stages with actual bank loan amounts. 
-                        Certificate of Statutory Completion (CSC) correctly positioned 12 months after TOP in bank loan schedule.
+                        <strong>Separate Bank Loan Timeline:</strong> Shows only stages with actual bank loan amounts.
                       </p>
                     </div>
                   </div>
@@ -1341,7 +1340,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                     <p className="text-sm text-green-800">
                       <strong>Bank Loan Servicing:</strong> 
                       {results.firstBankDrawdownMonth ? (
-                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown AND when interest rates change. Month 1 opening balance equals first drawdown amount.`
+                        ` Starts from Month ${results.firstBankDrawdownMonth}. Monthly payments recalculate after each drawdown AND when interest rates change.`
                       ) : (
                         ' 100% Cash/CPF payment - No bank loan servicing required.'
                       )}
@@ -1406,7 +1405,7 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                   <Download className="w-6 h-6" />
                   <div className="text-left">
                     <div className="text-lg">Generate Progressive Payment Report</div>
-                    <div className="text-sm text-red-500">Professional PDF with yearly interest breakdown</div>
+  
                   </div>
                 </button>
               </div>
