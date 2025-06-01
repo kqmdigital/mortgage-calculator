@@ -406,7 +406,10 @@ const ProgressivePaymentCalculator = () => {
       
       let paymentMode;
       
-      if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage > 0) {
+      // Special case for OTP - Cash only
+      if (stage.stage === 'Upon grant of Option to Purchase') {
+        paymentMode = `Cash (${roundedCashCPFPercentage.toFixed(1)}%)`;
+      } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage > 0) {
         paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%) + Bank Loan (${roundedBankLoanPercentage.toFixed(1)}%)`;
       } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage <= 0) {
         paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%)`;
@@ -814,7 +817,7 @@ const ProgressivePaymentCalculator = () => {
         <p style="margin: 3px 0;">• Bank loan drawdowns occur at specific construction stages as approved by the bank.</p>
         <p style="margin: 3px 0;">• Interest calculations are based on variable rates and actual drawdown amounts.</p>
         <p style="margin: 3px 0;">• Actual timeline may vary based on construction progress and developer schedules.</p>
-        <p style="margin: 3px 0;">• Cash/CPF payments are required upfront for initial stages (OTP and S&P).</p>
+        <p style="margin: 3px 0;">• Cash/CPF payments are required upfront for initial stages (OTP in Cash only, S&P in Cash/CPF).</p>
         <p style="margin: 3px 0;">• Consult our specialists for detailed analysis tailored to your specific project.</p>
     </div>
 
