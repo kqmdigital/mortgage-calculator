@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info } from 'lucide-react';
+import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
-// Progressive Payment Calculator - Clean Web Version
+// Progressive Payment Calculator - Enhanced UI Version
 const ProgressivePaymentCalculator = () => {
   const [inputs, setInputs] = useState({
     purchasePrice: '',
@@ -26,6 +26,7 @@ const ProgressivePaymentCalculator = () => {
   });
 
   const [results, setResults] = useState(null);
+  const [expandedMonthlySchedule, setExpandedMonthlySchedule] = useState(false);
 
   // Time calculation chain
   const calculateExcelTimeChain = (otpDate, topDate) => {
@@ -1110,8 +1111,8 @@ const ProgressivePaymentCalculator = () => {
                 </div>
               </div>
 
-              {/* Construction Payment Schedule */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              {/* Construction Payment Schedule - Card Layout for Mobile */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold mb-2">Construction Payment Schedule</h3>
                   <p className="text-sm text-gray-600">
@@ -1124,62 +1125,117 @@ const ProgressivePaymentCalculator = () => {
                   </p>
                 </div>
                 
-                <div className="p-6 overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-center py-3 font-medium text-gray-700">Project Month</th>
-                        <th className="text-left py-3 font-medium text-gray-700">Construction Stage</th>
-                        <th className="text-center py-3 font-medium text-gray-700">%</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Total Amount</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Cash/CPF</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Bank Loan</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Payment Mode</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.stages.map((stage, index) => (
-                        <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
-                          stage.isInitial ? 'bg-blue-50' : 
-                          stage.isTOP ? 'bg-green-50' : 
-                          stage.isCSC ? 'bg-purple-50' : 
-                          stage.bankLoanAmount > 0 ? 'bg-yellow-50' : 'bg-gray-50'
-                        }`}>
-                          <td className="py-4 text-center font-medium">{stage.month}</td>
-                          <td className="py-4 text-left">{stage.stage}</td>
-                          <td className="py-4 text-center">{stage.percentage.toFixed(1)}%</td>
-                          <td className="py-4 text-center font-semibold">{formatCurrency(stage.stageAmount)}</td>
-                          <td className="py-4 text-center">
-                            {stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}
-                          </td>
-                          <td className="py-4 text-center">
-                            {stage.bankLoanAmount > 0 ? (
-                              <span className="text-green-600 font-medium">
-                                {formatCurrency(stage.bankLoanAmount)}
-                              </span>
-                            ) : '-'}
-                          </td>
-                          <td className="py-4 text-center">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              stage.isInitial ? 'bg-blue-100 text-blue-800' : 
-                              stage.isTOP ? 'bg-green-100 text-green-800' :
-                              stage.isCSC ? 'bg-purple-100 text-purple-800' :
-                              stage.bankLoanAmount > 0 ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {stage.paymentMode}
-                            </span>
-                          </td>
+                {/* Desktop Table View */}
+                <div className="hidden lg:block p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b-2 border-gray-200">
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[80px]">Month</th>
+                          <th className="text-left py-3 font-medium text-gray-700 min-w-[200px]">Construction Stage</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">%</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Total Amount</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Cash/CPF</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Bank Loan</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Payment Mode</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {results.stages.map((stage, index) => (
+                          <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
+                            stage.isInitial ? 'bg-blue-50' : 
+                            stage.isTOP ? 'bg-green-50' : 
+                            stage.isCSC ? 'bg-purple-50' : 
+                            stage.bankLoanAmount > 0 ? 'bg-yellow-50' : 'bg-gray-50'
+                          }`}>
+                            <td className="py-4 text-center font-medium">{stage.month}</td>
+                            <td className="py-4 text-left">{stage.stage}</td>
+                            <td className="py-4 text-center">{stage.percentage.toFixed(1)}%</td>
+                            <td className="py-4 text-center font-semibold">{formatCurrency(stage.stageAmount)}</td>
+                            <td className="py-4 text-center">
+                              {stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}
+                            </td>
+                            <td className="py-4 text-center">
+                              {stage.bankLoanAmount > 0 ? (
+                                <span className="text-green-600 font-medium">
+                                  {formatCurrency(stage.bankLoanAmount)}
+                                </span>
+                              ) : '-'}
+                            </td>
+                            <td className="py-4 text-center">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                stage.isInitial ? 'bg-blue-100 text-blue-800' : 
+                                stage.isTOP ? 'bg-green-100 text-green-800' :
+                                stage.isCSC ? 'bg-purple-100 text-purple-800' :
+                                stage.bankLoanAmount > 0 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {stage.paymentMode}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="lg:hidden p-4">
+                  <div className="space-y-4">
+                    {results.stages.map((stage, index) => (
+                      <div key={index} className={`border rounded-lg p-4 ${
+                        stage.isInitial ? 'border-blue-200 bg-blue-50' : 
+                        stage.isTOP ? 'border-green-200 bg-green-50' : 
+                        stage.isCSC ? 'border-purple-200 bg-purple-50' : 
+                        stage.bankLoanAmount > 0 ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'
+                      }`}>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-sm font-semibold text-gray-700">Month {stage.month}</span>
+                          <span className="text-sm font-medium text-gray-600">{stage.percentage.toFixed(1)}%</span>
+                        </div>
+                        <h4 className="font-medium text-gray-800 mb-3 leading-snug">{stage.stage}</h4>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-600">Total Amount:</span>
+                            <div className="font-semibold">{formatCurrency(stage.stageAmount)}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Cash/CPF:</span>
+                            <div className="font-semibold">
+                              {stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Bank Loan:</span>
+                            <div className="font-semibold text-green-600">
+                              {stage.bankLoanAmount > 0 ? formatCurrency(stage.bankLoanAmount) : '-'}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Payment Mode:</span>
+                            <div className="text-xs mt-1">
+                              <span className={`px-2 py-1 rounded-full font-medium ${
+                                stage.isInitial ? 'bg-blue-100 text-blue-800' : 
+                                stage.isTOP ? 'bg-green-100 text-green-800' :
+                                stage.isCSC ? 'bg-purple-100 text-purple-800' :
+                                stage.bankLoanAmount > 0 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {stage.paymentMode}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Bank Loan Drawdown Schedule */}
               {results.bankDrawdownSchedule.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold mb-2">Bank Loan Drawdown Schedule</h3>
                     <p className="text-sm text-blue-800">
@@ -1187,7 +1243,8 @@ const ProgressivePaymentCalculator = () => {
                     </p>
                   </div>
                   
-                  <div className="p-6 overflow-x-auto">
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block p-6">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b-2 border-gray-200">
@@ -1218,67 +1275,163 @@ const ProgressivePaymentCalculator = () => {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden p-4">
+                    <div className="space-y-4">
+                      {results.bankDrawdownSchedule.map((drawdown, index) => (
+                        <div key={index} className={`border rounded-lg p-4 ${
+                          drawdown.stage.includes('Certificate of Statutory Completion') ? 'border-purple-200 bg-purple-50' : 
+                          drawdown.stage.includes('TOP') ? 'border-green-200 bg-green-50' : 
+                          'border-yellow-200 bg-yellow-50'
+                        }`}>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-semibold text-gray-700">Project Month {drawdown.projectMonth}</span>
+                            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm">
+                              Bank Month {drawdown.bankLoanMonth}
+                            </span>
+                          </div>
+                          <h4 className="font-medium text-gray-800 mb-2 leading-snug">{drawdown.stage}</h4>
+                          <div className="text-right">
+                            <span className="text-sm text-gray-600">Bank Loan Amount:</span>
+                            <div className="text-lg font-bold text-green-600">{formatCurrency(drawdown.bankLoanAmount)}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Monthly Payment Schedule */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold mb-2">Monthly Payment Schedule (First 60 Months)</h3>
-                  <p className="text-sm text-green-800">
-                    {results.firstBankDrawdownMonth ? (
-                      `Payment schedule starts from Month ${results.firstBankDrawdownMonth} with progressive loan drawdowns`
-                    ) : (
-                      '100% Cash/CPF payment - No bank loan servicing required'
-                    )}
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Monthly Payment Schedule</h3>
+                      <p className="text-sm text-green-800">
+                        {results.firstBankDrawdownMonth ? (
+                          `Payment schedule starts from Month ${results.firstBankDrawdownMonth} with progressive loan drawdowns`
+                        ) : (
+                          '100% Cash/CPF payment - No bank loan servicing required'
+                        )}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setExpandedMonthlySchedule(!expandedMonthlySchedule)}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors"
+                    >
+                      <span className="text-sm font-medium">
+                        {expandedMonthlySchedule ? 'Show Less' : 'Show More'}
+                      </span>
+                      {expandedMonthlySchedule ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 
-                <div className="p-6 overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-center py-3 font-medium text-gray-700">Month</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Opening Balance</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Bank Drawdown</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Monthly Payment</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Interest</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Principal</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Ending Balance</th>
-                        <th className="text-center py-3 font-medium text-gray-700">Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.monthlySchedule.slice(0, 60).map((month, index) => (
-                        <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
-                          month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
-                        }`}>
-                          <td className="py-3 text-center font-medium">{month.month}</td>
-                          <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
-                          <td className="py-3 text-center">
-                            {month.drawdownAmount > 0 ? (
-                              <span className="text-green-600 font-medium">
-                                {formatCurrency(month.drawdownAmount)}
-                              </span>
-                            ) : '-'}
-                          </td>
-                          <td className="py-3 text-center font-semibold text-blue-600">
-                            {month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}
-                          </td>
-                          <td className="py-3 text-center">
-                            {month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}
-                          </td>
-                          <td className="py-3 text-center">
-                            {month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}
-                          </td>
-                          <td className="py-3 text-center">{formatCurrency(month.endingBalance)}</td>
-                          <td className="py-3 text-center">
-                            {month.interestRate > 0 ? `${month.interestRate.toFixed(2)}%` : '-'}
-                          </td>
+                {/* Desktop Table View */}
+                <div className="hidden lg:block p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b-2 border-gray-200">
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Month</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Opening Balance</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Bank Drawdown</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Monthly Payment</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Interest</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Principal</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Ending Balance</th>
+                          <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Rate</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 60).map((month, index) => (
+                          <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
+                            month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
+                          }`}>
+                            <td className="py-3 text-center font-medium">{month.month}</td>
+                            <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
+                            <td className="py-3 text-center">
+                              {month.drawdownAmount > 0 ? (
+                                <span className="text-green-600 font-medium">
+                                  {formatCurrency(month.drawdownAmount)}
+                                </span>
+                              ) : '-'}
+                            </td>
+                            <td className="py-3 text-center font-semibold text-blue-600">
+                              {month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}
+                            </td>
+                            <td className="py-3 text-center">
+                              {month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}
+                            </td>
+                            <td className="py-3 text-center">
+                              {month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}
+                            </td>
+                            <td className="py-3 text-center">{formatCurrency(month.endingBalance)}</td>
+                            <td className="py-3 text-center">
+                              {month.interestRate > 0 ? `${month.interestRate.toFixed(2)}%` : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="lg:hidden p-4">
+                  <div className="space-y-4">
+                    {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 24).map((month, index) => (
+                      <div key={index} className={`border rounded-lg p-4 ${
+                        month.drawdownAmount > 0 ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'
+                      }`}>
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-lg font-semibold text-gray-800">Month {month.month}</span>
+                          {month.interestRate > 0 && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
+                              {month.interestRate.toFixed(2)}%
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-600">Opening Balance:</span>
+                            <div className="font-semibold">{formatCurrency(month.openingBalance)}</div>
+                          </div>
+                          {month.drawdownAmount > 0 && (
+                            <div>
+                              <span className="text-gray-600">Bank Drawdown:</span>
+                              <div className="font-semibold text-green-600">{formatCurrency(month.drawdownAmount)}</div>
+                            </div>
+                          )}
+                          {month.monthlyPayment > 0 && (
+                            <div>
+                              <span className="text-gray-600">Monthly Payment:</span>
+                              <div className="font-semibold text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
+                            </div>
+                          )}
+                          {month.interestPayment > 0 && (
+                            <div>
+                              <span className="text-gray-600">Interest:</span>
+                              <div className="font-semibold">{formatCurrency(month.interestPayment)}</div>
+                            </div>
+                          )}
+                          {month.principalPayment > 0 && (
+                            <div>
+                              <span className="text-gray-600">Principal:</span>
+                              <div className="font-semibold">{formatCurrency(month.principalPayment)}</div>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-gray-600">Ending Balance:</span>
+                            <div className="font-semibold">{formatCurrency(month.endingBalance)}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
