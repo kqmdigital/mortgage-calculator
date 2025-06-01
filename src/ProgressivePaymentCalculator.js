@@ -514,20 +514,21 @@ const ProgressivePaymentCalculator = () => {
     setResults(calculateProgressivePayments());
   }, [inputs]);
 
-  // PDF Report generation
-  const generateProgressivePaymentReport = () => {
-    if (!results) {
-      alert('Please calculate the progressive payments first before generating a report.');
-      return;
-    }
+// Updated generateProgressivePaymentReport function
 
-    const currentDate = new Date().toLocaleDateString('en-SG', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+const generateProgressivePaymentReport = () => {
+  if (!results) {
+    alert('Please calculate the progressive payments first before generating a report.');
+    return;
+  }
 
-    const htmlContent = `
+  const currentDate = new Date().toLocaleDateString('en-SG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -710,6 +711,106 @@ const ProgressivePaymentCalculator = () => {
         </div>
     </div>
 
+    <div class="section no-break">
+        <h2>🏗️ CONSTRUCTION PAYMENT SCHEDULE</h2>
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Construction Stage</th>
+                    <th>%</th>
+                    <th>Total Amount</th>
+                    <th>Cash/CPF</th>
+                    <th>Bank Loan</th>
+                    <th>Payment Mode</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${results.stages.map(stage => `
+                <tr class="${
+                  stage.isInitial ? 'cash-highlight' : 
+                  stage.isTOP ? 'top-highlight' : 
+                  stage.isCSC ? 'csc-highlight' : 
+                  stage.bankLoanAmount > 0 ? 'drawdown-highlight' : ''
+                }">
+                    <td>${stage.month}</td>
+                    <td style="text-align: left;">${stage.stage}</td>
+                    <td>${stage.percentage.toFixed(1)}%</td>
+                    <td>${formatCurrency(stage.stageAmount)}</td>
+                    <td>${stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}</td>
+                    <td>${stage.bankLoanAmount > 0 ? formatCurrency(stage.bankLoanAmount) : '-'}</td>
+                    <td style="font-size: 6px;">${stage.paymentMode}</td>
+                </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+
+    ${results.bankDrawdownSchedule.length > 0 ? `
+    <div class="section no-break">
+        <h2>💰 BANK LOAN DRAWDOWN SCHEDULE</h2>
+        <table class="payment-table">
+            <thead>
+                <tr>
+                    <th>Project Month</th>
+                    <th>Bank Loan Month</th>
+                    <th>Construction Stage</th>
+                    <th>Bank Loan Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${results.bankDrawdownSchedule.map(drawdown => `
+                <tr class="${
+                  drawdown.stage.includes('Certificate of Statutory Completion') ? 'csc-highlight' : 
+                  drawdown.stage.includes('TOP') ? 'top-highlight' : 'drawdown-highlight'
+                }">
+                    <td>${drawdown.projectMonth}</td>
+                    <td>${drawdown.bankLoanMonth}</td>
+                    <td style="text-align: left;">${drawdown.stage}</td>
+                    <td>${formatCurrency(drawdown.bankLoanAmount)}</td>
+                </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+    ` : ''}
+
+    ${results.monthlySchedule.length > 0 ? `
+    <div class="page-break">
+        <div class="section">
+            <h2>📅 MONTHLY PAYMENT SCHEDULE (First 5 Years)</h2>
+            <table class="payment-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Opening Balance</th>
+                        <th>Bank Drawdown</th>
+                        <th>Monthly Payment</th>
+                        <th>Interest</th>
+                        <th>Principal</th>
+                        <th>Ending Balance</th>
+                        <th>Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${results.monthlySchedule.slice(0, 60).map(month => `
+                    <tr class="${month.drawdownAmount > 0 ? 'drawdown-highlight' : ''}">
+                        <td>${month.month}</td>
+                        <td>${formatCurrency(month.openingBalance)}</td>
+                        <td>${month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}</td>
+                        <td>${month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}</td>
+                        <td>${month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}</td>
+                        <td>${month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}</td>
+                        <td>${formatCurrency(month.endingBalance)}</td>
+                        <td>${month.interestRate > 0 ? month.interestRate.toFixed(2) + '%' : '-'}</td>
+                    </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    ` : ''}
+
     <div class="disclaimer no-break">
         <h4 style="margin: 0 0 6px 0; color: #333; font-size: 10px;">Important Notes</h4>
         <p style="margin: 3px 0;">• This progressive payment schedule is based on standard BUC property development milestones.</p>
@@ -717,6 +818,7 @@ const ProgressivePaymentCalculator = () => {
         <p style="margin: 3px 0;">• Interest calculations are based on variable rates and actual drawdown amounts.</p>
         <p style="margin: 3px 0;">• Actual timeline may vary based on construction progress and developer schedules.</p>
         <p style="margin: 3px 0;">• Cash/CPF payments are required upfront for initial stages (OTP in Cash only, S&P in Cash/CPF).</p>
+        <p style="margin: 3px 0;">• <strong>Color Legend:</strong> Blue = Cash/CPF Only, Yellow = Bank Drawdown, Green = TOP, Purple = CSC</p>
         <p style="margin: 3px 0;">• Consult our specialists for detailed analysis tailored to your specific project.</p>
     </div>
 
@@ -731,18 +833,18 @@ const ProgressivePaymentCalculator = () => {
     </div>
 </body>
 </html>
-    `;
+  `;
 
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(htmlContent);
-    newWindow.document.close();
-    
-    setTimeout(() => {
-      newWindow.focus();
-      newWindow.print();
-    }, 1000);
+  const newWindow = window.open('', '_blank');
+  newWindow.document.write(htmlContent);
+  newWindow.document.close();
+  
+  setTimeout(() => {
+    newWindow.focus();
+    newWindow.print();
+  }, 1000);
 
-    alert(`Progressive payment schedule generated successfully! 
+  alert(`Progressive payment schedule generated successfully! 
 
 📄 FOR BEST PDF RESULTS:
 • Use Chrome or Edge browser for printing
@@ -753,7 +855,7 @@ const ProgressivePaymentCalculator = () => {
 • Set scale to "100%" or "Fit to page width"
 • Select "Portrait" orientation
 • Ensure all content fits properly without being cut off`);
-  };
+};
 
   return (
     <div className="space-y-8">
