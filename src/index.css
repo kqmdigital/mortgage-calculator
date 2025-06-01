@@ -44,3 +44,48 @@ code {
     display: none !important;
   }
 }
+
+/* Currency Input Styles - Mobile Fix */
+.currency-input {
+  padding-left: 60px !important; /* Make room for SGD symbol */
+  padding-right: 12px !important;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 12px; /* Position from left edge */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280; /* Gray color */
+  font-weight: 500;
+  font-size: 14px;
+  pointer-events: none; /* Prevent clicking on symbol */
+  z-index: 1;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Mobile-specific adjustments for currency inputs */
+@media (max-width: 768px) {
+  .currency-input {
+    padding-left: 55px !important; /* Slightly less padding on mobile */
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  .currency-symbol {
+    left: 10px; /* Adjust position for mobile */
+    font-size: 13px; /* Slightly smaller on mobile */
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .currency-input {
+    padding-left: 50px !important;
+    padding-right: 10px !important;
+  }
+  
+  .currency-symbol {
+    left: 8px;
+    font-size: 12px;
+  }
+}
