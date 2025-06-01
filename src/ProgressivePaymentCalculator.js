@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info, ChevronDown, ChevronUp, Home, Building2 } from 'lucide-react';
 
 // Progressive Payment Calculator - Enhanced UI Version
 const ProgressivePaymentCalculator = () => {
@@ -710,108 +710,6 @@ const ProgressivePaymentCalculator = () => {
         </div>
     </div>
 
-    <div class="section no-break">
-        <h2>📅 CONSTRUCTION PAYMENT SCHEDULE</h2>
-        <table class="payment-table">
-            <thead>
-                <tr>
-                    <th>Project Month</th>
-                    <th>Construction Stage</th>
-                    <th>%</th>
-                    <th>Total Amount</th>
-                    <th>Cash/CPF</th>
-                    <th>Bank Loan</th>
-                    <th>Payment Mode</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${results.stages.map((stage) => {
-                    const rowClass = stage.isInitial ? 'cash-highlight' : 
-                                   stage.isTOP ? 'top-highlight' : 
-                                   stage.isCSC ? 'csc-highlight' : 'drawdown-highlight';
-                    return `
-                    <tr class="${rowClass}">
-                        <td>${stage.month}</td>
-                        <td style="text-align: left; padding-left: 4px;">${stage.stage}</td>
-                        <td>${stage.percentage.toFixed(1)}%</td>
-                        <td>${formatCurrency(stage.stageAmount)}</td>
-                        <td>${stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}</td>
-                        <td>${stage.bankLoanAmount > 0 ? formatCurrency(stage.bankLoanAmount) : '-'}</td>
-                        <td style="font-size: 6px;">${stage.paymentMode}</td>
-                    </tr>
-                    `;
-                }).join('')}
-            </tbody>
-        </table>
-    </div>
-
-    ${results.bankDrawdownSchedule.length > 0 ? `
-    <div class="section no-break">
-        <h2>🏦 BANK LOAN DRAWDOWN SCHEDULE</h2>
-        <table class="payment-table">
-            <thead>
-                <tr>
-                    <th>Project Month</th>
-                    <th>Bank Loan Month</th>
-                    <th>Construction Stage</th>
-                    <th>Bank Loan Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${results.bankDrawdownSchedule.map((drawdown, index) => {
-                    const rowClass = drawdown.stage.includes('Certificate of Statutory Completion') ? 'csc-highlight' : 
-                                   drawdown.stage.includes('TOP') ? 'top-highlight' : 'drawdown-highlight';
-                    return `
-                    <tr class="${rowClass}">
-                        <td>${drawdown.projectMonth}</td>
-                        <td><strong>${drawdown.bankLoanMonth}</strong></td>
-                        <td style="text-align: left; padding-left: 4px;">${drawdown.stage}</td>
-                        <td>${formatCurrency(drawdown.bankLoanAmount)}</td>
-                    </tr>
-                    `;
-                }).join('')}
-            </tbody>
-        </table>
-    </div>
-    ` : ''}
-
-    <div class="page-break">
-        <div class="section">
-            <h2>📊 MONTHLY PAYMENT SCHEDULE (First 60 Months)</h2>
-            <table class="payment-table">
-                <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Opening Balance</th>
-                        <th>Bank Drawdown</th>
-                        <th>Monthly Payment</th>
-                        <th>Interest</th>
-                        <th>Principal</th>
-                        <th>Ending Balance</th>
-                        <th>Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${results.monthlySchedule.slice(0, 60).map(month => {
-                        const rowClass = month.drawdownAmount > 0 ? 'drawdown-highlight' : '';
-                        return `
-                        <tr class="${rowClass}">
-                            <td>${month.month}</td>
-                            <td>${formatCurrency(month.openingBalance)}</td>
-                            <td>${month.drawdownAmount > 0 ? formatCurrency(month.drawdownAmount) : '-'}</td>
-                            <td>${month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}</td>
-                            <td>${month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}</td>
-                            <td>${month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}</td>
-                            <td>${formatCurrency(month.endingBalance)}</td>
-                            <td>${month.interestRate > 0 ? month.interestRate.toFixed(1) + '%' : '-'}</td>
-                        </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <div class="disclaimer no-break">
         <h4 style="margin: 0 0 6px 0; color: #333; font-size: 10px;">Important Notes</h4>
         <p style="margin: 3px 0;">• This progressive payment schedule is based on standard BUC property development milestones.</p>
@@ -853,23 +751,24 @@ const ProgressivePaymentCalculator = () => {
 • Choose "A4" paper size
 • Enable "Background graphics"
 • Set scale to "100%" or "Fit to page width"
-• Select "Portrait" orientation`);
+• Select "Portrait" orientation
+• Ensure all content fits properly without being cut off`);
   };
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid-responsive cols-2">
         {/* Enhanced Input Section */}
         <div className="space-y-6">
-          {/* Project Information Card */}
-          <div className="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-xl border border-red-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+          {/* Property Information Card */}
+          <div className="standard-card card-gradient-red">
+            <div className="section-header">
+              <div className="icon-container red">
                 <Building className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-red-800">BUC Property Details</h3>
-                <p className="text-sm text-red-600">Built Under Construction Payment Calculator</p>
+              <div className="text-content">
+                <h2>BUC Property Details</h2>
+                <p>Built Under Construction Payment Calculator</p>
               </div>
             </div>
             
@@ -877,91 +776,88 @@ const ProgressivePaymentCalculator = () => {
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="standard-input currency-input"
                     placeholder="2,300,000.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-3 text-gray-700">Loan Amount Options</label>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                      <input
-                        type="radio"
-                        name="loanOption"
-                        checked={!inputs.useCustomAmount && inputs.loanPercentage === 75}
-                        onChange={() => {
-                          handleInputChange('useCustomAmount', false);
-                          handleInputChange('loanPercentage', 75);
-                        }}
-                        className="mr-2"
-                      />
-                      <div className="text-center w-full">
-                        <div className="font-medium">75%</div>
-                        <div className="text-xs text-gray-500">
-                          {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
-                        </div>
-                      </div>
-                    </label>
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                      <input
-                        type="radio"
-                        name="loanOption"
-                        checked={!inputs.useCustomAmount && inputs.loanPercentage === 55}
-                        onChange={() => {
-                          handleInputChange('useCustomAmount', false);
-                          handleInputChange('loanPercentage', 55);
-                        }}
-                        className="mr-2"
-                      />
-                      <div className="text-center w-full">
-                        <div className="font-medium">55%</div>
-                        <div className="text-xs text-gray-500">
-                          {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
-                        </div>
-                      </div>
-                    </label>
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                      <input
-                        type="radio"
-                        name="loanOption"
-                        checked={inputs.useCustomAmount}
-                        onChange={() => handleInputChange('useCustomAmount', true)}
-                        className="mr-2"
-                      />
-                      <div className="text-center w-full">
-                        <div className="font-medium">Custom</div>
-                        <div className="text-xs text-gray-500">Amount</div>
-                      </div>
-                    </label>
-                  </div>
-                  
-                  {inputs.useCustomAmount && (
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium mb-1 text-gray-700">Custom Loan Amount</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
-                        <input
-                          type="text"
-                          value={formatNumberInput(inputs.customLoanAmount)}
-                          onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
-                          className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                          placeholder="1,725,000.00"
-                        />
+                <div className="radio-card-group">
+                  <label className="radio-card">
+                    <input
+                      type="radio"
+                      name="loanOption"
+                      checked={!inputs.useCustomAmount && inputs.loanPercentage === 75}
+                      onChange={() => {
+                        handleInputChange('useCustomAmount', false);
+                        handleInputChange('loanPercentage', 75);
+                      }}
+                    />
+                    <div className="radio-card-content">
+                      <div className="radio-card-title">75%</div>
+                      <div className="radio-card-subtitle">
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
                       </div>
                     </div>
-                  )}
+                  </label>
+                  
+                  <label className="radio-card">
+                    <input
+                      type="radio"
+                      name="loanOption"
+                      checked={!inputs.useCustomAmount && inputs.loanPercentage === 55}
+                      onChange={() => {
+                        handleInputChange('useCustomAmount', false);
+                        handleInputChange('loanPercentage', 55);
+                      }}
+                    />
+                    <div className="radio-card-content">
+                      <div className="radio-card-title">55%</div>
+                      <div className="radio-card-subtitle">
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
+                      </div>
+                    </div>
+                  </label>
+                  
+                  <label className="radio-card">
+                    <input
+                      type="radio"
+                      name="loanOption"
+                      checked={inputs.useCustomAmount}
+                      onChange={() => handleInputChange('useCustomAmount', true)}
+                    />
+                    <div className="radio-card-content">
+                      <div className="radio-card-title">Custom</div>
+                      <div className="radio-card-subtitle">Amount</div>
+                    </div>
+                  </label>
                 </div>
+                
+                {inputs.useCustomAmount && (
+                  <div className="mt-3 fade-in">
+                    <label className="block text-sm font-medium mb-1 text-gray-700">Custom Loan Amount</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatNumberInput(inputs.customLoanAmount)}
+                        onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="1,725,000.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid-responsive cols-2">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
                   <div className="relative">
@@ -969,7 +865,7 @@ const ProgressivePaymentCalculator = () => {
                       type="number"
                       value={inputs.tenure}
                       onChange={(e) => handleInputChange('tenure', parseInt(e.target.value) || 20)}
-                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="standard-input"
                       min="5"
                       max="35"
                     />
@@ -982,21 +878,21 @@ const ProgressivePaymentCalculator = () => {
                     type="number"
                     value={inputs.numOutstandingMortgages}
                     onChange={(e) => handleInputChange('numOutstandingMortgages', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="standard-input"
                     min="0"
                     max="5"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid-responsive cols-2">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">OTP Date</label>
                   <input
                     type="date"
                     value={inputs.otpDate}
                     onChange={(e) => handleInputChange('otpDate', e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="standard-input"
                   />
                 </div>
                 <div>
@@ -1005,7 +901,7 @@ const ProgressivePaymentCalculator = () => {
                     type="date"
                     value={inputs.topDate}
                     onChange={(e) => handleInputChange('topDate', e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="standard-input"
                   />
                 </div>
               </div>
@@ -1013,23 +909,23 @@ const ProgressivePaymentCalculator = () => {
           </div>
 
           {/* Interest Rate Configuration */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+          <div className="standard-card card-gradient-blue">
+            <div className="section-header">
+              <div className="icon-container blue">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-blue-800">Variable Interest Rate Package</h3>
-                <p className="text-sm text-blue-600">Progressive rate structure</p>
+              <div className="text-content">
+                <h2>Variable Interest Rate Package</h2>
+                <p>Progressive rate structure</p>
               </div>
             </div>
                       
-            <div className="bg-white p-4 rounded-lg border border-blue-100">
+            <div className="standard-card">
               <h4 className="font-medium mb-3 text-gray-700">Interest Rate Structure</h4>
               <div className="space-y-3">
                 {inputs.rates.map((rate, index) => (
-                  <div key={index} className="grid grid-cols-3 gap-4 items-center">
-                    <div className="text-sm font-medium text-gray-600">
+                  <div key={index} className="grid-responsive cols-3">
+                    <div className="text-sm font-medium text-gray-600 flex items-center">
                       {rate.year === 'thereafter' ? 'Year 6 onwards' : `Year ${rate.year}`}
                     </div>
                     <div className="relative">
@@ -1042,11 +938,11 @@ const ProgressivePaymentCalculator = () => {
                           newRates[index].rate = parseFloat(e.target.value) || 0;
                           handleInputChange('rates', newRates);
                         }}
-                        className="w-full pr-8 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="standard-input"
                       />
                       <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">%</span>
                     </div>
-                    <div className="text-xs text-gray-500">{rate.description}</div>
+                    <div className="text-xs text-gray-500 flex items-center">{rate.description}</div>
                   </div>
                 ))}
               </div>
@@ -1059,74 +955,88 @@ const ProgressivePaymentCalculator = () => {
           {results && (
             <>
               {/* Summary Cards */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-8 h-8 text-green-600" />
+              <div className="grid-responsive cols-2">
+                <div className="result-card success">
+                  <div className="result-header">
+                    <div className="result-icon bg-green-100">
+                      <DollarSign className="w-8 h-8 text-green-600" />
+                    </div>
                     <div>
-                      <p className="text-sm text-green-600 font-medium">Cash/CPF Required</p>
-                      <p className="text-xl font-bold text-green-700">{formatCurrency(results.totalCashCPF)}</p>
+                      <div className="result-title">Cash/CPF Required</div>
+                      <div className="result-value success">{formatCurrency(results.totalCashCPF)}</div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="w-8 h-8 text-blue-600" />
+                <div className="result-card">
+                  <div className="result-header">
+                    <div className="result-icon bg-blue-100">
+                      <TrendingUp className="w-8 h-8 text-blue-600" />
+                    </div>
                     <div>
-                      <p className="text-sm text-blue-600 font-medium">Total Bank Loan</p>
-                      <p className="text-xl font-bold text-blue-700">{formatCurrency(results.totalBankLoan)}</p>
+                      <div className="result-title">Total Bank Loan</div>
+                      <div className="result-value text-blue-600">{formatCurrency(results.totalBankLoan)}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Yearly Interest Breakdown */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <BarChart3 className="w-8 h-8 text-orange-600" />
+              <div className="grid-responsive cols-3">
+                <div className="result-card warning">
+                  <div className="result-header">
+                    <div className="result-icon bg-orange-100">
+                      <BarChart3 className="w-8 h-8 text-orange-600" />
+                    </div>
                     <div>
-                      <p className="text-sm text-orange-600 font-medium">1st Yr Interest</p>
-                      <p className="text-xl font-bold text-orange-700">{formatCurrency(results.yearlyInterest.year1)}</p>
+                      <div className="result-title">1st Yr Interest</div>
+                      <div className="result-value warning">{formatCurrency(results.yearlyInterest.year1)}</div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-6 rounded-xl border border-purple-200 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <BarChart3 className="w-8 h-8 text-purple-600" />
+                <div className="result-card">
+                  <div className="result-header">
+                    <div className="result-icon bg-purple-100">
+                      <BarChart3 className="w-8 h-8 text-purple-600" />
+                    </div>
                     <div>
-                      <p className="text-sm text-purple-600 font-medium">2nd Yr Interest</p>
-                      <p className="text-xl font-bold text-purple-700">{formatCurrency(results.yearlyInterest.year2)}</p>
+                      <div className="result-title">2nd Yr Interest</div>
+                      <div className="result-value text-purple-600">{formatCurrency(results.yearlyInterest.year2)}</div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-xl border border-pink-200 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <BarChart3 className="w-8 h-8 text-pink-600" />
+                <div className="result-card">
+                  <div className="result-header">
+                    <div className="result-icon bg-pink-100">
+                      <BarChart3 className="w-8 h-8 text-pink-600" />
+                    </div>
                     <div>
-                      <p className="text-sm text-pink-600 font-medium">3rd Yr Interest</p>
-                      <p className="text-xl font-bold text-pink-700">{formatCurrency(results.yearlyInterest.year3)}</p>
+                      <div className="result-title">3rd Yr Interest</div>
+                      <div className="result-value text-pink-600">{formatCurrency(results.yearlyInterest.year3)}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Construction Payment Schedule - Card Layout for Mobile */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold mb-2">Construction Payment Schedule</h3>
-                  <p className="text-sm text-gray-600">
-                    Progressive payment breakdown based on construction milestones
-                    {results.timelineCalculated && (
-                      <span className="text-green-600 font-medium ml-2">
-                        • Timeline calculated from project dates
-                      </span>
-                    )}
-                  </p>
+              {/* Construction Payment Schedule */}
+              <div className="standard-card">
+                <div className="section-header">
+                  <div className="icon-container blue">
+                    <Building2 className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-content">
+                    <h2>Construction Payment Schedule</h2>
+                    <p>Progressive payment breakdown based on construction milestones
+                      {results.timelineCalculated && (
+                        <span className="text-green-600 font-medium ml-2">
+                          • Timeline calculated from project dates
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
                 
                 {/* Desktop Table View */}
-                <div className="hidden lg:block p-6">
+                <div className="hidden lg:block">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -1181,21 +1091,21 @@ const ProgressivePaymentCalculator = () => {
                 </div>
 
                 {/* Mobile Card View */}
-                <div className="lg:hidden p-4">
+                <div className="lg:hidden">
                   <div className="space-y-4">
                     {results.stages.map((stage, index) => (
-                      <div key={index} className={`border rounded-lg p-4 ${
-                        stage.isInitial ? 'border-blue-200 bg-blue-50' : 
-                        stage.isTOP ? 'border-green-200 bg-green-50' : 
-                        stage.isCSC ? 'border-purple-200 bg-purple-50' : 
-                        stage.bankLoanAmount > 0 ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'
+                      <div key={index} className={`standard-card ${
+                        stage.isInitial ? 'card-gradient-blue' : 
+                        stage.isTOP ? 'card-gradient-green' : 
+                        stage.isCSC ? 'card-gradient-purple' : 
+                        stage.bankLoanAmount > 0 ? 'card-gradient-yellow' : ''
                       }`}>
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-semibold text-gray-700">Month {stage.month}</span>
                           <span className="text-sm font-medium text-gray-600">{stage.percentage.toFixed(1)}%</span>
                         </div>
                         <h4 className="font-medium text-gray-800 mb-3 leading-snug">{stage.stage}</h4>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="grid-responsive cols-2 text-sm">
                           <div>
                             <span className="text-gray-600">Total Amount:</span>
                             <div className="font-semibold">{formatCurrency(stage.stageAmount)}</div>
@@ -1235,16 +1145,19 @@ const ProgressivePaymentCalculator = () => {
 
               {/* Bank Loan Drawdown Schedule */}
               {results.bankDrawdownSchedule.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold mb-2">Bank Loan Drawdown Schedule</h3>
-                    <p className="text-sm text-blue-800">
-                      Bank loan disbursement timing based on construction progress
-                    </p>
+                <div className="standard-card">
+                  <div className="section-header">
+                    <div className="icon-container yellow">
+                      <DollarSign className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-content">
+                      <h2>Bank Loan Drawdown Schedule</h2>
+                      <p>Bank loan disbursement timing based on construction progress</p>
+                    </div>
                   </div>
                   
                   {/* Desktop Table View */}
-                  <div className="hidden lg:block p-6">
+                  <div className="hidden lg:block">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b-2 border-gray-200">
@@ -1277,13 +1190,13 @@ const ProgressivePaymentCalculator = () => {
                   </div>
 
                   {/* Mobile Card View */}
-                  <div className="lg:hidden p-4">
+                  <div className="lg:hidden">
                     <div className="space-y-4">
                       {results.bankDrawdownSchedule.map((drawdown, index) => (
-                        <div key={index} className={`border rounded-lg p-4 ${
-                          drawdown.stage.includes('Certificate of Statutory Completion') ? 'border-purple-200 bg-purple-50' : 
-                          drawdown.stage.includes('TOP') ? 'border-green-200 bg-green-50' : 
-                          'border-yellow-200 bg-yellow-50'
+                        <div key={index} className={`standard-card ${
+                          drawdown.stage.includes('Certificate of Statutory Completion') ? 'card-gradient-purple' : 
+                          drawdown.stage.includes('TOP') ? 'card-gradient-green' : 
+                          'card-gradient-yellow'
                         }`}>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-semibold text-gray-700">Project Month {drawdown.projectMonth}</span>
@@ -1304,22 +1217,25 @@ const ProgressivePaymentCalculator = () => {
               )}
 
               {/* Monthly Payment Schedule */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Monthly Payment Schedule</h3>
-                      <p className="text-sm text-green-800">
-                        {results.firstBankDrawdownMonth ? (
-                          `Payment schedule starts from Month ${results.firstBankDrawdownMonth} with progressive loan drawdowns`
-                        ) : (
-                          '100% Cash/CPF payment - No bank loan servicing required'
-                        )}
-                      </p>
-                    </div>
+              <div className="standard-card">
+                <div className="section-header">
+                  <div className="icon-container green">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-content">
+                    <h2>Monthly Payment Schedule</h2>
+                    <p>
+                      {results.firstBankDrawdownMonth ? (
+                        `Payment schedule starts from Month ${results.firstBankDrawdownMonth} with progressive loan drawdowns`
+                      ) : (
+                        '100% Cash/CPF payment - No bank loan servicing required'
+                      )}
+                    </p>
+                  </div>
+                  <div>
                     <button
                       onClick={() => setExpandedMonthlySchedule(!expandedMonthlySchedule)}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors"
+                      className="btn-standard btn-secondary btn-sm"
                     >
                       <span className="text-sm font-medium">
                         {expandedMonthlySchedule ? 'Show Less' : 'Show More'}
@@ -1328,123 +1244,127 @@ const ProgressivePaymentCalculator = () => {
                     </button>
                   </div>
                 </div>
-                
-                {/* Desktop Table View */}
-                <div className="hidden lg:block p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b-2 border-gray-200">
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Month</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Opening Balance</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Bank Drawdown</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Monthly Payment</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Interest</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Principal</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Ending Balance</th>
-                          <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Rate</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 60).map((month, index) => (
-                          <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
-                            month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
-                          }`}>
-                            <td className="py-3 text-center font-medium">{month.month}</td>
-                            <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
-                            <td className="py-3 text-center">
-                              {month.drawdownAmount > 0 ? (
-                                <span className="text-green-600 font-medium">
-                                  {formatCurrency(month.drawdownAmount)}
-                                </span>
-                              ) : '-'}
-                            </td>
-                            <td className="py-3 text-center font-semibold text-blue-600">
-                              {month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}
-                            </td>
-                            <td className="py-3 text-center">
-                              {month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}
-                            </td>
-                            <td className="py-3 text-center">
-                              {month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}
-                            </td>
-                            <td className="py-3 text-center">{formatCurrency(month.endingBalance)}</td>
-                            <td className="py-3 text-center">
-                              {month.interestRate > 0 ? `${month.interestRate.toFixed(2)}%` : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
 
-                {/* Mobile Card View */}
-                <div className="lg:hidden p-4">
-                  <div className="space-y-4">
-                    {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 24).map((month, index) => (
-                      <div key={index} className={`border rounded-lg p-4 ${
-                        month.drawdownAmount > 0 ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-gray-50'
-                      }`}>
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-lg font-semibold text-gray-800">Month {month.month}</span>
-                          {month.interestRate > 0 && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
-                              {month.interestRate.toFixed(2)}%
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <span className="text-gray-600">Opening Balance:</span>
-                            <div className="font-semibold">{formatCurrency(month.openingBalance)}</div>
-                          </div>
-                          {month.drawdownAmount > 0 && (
-                            <div>
-                              <span className="text-gray-600">Bank Drawdown:</span>
-                              <div className="font-semibold text-green-600">{formatCurrency(month.drawdownAmount)}</div>
-                            </div>
-                          )}
-                          {month.monthlyPayment > 0 && (
-                            <div>
-                              <span className="text-gray-600">Monthly Payment:</span>
-                              <div className="font-semibold text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
-                            </div>
-                          )}
-                          {month.interestPayment > 0 && (
-                            <div>
-                              <span className="text-gray-600">Interest:</span>
-                              <div className="font-semibold">{formatCurrency(month.interestPayment)}</div>
-                            </div>
-                          )}
-                          {month.principalPayment > 0 && (
-                            <div>
-                              <span className="text-gray-600">Principal:</span>
-                              <div className="font-semibold">{formatCurrency(month.principalPayment)}</div>
-                            </div>
-                          )}
-                          <div>
-                            <span className="text-gray-600">Ending Balance:</span>
-                            <div className="font-semibold">{formatCurrency(month.endingBalance)}</div>
-                          </div>
-                        </div>
+                {results.monthlySchedule.length > 0 && (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b-2 border-gray-200">
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Month</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Opening Balance</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Bank Drawdown</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Monthly Payment</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Interest</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Principal</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Ending Balance</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 60).map((month, index) => (
+                              <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
+                                month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
+                              }`}>
+                                <td className="py-3 text-center font-medium">{month.month}</td>
+                                <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
+                                <td className="py-3 text-center">
+                                  {month.drawdownAmount > 0 ? (
+                                    <span className="text-green-600 font-medium">
+                                      {formatCurrency(month.drawdownAmount)}
+                                    </span>
+                                  ) : '-'}
+                                </td>
+                                <td className="py-3 text-center font-semibold text-blue-600">
+                                  {month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}
+                                </td>
+                                <td className="py-3 text-center">
+                                  {month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}
+                                </td>
+                                <td className="py-3 text-center">
+                                  {month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}
+                                </td>
+                                <td className="py-3 text-center">{formatCurrency(month.endingBalance)}</td>
+                                <td className="py-3 text-center">
+                                  {month.interestRate > 0 ? `${month.interestRate.toFixed(2)}%` : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden">
+                      <div className="space-y-4">
+                        {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 24).map((month, index) => (
+                          <div key={index} className={`standard-card ${
+                            month.drawdownAmount > 0 ? 'card-gradient-yellow' : ''
+                          }`}>
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="text-lg font-semibold text-gray-800">Month {month.month}</span>
+                              {month.interestRate > 0 && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
+                                  {month.interestRate.toFixed(2)}%
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="grid-responsive cols-2 text-sm">
+                              <div>
+                                <span className="text-gray-600">Opening Balance:</span>
+                                <div className="font-semibold">{formatCurrency(month.openingBalance)}</div>
+                              </div>
+                              {month.drawdownAmount > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Bank Drawdown:</span>
+                                  <div className="font-semibold text-green-600">{formatCurrency(month.drawdownAmount)}</div>
+                                </div>
+                              )}
+                              {month.monthlyPayment > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Monthly Payment:</span>
+                                  <div className="font-semibold text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
+                                </div>
+                              )}
+                              {month.interestPayment > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Interest:</span>
+                                  <div className="font-semibold">{formatCurrency(month.interestPayment)}</div>
+                                </div>
+                              )}
+                              {month.principalPayment > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Principal:</span>
+                                  <div className="font-semibold">{formatCurrency(month.principalPayment)}</div>
+                                </div>
+                              )}
+                              <div>
+                                <span className="text-gray-600">Ending Balance:</span>
+                                <div className="font-semibold">{formatCurrency(month.endingBalance)}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Generate Report Button */}
               <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-1 shadow-lg">
                 <button
                   onClick={generateProgressivePaymentReport}
-                  className="w-full bg-white text-red-600 py-4 px-6 rounded-lg font-semibold flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors"
+                  className="btn-standard btn-lg w-full bg-white text-red-600 hover:bg-gray-50"
                 >
                   <Download className="w-6 h-6" />
                   <div className="text-left">
-                    <div className="text-lg">Generate Progressive Payment Report</div>
-                    <div className="text-sm text-red-500">Complete BUC property payment schedule</div>
+                    <div>Generate Progressive Payment Report</div>
+                    <div className="text-sm opacity-75">Complete BUC property payment schedule</div>
                   </div>
                 </button>
               </div>
