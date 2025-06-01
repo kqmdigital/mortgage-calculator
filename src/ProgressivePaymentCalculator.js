@@ -146,58 +146,76 @@ const ProgressivePaymentCalculator = () => {
     });
   };
 
-  // Excel Column N Logic: Dynamic bank loan months with exact conditional logic
+  // Excel Column N Logic: Calculate for ALL stages sequentially, then filter
   const calculateExcelDynamicBankLoanMonths = (stagesWithBankAllocation, purchasePrice) => {
-    const bankLoanSchedule = [];
+    // Step 1: Calculate N values for ALL stages (Excel rows 10-17) sequentially
+    const nValues = [];
+    let hasFirstBankLoan = false;
     
-    // Filter stages with meaningful bank loan amounts (Excel: skip G=0 stages)
-    const stagesWithActualBankLoan = stagesWithBankAllocation.filter(stage => {
-      const percentage = (stage.bankLoanAmount / purchasePrice) * 100;
-      const roundedPercentage = Math.round(percentage * 10) / 10;
-      return roundedPercentage > 0;
-    });
+    // Find construction stages (equivalent to Excel rows 10-17)
+    const constructionStages = stagesWithBankAllocation.filter(stage => 
+      !stage.isCashCPFOnly // Exclude OTP and S&P
+    );
     
-    stagesWithActualBankLoan.forEach((stage, index) => {
-      let bankLoanMonth;
+    constructionStages.forEach((stage, index) => {
+      const bankLoanPercentage = (stage.bankLoanAmount / purchasePrice) * 100;
+      const roundedPercentage = Math.round(bankLoanPercentage * 10) / 10;
+      const hasBankLoan = roundedPercentage > 0;
+      
+      let nValue = null;
       
       if (index === 0) {
-        // Excel N10 logic: IF(G10=0,"",1) - First stage with bank loan = Month 1
-        bankLoanMonth = 1;
+        // Excel N10: IF(G10=0,"",1) - First construction stage
+        nValue = hasBankLoan ? 1 : null;
+        if (hasBankLoan) hasFirstBankLoan = true;
       } else {
-        const prevBankLoanStage = bankLoanSchedule[index - 1];
+        const prevStage = constructionStages[index - 1];
+        const prevBankLoanPercentage = (prevStage.bankLoanAmount / purchasePrice) * 100;
+        const prevRoundedPercentage = Math.round(prevBankLoanPercentage * 10) / 10;
+        const prevHasBankLoan = prevRoundedPercentage > 0;
         
-        // Find the previous stage in original array to get its estimated time
-        const prevOriginalIndex = stagesWithBankAllocation.findIndex(s => 
-          s.stage === prevBankLoanStage.stage && s.bankLoanAmount === prevBankLoanStage.bankLoanAmount
-        );
-        const prevStage = stagesWithBankAllocation[prevOriginalIndex];
-        
-        if (stage.isCSC) {
-          // Excel N17 special case: N16 + E17 (CSC uses its own time, not previous)
-          bankLoanMonth = prevBankLoanStage.bankLoanMonth + stage.estimatedTime;
+        // Excel pattern: IF(AND(G(prev)=0,G(current)=0),"",IF(G(prev)=0,1,N(prev)+E(prev)))
+        if (!prevHasBankLoan && !hasBankLoan) {
+          nValue = null; // Both previous and current have no bank loan
+        } else if (!prevHasBankLoan && hasBankLoan) {
+          nValue = 1; // Previous has no bank loan, current has bank loan
         } else {
-          // Excel normal pattern: Nn = Nn-1 + En-1 (Previous month + Previous time)
-          bankLoanMonth = prevBankLoanStage.bankLoanMonth + (prevStage?.estimatedTime || 0);
+          // Previous has bank loan, calculate using pattern
+          const prevNValue = nValues[index - 1]?.nValue;
+          if (prevNValue !== null) {
+            if (stage.isCSC) {
+              // Excel N17 special case: N16 + E17 (CSC uses its own time)
+              nValue = prevNValue + stage.estimatedTime;
+            } else {
+              // Excel normal pattern: N(current) = N(previous) + E(previous)
+              nValue = prevNValue + prevStage.estimatedTime;
+            }
+          }
         }
       }
       
-      // Find original index for this stage
-      const originalIndex = stagesWithBankAllocation.findIndex(s => 
-        s.stage === stage.stage && s.bankLoanAmount === stage.bankLoanAmount
-      );
-      
-      bankLoanSchedule.push({
+      nValues.push({
+        ...stage,
+        nValue: nValue,
+        hasBankLoan: hasBankLoan,
+        originalIndex: stagesWithBankAllocation.findIndex(s => s.stage === stage.stage)
+      });
+    });
+    
+    // Step 2: Filter out stages with meaningful bank loans for final schedule
+    const bankLoanSchedule = nValues
+      .filter(stage => stage.hasBankLoan && stage.nValue !== null)
+      .map(stage => ({
         stage: stage.stage,
-        bankLoanMonth: bankLoanMonth,
+        bankLoanMonth: stage.nValue,
         bankLoanAmount: stage.bankLoanAmount,
         estimatedTime: stage.estimatedTime,
         percentage: (stage.bankLoanAmount / purchasePrice) * 100,
-        originalIndex: originalIndex,
+        originalIndex: stage.originalIndex,
         isTOP: stage.isTOP || false,
         isCSC: stage.isCSC || false,
-        projectMonth: stage.month || bankLoanMonth
-      });
-    });
+        projectMonth: stage.month || stage.nValue
+      }));
     
     return bankLoanSchedule;
   };
