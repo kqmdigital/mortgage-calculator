@@ -27,12 +27,17 @@ const ProgressivePaymentCalculator = () => {
 
   const [results, setResults] = useState(null);
 
-  // CORRECTED: Excel Column N Dynamic Logic - Only includes stages with actual bank loan amounts
-  const calculateDynamicBankLoanMonths = (stagesWithBankAllocation) => {
+  // CORRECTED: Excel Column N Dynamic Logic - Only includes stages with meaningful bank loan amounts
+  const calculateDynamicBankLoanMonths = (stagesWithBankAllocation, purchasePrice) => {
     const bankLoanSchedule = [];
     
-    // First, filter out stages with no actual bank loan amount
-    const stagesWithActualBankLoan = stagesWithBankAllocation.filter(stage => stage.bankLoanAmount > 0);
+    // Filter out stages with no meaningful bank loan amount (avoid tiny floating point amounts)
+    const stagesWithActualBankLoan = stagesWithBankAllocation.filter(stage => {
+      // Calculate percentage and check if it's meaningful when rounded
+      const percentage = (stage.bankLoanAmount / purchasePrice) * 100;
+      const roundedPercentage = Math.round(percentage * 10) / 10; // Round to 1 decimal place
+      return roundedPercentage > 0; // Only include if percentage is > 0.0% when rounded
+    });
     
     stagesWithActualBankLoan.forEach((stage, index) => {
       let bankLoanMonth;
@@ -85,8 +90,8 @@ const ProgressivePaymentCalculator = () => {
     return bankLoanSchedule;
   };
 
-  // CORRECTED: Excel Bank Loan Allocation (Column G logic)
-  const calculateExcelBankLoanAllocation = (stages, loanAmount, totalCashCPFRequired) => {
+  // CORRECTED: Excel Bank Loan Allocation (Column G logic) with floating point precision handling
+  const calculateExcelBankLoanAllocation = (stages, loanAmount, totalCashCPFRequired, purchasePrice) => {
     return stages.map((stage, index) => {
       // OTP and S&P are cash/CPF only
       if (stage.isCashCPFOnly) {
@@ -120,6 +125,12 @@ const ProgressivePaymentCalculator = () => {
           stage.stageAmount,
           Math.max(0, cumulativeFromOTP - totalCashCPFRequired)
         );
+      }
+      
+      // Round to avoid tiny floating point amounts that display as 0.0%
+      const bankLoanPercentage = (bankLoanAmount / purchasePrice) * 100;
+      if (bankLoanPercentage < 0.05) { // If less than 0.05%, round down to 0
+        bankLoanAmount = 0;
       }
       
       const cashCPFAmount = stage.stageAmount - bankLoanAmount;
@@ -252,10 +263,10 @@ const ProgressivePaymentCalculator = () => {
     });
 
     // Apply Excel bank loan allocation logic (Column G)
-    const stagesWithBankLoan = calculateExcelBankLoanAllocation(allStages, selectedLoanAmount, totalCashCPFRequired);
+    const stagesWithBankLoan = calculateExcelBankLoanAllocation(allStages, selectedLoanAmount, totalCashCPFRequired, purchasePrice);
 
     // Calculate dynamic bank loan timeline (Column N logic)
-    const bankLoanTimeline = calculateDynamicBankLoanMonths(stagesWithBankLoan);
+    const bankLoanTimeline = calculateDynamicBankLoanMonths(stagesWithBankLoan, purchasePrice);
 
     return {
       stages: stagesWithBankLoan,
@@ -282,8 +293,12 @@ const ProgressivePaymentCalculator = () => {
       drawdownMap.set(item.bankLoanMonth, item.bankLoanAmount);
     });
     
-    // Find the first month with actual bank drawdown
-    const firstDrawdownMonth = Math.min(...bankLoanTimeline.map(item => item.bankLoanMonth));
+    // Find the first month with actual meaningful bank drawdown
+    const meaningfulDrawdowns = bankLoanTimeline.filter(item => item.bankLoanAmount > 1); // Filter out negligible amounts
+    const firstDrawdownMonth = meaningfulDrawdowns.length > 0 ? Math.min(...meaningfulDrawdowns.map(item => item.bankLoanMonth)) : null;
+    
+    // If no meaningful drawdowns, return empty schedule
+    if (!firstDrawdownMonth) return [];
     
     // Start the schedule from month 1, but only show loan servicing after first drawdown
     for (let month = 1; month <= totalMonths; month++) {
@@ -296,12 +311,12 @@ const ProgressivePaymentCalculator = () => {
       
       const openingBalance = outstandingBalance;
       
-      // Calculate payments (only if we've reached first drawdown month and have outstanding balance)
+      // Calculate payments (only if we've reached first meaningful drawdown month and have outstanding balance)
       let monthlyPayment = 0;
       let interestPayment = 0;
       let principalPayment = 0;
       
-      if (month >= firstDrawdownMonth && outstandingBalance > 0) {
+      if (firstDrawdownMonth && month >= firstDrawdownMonth && outstandingBalance > 0) {
         const currentRate = getInterestRateForMonth(month);
         const monthlyRate = currentRate / 100 / 12;
         
@@ -327,12 +342,12 @@ const ProgressivePaymentCalculator = () => {
         interestPayment,
         principalPayment,
         endingBalance: outstandingBalance,
-        interestRate: month >= firstDrawdownMonth ? getInterestRateForMonth(month) : 0,
+        interestRate: (firstDrawdownMonth && month >= firstDrawdownMonth) ? getInterestRateForMonth(month) : 0,
         hasBankDrawdown: drawdownAmount > 0
       });
       
       // Stop if loan is fully paid and we've passed the loan servicing period
-      if (outstandingBalance <= 0.01 && month >= firstDrawdownMonth) {
+      if (outstandingBalance <= 0.01 && firstDrawdownMonth && month >= firstDrawdownMonth) {
         // Continue until we reach tenure end to show the full schedule
         if (month >= totalMonths) break;
       }
@@ -376,19 +391,25 @@ const ProgressivePaymentCalculator = () => {
     
     // Create display stages with payment mode information
     const displayStages = completeSchedule.stages.map(stage => {
+      // Calculate percentages and round to check for effectively zero amounts
+      const cashCPFPercentage = (stage.cashCPFAmount / completeSchedule.purchasePrice) * 100;
+      const bankLoanPercentage = (stage.bankLoanAmount / completeSchedule.purchasePrice) * 100;
+      
+      // Round to 1 decimal place for meaningful comparison
+      const roundedCashCPFPercentage = Math.round(cashCPFPercentage * 10) / 10;
+      const roundedBankLoanPercentage = Math.round(bankLoanPercentage * 10) / 10;
+      
       let paymentMode;
-      if (stage.cashCPFAmount > 0 && stage.bankLoanAmount > 0) {
-        const cashCPFPercentage = ((stage.cashCPFAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
-        const bankLoanPercentage = ((stage.bankLoanAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
-        paymentMode = `Cash/CPF (${cashCPFPercentage}%) + Bank Loan (${bankLoanPercentage}%)`;
-      } else if (stage.cashCPFAmount > 0 && stage.bankLoanAmount <= 0) {
-        // Only Cash/CPF when bank loan amount is 0
-        const cashCPFPercentage = ((stage.cashCPFAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
-        paymentMode = `Cash/CPF (${cashCPFPercentage}%)`;
-      } else if (stage.bankLoanAmount > 0 && stage.cashCPFAmount <= 0) {
-        // Only Bank Loan when cash/CPF amount is 0
-        const bankLoanPercentage = ((stage.bankLoanAmount / completeSchedule.purchasePrice) * 100).toFixed(1);
-        paymentMode = `Bank Loan (${bankLoanPercentage}%)`;
+      
+      if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage > 0) {
+        // Both have meaningful amounts (not effectively zero when rounded)
+        paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%) + Bank Loan (${roundedBankLoanPercentage.toFixed(1)}%)`;
+      } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage <= 0) {
+        // Only Cash/CPF (bank loan is effectively zero)
+        paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%)`;
+      } else if (roundedBankLoanPercentage > 0 && roundedCashCPFPercentage <= 0) {
+        // Only Bank Loan (cash/CPF is effectively zero)
+        paymentMode = `Bank Loan (${roundedBankLoanPercentage.toFixed(1)}%)`;
       } else {
         paymentMode = 'No Payment Required';
       }
@@ -419,7 +440,10 @@ const ProgressivePaymentCalculator = () => {
       totalPrincipal,
       totalPayable: totalInterest + totalPrincipal + completeSchedule.totalCashCPF,
       loanToValueRatio: (completeSchedule.selectedLoanAmount / completeSchedule.purchasePrice) * 100,
-      firstBankDrawdownMonth: completeSchedule.bankLoanTimeline.length > 0 ? Math.min(...completeSchedule.bankLoanTimeline.map(item => item.bankLoanMonth)) : null,
+      firstBankDrawdownMonth: (() => {
+        const meaningfulDrawdowns = completeSchedule.bankLoanTimeline.filter(item => item.bankLoanAmount > 1);
+        return meaningfulDrawdowns.length > 0 ? Math.min(...meaningfulDrawdowns.map(item => item.bankLoanMonth)) : null;
+      })(),
       timelineCalculated: !!(inputs.otpDate && inputs.topDate),
       yearlyInterest
     };
@@ -836,12 +860,12 @@ const ProgressivePaymentCalculator = () => {
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and Expected TOP dates.' : ''}
 
 ✅ Updated Features:
-• Corrected Excel Column N dynamic logic - excludes $0 bank loan stages
-• Accurate bank loan allocation (Column G logic)
-• Monthly payment schedule starts only when actual bank drawdowns occur
-• CSC always 12 months after TOP in bank loan timeline
-• Dynamic timeline handles any scenario (55%, 75%, custom loan amounts)
-• Yearly interest breakdown (1st-4th year) included
+- Corrected Excel Column N dynamic logic - excludes $0 bank loan stages
+- Accurate bank loan allocation (Column G logic)
+- Monthly payment schedule starts only when actual bank drawdowns occur
+- CSC always 12 months after TOP in bank loan timeline
+- Dynamic timeline handles any scenario (55%, 75%, custom loan amounts)
+- Yearly interest breakdown (1st-4th year) included
 
 📄 FOR BEST PDF RESULTS:
 - Use Chrome or Edge browser for printing
