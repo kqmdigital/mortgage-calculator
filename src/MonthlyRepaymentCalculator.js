@@ -763,7 +763,7 @@ const MonthlyRepaymentCalculator = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Interest rate (%)</label>
                     <div className="relative">
@@ -781,25 +781,29 @@ const MonthlyRepaymentCalculator = () => {
 
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Loan period</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        value={newLoan.loanPeriodYears}
-                        onChange={(e) => handleNewLoanChange('loanPeriodYears', e.target.value)}
-                        className="w-20 px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
-                        min="0"
-                        max="35"
-                      />
-                      <span className="flex items-center text-gray-500">yrs</span>
-                      <input
-                        type="number"
-                        value={newLoan.loanPeriodMonths}
-                        onChange={(e) => handleNewLoanChange('loanPeriodMonths', e.target.value)}
-                        className="w-20 px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
-                        min="0"
-                        max="11"
-                      />
-                      <span className="flex items-center text-gray-500">mths</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={newLoan.loanPeriodYears}
+                          onChange={(e) => handleNewLoanChange('loanPeriodYears', e.target.value)}
+                          className="w-full px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                          min="0"
+                          max="35"
+                        />
+                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">yrs</span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={newLoan.loanPeriodMonths}
+                          onChange={(e) => handleNewLoanChange('loanPeriodMonths', e.target.value)}
+                          className="w-full px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                          min="0"
+                          max="11"
+                        />
+                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mths</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -821,7 +825,7 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="mt-4 p-4 bg-white rounded-lg space-y-3 border border-green-100">
                     <h4 className="font-medium text-sm mb-3 text-green-700">Subsequent year rates</h4>
                     {newLoan.subsequentRates.map((rate, index) => (
-                      <div key={index} className="grid grid-cols-2 gap-4">
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="text-sm text-gray-600 flex items-center">
                           {rate.year === 'thereafter' ? 'Thereafter' : `${rate.year}${['st', 'nd', 'rd', 'th', 'th'][rate.year - 2] || 'th'} year`}
                         </div>
@@ -853,7 +857,7 @@ const MonthlyRepaymentCalculator = () => {
             {newLoanResults && (
               <>
                 {/* Summary Cards */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-8 h-8 text-blue-600" />
@@ -908,91 +912,96 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Repayment Schedule</h3>
 
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total interest payable</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <div className="text-center p-4 bg-red-50 rounded-lg">
+                        <p className="text-xs text-red-600 mb-1">Total Interest</p>
                         <p className="font-bold text-lg text-red-600">{formatCurrency(newLoanResults.totalInterest)}</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total principal</p>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-xs text-green-600 mb-1">Total Principal</p>
                         <p className="font-bold text-lg text-green-600">{formatCurrency(newLoanResults.totalPrincipal)}</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total payable</p>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 mb-1">Total Payable</p>
                         <p className="font-bold text-lg text-blue-600">{formatCurrency(newLoanResults.totalPayable)}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b-2 border-gray-200">
-                          <th className="text-center py-3 font-medium text-gray-700">Year</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Interest rate</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Monthly instalment</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Interest paid</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Principal paid</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Ending principal</th>
-                          <th className="text-center py-3 font-medium text-gray-700"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {newLoanResults.yearlyData.map((year, index) => (
-                          <React.Fragment key={index}>
-                            <tr className="border-b hover:bg-gray-50 transition-colors">
-                              <td className="text-center py-4 font-medium">{year.year}</td>
-                              <td className="text-center py-4">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</td>
-                              <td className="text-center py-4 font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</td>
-                              <td className="text-center py-4 text-red-600">{formatCurrency(year.interestPaid)}</td>
-                              <td className="text-center py-4 text-green-600">{formatCurrency(year.principalPaid)}</td>
-                              <td className="text-center py-4">{formatCurrency(year.endingPrincipal)}</td>
-                              <td className="text-center py-4">
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      {newLoanResults.yearlyData.map((year, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 p-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Year</div>
+                                <div className="font-medium">{year.year}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Rate</div>
+                                <div className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Monthly Payment</div>
+                                <div className="font-semibold text-blue-600 text-sm">{formatCurrency(year.monthlyInstalment)}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Interest</div>
+                                <div className="font-medium text-red-600 text-sm">{formatCurrency(year.interestPaid)}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Principal</div>
+                                <div className="font-medium text-green-600 text-sm">{formatCurrency(year.principalPaid)}</div>
+                              </div>
+                              <div className="text-center">
                                 <button
                                   onClick={() => setShowMonthlyBreakdown(prev => ({
                                     ...prev,
                                     [year.yearNumber]: !prev[year.yearNumber]
                                   }))}
-                                  className="text-blue-600 hover:text-blue-800 px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors"
+                                  className="text-blue-600 hover:text-blue-800 px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors text-lg font-bold"
                                 >
                                   {showMonthlyBreakdown[year.yearNumber] ? '−' : '+'}
                                 </button>
-                              </td>
-                            </tr>
-                            {showMonthlyBreakdown[year.yearNumber] && (
-                              <tr>
-                                <td colSpan="7" className="p-0">
-                                  <div className="bg-gray-50 p-4">
-                                    <table className="w-full text-xs">
-                                      <thead>
-                                        <tr className="text-gray-600">
-                                          <th className="text-center py-2">Month</th>
-                                          <th className="text-center py-2">Monthly instalment</th>
-                                          <th className="text-center py-2">Interest paid</th>
-                                          <th className="text-center py-2">Principal paid</th>
-                                          <th className="text-center py-2">Ending principal</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {year.months.map((month, mIndex) => (
-                                          <tr key={mIndex} className="border-t border-gray-200">
-                                            <td className="text-center py-1">{month.monthName}</td>
-                                            <td className="text-center py-1">{formatCurrency(month.monthlyPayment)}</td>
-                                            <td className="text-center py-1">{formatCurrency(month.interestPayment)}</td>
-                                            <td className="text-center py-1">{formatCurrency(month.principalPayment)}</td>
-                                            <td className="text-center py-1">{formatCurrency(month.endingBalance)}</td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
+                              </div>
+                            </div>
+                          </div>
+                          {showMonthlyBreakdown[year.yearNumber] && (
+                            <div className="bg-white p-4 border-t border-gray-200">
+                              <h5 className="font-medium text-gray-700 mb-3">Monthly Breakdown</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {year.months.map((month, mIndex) => (
+                                  <div key={mIndex} className="bg-gray-50 p-3 rounded-lg">
+                                    <div className="text-center">
+                                      <div className="font-medium text-gray-800 mb-2">{month.monthName}</div>
+                                      <div className="space-y-1 text-xs">
+                                        <div className="flex justify-between">
+                                          <span>Payment:</span>
+                                          <span className="font-medium">{formatCurrency(month.monthlyPayment)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span>Interest:</span>
+                                          <span className="text-red-600">{formatCurrency(month.interestPayment)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                          <span>Principal:</span>
+                                          <span className="text-green-600">{formatCurrency(month.principalPayment)}</span>
+                                        </div>
+                                        <div className="flex justify-between border-t pt-1">
+                                          <span>Balance:</span>
+                                          <span className="font-medium">{formatCurrency(month.endingBalance)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </tbody>
-                    </table>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   
                   {/* Generate Report Button for New Loan */}
@@ -1051,7 +1060,7 @@ const MonthlyRepaymentCalculator = () => {
                     <Clock className="w-5 h-5" />
                     Current Loan Details
                   </h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700">Existing interest rate (%)</label>
                       <div className="relative">
@@ -1069,25 +1078,29 @@ const MonthlyRepaymentCalculator = () => {
 
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700">Remaining period</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          value={existingLoan.remainingYears}
-                          onChange={(e) => handleExistingLoanChange('remainingYears', e.target.value)}
-                          className="w-20 px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-                          min="0"
-                          max="35"
-                        />
-                        <span className="flex items-center text-gray-500">yrs</span>
-                        <input
-                          type="number"
-                          value={existingLoan.remainingMonths}
-                          onChange={(e) => handleExistingLoanChange('remainingMonths', e.target.value)}
-                          className="w-20 px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-                          min="0"
-                          max="11"
-                        />
-                        <span className="flex items-center text-gray-500">mths</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={existingLoan.remainingYears}
+                            onChange={(e) => handleExistingLoanChange('remainingYears', e.target.value)}
+                            className="w-full px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                            min="0"
+                            max="35"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">yrs</span>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={existingLoan.remainingMonths}
+                            onChange={(e) => handleExistingLoanChange('remainingMonths', e.target.value)}
+                            className="w-full px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                            min="0"
+                            max="11"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mths</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1098,7 +1111,7 @@ const MonthlyRepaymentCalculator = () => {
                     <TrendingUp className="w-5 h-5" />
                     New Package Details
                   </h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700">Interest rate (%)</label>
                       <div className="relative">
@@ -1116,25 +1129,29 @@ const MonthlyRepaymentCalculator = () => {
 
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700">New loan period</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          value={existingLoan.newLoanYears}
-                          onChange={(e) => handleExistingLoanChange('newLoanYears', e.target.value)}
-                          className="w-20 px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-                          min="0"
-                          max="35"
-                        />
-                        <span className="flex items-center text-gray-500">yrs</span>
-                        <input
-                          type="number"
-                          value={existingLoan.newLoanMonths}
-                          onChange={(e) => handleExistingLoanChange('newLoanMonths', e.target.value)}
-                          className="w-20 px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-                          min="0"
-                          max="11"
-                        />
-                        <span className="flex items-center text-gray-500">mths</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={existingLoan.newLoanYears}
+                            onChange={(e) => handleExistingLoanChange('newLoanYears', e.target.value)}
+                            className="w-full px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                            min="0"
+                            max="35"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">yrs</span>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={existingLoan.newLoanMonths}
+                            onChange={(e) => handleExistingLoanChange('newLoanMonths', e.target.value)}
+                            className="w-full px-2 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                            min="0"
+                            max="11"
+                          />
+                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mths</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1156,7 +1173,7 @@ const MonthlyRepaymentCalculator = () => {
                     <div className="mt-4 p-4 bg-white rounded-lg space-y-3 border border-green-100">
                       <h4 className="font-medium text-sm mb-3 text-green-700">Subsequent year rates</h4>
                       {existingLoan.newSubsequentRates.map((rate, index) => (
-                        <div key={index} className="grid grid-cols-2 gap-4">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="text-sm text-gray-600 flex items-center">
                             {rate.year === 'thereafter' ? 'Thereafter' : `${rate.year}${['st', 'nd', 'rd', 'th', 'th'][rate.year - 2] || 'th'} year`}
                           </div>
@@ -1248,47 +1265,57 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">Your New Repayment Schedule</h3>
 
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total interest payable</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <div className="text-center p-4 bg-red-50 rounded-lg">
+                        <p className="text-xs text-red-600 mb-1">Total Interest</p>
                         <p className="font-bold text-lg text-red-600">{formatCurrency(refinancingResults.new.totalInterest)}</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total principal</p>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-xs text-green-600 mb-1">Total Principal</p>
                         <p className="font-bold text-lg text-green-600">{formatCurrency(refinancingResults.new.totalPrincipal)}</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total payable</p>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 mb-1">Total Payable</p>
                         <p className="font-bold text-lg text-blue-600">{formatCurrency(refinancingResults.new.totalPayable)}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b-2 border-gray-200">
-                          <th className="text-center py-3 font-medium text-gray-700">Year</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Interest rate</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Monthly instalment</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Interest paid</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Principal paid</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Ending principal</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {refinancingResults.new.yearlyData.map((year, index) => (
-                          <tr key={index} className="border-b hover:bg-gray-50 transition-colors">
-                            <td className="text-center py-4 font-medium">{year.year}</td>
-                            <td className="text-center py-4">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</td>
-                            <td className="text-center py-4 font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</td>
-                            <td className="text-center py-4 text-red-600">{formatCurrency(year.interestPaid)}</td>
-                            <td className="text-center py-4 text-green-600">{formatCurrency(year.principalPaid)}</td>
-                            <td className="text-center py-4">{formatCurrency(year.endingPrincipal)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      {refinancingResults.new.yearlyData.map((year, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 p-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 items-center">
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Year</div>
+                                <div className="font-medium">{year.year}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Rate</div>
+                                <div className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Monthly Payment</div>
+                                <div className="font-semibold text-blue-600 text-sm">{formatCurrency(year.monthlyInstalment)}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Interest</div>
+                                <div className="font-medium text-red-600 text-sm">{formatCurrency(year.interestPaid)}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Principal</div>
+                                <div className="font-medium text-green-600 text-sm">{formatCurrency(year.principalPaid)}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Balance</div>
+                                <div className="font-medium text-sm">{formatCurrency(year.endingPrincipal)}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   
                   {/* Generate Report Button for Refinancing */}
