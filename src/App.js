@@ -1543,112 +1543,132 @@ This ensures all content fits properly without being cut off.`);
               </div>
             )}
 
-            {inputs.propertyType === 'hdb' && (
-              <div className="space-y-6">
-                {/* MSR 30% Assessment */}
-                <div className={`result-card ${results.hdbPass ? 'success' : 'error'}`}>
-                  <div className="result-header">
-                    <div className="result-icon">
-                      {results.hdbPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
-                    </div>
-                    <div>
-                      <div className="result-title">HDB Property (MSR 30%)</div>
-                      <div className={`result-value ${results.hdbPass ? 'success' : 'error'}`}>
-                        {results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid-responsive cols-2 mt-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Required Income:</span>
-                      <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeHDB)}</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                      <div className={`font-bold text-xl ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(results.hdbDeficit)}
-                      </div>
-                    </div>
-{!results.hdbPass && (
-  <div className="mt-6 pt-4 border-t border-gray-200">
-    <h4 className="font-semibold mb-4 text-center">MSR Funding Solutions (Choose One):</h4>
-    <div className="grid-responsive cols-2">
-      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-        <span className="text-sm text-gray-600">MSR Show Fund:</span>
-        <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowHDB)}</div>
+           {inputs.propertyType === 'hdb' && (
+  <div className="space-y-6">
+    {/* MSR 30% Assessment */}
+    <div className={`result-card ${results.hdbPass ? 'success' : 'error'}`}>
+      <div className="result-header">
+        <div className="result-icon">
+          {results.hdbPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
+        </div>
+        <div>
+          <div className="result-title">HDB Property (MSR 30%)</div>
+          <div className={`result-value ${results.hdbPass ? 'success' : 'error'}`}>
+            {results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
+          </div>
+        </div>
       </div>
-      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-        <span className="text-sm text-gray-600">MSR Pledge Amount:</span>
-        <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
+      
+      <div className="grid-responsive cols-2 mt-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <span className="text-sm text-gray-600">Required Income:</span>
+          <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeHDB)}</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <span className="text-sm text-gray-600">Deficit/Surplus:</span>
+          <div className={`font-bold text-xl ${results.hdbDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatCurrency(results.hdbDeficit)}
+          </div>
+        </div>
       </div>
+      
+      {!results.hdbPass && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <h4 className="font-semibold mb-4 text-center text-gray-700">MSR Funding Solutions (Choose One):</h4>
+          <div className="grid-responsive cols-2 gap-4">
+            <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <div className="text-sm text-gray-600 mb-2">MSR Show Fund:</div>
+              <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowHDB)}</div>
+            </div>
+            <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <div className="text-sm text-gray-600 mb-2">MSR Pledge Amount:</div>
+              <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* TDSR 55% Assessment for HDB */}
+    <div className={`result-card ${results.tdsrPass ? 'success' : 'error'}`}>
+      <div className="result-header">
+        <div className="result-icon">
+          {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
+        </div>
+        <div>
+          <div className="result-title">HDB Property (TDSR 55%)</div>
+          <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
+            {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid-responsive cols-2 mt-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <span className="text-sm text-gray-600">Required Income:</span>
+          <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeTDSR)}</div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <span className="text-sm text-gray-600">Deficit/Surplus:</span>
+          <div className={`font-bold text-xl ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatCurrency(results.tdsrDeficit)}
+          </div>
+        </div>
+      </div>
+      
+      {!results.tdsrPass && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <h4 className="font-semibold mb-4 text-center text-gray-700">TDSR Funding Solutions (Choose One):</h4>
+          <div className="grid-responsive cols-2 gap-4">
+            <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <div className="text-sm text-gray-600 mb-2">TDSR Show Fund:</div>
+              <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
+            </div>
+            <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <div className="text-sm text-gray-600 mb-2">TDSR Pledge Amount:</div>
+              <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Overall HDB Assessment */}
+    <div className={`result-card text-center ${(results.hdbPass && results.tdsrPass) ? 'success' : 'error'}`}>
+      <div className="result-title text-2xl mb-4">
+        Overall HDB Assessment: {(results.hdbPass && results.tdsrPass) ? 
+          <span className="text-green-700">PASS ✓</span> : 
+          <span className="text-red-700">FAIL ✗</span>
+        }
+      </div>
+      <p className="text-sm mt-3 text-gray-600">
+        {(results.hdbPass && results.tdsrPass) ? 
+          'You meet both MSR (30%) and TDSR (55%) requirements.' :
+          'You must pass BOTH MSR (30%) AND TDSR (55%) tests for HDB loan approval.'
+        }
+      </p>
+      
+      {/* Additional Information for Failed Cases */}
+      {!(results.hdbPass && results.tdsrPass) && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-left">
+            <h5 className="font-semibold text-blue-800 mb-2">💡 Quick Summary:</h5>
+            <ul className="text-sm text-blue-700 space-y-1">
+              {!results.hdbPass && (
+                <li>• MSR (30%) test failed - Need additional funding for property-related commitments</li>
+              )}
+              {!results.tdsrPass && (
+                <li>• TDSR (55%) test failed - Need additional funding for total debt commitments</li>
+              )}
+              <li>• Consider Show Fund (cash deposit) or Pledge (asset commitment) options</li>
+              <li>• Contact our specialists for personalized debt restructuring advice</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   </div>
 )}
-                        
-                  </div>
-                </div>
-
-                {/* TDSR 55% Assessment for HDB */}
-                <div className={`result-card ${results.tdsrPass ? 'success' : 'error'}`}>
-                  <div className="result-header">
-                    <div className="result-icon">
-                      {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
-                    </div>
-                    <div>
-                      <div className="result-title">HDB Property (TDSR 55%)</div>
-                      <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
-                        {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid-responsive cols-2 mt-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Required Income:</span>
-                      <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeTDSR)}</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Deficit/Surplus:</span>
-                      <div className={`font-bold text-xl ${results.tdsrDeficit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(results.tdsrDeficit)}
-                      </div>
-                    </div>
-                        {!results.tdsrPass && (
-  <div className="mt-6 pt-4 border-t border-gray-200">
-    <h4 className="font-semibold mb-4 text-center">TDSR Funding Solutions (Choose One):</h4>
-    <div className="grid-responsive cols-2">
-      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-        <span className="text-sm text-gray-600">TDSR Show Fund:</span>
-        <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
-      </div>
-      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-        <span className="text-sm text-gray-600">TDSR Pledge Amount:</span>
-        <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
-      </div>
-    </div>
-  </div>
-)}
-
-                        
-                  </div>
-                </div>
-
-                {/* Overall HDB Assessment */}
-                <div className={`result-card text-center ${(results.hdbPass && results.tdsrPass) ? 'success' : 'error'}`}>
-                  <div className="result-title text-2xl">
-                    Overall HDB Assessment: {(results.hdbPass && results.tdsrPass) ? 
-                      <span className="text-green-700">PASS ✓</span> : 
-                      <span className="text-red-700">FAIL ✗</span>
-                    }
-                  </div>
-                  <p className="text-sm mt-3 text-gray-600">
-                    {(results.hdbPass && results.tdsrPass) ? 
-                      'You meet both MSR (30%) and TDSR (55%) requirements.' :
-                      'You must pass BOTH MSR (30%) AND TDSR (55%) tests for HDB loan approval.'
-                    }
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Generate Report Button */}
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-1 shadow-lg">
