@@ -176,28 +176,40 @@ const ProgressivePaymentCalculator = () => {
         } else if (prevGIsZero && !currentGIsZero) {
           // Previous G is 0, current G is not 0 -> 1
           nValue = 1;
-        } else if (!prevGIsZero) {
-          // Previous G is not 0 -> N(prev) + E(prev)
-          if (prevNValue !== null) {
-            // Use EXACT E value from previous stage based on Excel row
-            let prevEstimatedTime;
-            
-            if (prevStage.excelRow === 8) {
-              prevEstimatedTime = 1; // E8 = 1 (hardcoded)
-            } else if (prevStage.excelRow === 9) {
-              prevEstimatedTime = 2; // E9 = 2 (hardcoded)
-            } else if (prevStage.excelRow >= 10 && prevStage.excelRow <= 15) {
-              prevEstimatedTime = prevStage.estimatedTime; // E10-E15: K4-derived ROUNDUP results
-            } else if (prevStage.excelRow === 16) {
-              prevEstimatedTime = 0; // E16 = undefined/empty (treat as 0)
-            } else if (prevStage.excelRow === 17) {
-              prevEstimatedTime = 12; // E17 = 12 (hardcoded)
-            }
-            
-            nValue = prevNValue + prevEstimatedTime;
-          }
+       } else if (!prevGIsZero) {
+  // Previous G is not 0 -> N(prev) + E(prev)
+  if (prevNValue !== null) {
+    // Use EXACT E value from previous stage based on Excel row
+    let prevEstimatedTime;
+    
+    if (prevStage.excelRow === 8) {
+      prevEstimatedTime = 1; // E8 = 1 (hardcoded)
+    } else if (prevStage.excelRow === 9) {
+      prevEstimatedTime = 2; // E9 = 2 (hardcoded)
+    } else if (prevStage.excelRow >= 10 && prevStage.excelRow <= 15) {
+      prevEstimatedTime = prevStage.estimatedTime; // E10-E15: K4-derived ROUNDUP results
+    } else if (prevStage.excelRow === 16) {
+      // TOP: Use 0 for timing calculation (E16 is empty)
+      prevEstimatedTime = 0;
+    } else if (prevStage.excelRow === 17) {
+      prevEstimatedTime = 12; // E17 = 12 (hardcoded)
+    }
+    
+    // Special case for CSC (current stage is row 17): always add 12 months to TOP
+    if (stage.excelRow === 17 && stage.isCSC) {
+      // For CSC, find the TOP's N value and add 12
+      const topStageIndex = excelStages.findIndex(s => s.isTOP);
+      if (topStageIndex >= 0 && topStageIndex < index) {
+        const topNValue = nValues[topStageIndex]?.nValue;
+        if (topNValue !== null) {
+          nValue = topNValue + 12; // CSC = TOP + 12 months
         }
       }
+    } else {
+      nValue = prevNValue + prevEstimatedTime;
+    }
+  }
+}
       
       nValues.push({
         ...stage,
