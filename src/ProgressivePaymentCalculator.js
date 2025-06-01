@@ -857,7 +857,7 @@ const ProgressivePaymentCalculator = () => {
         <p style="margin: 3px 0;">• <strong>I4/J4/K4 Logic:</strong> Construction time calculated dynamically from OTP/TOP dates using Excel formulas.</p>
         <p style="margin: 3px 0;">• <strong>Column G Logic:</strong> Bank loan allocation uses exact Excel forward-looking conditional formulas.</p>
         <p style="margin: 3px 0;">• <strong>Column N Logic:</strong> Bank loan month calculation uses Excel's complex conditional logic patterns.</p>
-        <p style="margin: 3px 0;">• <strong>ROUNDUP Logic:</strong> Construction stage timing uses proportional weight distribution with ceiling function.</p>
+        <p style="margin: 3px 0;">• <strong>ROUNDUP Logic:</strong> Each stage uses ROUNDUP($K$4*(Crow/SUM($C$10:$C$15)),0) formula.</p>
         <p style="margin: 3px 0;">• <strong>CSC Special Case:</strong> N17 = N16 + E17 (12 months) correctly implemented as per Excel.</p>
         <p style="margin: 3px 0;">• All calculations now match Excel progressive payment calculator exactly.</p>
     </div>
@@ -1174,7 +1174,7 @@ ${!results.timelineCalculated ? '\n⚠️  For Excel-accurate calculations, plea
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
                 <p className="font-medium text-purple-700">ROUNDUP Timing:</p>
-                <p className="text-xs mt-1">Each stage: ROUNDUP($K$4*(C{row}/SUM($C$10:$C$15)),0)</p>
+                <p className="text-xs mt-1">Each stage: ROUNDUP($K$4*(Crow/SUM($C$10:$C$15)),0)</p>
               </div>
             </div>
           </div>
