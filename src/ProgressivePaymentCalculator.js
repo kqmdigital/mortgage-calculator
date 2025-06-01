@@ -210,7 +210,7 @@ const ProgressivePaymentCalculator = () => {
     }
   }
 }
-      
+}      
       nValues.push({
         ...stage,
         nValue: nValue,
