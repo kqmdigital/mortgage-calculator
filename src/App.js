@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import './App.css';
-import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award } from 'lucide-react';
+import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X } from 'lucide-react';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 
@@ -11,7 +11,6 @@ const EMPLOYEE_CREDENTIALS = {
   'analyst': 'analyst789',
   'employee1': 'emp123',
   'employee2': 'emp456',
-  // Add more employees as needed
 };
 
 const LoginScreen = ({ onLogin }) => {
@@ -24,7 +23,6 @@ const LoginScreen = ({ onLogin }) => {
     setIsLoading(true);
     setError('');
 
-    // Simulate loading delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
     if (EMPLOYEE_CREDENTIALS[username] === password) {
@@ -44,9 +42,9 @@ const LoginScreen = ({ onLogin }) => {
         <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 max-w-md w-full">
+      <div className="relative z-10 w-full max-w-md">
         {/* Login Card */}
-        <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8 transform hover:scale-105 transition-all duration-300">
+        <div className="standard-card card-gradient-blue backdrop-blur-lg transform hover:scale-105 transition-all duration-300">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
@@ -56,9 +54,6 @@ const LoginScreen = ({ onLogin }) => {
               Employee Portal
             </h1>
             <p className="text-gray-600 mt-2 font-medium">KeyQuest Mortgage Calculator Suite</p>
-            <div className="flex items-center justify-center gap-2 mt-3">
-            
-            </div>
           </div>
 
           {/* Form */}
@@ -72,7 +67,7 @@ const LoginScreen = ({ onLogin }) => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 placeholder-gray-400"
+                  className="standard-input"
                   placeholder="Enter your username"
                   onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
@@ -89,7 +84,7 @@ const LoginScreen = ({ onLogin }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 placeholder-gray-400"
+                  className="standard-input"
                   placeholder="Enter your password"
                   onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
@@ -98,10 +93,12 @@ const LoginScreen = ({ onLogin }) => {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 animate-pulse">
-                <div className="flex items-center gap-3">
-                  <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <p className="text-red-700 text-sm font-medium">{error}</p>
+              <div className="result-card error">
+                <div className="result-header">
+                  <div className="result-icon">
+                    <XCircle className="w-5 h-5 text-red-500" />
+                  </div>
+                  <p className="text-red-700 text-sm font-medium m-0">{error}</p>
                 </div>
               </div>
             )}
@@ -109,24 +106,21 @@ const LoginScreen = ({ onLogin }) => {
             <button
               onClick={handleLogin}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+              className="btn-standard btn-primary btn-lg w-full"
             >
               {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <>
+                  <div className="loading-spinner"></div>
                   <span>Authenticating...</span>
-                </div>
+                </>
               ) : (
-                <div className="flex items-center justify-center gap-2">
+                <>
                   <Shield className="w-5 h-5" />
                   <span>Access Portal</span>
-                </div>
+                </>
               )}
             </button>
           </div>
-
-        
-          
         </div>
 
         {/* Footer */}
@@ -142,49 +136,33 @@ const LoginScreen = ({ onLogin }) => {
 
 // Main TDSR/MSR Calculator Component
 const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
-  // Reset all values with defaults when component mounts (fresh login)
   const [inputs, setInputs] = useState({
-    // Property Type Selection
-    propertyType: 'private', // 'private' or 'hdb'
-    
+    propertyType: 'private',
     purchasePrice: '',
-    loanPercentage: 75, // 55, 75, or custom
+    loanPercentage: 75,
     customLoanAmount: '',
     useCustomAmount: false,
-    
-    // Stress test rate (separate field for calculations)
     stressTestRate: 4,
-    
-    loanTenor: 30, // Default to 30 years
-    
-    // Applicant A
+    loanTenor: 30,
     monthlySalaryA: '',
     annualSalaryA: '',
     applicantAgeA: '',
-    
-    // Applicant B
     monthlySalaryB: '',
     annualSalaryB: '',
     applicantAgeB: '',
-    
-    // Show Fund and Pledging (combined solution)
     showFundAmount: '',
     pledgeAmount: '',
-    
-    // Existing commitments
     carLoanA: '',
     carLoanB: '',
     personalLoanA: '',
     personalLoanB: '',
-    
-    // Property loan for HDB MSR calculation
     propertyLoanA: '',
     propertyLoanB: ''
   });
 
   const [results, setResults] = useState(null);
 
-  // Helper function to format number inputs
+  // Helper functions (keeping the same logic as before)
   const formatNumberInput = (value) => {
     if (value === '' || value === null || value === undefined) return '';
     const num = parseFloat(value.toString().replace(/,/g, ''));
@@ -192,14 +170,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return num.toLocaleString();
   };
 
-  // Helper function to parse formatted input back to number
   const parseNumberInput = (value) => {
     if (value === '' || value === null || value === undefined) return '';
     const num = parseFloat(value.toString().replace(/,/g, ''));
     return isNaN(num) ? '' : num;
   };
 
-  // Calculate average applicant age
   const calculateAverageAge = () => {
     const ageA = parseNumberInput(inputs.applicantAgeA) || 0;
     const ageB = parseNumberInput(inputs.applicantAgeB) || 0;
@@ -214,21 +190,18 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return 0;
   };
 
-  // Calculate maximum loan tenor based on property type and loan percentage
   const calculateMaxLoanTenor = () => {
     const averageAge = calculateAverageAge();
     
-    // Determine loan percentage
     let loanPercentage;
     if (inputs.useCustomAmount) {
       const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
       const customAmount = parseNumberInput(inputs.customLoanAmount) || 0;
-      loanPercentage = purchasePrice > 0 ? (customAmount / purchasePrice) * 100 : 75; // Default to 75%
+      loanPercentage = purchasePrice > 0 ? (customAmount / purchasePrice) * 100 : 75;
     } else {
       loanPercentage = inputs.loanPercentage;
     }
     
-    // If no age provided, return maximum possible tenor for the loan type
     if (averageAge === 0) {
       if (inputs.propertyType === 'hdb') {
         return loanPercentage >= 56 && loanPercentage <= 75 ? 25 : 30;
@@ -239,27 +212,21 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     
     if (inputs.propertyType === 'hdb') {
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        // HDB 56%-75%: Max 25 years, age cap at 65
         return Math.min(25, Math.max(1, 65 - averageAge));
       } else if (loanPercentage <= 55) {
-        // HDB 55% and below: Max 30 years, age cap at 75
         return Math.min(30, Math.max(1, 75 - averageAge));
       }
     } else {
-      // Private property
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        // Private 56%-75%: Max 30 years, age cap at 65
         return Math.min(30, Math.max(1, 65 - averageAge));
       } else if (loanPercentage <= 55) {
-        // Private 55% and below: Max 35 years, age cap at 75
         return Math.min(35, Math.max(1, 75 - averageAge));
       }
     }
     
-    return 30; // Default fallback
+    return 30;
   };
 
-  // PMT function calculation
   const calculatePMT = (rate, periods, principal) => {
     if (rate === 0) return principal / periods;
     const monthlyRate = rate / 100 / 12;
@@ -267,7 +234,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
   };
 
-  // Main calculation function
   const calculateMortgage = useCallback(() => {
     const {
       propertyType, purchasePrice, loanPercentage, customLoanAmount, useCustomAmount,
@@ -279,7 +245,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       propertyLoanA, propertyLoanB
     } = inputs;
 
-    // Parse all numeric inputs
     const parsedInputs = {
       purchasePrice: parseNumberInput(purchasePrice) || 0,
       customLoanAmount: parseNumberInput(customLoanAmount) || 0,
@@ -301,11 +266,9 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       propertyLoanB: parseNumberInput(propertyLoanB) || 0
     };
 
-    // Calculate average age
     const averageAge = calculateAverageAge();
     const maxLoanTenor = calculateMaxLoanTenor();
 
-    // Calculate loan amount
     let loanAmount;
     if (useCustomAmount) {
       loanAmount = parsedInputs.customLoanAmount;
@@ -313,66 +276,49 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       loanAmount = parsedInputs.purchasePrice * (loanPercentage / 100);
     }
     
-    // Calculate loan amounts for reference
     const loanAmount75 = parsedInputs.purchasePrice * 0.75;
     const loanAmount55 = parsedInputs.purchasePrice * 0.55;
     
-    // Calculate monthly installment using stress test rate
     const monthlyInstallmentStressTest = calculatePMT(parsedInputs.stressTestRate, parsedInputs.loanTenor * 12, loanAmount);
-    
-    // Use stress test installment for affordability calculation
     const monthlyInstallment = monthlyInstallmentStressTest;
-    
-    // Calculate bonus income (70% of excess annual salary over base)
     
     const baseSalaryA = parsedInputs.monthlySalaryA * 12;
     const baseSalaryB = parsedInputs.monthlySalaryB * 12;
     const bonusIncomeA = Math.max(0, (parsedInputs.annualSalaryA - baseSalaryA) / 12) * 0.7;
     const bonusIncomeB = Math.max(0, (parsedInputs.annualSalaryB - baseSalaryB) / 12) * 0.7;
     
-    // Calculate additional income from show fund and pledge
-    const showFundIncomeA = parsedInputs.showFundAmount * 0.00625; // 0.625% monthly yield
-    const showFundIncomeB = 0; // Assuming single applicant for show fund
-    const pledgeIncomeA = 0; // Assign pledge to Applicant B
-    const pledgeIncomeB = parsedInputs.pledgeAmount / 48; // Divide by 48 months - assigned to Applicant B
+    const showFundIncomeA = parsedInputs.showFundAmount * 0.00625;
+    const showFundIncomeB = 0;
+    const pledgeIncomeA = 0;
+    const pledgeIncomeB = parsedInputs.pledgeAmount / 48;
     
-    // Total monthly income
     const totalMonthlyIncomeA = parsedInputs.monthlySalaryA + bonusIncomeA + showFundIncomeA + pledgeIncomeA;
     const totalMonthlyIncomeB = parsedInputs.monthlySalaryB + bonusIncomeB + showFundIncomeB + pledgeIncomeB;
     const combinedMonthlyIncome = totalMonthlyIncomeA + totalMonthlyIncomeB;
     
-    // Total commitments (different for HDB vs Private)
     let totalCommitments;
-    let totalCommitmentsTDSR; // For TDSR calculation (always includes all commitments)
+    let totalCommitmentsTDSR;
     
     if (propertyType === 'hdb') {
-      // For HDB MSR: Include property loans only
       totalCommitments = parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
-      // For HDB TDSR: Include ALL commitments (car, personal, property loans)
       totalCommitmentsTDSR = parsedInputs.carLoanA + parsedInputs.carLoanB + parsedInputs.personalLoanA + parsedInputs.personalLoanB + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
     } else {
-      // For Private: Include ALL commitments in TDSR calculation
       totalCommitments = parsedInputs.carLoanA + parsedInputs.carLoanB + parsedInputs.personalLoanA + parsedInputs.personalLoanB + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
       totalCommitmentsTDSR = totalCommitments;
     }
     
-    // TDSR and MSR calculations
     const tdsr55Available = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR;
     const msr30Available = combinedMonthlyIncome * 0.3;
     
-    // Required income calculations
     const requiredIncomeTDSR = (monthlyInstallment + totalCommitmentsTDSR) / 0.55;
     const requiredIncomeHDB = (monthlyInstallment + totalCommitments) / 0.3;
     
-    // Deficit calculations
     const tdsrDeficit = combinedMonthlyIncome - requiredIncomeTDSR;
     const hdbDeficit = combinedMonthlyIncome - requiredIncomeHDB;
     
-    // Pass/Fail determination
     const tdsrPass = tdsrDeficit >= 0;
     const hdbPass = hdbDeficit >= 0;
     
-    // Cash requirements when failing
     const cashShowTDSR = tdsrPass ? 0 : Math.abs(tdsrDeficit) / 0.00625;
     const cashShowHDB = hdbPass ? 0 : Math.abs(hdbDeficit) / 0.00625;
     const cashPledgeTDSR = tdsrPass ? 0 : Math.abs(tdsrDeficit) * 48;
@@ -426,7 +372,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   };
 
   const handleInputChange = (field, value) => {
-    // For numeric fields, handle formatting
     const numericFields = [
       'purchasePrice', 'customLoanAmount', 'monthlySalaryA', 'annualSalaryA', 
       'monthlySalaryB', 'annualSalaryB', 'showFundAmount', 'pledgeAmount',
@@ -441,7 +386,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         [field]: parsedValue
       }));
     } else if (field === 'stressTestRate') {
-      // Handle stress test rate to allow empty values
       const parsedValue = value === '' ? '' : Number(value);
       setInputs(prev => ({
         ...prev,
@@ -450,7 +394,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     } else if (field === 'loanTenor') {
       const parsedValue = parseNumberInput(value);
       const maxTenor = calculateMaxLoanTenor();
-      // Handle empty values - don't set a default, just validate if there's a value
       if (parsedValue === '' || parsedValue === null || parsedValue === undefined) {
         setInputs(prev => ({
           ...prev,
@@ -471,7 +414,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
   };
 
-  // CLEAN PDF REPORT FUNCTION - PROPERLY INSIDE COMPONENT
   const generatePDFReport = () => {
     if (!results) {
       alert('Please calculate the mortgage first before generating a report.');
@@ -486,7 +428,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         day: 'numeric'
       });
 
-      // Generate professional HTML report
       const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -548,12 +489,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             margin-bottom: 6px;
         }
         
-       .logo-section img {
-    max-width: 100px !important;
-    width: 100px !important;
-    height: auto !important;
-    display: block;
-}
+        .logo-section img {
+            max-width: 100px !important;
+            width: 100px !important;
+            height: auto !important;
+            display: block;
+        }
         
         .report-info {
             margin-top: 6px;
@@ -765,234 +706,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         </div>
     </div>
 
-    ${inputs.propertyType === 'hdb' ? `
-    <div class="section no-break">
-        <h2>📊 HDB DUAL ASSESSMENT (MSR & TDSR)</h2>
-        <div class="two-column">
-            <div style="background: ${results.hdbPass ? '#f0fdf4' : '#fef2f2'}; border: 2px solid ${results.hdbPass ? '#22c55e' : '#ef4444'}; border-radius: 6px; padding: 12px;">
-                <h3 style="color: ${results.hdbPass ? '#16a34a' : '#dc2626'}; font-size: 14px; margin: 0 0 10px 0;">MSR 30% Test</h3>
-                <div class="info-row" style="border: none;">
-                    <span class="info-label">Required Income:</span>
-                    <span class="info-value">${formatCurrency(results.requiredIncomeHDB)}</span>
-                </div>
-                <div class="info-row" style="border: none;">
-                    <span class="info-label">Deficit/Surplus:</span>
-                    <span class="info-value" style="color: ${results.hdbDeficit >= 0 ? '#16a34a' : '#dc2626'};">${formatCurrency(results.hdbDeficit)}</span>
-                </div>
-                <div style="text-align: center; margin-top: 10px; font-weight: bold; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">
-                    ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
-                </div>
-            </div>
-            
-            <div style="background: ${results.tdsrPass ? '#f0fdf4' : '#fef2f2'}; border: 2px solid ${results.tdsrPass ? '#22c55e' : '#ef4444'}; border-radius: 6px; padding: 12px;">
-                <h3 style="color: ${results.tdsrPass ? '#16a34a' : '#dc2626'}; font-size: 14px; margin: 0 0 10px 0;">TDSR 55% Test</h3>
-                <div class="info-row" style="border: none;">
-                    <span class="info-label">Required Income:</span>
-                    <span class="info-value">${formatCurrency(results.requiredIncomeTDSR)}</span>
-                </div>
-                <div class="info-row" style="border: none;">
-                    <span class="info-label">Deficit/Surplus:</span>
-                    <span class="info-value" style="color: ${results.tdsrDeficit >= 0 ? '#16a34a' : '#dc2626'};">${formatCurrency(results.tdsrDeficit)}</span>
-                </div>
-                <div style="text-align: center; margin-top: 10px; font-weight: bold; color: ${results.tdsrPass ? '#16a34a' : '#dc2626'};">
-                    ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
-                </div>
-            </div>
-        </div>
-        
-        <div style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 12px; margin-top: 15px; text-align: center;">
-            <p style="margin: 0; font-size: 12px; color: #1d4ed8;">
-                <strong>Note:</strong> For HDB loans, banks assess both MSR (30%) for property-related debt and TDSR (55%) for total debt servicing.
-                Both tests must be passed for loan approval.
-            </p>
-        </div>
-    </div>
-    ` : ''}
-
-    ${(inputs.propertyType === 'private' && !results.tdsrPass) || (inputs.propertyType === 'hdb' && (!results.hdbPass || !results.tdsrPass)) ? `
-    
-    <div class="section no-break">
-        <h2>💡 FUNDING SOLUTIONS</h2>
-        <p style="text-align: center; margin-bottom: 15px;">To meet the ${inputs.propertyType === 'private' ? 'TDSR' : 'MSR and TDSR'} requirements, you need one of the following:</p>
-        
-        ${inputs.propertyType === 'hdb' ? `
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #555; font-size: 12px; margin-bottom: 8px;">For MSR (30%) Shortfall:</h4>
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <strong>Show Fund Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                        ${formatCurrency(results.cashShowHDB)}
-                    </span>
-                </div>
-                <div class="funding-card">
-                    <strong>Pledge Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                        ${formatCurrency(results.cashPledgeHDB)}
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #555; font-size: 12px; margin-bottom: 8px;">For TDSR (55%) Shortfall:</h4>
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <strong>Show Fund Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                        ${formatCurrency(results.cashShowTDSR)}
-                    </span>
-                </div>
-                <div class="funding-card">
-                    <strong>Pledge Option</strong><br>
-                    <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                        ${formatCurrency(results.cashPledgeTDSR)}
-                    </span>
-                </div>
-            </div>
-        </div>
-        ` : `
-        <div class="funding-grid">
-            <div class="funding-card">
-                <strong>Show Fund Option</strong><br>
-                <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                    ${formatCurrency(results.cashShowTDSR)}
-                </span>
-            </div>
-            <div class="funding-card">
-                <strong>Pledge Option</strong><br>
-                <span style="font-size: 16px; color: #dc2626; font-weight: bold;">
-                    ${formatCurrency(results.cashPledgeTDSR)}
-                </span>
-            </div>
-        </div>
-        `}
-        
-        <p style="font-size: 12px; color: #666; text-align: center; margin-top: 15px;">
-            <em>Choose either Show Fund OR Pledge option, not both</em>
-        </p>
-    </div>
-    ` : ''}
-
-    <div class="section">
-        <h2>👥 APPLICANT DETAILS</h2>
-        
-        <div class="two-column">
-            <div>
-                <h3 style="color: #555; font-size: 14px;">Primary Applicant</h3>
-                <div class="info-row">
-                    <span class="info-label">Monthly Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Annual Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Age:</span>
-                    <span class="info-value">${parseNumberInput(inputs.applicantAgeA) || 'N/A'} years</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Total Income:</span>
-                    <span class="info-value">${formatCurrency(results.totalMonthlyIncomeA)}</span>
-                </div>
-            </div>
-            
-            ${(parseNumberInput(inputs.monthlySalaryB) || 0) > 0 ? `
-            <div>
-                <h3 style="color: #555; font-size: 14px;">Co-Applicant</h3>
-                <div class="info-row">
-                    <span class="info-label">Monthly Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Annual Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Age:</span>
-                    <span class="info-value">${parseNumberInput(inputs.applicantAgeB) || 'N/A'} years</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Total Income:</span>
-                    <span class="info-value">${formatCurrency(results.totalMonthlyIncomeB)}</span>
-                </div>
-            </div>
-            ` : '<div><p style="color: #666; font-style: italic; font-size: 12px;">Single applicant application</p></div>'}
-        </div>
-        
-        <div style="background: #f0f9ff; padding: 12px; border-radius: 6px; margin-top: 15px; text-align: center;">
-            <h4 style="margin: 0 0 8px 0; color: #0369a1; font-size: 14px;">Combined Household Income</h4>
-            <div style="font-size: 20px; font-weight: bold; color: #0369a1;">${formatCurrency(results.combinedMonthlyIncome)}</div>
-        </div>
-        
-        ${results.averageAge > 0 ? `
-        <div style="margin-top: 15px;">
-            <h4 style="color: #555; font-size: 14px;">Age & Tenor Information</h4>
-            <div class="info-row">
-                <span class="info-label">Average Age:</span>
-                <span class="info-value">${results.averageAge.toFixed(1)} years</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Max Loan Tenor:</span>
-                <span class="info-value">${results.maxLoanTenor} years</span>
-            </div>
-        </div>
-        ` : ''}
-        
-        ${(parseNumberInput(inputs.showFundAmount) || 0) > 0 || (parseNumberInput(inputs.pledgeAmount) || 0) > 0 ? `
-        <div style="margin-top: 15px;">
-            <h4 style="color: #555; font-size: 14px;">Additional Funding Options</h4>
-            ${(parseNumberInput(inputs.showFundAmount) || 0) > 0 ? `
-            <div class="info-row">
-                <span class="info-label">Show Fund Amount:</span>
-                <span class="info-value">${formatCurrency(parseNumberInput(inputs.showFundAmount))}</span>
-            </div>
-            ` : ''}
-            ${(parseNumberInput(inputs.pledgeAmount) || 0) > 0 ? `
-            <div class="info-row">
-                <span class="info-label">Pledge Amount:</span>
-                <span class="info-value">${formatCurrency(parseNumberInput(inputs.pledgeAmount))}</span>
-            </div>
-            ` : ''}
-        </div>
-        ` : ''}
-        
-        ${(results.totalCommitments > 0 || (inputs.propertyType === 'hdb' && results.totalCommitmentsTDSR > 0)) ? `
-        <div style="margin-top: 15px;">
-            <h4 style="color: #555; font-size: 14px;">Monthly Commitments</h4>
-            ${inputs.propertyType === 'hdb' ? `
-                <div style="font-size: 16px; font-weight: bold; color: #dc2626;">
-                    MSR Commitments: ${formatCurrency(results.totalCommitments)}
-                </div>
-                <p style="font-size: 11px; color: #666; margin-top: 5px;">
-                    <strong>HDB MSR Calculation:</strong> Includes property loans only (${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}). 
-                    Car loans and personal loans are excluded from MSR.
-                </p>
-                ${results.totalCommitmentsTDSR > 0 ? `
-                <div style="font-size: 16px; font-weight: bold; color: #dc2626; margin-top: 10px;">
-                    TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}
-                </div>
-                <p style="font-size: 11px; color: #666; margin-top: 5px;">
-                    <strong>HDB TDSR Calculation:</strong> Includes all commitments:
-                    <br>• Car loans: ${formatCurrency(parseNumberInput(inputs.carLoanA) + parseNumberInput(inputs.carLoanB))}
-                    <br>• Personal loans: ${formatCurrency(parseNumberInput(inputs.personalLoanA) + parseNumberInput(inputs.personalLoanB))}
-                    <br>• Property loans: ${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}
-                </p>
-                ` : ''}
-            ` : `
-                <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.totalCommitments)}</div>
-                <p style="font-size: 11px; color: #666; margin-top: 5px;">
-                    <strong>Private Property TDSR Calculation:</strong> Includes all commitments:
-                    <br>• Car loans: ${formatCurrency(parseNumberInput(inputs.carLoanA) + parseNumberInput(inputs.carLoanB))}
-                    <br>• Personal loans: ${formatCurrency(parseNumberInput(inputs.personalLoanA) + parseNumberInput(inputs.personalLoanB))}
-                    <br>• Property loans: ${formatCurrency(parseNumberInput(inputs.propertyLoanA) + parseNumberInput(inputs.propertyLoanB))}
-                </p>
-            `}
-        </div>
-        ` : ''}
-    </div>
-
     <div class="disclaimer no-break">
         <h4 style="margin: 0 0 8px 0; color: #333; font-size: 12px;">Important Notes</h4>
         <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
@@ -1017,18 +730,15 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
 </html>
       `;
 
-      // Create a new window with the HTML content
       const newWindow = window.open('', '_blank');
       newWindow.document.write(htmlContent);
       newWindow.document.close();
       
-      // Add a small delay to ensure content is loaded, then trigger print
       setTimeout(() => {
         newWindow.focus();
         newWindow.print();
       }, 500);
 
-      // Show detailed instructions for optimal PDF printing
       alert(`Professional report generated successfully! 
 
 📄 FOR BEST PDF RESULTS:
@@ -1050,61 +760,63 @@ This ensures all content fits properly without being cut off.`);
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid-responsive cols-2">
         {/* Enhanced Input Section */}
         <div className="space-y-6">
           {/* Property Type Selection */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+          <div className="standard-card card-gradient-purple">
+            <div className="section-header">
+              <div className="icon-container purple">
                 <Building className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-purple-800">Property Type Selection</h2>
-                <p className="text-sm text-purple-600">Choose your property category</p>
+              <div className="text-content">
+                <h2>Property Type Selection</h2>
+                <p>Choose your property category</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => handleInputChange('propertyType', 'private')}
-                className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
-                  inputs.propertyType === 'private'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-lg transform scale-105'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:shadow-md hover:scale-102'
-                }`}
-              >
-                <Building className="w-8 h-8" />
-                <div className="text-center">
-                  <div className="font-semibold">Private Property</div>
-                  <div className="text-xs opacity-75">TDSR Assessment</div>
+            
+            <div className="radio-card-group">
+              <label className="radio-card">
+                <input
+                  type="radio"
+                  name="propertyType"
+                  value="private"
+                  checked={inputs.propertyType === 'private'}
+                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                />
+                <div className="radio-card-content">
+                  <Building className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <div className="radio-card-title">Private Property</div>
+                  <div className="radio-card-subtitle">TDSR Assessment</div>
                 </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('propertyType', 'hdb')}
-                className={`p-6 rounded-xl border-2 transition-all duration-300 flex flex-col items-center gap-3 ${
-                  inputs.propertyType === 'hdb'
-                    ? 'border-green-500 bg-green-50 text-green-700 shadow-lg transform scale-105'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-green-300 hover:shadow-md hover:scale-102'
-                }`}
-              >
-                <Home className="w-8 h-8" />
-                <div className="text-center">
-                  <div className="font-semibold">HDB Property</div>
-                  <div className="text-xs opacity-75">MSR + TDSR Assessment</div>
+              </label>
+              
+              <label className="radio-card">
+                <input
+                  type="radio"
+                  name="propertyType"
+                  value="hdb"
+                  checked={inputs.propertyType === 'hdb'}
+                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                />
+                <div className="radio-card-content">
+                  <Home className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                  <div className="radio-card-title">HDB Property</div>
+                  <div className="radio-card-subtitle">MSR + TDSR Assessment</div>
                 </div>
-              </button>
+              </label>
             </div>
           </div>
 
           {/* Enhanced Loan Details */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+          <div className="standard-card card-gradient-blue">
+            <div className="section-header">
+              <div className="icon-container blue">
                 <DollarSign className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-blue-800">Loan Configuration</h2>
-                <p className="text-sm text-blue-600">Set your loan parameters</p>
+              <div className="text-content">
+                <h2>Loan Configuration</h2>
+                <p>Set your loan parameters</p>
               </div>
             </div>
             
@@ -1112,23 +824,21 @@ This ensures all content fits properly without being cut off.`);
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="1,000,000.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
-            </div>
-            
-            <div className="mt-6">
-              <label className="block text-sm font-semibold mb-3 text-gray-700">Loan Amount Options</label>
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  <label className="group">
+              
+              <div>
+                <label className="block text-sm font-semibold mb-3 text-gray-700">Loan Amount Options</label>
+                <div className="radio-card-group">
+                  <label className="radio-card">
                     <input
                       type="radio"
                       name="loanOption"
@@ -1137,21 +847,16 @@ This ensures all content fits properly without being cut off.`);
                         handleInputChange('useCustomAmount', false);
                         handleInputChange('loanPercentage', 75);
                       }}
-                      className="sr-only"
                     />
-                    <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
-                      !inputs.useCustomAmount && inputs.loanPercentage === 75
-                        ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
-                    }`}>
-                      <div className="font-semibold text-lg">75%</div>
-                      <div className="text-xs text-gray-600 mt-1">
+                    <div className="radio-card-content">
+                      <div className="radio-card-title">75%</div>
+                      <div className="radio-card-subtitle text-xs">
                         {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
                       </div>
                     </div>
                   </label>
                   
-                  <label className="group">
+                  <label className="radio-card">
                     <input
                       type="radio"
                       name="loanOption"
@@ -1160,60 +865,47 @@ This ensures all content fits properly without being cut off.`);
                         handleInputChange('useCustomAmount', false);
                         handleInputChange('loanPercentage', 55);
                       }}
-                      className="sr-only"
                     />
-                    <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
-                      !inputs.useCustomAmount && inputs.loanPercentage === 55
-                        ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
-                    }`}>
-                      <div className="font-semibold text-lg">55%</div>
-                      <div className="text-xs text-gray-600 mt-1">
+                    <div className="radio-card-content">
+                      <div className="radio-card-title">55%</div>
+                      <div className="radio-card-subtitle text-xs">
                         {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
                       </div>
                     </div>
                   </label>
                   
-                  <label className="group">
+                  <label className="radio-card">
                     <input
                       type="radio"
                       name="loanOption"
                       checked={inputs.useCustomAmount}
                       onChange={() => handleInputChange('useCustomAmount', true)}
-                      className="sr-only"
                     />
-                    <div className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 text-center ${
-                      inputs.useCustomAmount
-                        ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
-                    }`}>
-                      <div className="font-semibold text-lg">Custom</div>
-                      <div className="text-xs text-gray-600 mt-1">Amount</div>
+                    <div className="radio-card-content">
+                      <div className="radio-card-title">Custom</div>
+                      <div className="radio-card-subtitle">Amount</div>
                     </div>
                   </label>
                 </div>
                 
                 {inputs.useCustomAmount && (
-                  <div className="mt-4 animate-fadeIn">
+                  <div className="mt-4 fade-in">
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Loan Amount</label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                       <input
                         type="text"
                         value={formatNumberInput(inputs.customLoanAmount)}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
-                        className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                        className="standard-input currency-input"
                         placeholder="750,000.00"
                       />
+                      <span className="currency-symbol">SGD</span>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
 
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Loan Parameters</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid-responsive cols-2">
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Stress Test Rate (%)</label>
                   <div className="relative">
@@ -1222,18 +914,14 @@ This ensures all content fits properly without being cut off.`);
                       step="0.01"
                       value={inputs.stressTestRate}
                       onChange={(e) => handleInputChange('stressTestRate', Number(e.target.value))}
-                      className="w-full pr-8 pl-3 py-3 border border-gray-300 rounded-xl bg-red-50 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
+                      className="standard-input bg-red-50 border-red-200 focus:border-red-500"
                       placeholder="4.00"
-                      style={{
-                        MozAppearance: 'textfield',
-                        WebkitAppearance: 'none',
-                        appearance: 'none'
-                      }}
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">%</span>
                   </div>
                   <p className="text-xs text-red-600 mt-1 font-medium">Used for affordability calculation</p>
                 </div>
+                
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Loan Tenor (Years)</label>
                   <div className="relative">
@@ -1243,13 +931,8 @@ This ensures all content fits properly without being cut off.`);
                       onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
                       max={results ? results.maxLoanTenor : "35"}
                       min="0"
-                      className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input"
                       placeholder="30"
-                      style={{
-                        MozAppearance: 'textfield',
-                        WebkitAppearance: 'none',
-                        appearance: 'none'
-                      }}
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
                   </div>
@@ -1259,13 +942,6 @@ This ensures all content fits properly without being cut off.`);
                       {results.averageAge > 0 && (
                         <p><strong>Average age:</strong> {results.averageAge.toFixed(1)} years</p>
                       )}
-                      <p className="text-blue-600 font-medium">
-                        {inputs.propertyType === 'hdb' ? 'HDB' : 'Private'} Property Rules:
-                        {inputs.propertyType === 'hdb' 
-                          ? ' 56%-75% loan: Max 25yr (age≤65), ≤55% loan: Max 30yr (age≤75)'
-                          : ' 56%-75% loan: Max 30yr (age≤65), ≤55% loan: Max 35yr (age≤75)'
-                        }
-                      </p>
                     </div>
                   )}
                 </div>
@@ -1274,44 +950,44 @@ This ensures all content fits properly without being cut off.`);
           </div>
 
           {/* Enhanced Applicant Information */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+          <div className="standard-card card-gradient-green">
+            <div className="section-header">
+              <div className="icon-container green">
                 <Users className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-green-800">Applicant Details</h2>
-                <p className="text-sm text-green-600">Income and demographic information</p>
+              <div className="text-content">
+                <h2>Applicant Details</h2>
+                <p>Income and demographic information</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid-responsive cols-2">
               <div className="space-y-4">
                 <h3 className="font-semibold text-gray-800 text-lg border-b border-green-200 pb-2">Primary Applicant</h3>
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.monthlySalaryA)}
                       onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
-                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input currency-input"
                       placeholder="8,000.00"
                     />
+                    <span className="currency-symbol">SGD</span>
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.annualSalaryA)}
                       onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
-                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input currency-input"
                       placeholder="120,000.00"
                     />
+                    <span className="currency-symbol">SGD</span>
                   </div>
                 </div>
                 <div>
@@ -1321,7 +997,7 @@ This ensures all content fits properly without being cut off.`);
                       type="text"
                       value={formatNumberInput(inputs.applicantAgeA)}
                       onChange={(e) => handleInputChange('applicantAgeA', e.target.value)}
-                      className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input"
                       placeholder="35"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
@@ -1334,27 +1010,27 @@ This ensures all content fits properly without being cut off.`);
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.monthlySalaryB)}
                       onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
-                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input currency-input"
                       placeholder="6,000.00"
                     />
+                    <span className="currency-symbol">SGD</span>
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                     <input
                       type="text"
                       value={formatNumberInput(inputs.annualSalaryB)}
                       onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
-                      className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input currency-input"
                       placeholder="90,000.00"
                     />
+                    <span className="currency-symbol">SGD</span>
                   </div>
                 </div>
                 <div>
@@ -1364,7 +1040,7 @@ This ensures all content fits properly without being cut off.`);
                       type="text"
                       value={formatNumberInput(inputs.applicantAgeB)}
                       onChange={(e) => handleInputChange('applicantAgeB', e.target.value)}
-                      className="w-full pr-12 pl-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm"
+                      className="standard-input"
                       placeholder="32"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
@@ -1375,136 +1051,136 @@ This ensures all content fits properly without being cut off.`);
           </div>
 
           {/* Enhanced Additional Funding */}
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+          <div className="standard-card card-gradient-yellow">
+            <div className="section-header">
+              <div className="icon-container yellow">
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-yellow-800">Additional Funding Solutions</h2>
-                <p className="text-sm text-yellow-600">Show fund and pledge amount options</p>
+              <div className="text-content">
+                <h2>Additional Funding Solutions</h2>
+                <p>Show fund and pledge amount options</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid-responsive cols-2">
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Show Fund (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.showFundAmount)}
                     onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="500,000.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Pledging (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.pledgeAmount)}
                     onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="300,000.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Enhanced Existing Commitments */}
-          <div className="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border border-red-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+          <div className="standard-card card-gradient-red">
+            <div className="section-header">
+              <div className="icon-container red">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-red-800">Existing Monthly Commitments</h2>
-                <p className="text-sm text-red-600">Current loan obligations</p>
+              <div className="text-content">
+                <h2>Existing Monthly Commitments</h2>
+                <p>Current loan obligations</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid-responsive cols-2">
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (A) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanA)}
                     onChange={(e) => handleInputChange('carLoanA', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="800.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (B) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.carLoanB)}
                     onChange={(e) => handleInputChange('carLoanB', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="600.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (A) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanA)}
                     onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="500.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (B) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.personalLoanB)}
                     onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="300.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (A) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanA)}
                     onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="2,000.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (B) (SGD)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">SGD</span>
                   <input
                     type="text"
                     value={formatNumberInput(inputs.propertyLoanB)}
                     onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
-                    className="w-full pl-12 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white shadow-sm"
+                    className="standard-input currency-input"
                     placeholder="1,500.00"
                   />
+                  <span className="currency-symbol">SGD</span>
                 </div>
               </div>
             </div>
@@ -1532,71 +1208,65 @@ This ensures all content fits properly without being cut off.`);
         {/* Enhanced Results Section */}
         {results && (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-gray-50 to-slate-100 p-6 rounded-xl border border-gray-200 shadow-lg">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Assessment Results</h2>
-                <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  inputs.propertyType === 'private' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property'}
+            <div className="standard-card">
+              <div className="section-header">
+                <div className="icon-container blue">
+                  <Calculator className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-content">
+                  <h2>Assessment Results</h2>
+                  <p>{inputs.propertyType === 'private' ? 'Private Property Analysis' : 'HDB Property Analysis'}</p>
                 </div>
               </div>
               
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold mb-4 text-gray-800">Loan Configuration</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Selected Loan Amount:</span>
-                      <div className="font-bold text-xl text-blue-600">{formatCurrency(results.loanAmount)}</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">75% Loan Option:</span>
-                      <div className="font-semibold text-gray-700">{formatCurrency(results.loanAmount75)}</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">55% Loan Option:</span>
-                      <div className="font-semibold text-gray-700">{formatCurrency(results.loanAmount55)}</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Loan-to-Value Ratio:</span>
-                      <div className="font-semibold text-gray-700">{((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-4 text-gray-800">Affordability Assessment</h3>
-                  <div className="bg-red-50 p-4 rounded-xl mb-4 border border-red-200">
-                    <div className="text-sm text-gray-600 mb-1">Monthly Installment (Stress Test {inputs.stressTestRate}%):</div>
-                    <div className="font-bold text-2xl text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
-                    <p className="text-xs text-gray-500 mt-1">This amount is used for TDSR/MSR calculation</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">Combined Monthly Income:</span>
-                      <div className="font-bold text-xl text-green-600">{formatCurrency(results.combinedMonthlyIncome)}</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <span className="text-sm text-gray-600">
-                        {inputs.propertyType === 'hdb' ? 'MSR Commitments (Property Only):' : 'Total Commitments (All Loans):'}
-                      </span>
-                      <div className="font-bold text-xl text-red-600">{formatCurrency(results.totalCommitments)}</div>
-                      <div className="text-xs text-gray-500">
-                        {inputs.propertyType === 'hdb' 
-                          ? 'MSR: Property loans only' 
-                          : 'TDSR: Car, personal & property loans'
-                        }
-                      </div>
-                      {inputs.propertyType === 'hdb' && results.totalCommitmentsTDSR > 0 && (
-                        <div className="mt-2">
-                          <span className="text-sm text-gray-600">TDSR Commitments (All Loans):</span>
-                          <div className="font-bold text-lg text-red-600">{formatCurrency(results.totalCommitmentsTDSR)}</div>
-                          <div className="text-xs text-gray-500">TDSR: Car, personal & property loans</div>
+                  <div className="grid-responsive cols-2">
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-blue-100">
+                          <DollarSign className="w-5 h-5 text-blue-600" />
                         </div>
-                      )}
+                        <div>
+                          <div className="result-title">Selected Loan Amount</div>
+                          <div className="result-value text-blue-600">{formatCurrency(results.loanAmount)}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-green-100">
+                          <TrendingUp className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Combined Monthly Income</div>
+                          <div className="result-value text-green-600">{formatCurrency(results.combinedMonthlyIncome)}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-red-100">
+                          <BarChart3 className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Monthly Installment (Stress)</div>
+                          <div className="result-value text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
+                          <div className="result-subtitle">Using {inputs.stressTestRate}% stress test rate</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-gray-100">
+                          <Info className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Loan-to-Value Ratio</div>
+                          <div className="result-value text-gray-700">{((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1605,12 +1275,19 @@ This ensures all content fits properly without being cut off.`);
 
             {/* Property-specific Results */}
             {inputs.propertyType === 'private' && (
-              <div className={`p-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${results.tdsrPass ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
-                  {results.tdsrPass ? <CheckCircle className="text-green-600 w-8 h-8" /> : <XCircle className="text-red-600 w-8 h-8" />}
-                  Private Property (TDSR 55%)
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
+              <div className={`result-card ${results.tdsrPass ? 'success' : 'error'}`}>
+                <div className="result-header">
+                  <div className="result-icon">
+                    {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
+                  </div>
+                  <div>
+                    <div className="result-title">Private Property (TDSR 55%)</div>
+                    <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
+                      {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid-responsive cols-2 mt-4">
                   <div className="bg-white p-4 rounded-lg shadow-sm">
                     <span className="text-sm text-gray-600">Required Income:</span>
                     <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeTDSR)}</div>
@@ -1625,7 +1302,7 @@ This ensures all content fits properly without being cut off.`);
                 {!results.tdsrPass && (
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <h4 className="font-semibold mb-4">Cash Requirements (Choose One):</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid-responsive cols-2">
                       <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                         <span className="text-sm text-gray-600">Cash to Show:</span>
                         <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
@@ -1635,9 +1312,6 @@ This ensures all content fits properly without being cut off.`);
                         <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
                       </div>
                     </div>
-                    <div className="text-center mt-4">
-                      <span className="text-sm font-semibold text-gray-700 bg-yellow-200 px-4 py-2 rounded-full">OR</span>
-                    </div>
                   </div>
                 )}
               </div>
@@ -1646,12 +1320,19 @@ This ensures all content fits properly without being cut off.`);
             {inputs.propertyType === 'hdb' && (
               <div className="space-y-6">
                 {/* MSR 30% Assessment */}
-                <div className={`p-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${results.hdbPass ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
-                    {results.hdbPass ? <CheckCircle className="text-green-600 w-8 h-8" /> : <XCircle className="text-red-600 w-8 h-8" />}
-                    HDB Property (MSR 30%)
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className={`result-card ${results.hdbPass ? 'success' : 'error'}`}>
+                  <div className="result-header">
+                    <div className="result-icon">
+                      {results.hdbPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
+                    </div>
+                    <div>
+                      <div className="result-title">HDB Property (MSR 30%)</div>
+                      <div className={`result-value ${results.hdbPass ? 'success' : 'error'}`}>
+                        {results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid-responsive cols-2 mt-4">
                     <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Required Income:</span>
                       <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeHDB)}</div>
@@ -1663,33 +1344,22 @@ This ensures all content fits properly without being cut off.`);
                       </div>
                     </div>
                   </div>
-                  {!results.hdbPass && (
-                    <div className="mt-6 pt-4 border-t border-gray-200">
-                      <h4 className="font-semibold mb-4">MSR Cash Requirements (Choose One):</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                          <span className="text-sm text-gray-600">Cash to Show:</span>
-                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowHDB)}</div>
-                        </div>
-                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                          <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeHDB)}</div>
-                        </div>
-                      </div>
-                      <div className="text-center mt-4">
-                        <span className="text-sm font-semibold text-gray-700 bg-yellow-200 px-4 py-2 rounded-full">OR</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* TDSR 55% Assessment for HDB */}
-                <div className={`p-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${results.tdsrPass ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`}>
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
-                    {results.tdsrPass ? <CheckCircle className="text-green-600 w-8 h-8" /> : <XCircle className="text-red-600 w-8 h-8" />}
-                    HDB Property (TDSR 55%)
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                <div className={`result-card ${results.tdsrPass ? 'success' : 'error'}`}>
+                  <div className="result-header">
+                    <div className="result-icon">
+                      {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
+                    </div>
+                    <div>
+                      <div className="result-title">HDB Property (TDSR 55%)</div>
+                      <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
+                        {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid-responsive cols-2 mt-4">
                     <div className="bg-white p-4 rounded-lg shadow-sm">
                       <span className="text-sm text-gray-600">Required Income:</span>
                       <div className="font-bold text-xl">{formatCurrency(results.requiredIncomeTDSR)}</div>
@@ -1701,34 +1371,16 @@ This ensures all content fits properly without being cut off.`);
                       </div>
                     </div>
                   </div>
-                  {!results.tdsrPass && (
-                    <div className="mt-6 pt-4 border-t border-gray-200">
-                      <h4 className="font-semibold mb-4">TDSR Cash Requirements (Choose One):</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                          <span className="text-sm text-gray-600">Cash to Show:</span>
-                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashShowTDSR)}</div>
-                        </div>
-                        <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                          <span className="text-sm text-gray-600">Cash to Pledge:</span>
-                          <div className="font-bold text-2xl text-red-600">{formatCurrency(results.cashPledgeTDSR)}</div>
-                        </div>
-                      </div>
-                      <div className="text-center mt-4">
-                        <span className="text-sm font-semibold text-gray-700 bg-yellow-200 px-4 py-2 rounded-full">OR</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Overall HDB Assessment */}
-                <div className={`p-6 rounded-xl border-2 text-center shadow-lg transition-all duration-300 ${(results.hdbPass && results.tdsrPass) ? 'bg-green-100 border-green-400' : 'bg-red-100 border-red-400'}`}>
-                  <h4 className="font-bold text-2xl">
+                <div className={`result-card text-center ${(results.hdbPass && results.tdsrPass) ? 'success' : 'error'}`}>
+                  <div className="result-title text-2xl">
                     Overall HDB Assessment: {(results.hdbPass && results.tdsrPass) ? 
                       <span className="text-green-700">PASS ✓</span> : 
                       <span className="text-red-700">FAIL ✗</span>
                     }
-                  </h4>
+                  </div>
                   <p className="text-sm mt-3 text-gray-600">
                     {(results.hdbPass && results.tdsrPass) ? 
                       'You meet both MSR (30%) and TDSR (55%) requirements.' :
@@ -1743,48 +1395,14 @@ This ensures all content fits properly without being cut off.`);
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-1 shadow-lg">
               <button
                 onClick={generatePDFReport}
-                className="w-full bg-white text-blue-600 py-4 px-6 rounded-lg font-bold text-lg flex items-center justify-center gap-3 hover:bg-gray-50 transition-all duration-200 transform hover:scale-105"
+                className="btn-standard btn-lg w-full bg-white text-blue-600 hover:bg-gray-50"
               >
                 <Download className="w-6 h-6" />
                 <div className="text-left">
                   <div>Generate TDSR/MSR Analysis Report</div>
-                 
+                  <div className="text-sm opacity-75">Professional PDF assessment</div>
                 </div>
               </button>
-            </div>
-
-            {/* Formula Information */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-3 text-blue-800">
-                <Info className="text-blue-600 w-6 h-6" />
-                Key Calculation Formulas
-              </h3>
-              <div className="text-sm space-y-3 text-gray-700">
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <p className="font-semibold text-blue-700">Maximum Loan Tenor Rules:</p>
-                  <p className="ml-4 text-xs mt-1"><strong>HDB Property:</strong></p>
-                  <p className="ml-6 text-xs">• 56%-75% loan: Max 25 years, borrower age capped at 65 years</p>
-                  <p className="ml-6 text-xs">• ≤55% loan: Max 30 years, borrower age capped at 75 years</p>
-                  <p className="ml-4 text-xs mt-1"><strong>Private Property:</strong></p>
-                  <p className="ml-6 text-xs">• 56%-75% loan: Max 30 years, borrower age capped at 65 years</p>
-                  <p className="ml-6 text-xs">• ≤55% loan: Max 35 years, borrower age capped at 75 years</p>
-                </div>
-                
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <p className="font-semibold text-blue-700">Commitment Inclusions by Property Type:</p>
-                  <p className="ml-4 text-xs"><strong>Private Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
-                  <p className="ml-4 text-xs"><strong>HDB Property (MSR):</strong> Property loans only (car & personal loans excluded)</p>
-                  <p className="ml-4 text-xs"><strong>HDB Property (TDSR):</strong> Car loans + Personal loans + Property loans</p>
-                  <p className="ml-4 text-xs italic">Note: HDB properties must pass BOTH MSR (30%) AND TDSR (55%) tests</p>
-                </div>
-                
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <p className="font-semibold text-blue-700">Affordability Ratios:</p>
-                  <p className="ml-4 text-xs">• <strong>TDSR 55% (Private):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
-                  <p className="ml-4 text-xs">• <strong>MSR 30% (HDB):</strong> Combined Monthly Income × 0.3 - Property Loans Only</p>
-                  <p className="ml-4 text-xs">• <strong>TDSR 55% (HDB):</strong> Combined Monthly Income × 0.55 - All Commitments</p>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -1795,11 +1413,12 @@ This ensures all content fits properly without being cut off.`);
 
 // Main Calculator Wrapper Component
 const MortgageCalculator = ({ currentUser, onLogout }) => {
-  const [calculatorType, setCalculatorType] = useState('tdsr'); // 'tdsr', 'repayment', or 'progressive'
+  const [calculatorType, setCalculatorType] = useState('tdsr');
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Enhanced Header */}
         <div className="mb-8">
           <div className="flex justify-center mb-6">
@@ -1807,7 +1426,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
               <img 
                 src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
                 alt="KeyQuest Mortgage Logo" 
-                className="h-32 w-auto rounded-2xl shadow-lg"
+                className="h-24 lg:h-32 w-auto rounded-2xl shadow-lg"
               />
               <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
@@ -1815,17 +1434,17 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200">
-            <div className="flex justify-between items-center">
+          <div className="standard-card">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-                  <Calculator className="text-blue-600 w-10 h-10" />
+                <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+                  <Calculator className="text-blue-600 w-8 lg:w-10 h-8 lg:h-10" />
                   Comprehensive Mortgage Calculator Suite
                 </h1>
-              
+                <p className="text-sm lg:text-base text-gray-600 mt-2">Professional mortgage analysis tools for property financing</p>
               </div>
-              <div className="text-right">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200">
+              <div className="text-left lg:text-right w-full lg:w-auto">
+                <div className="standard-card card-gradient-blue">
                   <p className="text-sm text-gray-600">Logged in as:</p>
                   <p className="font-bold text-gray-800 text-lg">{currentUser}</p>
                   <button
@@ -1842,46 +1461,34 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         </div>
 
         {/* Enhanced Calculator Type Selection */}
-        <div className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-2 inline-flex border border-gray-200">
+        <div className="mb-8 overflow-x-auto">
+          <div className="tab-navigation">
             <button
               onClick={() => setCalculatorType('tdsr')}
-              className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
-                calculatorType === 'tdsr'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
+              className={`tab-button ${calculatorType === 'tdsr' ? 'active' : ''}`}
             >
               <TrendingUp className="w-5 h-5" />
-              <div className="text-left">
+              <div className="tab-text">
                 <div>TDSR/MSR Calculator</div>
                 <div className="text-xs opacity-75">Affordability Assessment</div>
               </div>
             </button>
             <button
               onClick={() => setCalculatorType('repayment')}
-              className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
-                calculatorType === 'repayment'
-                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
+              className={`tab-button ${calculatorType === 'repayment' ? 'active' : ''}`}
             >
               <DollarSign className="w-5 h-5" />
-              <div className="text-left">
+              <div className="tab-text">
                 <div>Monthly Repayment Calculator</div>
                 <div className="text-xs opacity-75">Payment Schedules</div>
               </div>
             </button>
             <button
               onClick={() => setCalculatorType('progressive')}
-              className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 ${
-                calculatorType === 'progressive'
-                  ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
+              className={`tab-button ${calculatorType === 'progressive' ? 'active' : ''}`}
             >
               <BarChart3 className="w-5 h-5" />
-              <div className="text-left">
+              <div className="tab-text">
                 <div>Progressive Payment Calculator</div>
                 <div className="text-xs opacity-75">BUC Properties</div>
               </div>
@@ -1890,28 +1497,28 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         </div>
 
         {/* Calculator Content */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          <div className="p-8">
-            {calculatorType === 'tdsr' ? (
-              <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
-            ) : calculatorType === 'repayment' ? (
-              <MonthlyRepaymentCalculator />
-            ) : (
-              <ProgressivePaymentCalculator />
-            )}
-          </div>
+        <div className="standard-card">
+          {calculatorType === 'tdsr' ? (
+            <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
+          ) : calculatorType === 'repayment' ? (
+            <MonthlyRepaymentCalculator />
+          ) : (
+            <ProgressivePaymentCalculator />
+          )}
         </div>
 
         {/* Footer */}
         <div className="mt-12 text-center">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+          <div className="standard-card">
             <p className="text-gray-600 text-sm">
               © 2025 KeyQuest Mortgage
             </p>
-            <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-3 text-xs text-gray-500">
               <span>📧 kenneth@keyquestmortgage.com.sg</span>
+              <span className="hidden sm:inline">|</span>
               <span>📞 +65 9795 2338</span>
-              <span></span>
+              <span className="hidden sm:inline">|</span>
+              <span>Your Trusted Mortgage Advisory Partner</span>
             </div>
           </div>
         </div>
