@@ -51,7 +51,7 @@ const ProgressivePaymentCalculator = () => {
     // Excel K4: J4-E8-E9 (construction time = total - OTP time - S&P time)
     const E8 = 1; // OTP time
     const E9 = 2; // S&P time
-    const K4 = Math.max(24, J4 - E8 - E9); // Minimum 24 months construction
+    const K4 = J4 - E8 - E9;
     
     return {
       I4,
