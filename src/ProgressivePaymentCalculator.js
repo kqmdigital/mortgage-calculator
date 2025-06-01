@@ -401,7 +401,10 @@ const ProgressivePaymentCalculator = () => {
       
       let paymentMode;
       
-      if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage > 0) {
+      // Special case: Option to Purchase (OTP) stage - Cash only
+      if (stage.stage.includes('Option to Purchase')) {
+        paymentMode = `Cash (${roundedCashCPFPercentage.toFixed(1)}%)`;
+      } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage > 0) {
         // Both have meaningful amounts (not effectively zero when rounded)
         paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%) + Bank Loan (${roundedBankLoanPercentage.toFixed(1)}%)`;
       } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage <= 0) {
@@ -830,6 +833,7 @@ const ProgressivePaymentCalculator = () => {
         <p style="margin: 3px 0;">• Construction stage timing calculated using Excel ROUNDUP formula with proportional weight distribution.</p>
         <p style="margin: 3px 0;">• Bank loan allocation follows Excel Column G logic with forward-looking calculations.</p>
         <p style="margin: 3px 0;">• Interest rates may vary based on market conditions and bank packages.</p>
+        <p style="margin: 3px 0;">• Option to Purchase (OTP) payment is cash-only and cannot be paid using CPF.</p>
     </div>
 
     <div class="footer no-break">
@@ -860,6 +864,7 @@ const ProgressivePaymentCalculator = () => {
 ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please provide both OTP and Expected TOP dates.' : ''}
 
 ✅ Updated Features:
+- Option to Purchase (OTP) stage now shows 'Cash (5.0%)' instead of 'Cash/CPF'
 - Corrected Excel Column N dynamic logic - excludes $0 bank loan stages
 - Accurate bank loan allocation (Column G logic)
 - Monthly payment schedule starts only when actual bank drawdowns occur
@@ -1126,8 +1131,8 @@ ${!results.timelineCalculated ? '\n⚠️  For accurate calculations, please pro
                 <p className="text-xs mt-1">Forward-looking Excel formula considers remaining stages vs available loan amount</p>
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
-                <p className="font-medium text-purple-700">CSC Special Rule:</p>
-                <p className="text-xs mt-1">Certificate of Statutory Completion always 12 months after TOP in bank loan timeline</p>
+                <p className="font-medium text-purple-700">OTP Payment Mode:</p>
+                <p className="text-xs mt-1">Option to Purchase stage shows 'Cash' only (CPF not allowed for OTP)</p>
               </div>
             </div>
           </div>
