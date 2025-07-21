@@ -511,11 +511,3 @@ export const initializeMonitoring = () => {
     console.error('Failed to initialize monitoring:', error);
   }
 };
-
-// Export all monitoring tools
-export {
-  PerformanceMonitor,
-  HealthChecker,
-  ErrorMonitor,
-  DiagnosticsCollector
-};
