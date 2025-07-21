@@ -1911,4 +1911,4 @@ const AuthenticatedApp = () => {
   );
 };
 
-export default App;
+export default AuthenticatedApp;
