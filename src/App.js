@@ -1,36 +1,49 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './App.css';
-import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X } from 'lucide-react';
+import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X, Settings, AlertTriangle } from 'lucide-react';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
+import AdminManagement from './components/AdminManagement';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { initializeMonitoring, PerformanceMonitor, HealthChecker, DiagnosticsCollector } from './utils/monitoring';
+import { performSecurityChecks, validateEnvironment } from './utils/security';
 
-// Employee credentials (in production, store these securely)
-const EMPLOYEE_CREDENTIALS = {
-  'admin': 'admin123',
-  'manager': 'manager456',
-  'analyst': 'analyst789',
-  'employee1': 'emp123',
-  'employee2': 'emp456',
-};
+// Enhanced Login Screen with Database Authentication
+const LoginScreen = () => {
+  const { login, isLoading, error, clearError } = useAuth();
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
 
-const LoginScreen = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleLogin = async () => {
-    setIsLoading(true);
-    setError('');
-
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    if (EMPLOYEE_CREDENTIALS[username] === password) {
-      onLogin(username);
-    } else {
-      setError('Invalid credentials. Please check your username and password.');
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    clearError();
+    
+    if (!credentials.email || !credentials.password) {
+      return;
     }
-    setIsLoading(false);
+
+    PerformanceMonitor.startTiming('login_attempt');
+    const result = await login(credentials.email, credentials.password);
+    PerformanceMonitor.endTiming('login_attempt');
+    
+    if (!result.success) {
+      // Error is already handled by the auth context
+      console.log('Login failed:', result.error);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setCredentials(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    // Clear error when user starts typing
+    if (error) {
+      clearError();
+    }
   };
 
   return (
@@ -44,32 +57,33 @@ const LoginScreen = ({ onLogin }) => {
 
       <div className="relative z-10 w-full max-w-md">
         {/* Login Card */}
-        <div className="standard-card card-gradient-blue backdrop-blur-lg transform hover:scale-105 transition-all duration-300">
+        <form onSubmit={handleLogin} className="standard-card card-gradient-blue backdrop-blur-lg transform hover:scale-105 transition-all duration-300">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
               <Shield className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Employee Portal
+              KeyQuest Portal
             </h1>
-            <p className="text-gray-600 mt-2 font-medium">KeyQuest Mortgage Calculator Suite</p>
+            <p className="text-gray-600 mt-2 font-medium">Professional Mortgage Calculator Suite</p>
           </div>
 
           {/* Form */}
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
-                Username
+                Email Address
               </label>
               <div className="relative">
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  type="email"
+                  value={credentials.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
                   className="standard-input"
-                  placeholder="Enter your username"
-                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  placeholder="Enter your email address"
+                  required
+                  disabled={isLoading}
                 />
                 <Users className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -81,19 +95,27 @@ const LoginScreen = ({ onLogin }) => {
               </label>
               <div className="relative">
                 <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  type={showPassword ? "text" : "password"}
+                  value={credentials.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
                   className="standard-input"
                   placeholder="Enter your password"
-                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                  required
+                  disabled={isLoading}
                 />
-                <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
+                >
+                  {showPassword ? <XCircle className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
             {error && (
-              <div className="result-card error">
+              <div className="result-card error fade-in">
                 <div className="result-header">
                   <div className="result-icon">
                     <XCircle className="w-5 h-5 text-red-500" />
@@ -104,8 +126,8 @@ const LoginScreen = ({ onLogin }) => {
             )}
 
             <button
-              onClick={handleLogin}
-              disabled={isLoading}
+              type="submit"
+              disabled={isLoading || !credentials.email || !credentials.password}
               className="btn-standard btn-primary btn-lg w-full"
             >
               {isLoading ? (
@@ -116,12 +138,12 @@ const LoginScreen = ({ onLogin }) => {
               ) : (
                 <>
                   <Shield className="w-5 h-5" />
-                  <span>Access Portal</span>
+                  <span>Sign In</span>
                 </>
               )}
             </button>
           </div>
-        </div>
+        </form>
 
         {/* Footer */}
         <div className="text-center mt-6">
@@ -134,8 +156,8 @@ const LoginScreen = ({ onLogin }) => {
   );
 };
 
-// Main TDSR/MSR Calculator Component
-const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
+// Main TDSR/MSR Calculator Component (keeping all existing functionality)
+const TDSRMSRCalculator = () => {
   const [inputs, setInputs] = useState({
     propertyType: 'private',
     purchasePrice: '',
@@ -359,7 +381,9 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   }, [inputs]);
 
   React.useEffect(() => {
+    PerformanceMonitor.startTiming('mortgage_calculation');
     setResults(calculateMortgage());
+    PerformanceMonitor.endTiming('mortgage_calculation');
   }, [calculateMortgage]);
 
   const formatCurrency = (amount) => {
@@ -421,6 +445,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
 
     try {
+      PerformanceMonitor.startTiming('pdf_generation');
+      
       const propertyTypeText = inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property';
       const currentDate = new Date().toLocaleDateString('en-SG', {
         year: 'numeric',
@@ -963,6 +989,7 @@ const htmlContent = `
       setTimeout(() => {
         newWindow.focus();
         newWindow.print();
+        PerformanceMonitor.endTiming('pdf_generation');
       }, 500);
 
       alert(`Professional report generated successfully! 
@@ -1690,15 +1717,57 @@ This ensures all content fits properly without being cut off.`);
   );
 };
 
-// Main Calculator Wrapper Component
-const MortgageCalculator = ({ currentUser, onLogout }) => {
+// Main Calculator Wrapper Component with Authentication Integration
+const MortgageCalculator = () => {
+  const { user, logout, canPerformAdminActions, isLoading } = useAuth();
   const [calculatorType, setCalculatorType] = useState('tdsr');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showSystemStatus, setShowSystemStatus] = useState(false);
+
+  // System status check
+  const [systemHealth, setSystemHealth] = useState(null);
+
+  useEffect(() => {
+    const checkSystemHealth = async () => {
+      try {
+        const health = await HealthChecker.performHealthCheck();
+        setSystemHealth(health);
+      } catch (error) {
+        console.error('System health check failed:', error);
+      }
+    };
+
+    checkSystemHealth();
+    // Check health every 5 minutes
+    const interval = setInterval(checkSystemHealth, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleExportDiagnostics = async () => {
+    try {
+      await DiagnosticsCollector.exportDiagnostics();
+    } catch (error) {
+      console.error('Failed to export diagnostics:', error);
+      alert('Failed to export diagnostics. Please try again.');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner w-12 h-12 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading application...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
-        {/* Enhanced Header */}
+        {/* Enhanced Header with User Management */}
         <div className="mb-8">
           <div className="flex justify-center mb-6">
             <div className="relative">
@@ -1724,15 +1793,46 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
               </div>
               <div className="text-left lg:text-right w-full lg:w-auto">
                 <div className="standard-card card-gradient-blue">
-                  <p className="text-sm text-gray-600">Logged in as:</p>
-                  <p className="font-bold text-gray-800 text-lg">{currentUser}</p>
-                  <button
-                    onClick={onLogout}
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">
+                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Welcome back,</p>
+                      <p className="font-bold text-gray-800">{user?.name}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">{user?.email}</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {canPerformAdminActions() && (
+                      <button
+                        onClick={() => setShowAdminPanel(true)}
+                        className="btn-standard btn-secondary btn-sm"
+                        title="User Management"
+                      >
+                        <Users className="w-4 h-4" />
+                        <span className="hidden sm:inline">Admin</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowSystemStatus(true)}
+                      className="btn-standard btn-secondary btn-sm"
+                      title="System Status"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span className="hidden sm:inline">Status</span>
+                    </button>
+                    <button
+                      onClick={logout}
+                      className="btn-standard btn-danger btn-sm"
+                      title="Logout"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="hidden sm:inline">Logout</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1778,7 +1878,7 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
         {/* Calculator Content */}
         <div className="standard-card">
           {calculatorType === 'tdsr' ? (
-            <TDSRMSRCalculator currentUser={currentUser} onLogout={onLogout} />
+            <TDSRMSRCalculator />
           ) : calculatorType === 'repayment' ? (
             <MonthlyRepaymentCalculator />
           ) : (
@@ -1802,26 +1902,172 @@ const MortgageCalculator = ({ currentUser, onLogout }) => {
           </div>
         </div>
       </div>
+
+      {/* Admin Management Modal */}
+      <AdminManagement 
+        isOpen={showAdminPanel} 
+        onClose={() => setShowAdminPanel(false)} 
+      />
+
+      {/* System Status Modal */}
+      {showSystemStatus && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="standard-card w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${systemHealth?.overall?.status === 'healthy' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <h2 className="text-2xl font-bold text-gray-800">System Status</h2>
+              </div>
+              <button
+                onClick={() => setShowSystemStatus(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {systemHealth && (
+              <div className="space-y-6">
+                {/* Overall Status */}
+                <div className={`result-card ${systemHealth.overall.status === 'healthy' ? 'success' : 'warning'}`}>
+                  <div className="result-header">
+                    <div className="result-icon">
+                      {systemHealth.overall.status === 'healthy' ? 
+                        <CheckCircle className="w-6 h-6 text-green-500" /> : 
+                        <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                      }
+                    </div>
+                    <div>
+                      <div className="result-title">System Health: {systemHealth.overall.status.toUpperCase()}</div>
+                      <div className="result-subtitle">
+                        {systemHealth.overall.failedChecks} of {systemHealth.overall.totalChecks} checks failed
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Individual Checks */}
+                <div className="grid-responsive cols-2">
+                  {Object.entries(systemHealth.checks).map(([check, result]) => (
+                    <div key={check} className={`result-card ${result.status ? 'success' : 'error'}`}>
+                      <div className="result-header">
+                        <div className="result-icon">
+                          {result.status ? 
+                            <CheckCircle className="w-5 h-5 text-green-500" /> : 
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          }
+                        </div>
+                        <div>
+                          <div className="result-title">{check.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</div>
+                          <div className="result-subtitle">{result.message}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Performance Metrics */}
+                <div className="standard-card">
+                  <h3 className="font-semibold text-gray-800 mb-4">Performance Metrics</h3>
+                  <div className="space-y-2 text-sm">
+                    {Object.entries(PerformanceMonitor.getMetrics()).map(([metric, data]) => (
+                      <div key={metric} className="flex justify-between items-center">
+                        <span className="text-gray-600">{metric.replace(/_/g, ' ').replace(/^./, str => str.toUpperCase())}:</span>
+                        <span className={`font-medium ${data.duration > 1000 ? 'text-red-600' : 'text-green-600'}`}>
+                          {data.duration ? `${data.duration.toFixed(2)}ms` : 'N/A'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleExportDiagnostics}
+                    className="btn-standard btn-secondary"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Export Diagnostics</span>
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="btn-standard btn-primary"
+                  >
+                    <span>Refresh Application</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!systemHealth && (
+              <div className="text-center py-8">
+                <div className="loading-spinner w-8 h-8 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading system status...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
+// Main App Component with Authentication Provider
 const App = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [securityChecksResult, setSecurityChecksResult] = useState(null);
 
-  const handleLogin = (username) => {
-    setCurrentUser(username);
-  };
+  useEffect(() => {
+    // Initialize monitoring and security checks
+    initializeMonitoring();
+    
+    // Perform security checks
+    const securityResult = performSecurityChecks();
+    setSecurityChecksResult(securityResult);
+    
+    // Validate environment
+    const envValid = validateEnvironment();
+    if (!envValid) {
+      console.error('Environment validation failed');
+    }
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-  };
+    // Log application startup
+    console.log('🚀 KeyQuest Mortgage Calculator initialized');
+    console.log('🔒 Security checks:', securityResult.secure ? 'PASSED' : 'FAILED');
+    
+    if (securityResult.issues.length > 0) {
+      console.warn('⚠️ Security issues detected:', securityResult.issues);
+    }
+  }, []);
 
-  if (!currentUser) {
-    return <LoginScreen onLogin={handleLogin} />;
+  return (
+    <AuthProvider>
+      <div className="App">
+        {/* Security Warning Banner */}
+        {securityChecksResult && !securityChecksResult.secure && (
+          <div className="bg-red-600 text-white p-2 text-center text-sm">
+            <div className="flex items-center justify-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              <span>Security issues detected. Please check console for details.</span>
+            </div>
+          </div>
+        )}
+        
+        <AuthenticatedApp />
+      </div>
+    </AuthProvider>
+  );
+};
+
+// Authenticated App Component
+const AuthenticatedApp = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
   }
 
-  return <MortgageCalculator currentUser={currentUser} onLogout={handleLogout} />;
+  return <MortgageCalculator />;
 };
 
 export default App;
