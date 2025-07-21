@@ -17,6 +17,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
+// Browser-compatible password hashing using Web Crypto API
+const hashPassword = async (password) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'keyquest_salt_2025'); // Add salt
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+const verifyPassword = async (password, hashedPassword) => {
+  const inputHash = await hashPassword(password);
+  return inputHash === hashedPassword;
+};
+
 // Database queries with error handling and security
 export class AuthService {
   
@@ -37,9 +51,8 @@ export class AuthService {
         throw new Error('Invalid email or password');
       }
 
-      // Import bcrypt dynamically for better performance
-      const bcrypt = await import('bcryptjs');
-      const isValidPassword = await bcrypt.compare(password, data.password_hash);
+      // Verify password using browser-compatible hashing
+      const isValidPassword = await verifyPassword(password, data.password_hash);
 
       if (!isValidPassword) {
         throw new Error('Invalid email or password');
@@ -85,9 +98,8 @@ export class AuthService {
         throw new Error('User with this email already exists');
       }
 
-      // Hash password
-      const bcrypt = await import('bcryptjs');
-      const password_hash = await bcrypt.hash(password, 12);
+      // Hash password using browser-compatible method
+      const password_hash = await hashPassword(password);
 
       // Insert new user
       const { data, error } = await supabase
@@ -134,8 +146,7 @@ export class AuthService {
       }
 
       // Verify current password
-      const bcrypt = await import('bcryptjs');
-      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, userData.password_hash);
+      const isCurrentPasswordValid = await verifyPassword(currentPassword, userData.password_hash);
 
       if (!isCurrentPasswordValid) {
         throw new Error('Current password is incorrect');
@@ -150,7 +161,7 @@ export class AuthService {
       }
 
       // Hash new password
-      const newPasswordHash = await bcrypt.hash(newPassword, 12);
+      const newPasswordHash = await hashPassword(newPassword);
 
       // Update password
       const { error: updateError } = await supabase
