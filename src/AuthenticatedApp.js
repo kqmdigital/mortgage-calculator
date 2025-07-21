@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './AuthenticatedApp.css';
+import './App.css';
 import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X, Settings, UserPlus } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
