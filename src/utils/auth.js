@@ -1,39 +1,37 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+// Browser-compatible authentication utilities
+// Note: Password hashing and JWT generation should be done server-side in production
 
-// Password utilities
-export const hashPassword = async (password) => {
-  const saltRounds = 12;
-  return await bcrypt.hash(password, saltRounds);
-};
-
-export const comparePasswords = async (password, hash) => {
-  return await bcrypt.compare(password, hash);
-};
-
-// JWT utilities
-export const generateToken = (userData) => {
+// Simple browser-compatible session token generation
+export const generateSessionToken = (userData) => {
   const payload = {
     id: userData.id,
     email: userData.email,
     role: userData.role,
     name: userData.name,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+    timestamp: Date.now(),
+    expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
   };
   
-  return jwt.sign(payload, process.env.REACT_APP_JWT_SECRET);
+  // Base64 encode the payload (not secure, but functional for demo)
+  return btoa(JSON.stringify(payload));
 };
 
-export const verifyToken = (token) => {
+export const verifySessionToken = (token) => {
   try {
-    return jwt.verify(token, process.env.REACT_APP_JWT_SECRET);
+    const payload = JSON.parse(atob(token));
+    
+    // Check if token is expired
+    if (Date.now() > payload.expires) {
+      return null;
+    }
+    
+    return payload;
   } catch (error) {
     return null;
   }
 };
 
-// Password validation
+// Password validation (client-side)
 export const validatePassword = (password) => {
   const minLength = 8;
   const hasUpperCase = /[A-Z]/.test(password);
@@ -86,7 +84,7 @@ export const getUserSession = () => {
   
   try {
     const user = JSON.parse(userData);
-    const tokenData = verifyToken(token);
+    const tokenData = verifySessionToken(token);
     
     if (!tokenData) {
       clearUserSession();
