@@ -4,7 +4,7 @@ import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOu
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/EnhancedAuthContext';
 import { initializeMonitoring, PerformanceMonitor, HealthChecker, DiagnosticsCollector } from './utils/monitoring';
 import { performSecurityChecks, validateEnvironment } from './utils/security';
 
