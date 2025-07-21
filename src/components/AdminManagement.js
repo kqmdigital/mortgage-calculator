@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Edit, Trash2, Users, Shield, Eye, EyeOff, X, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/EnhancedAuthContext';
 import { AuthService } from '../utils/supabase';
 import { validatePassword, validateEmail } from '../utils/auth';
 
