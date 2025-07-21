@@ -1563,10 +1563,7 @@ This ensures all content fits properly without being cut off.`);
   );
 };
 
-// Main Calculator Wrapper Component
-const MortgageCalculator = ({ currentUser, onLogout }) => {
-  const [calculatorType, setCalculatorType] = useState('tdsr');
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
 const AuthenticatedApp = () => {
   const { user, logout, canPerformAdminActions, isSuperAdmin, changePassword } = useAuth();
   
