@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { AuthService } from '../utils/supabase';
 import { 
-  generateToken, 
+  generateSessionToken, 
   setUserSession, 
   getUserSession, 
   clearUserSession,
@@ -250,7 +250,7 @@ export const AuthProvider = ({ children }) => {
       const userData = await AuthService.loginUser(cleanEmail, cleanPassword);
       
       // Generate JWT token
-      const token = generateToken(userData);
+      const token = generateSessionToken(userData);
       
       // Store session
       setUserSession(token, userData);
@@ -318,7 +318,7 @@ export const AuthProvider = ({ children }) => {
       // Update session with new data
       const session = getUserSession();
       if (session) {
-        const newToken = generateToken(updatedUser);
+        const newToken = generateSessionToken(updatedUser);
         setUserSession(newToken, updatedUser);
       }
       
