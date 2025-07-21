@@ -382,9 +382,9 @@ export class DiagnosticsCollector {
         height: window.innerHeight
       },
       screen: {
-        width: screen.width,
-        height: screen.height,
-        colorDepth: screen.colorDepth
+        width: window.screen.width,
+        height: window.screen.height,
+        colorDepth: window.screen.colorDepth
       },
       connection: this.getConnectionInfo(),
       performance: this.getPerformanceInfo(),
