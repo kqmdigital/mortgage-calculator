@@ -163,7 +163,9 @@ const LoginPage = () => {
             </div>
           </div>
           
-      
+         
+        </div>
+
         {/* Enhanced Navigation Tabs - Centered */}
         <div className="flex justify-center mb-8">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2 inline-flex">
@@ -196,10 +198,9 @@ const LoginPage = () => {
         {activeView === 'login' && (
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <LogIn className="w-8 h-8 text-white" />
-              </div>
+              
               <h2 className="text-3xl font-bold text-gray-800 mb-2">Employee Portal</h2>
+              
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
@@ -291,11 +292,9 @@ const LoginPage = () => {
         {activeView === 'change' && (
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Settings className="w-8 h-8 text-white" />
-              </div>
+              
               <h2 className="text-3xl font-bold text-gray-800 mb-2">Change Password</h2>
-              <p className="text-gray-600">Update your account password</p>
+              
             </div>
 
             <form onSubmit={handlePasswordChange} className="space-y-6">
