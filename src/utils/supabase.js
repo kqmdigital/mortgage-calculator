@@ -48,15 +48,16 @@ export class AuthService {
         .single();
 
       if (error || !data) {
-        throw new Error('Invalid email or password');
-      }
+  console.log('Supabase error:', error);
+  throw new Error('Invalid email or password. Please check your credentials and try again.');
+}
 
       // Verify password using browser-compatible hashing
       const isValidPassword = await verifyPassword(password, data.password_hash);
 
       if (!isValidPassword) {
-        throw new Error('Invalid email or password');
-      }
+  throw new Error('Invalid email or password. Please check your credentials and try again.');
+}
 
       // Don't return password hash
       const { password_hash, ...userData } = data;
