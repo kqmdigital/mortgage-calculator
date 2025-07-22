@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X, Settings, UserPlus } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
@@ -1571,6 +1571,9 @@ const AuthenticatedApp = () => {
   const [showAdminManagement, setShowAdminManagement] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   
+  // Add ref for user menu to handle click outside
+  const userMenuRef = useRef(null);
+  
   // Change password form state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -1580,6 +1583,38 @@ const AuthenticatedApp = () => {
     isSuccess: false,
     isLoading: false
   });
+
+ // Handle click outside to close menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
+
+  const toggleUserMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowUserMenu(!showUserMenu);
+  };
+
+  const handleMenuItemClick = (action) => {
+    return (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setShowUserMenu(false);
+      setTimeout(() => action(), 100);
+    };
+  };
 
   const handleLogout = () => {
     logout();
@@ -1654,7 +1689,7 @@ const AuthenticatedApp = () => {
               </div>
               
               {/* User Menu */}
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <div className="standard-card card-gradient-blue">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3">
@@ -1673,8 +1708,9 @@ const AuthenticatedApp = () => {
                     </div>
                     
                     <button
-                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      onClick={toggleUserMenu}
                       className="btn-standard btn-secondary btn-sm"
+                      type="button"
                     >
                       <Menu className="w-4 h-4" />
                     </button>
@@ -1686,11 +1722,19 @@ const AuthenticatedApp = () => {
                   <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border z-50">
                     <div className="p-4">
                       <button
-                        onClick={() => {
+                        onClick={handleMenuItemClick(() => {
+                          setPasswordForm({
+                            currentPassword: '',
+                            newPassword: '',
+                            confirmPassword: '',
+                            message: '',
+                            isSuccess: false,
+                            isLoading: false
+                          });
                           setShowChangePassword(true);
-                          setShowUserMenu(false);
-                        }}
+                        })}
                         className="w-full btn-standard btn-secondary mb-2"
+                        type="button"
                       >
                         <Settings className="w-4 h-4" />
                         <span>Change Password</span>
@@ -1698,11 +1742,9 @@ const AuthenticatedApp = () => {
                       
                       {canPerformAdminActions() && (
                         <button
-                          onClick={() => {
-                            setShowAdminManagement(true);
-                            setShowUserMenu(false);
-                          }}
+                          onClick={handleMenuItemClick(() => setShowAdminManagement(true))}
                           className="w-full btn-standard btn-primary mb-2"
+                          type="button"
                         >
                           <UserPlus className="w-4 h-4" />
                           <span>User Management</span>
@@ -1710,8 +1752,9 @@ const AuthenticatedApp = () => {
                       )}
                       
                       <button
-                        onClick={handleLogout}
+                        onClick={handleMenuItemClick(handleLogout)}
                         className="w-full btn-standard btn-danger"
+                        type="button"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>
@@ -1896,13 +1939,6 @@ const AuthenticatedApp = () => {
         onClose={() => setShowAdminManagement(false)} 
       />
 
-      {/* Click outside to close menus */}
-      {showUserMenu && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setShowUserMenu(false)}
-        />
-      )}
     </div>
   );
 };
