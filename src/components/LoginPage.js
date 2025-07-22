@@ -156,14 +156,11 @@ const LoginPage = () => {
           <div className="flex justify-center">
             <div className="relative">
               <img 
-                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
+                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
                 alt="KeyQuest Mortgage Logo" 
-                className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl shadow-lg border-2 border-white object-cover"
+                className="w-36 h-36 lg:w-40 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
               />
-              {/* Professional badge */}
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                <Shield className="w-4 h-4 text-white" />
-              </div>
+            
             </div>
           </div>
         </div>
