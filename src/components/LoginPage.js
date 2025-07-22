@@ -11,6 +11,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [localError, setLocalError] = useState('');
   
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -32,6 +33,7 @@ const LoginPage = () => {
   // Clear errors when switching views
   useEffect(() => {
     clearError();
+    setLocalError('');
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
@@ -39,23 +41,23 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     clearError();
+    setLocalError('');
 
     if (!loginForm.email || !loginForm.password) {
+      setLocalError('Please fill in all fields.');
       return;
     }
 
     try {
       const result = await login(loginForm.email, loginForm.password);
       
-      if (result.success) {
-        // Login successful - redirect handled by parent component
-        console.log('Login successful');
-      } else {
-        // Error should already be set in context, but let's ensure it shows
-        console.log('Login failed:', result.error);
+      if (!result.success) {
+        // If login function returns error but doesn't set it in context
+        setLocalError(result.error || 'Login failed. Please check your email and password.');
       }
     } catch (error) {
       console.error('Login error:', error);
+      setLocalError('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -140,69 +142,65 @@ const LoginPage = () => {
     }
   };
 
+  // Get the current error to display (prefer context error, fall back to local error)
+  const displayError = error || localError;
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-50"></div>
       
       <div className="relative z-10 w-full max-w-lg">
-        {/* Enhanced Header with Larger Logo */}
-        <div className="text-center mb-10">
-          {/* Larger Company Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="relative">
-              <img 
-                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
-                alt="KeyQuest Mortgage Logo" 
-                className="w-32 h-32 lg:w-40 lg:h-40 rounded-3xl shadow-xl border-4 border-white object-cover"
-              />
-              {/* Professional badge */}
-              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
+        {/* Unified Form Container */}
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
+          
+          {/* Logo and Title Section */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <img 
+                  src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192"
+                  alt="KeyQuest Mortgage Logo" 
+                
+                />
+                {/* Professional badge */}
+                
+              </div>
+            </div>
+            
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Employee Portal</h2>
+            
+            {/* Navigation Tabs - Directly Below Title */}
+            <div className="flex justify-center mb-6">
+              <div className="bg-gray-100 rounded-xl shadow-inner border border-gray-200 p-1 inline-flex">
+                <button
+                  onClick={() => setActiveView('login')}
+                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    activeView === 'login' 
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Login</span>
+                </button>
+                <button
+                  onClick={() => setActiveView('change')}
+                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    activeView === 'change' 
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Change</span>
+                </button>
               </div>
             </div>
           </div>
-          
-         
-        </div>
 
-        {/* Enhanced Navigation Tabs - Centered */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2 inline-flex">
-            <button
-              onClick={() => setActiveView('login')}
-              className={`px-8 py-4 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-3 ${
-                activeView === 'login' 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
-            >
-              <LogIn className="w-5 h-5" />
-              <span>Login</span>
-            </button>
-            <button
-              onClick={() => setActiveView('change')}
-              className={`px-8 py-4 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-3 ${
-                activeView === 'change' 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
-            >
-              <Settings className="w-5 h-5" />
-              <span>Change</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Login Form */}
-        {activeView === 'login' && (
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
-            <div className="text-center mb-8">
-              
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Employee Portal</h2>
-              
-            </div>
-
+          {/* Login Form */}
+          {activeView === 'login' && (
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
@@ -257,12 +255,12 @@ const LoginPage = () => {
                 </div>
               )}
 
-              {/* Login Error */}
-              {error && (
+              {/* Login Error - Enhanced Error Display */}
+              {displayError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                   <div className="flex items-center gap-3">
                     <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                    <p className="text-red-700 text-sm font-medium">{displayError}</p>
                   </div>
                 </div>
               )}
@@ -285,18 +283,10 @@ const LoginPage = () => {
                 )}
               </button>
             </form>
-          </div>
-        )}
+          )}
 
-        {/* Change Password Form */}
-        {activeView === 'change' && (
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
-            <div className="text-center mb-8">
-              
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Change Password</h2>
-              
-            </div>
-
+          {/* Change Password Form */}
+          {activeView === 'change' && (
             <form onSubmit={handlePasswordChange} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
@@ -453,21 +443,11 @@ const LoginPage = () => {
                 )}
               </button>
             </form>
-
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => setActiveView('login')}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center justify-center gap-2 mx-auto transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Login
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Enhanced Footer */}
-        <div className="text-center mt-10">
+        <div className="text-center mt-8">
           <div className="space-y-2">
             <p className="text-gray-600 font-medium">© 2025 KeyQuest Mortgage</p>
             <p className="text-gray-500 text-sm">Professional Mortgage Advisory Services</p>
