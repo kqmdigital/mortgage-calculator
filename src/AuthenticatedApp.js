@@ -540,7 +540,12 @@ const htmlContent = `
 <body>
     <div class="header no-break">
         <div class="logo-section">
-            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
+            <img 
+                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
+                alt="KeyQuest Mortgage Logo" 
+                className="w-42 h-36 lg:w-46 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
+              />
+
         </div>
         
         <div class="property-type-banner">
@@ -1668,9 +1673,9 @@ const AuthenticatedApp = () => {
           <div className="flex justify-center mb-6">
             <div className="relative">
               <img 
-                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
+                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
                 alt="KeyQuest Mortgage Logo" 
-                className="h-24 lg:h-32 w-auto rounded-2xl shadow-lg"
+                className="w-42 h-36 lg:w-46 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
               />
               <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
