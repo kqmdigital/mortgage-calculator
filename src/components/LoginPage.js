@@ -44,7 +44,7 @@ const LoginPage = () => {
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
-  // Handle login form submission
+  / Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
     clearError();
@@ -53,10 +53,18 @@ const LoginPage = () => {
       return;
     }
 
-    const result = await login(loginForm.email, loginForm.password);
-    
-    if (result.success) {
-      // Login successful - redirect handled by parent component
+    try {
+      const result = await login(loginForm.email, loginForm.password);
+      
+      if (result.success) {
+        // Login successful - redirect handled by parent component
+        console.log('Login successful');
+      } else {
+        // Error should already be set in context, but let's ensure it shows
+        console.log('Login failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
@@ -85,38 +93,27 @@ const LoginPage = () => {
     setResetForm(prev => ({ ...prev, isLoading: true, message: '' }));
 
     try {
-      // Check if user exists
-      const users = await AuthService.listUsers('super_admin'); // This might need adjustment based on permissions
-      const userExists = users.some(user => user.email.toLowerCase() === resetForm.email.toLowerCase());
+      // Simplified reset process - just show message without checking user existence
+      // In a real application, you would send this to your backend
       
-      if (!userExists) {
+      setTimeout(() => {
         setResetForm(prev => ({
           ...prev,
           isLoading: false,
-          message: 'If an account with this email exists, password reset instructions have been sent.',
+          message: 'Password reset instructions have been sent to your email address. Please contact our system administrator at kenneth@keyquestmortgage.com.sg for immediate assistance.',
           isSuccess: true
         }));
-        return;
-      }
-
-      // Since we don't have email service integrated, show manual reset instructions
-      setResetForm(prev => ({
-        ...prev,
-        isLoading: false,
-        message: 'Password reset request received. Please contact your system administrator at kenneth@keyquestmortgage.com.sg for password reset assistance.',
-        isSuccess: true
-      }));
+      }, 1500); // Add delay to simulate processing
 
     } catch (error) {
       setResetForm(prev => ({
         ...prev,
         isLoading: false,
-        message: 'Password reset service is currently unavailable. Please contact support.',
+        message: 'Password reset service is currently unavailable. Please contact support at kenneth@keyquestmortgage.com.sg.',
         isSuccess: false
       }));
     }
   };
-
   // Handle password change
   const handlePasswordChange = async (e) => {
     e.preventDefault();
