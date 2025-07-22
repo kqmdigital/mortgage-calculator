@@ -714,3 +714,16 @@ input[type="number"] {
     display: none;
   }
 }
+
+/* Fix button hover flickering in dropdown menus */
+.relative .btn-standard:hover {
+  transform: none !important;
+}
+
+.relative div .btn-standard {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.relative div .btn-standard:hover {
+  transform: none !important;
+}
