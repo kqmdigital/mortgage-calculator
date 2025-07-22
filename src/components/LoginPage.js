@@ -163,15 +163,7 @@ const LoginPage = () => {
             </div>
           </div>
           
-          <div className="space-y-3">
-            <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              KeyQuest Mortgage
-            </h1>
-            <p className="text-gray-600 text-lg font-medium">Professional Mortgage Calculator Suite</p>
-            <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
-          </div>
-        </div>
-
+      
         {/* Enhanced Navigation Tabs - Centered */}
         <div className="flex justify-center mb-8">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2 inline-flex">
@@ -207,8 +199,7 @@ const LoginPage = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <LogIn className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
-              <p className="text-gray-600">Sign in to access your dashboard</p>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">Employee Portal</h2>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
