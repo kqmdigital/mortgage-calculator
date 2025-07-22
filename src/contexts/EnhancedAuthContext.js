@@ -222,82 +222,98 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.LOGOUT });
   }, [state.user]);
 
-  const login = async (email, password) => {
-    try {
-      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
-      dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
+ // In EnhancedAuthContext.js, replace the entire login function with this improved version:
 
-      // Sanitize inputs
-      const cleanEmail = sanitizeEmail(email);
-      const cleanPassword = sanitizeInput(password);
+const login = async (email, password) => {
+  try {
+    console.log('🟡 Auth Context: Starting login process');
+    
+    dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
+    dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      // Validate inputs
-      if (!cleanEmail || !cleanPassword) {
-        throw new Error('Email and password are required');
-      }
+    // Sanitize inputs
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPassword = sanitizeInput(password);
 
-      // Check rate limiting
-      const identifier = getUserIdentifier();
-      const rateLimitCheck = authRateLimiter.checkRateLimit(identifier);
-      
-      if (!rateLimitCheck.allowed) {
-        const error = `Too many failed attempts. Please try again in ${rateLimitCheck.retryAfter} seconds.`;
-        dispatch({ type: AUTH_ACTIONS.SET_RATE_LIMIT, payload: rateLimitCheck });
-        throw new Error(error);
-      }
+    console.log('🟡 Auth Context: Inputs sanitized');
 
-      // Attempt login
-      const userData = await AuthService.loginUser(cleanEmail, cleanPassword);
-      
-      // Generate JWT token
-      const token = generateSessionToken(userData);
-      
-      // Store session
-      setUserSession(token, userData);
-      
-      // Clear rate limiting on successful login
-      authRateLimiter.clearAttempts(identifier);
-      
-      // Log successful login
-      AuditLogger.log('LOGIN_SUCCESS', userData.id, {
-        email: userData.email,
-        role: userData.role,
-        method: 'password'
-      });
-      
-      // Update state
-      dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: userData });
-      
-      return { success: true };
-      
-    } catch (error) {
-  const errorMessage = error.message || 'Login failed. Please check your email and password.';
-  
-  // ADD THESE DEBUG LINES:
-  console.log('🔴 Login Error Occurred:', errorMessage);
-  console.log('🔴 Setting error in context...');
-  
-  // Record failed attempt for rate limiting
-  const identifier = getUserIdentifier();
-  authRateLimiter.recordFailedAttempt(identifier);
-  
-  // Log failed login attempt
-  AuditLogger.log('LOGIN_FAILED', null, {
-    email: sanitizeEmail(email),
-    error: errorMessage,
-    identifier
-  });
-  
-  // Ensure error is set immediately
-  dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
-  
-  // ADD THIS DEBUG LINE:
-  console.log('🔴 Error dispatched to context');
-  
-  return { success: false, error: errorMessage };
-}
-  };
+    // Validate inputs
+    if (!cleanEmail || !cleanPassword) {
+      const error = 'Email and password are required';
+      console.log('🔴 Auth Context: Validation failed:', error);
+      dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: error });
+      return { success: false, error };
+    }
 
+    // Check rate limiting
+    const identifier = getUserIdentifier();
+    const rateLimitCheck = authRateLimiter.checkRateLimit(identifier);
+    
+    if (!rateLimitCheck.allowed) {
+      const error = `Too many failed attempts. Please try again in ${rateLimitCheck.retryAfter} seconds.`;
+      console.log('🔴 Auth Context: Rate limited:', error);
+      dispatch({ type: AUTH_ACTIONS.SET_RATE_LIMIT, payload: rateLimitCheck });
+      dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: error });
+      return { success: false, error };
+    }
+
+    console.log('🟡 Auth Context: About to call AuthService.loginUser');
+
+    // Attempt login
+    const userData = await AuthService.loginUser(cleanEmail, cleanPassword);
+    
+    console.log('✅ Auth Context: AuthService.loginUser succeeded:', userData);
+    
+    // Generate JWT token
+    const token = generateSessionToken(userData);
+    
+    // Store session
+    setUserSession(token, userData);
+    
+    // Clear rate limiting on successful login
+    authRateLimiter.clearAttempts(identifier);
+    
+    // Log successful login
+    AuditLogger.log('LOGIN_SUCCESS', userData.id, {
+      email: userData.email,
+      role: userData.role,
+      method: 'password'
+    });
+    
+    console.log('✅ Auth Context: Login completely successful');
+    
+    // Update state
+    dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: userData });
+    
+    return { success: true };
+    
+  } catch (error) {
+    console.log('🔴 Auth Context: Login error caught:', error);
+    console.log('🔴 Auth Context: Error message:', error.message);
+    
+    const errorMessage = error.message || 'Login failed. Please check your email and password.';
+    
+    // Record failed attempt for rate limiting
+    const identifier = getUserIdentifier();
+    authRateLimiter.recordFailedAttempt(identifier);
+    
+    // Log failed login attempt
+    AuditLogger.log('LOGIN_FAILED', null, {
+      email: sanitizeEmail(email),
+      error: errorMessage,
+      identifier
+    });
+    
+    console.log('🔴 Auth Context: About to dispatch LOGIN_FAILURE with message:', errorMessage);
+    
+    // Ensure error is set in state
+    dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
+    
+    console.log('🔴 Auth Context: LOGIN_FAILURE dispatched');
+    
+    return { success: false, error: errorMessage };
+  }
+};
   const logout = useCallback(() => {
     try {
       // Log logout
