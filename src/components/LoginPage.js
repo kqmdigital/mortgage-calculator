@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Eye, EyeOff, LogIn, KeyRound, Mail, User, ArrowLeft, CheckCircle, XCircle, AlertTriangle, RefreshCw, Settings } from 'lucide-react';
+import { Shield, Eye, EyeOff, LogIn, Mail, User, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/EnhancedAuthContext';
 import { validatePassword, validateEmail } from '../utils/auth';
 import { AuthService } from '../utils/supabase';
@@ -18,14 +18,6 @@ const LoginPage = () => {
     password: ''
   });
   
-  // Password reset form state
-  const [resetForm, setResetForm] = useState({
-    email: '',
-    message: '',
-    isSuccess: false,
-    isLoading: false
-  });
-  
   // Change password form state
   const [changePasswordForm, setChangePasswordForm] = useState({
     email: '',
@@ -40,7 +32,6 @@ const LoginPage = () => {
   // Clear errors when switching views
   useEffect(() => {
     clearError();
-    setResetForm(prev => ({ ...prev, message: '', isSuccess: false }));
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
@@ -68,53 +59,7 @@ const LoginPage = () => {
     }
   };
 
-  // Handle password reset
-  const handlePasswordReset = async (e) => {
-    e.preventDefault();
-    
-    if (!resetForm.email) {
-      setResetForm(prev => ({ 
-        ...prev, 
-        message: 'Please enter your email address.',
-        isSuccess: false 
-      }));
-      return;
-    }
-
-    if (!validateEmail(resetForm.email)) {
-      setResetForm(prev => ({ 
-        ...prev, 
-        message: 'Please enter a valid email address.',
-        isSuccess: false 
-      }));
-      return;
-    }
-
-    setResetForm(prev => ({ ...prev, isLoading: true, message: '' }));
-
-    try {
-      // Simplified reset process - just show message without checking user existence
-      // In a real application, you would send this to your backend
-      
-      setTimeout(() => {
-        setResetForm(prev => ({
-          ...prev,
-          isLoading: false,
-          message: 'Password reset instructions have been sent to your email address. Please contact our system administrator at kenneth@keyquestmortgage.com.sg for immediate assistance.',
-          isSuccess: true
-        }));
-      }, 1500); // Add delay to simulate processing
-
-    } catch (error) {
-      setResetForm(prev => ({
-        ...prev,
-        isLoading: false,
-        message: 'Password reset service is currently unavailable. Please contact support at kenneth@keyquestmortgage.com.sg.',
-        isSuccess: false
-      }));
-    }
-  };
-  // Handle password change
+    // Handle password change
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     
@@ -190,8 +135,6 @@ const LoginPage = () => {
   const handleInputChange = (form, field, value) => {
     if (form === 'login') {
       setLoginForm(prev => ({ ...prev, [field]: value }));
-    } else if (form === 'reset') {
-      setResetForm(prev => ({ ...prev, [field]: value }));
     } else if (form === 'change') {
       setChangePasswordForm(prev => ({ ...prev, [field]: value }));
     }
@@ -226,13 +169,6 @@ const LoginPage = () => {
           >
             <LogIn className="w-5 h-5" />
             <span className="tab-text">Login</span>
-          </button>
-          <button
-            onClick={() => setActiveView('reset')}
-            className={`tab-button ${activeView === 'reset' ? 'active' : ''}`}
-          >
-            <KeyRound className="w-5 h-5" />
-            <span className="tab-text">Reset</span>
           </button>
           <button
             onClick={() => setActiveView('change')}
@@ -340,82 +276,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        {/* Password Reset Form */}
-        {activeView === 'reset' && (
-          <div className="standard-card card-gradient-yellow backdrop-blur-lg transform hover:scale-105 transition-all duration-300">
-            <div className="text-center mb-6">
-              <KeyRound className="w-12 h-12 mx-auto text-yellow-600 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-800">Reset Password</h2>
-              <p className="text-gray-600">Enter your email to reset your password</p>
-            </div>
-
-            <form onSubmit={handlePasswordReset} className="space-y-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={resetForm.email}
-                    onChange={(e) => handleInputChange('reset', 'email', e.target.value)}
-                    className="standard-input"
-                    placeholder="Enter your email"
-                    required
-                  />
-                  <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                </div>
-              </div>
-
-              {/* Reset Message */}
-              {resetForm.message && (
-                <div className={`result-card ${resetForm.isSuccess ? 'success' : 'error'}`}>
-                  <div className="result-header">
-                    <div className="result-icon">
-                      {resetForm.isSuccess ? 
-                        <CheckCircle className="w-5 h-5 text-green-500" /> : 
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      }
-                    </div>
-                    <p className={`${resetForm.isSuccess ? 'text-green-700' : 'text-red-700'} text-sm font-medium m-0`}>
-                      {resetForm.message}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={resetForm.isLoading}
-                className="btn-standard btn-warning btn-lg w-full"
-              >
-                {resetForm.isLoading ? (
-                  <>
-                    <div className="loading-spinner"></div>
-                    <span>Sending Request...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-5 h-5" />
-                    <span>Reset Password</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => setActiveView('login')}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center justify-center gap-1 mx-auto"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Login
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Change Password Form */}
+         {/* Change Password Form */}
         {activeView === 'change' && (
           <div className="standard-card card-gradient-green backdrop-blur-lg transform hover:scale-105 transition-all duration-300">
             <div className="text-center mb-6">
