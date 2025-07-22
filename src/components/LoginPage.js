@@ -151,23 +151,28 @@ const LoginPage = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-50"></div>
       
       <div className="relative z-10 w-full max-w-lg">
+        {/* Logo Section - Outside Form */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center">
+            <div className="relative">
+              <img 
+                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" 
+                alt="KeyQuest Mortgage Logo" 
+                className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl shadow-lg border-2 border-white object-cover"
+              />
+              {/* Professional badge */}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Unified Form Container */}
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
           
-          {/* Logo and Title Section */}
+          {/* Title and Navigation Section */}
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <img 
-                  src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798"
-                  alt="KeyQuest Mortgage Logo" 
-                
-                />
-                {/* Professional badge */}
-                
-              </div>
-            </div>
-            
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Employee Portal</h2>
             
             {/* Navigation Tabs - Directly Below Title */}
