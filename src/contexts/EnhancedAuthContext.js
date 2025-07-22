@@ -271,22 +271,31 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
       
     } catch (error) {
-      const errorMessage = error.message || 'Login failed';
-      
-      // Record failed attempt for rate limiting
-      const identifier = getUserIdentifier();
-      authRateLimiter.recordFailedAttempt(identifier);
-      
-      // Log failed login attempt
-      AuditLogger.log('LOGIN_FAILED', null, {
-        email: sanitizeEmail(email),
-        error: errorMessage,
-        identifier
-      });
-      
-      dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
-      return { success: false, error: errorMessage };
-    }
+  const errorMessage = error.message || 'Login failed. Please check your email and password.';
+  
+  // ADD THESE DEBUG LINES:
+  console.log('🔴 Login Error Occurred:', errorMessage);
+  console.log('🔴 Setting error in context...');
+  
+  // Record failed attempt for rate limiting
+  const identifier = getUserIdentifier();
+  authRateLimiter.recordFailedAttempt(identifier);
+  
+  // Log failed login attempt
+  AuditLogger.log('LOGIN_FAILED', null, {
+    email: sanitizeEmail(email),
+    error: errorMessage,
+    identifier
+  });
+  
+  // Ensure error is set immediately
+  dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
+  
+  // ADD THIS DEBUG LINE:
+  console.log('🔴 Error dispatched to context');
+  
+  return { success: false, error: errorMessage };
+}
   };
 
   const logout = useCallback(() => {
