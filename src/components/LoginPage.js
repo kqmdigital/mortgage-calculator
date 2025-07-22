@@ -158,7 +158,7 @@ const LoginPage = () => {
               <img 
                 src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
                 alt="KeyQuest Mortgage Logo" 
-                className="w-36 h-36 lg:w-40 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
+                className="w-42 h-36 lg:w-46 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
               />
             
             </div>
