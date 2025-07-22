@@ -7,7 +7,7 @@ import { AuthService } from '../utils/supabase';
 const LoginPage = () => {
   const { login, error, isLoading, rateLimitInfo, clearError } = useAuth();
   
-  const [activeView, setActiveView] = useState('login'); // 'login', 'reset', 'change'
+  const [activeView, setActiveView] = useState('login'); // 'login', 'change'
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -35,7 +35,7 @@ const LoginPage = () => {
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
-  / Handle login form submission
+  // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
     clearError();
@@ -59,7 +59,7 @@ const LoginPage = () => {
     }
   };
 
-    // Handle password change
+  // Handle password change
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     
@@ -276,7 +276,7 @@ const LoginPage = () => {
           </div>
         )}
 
-         {/* Change Password Form */}
+        {/* Change Password Form */}
         {activeView === 'change' && (
           <div className="standard-card card-gradient-green backdrop-blur-lg transform hover:scale-105 transition-all duration-300">
             <div className="text-center mb-6">
