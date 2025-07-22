@@ -7,10 +7,13 @@ import { AuthService } from '../utils/supabase';
 const LoginPage = () => {
   const { login, error, isLoading, rateLimitInfo, clearError } = useAuth();
   
-  const [activeView, setActiveView] = useState('login'); // 'login', 'change'
+  const [activeView, setActiveView] = useState('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Local error state as backup
+  const [localError, setLocalError] = useState('');
   
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -29,31 +32,54 @@ const LoginPage = () => {
     isLoading: false
   });
 
+  // Debug effect to monitor error state
+  useEffect(() => {
+    console.log('🔵 Error state changed:', error);
+    console.log('🔵 Is Loading:', isLoading);
+    console.log('🔵 Local Error:', localError);
+  }, [error, isLoading, localError]);
+
   // Clear errors when switching views
   useEffect(() => {
     clearError();
+    setLocalError('');
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
   // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log('🟡 Form submitted');
+    
+    // Clear both local and global errors
     clearError();
+    setLocalError('');
+    
+    console.log('🟡 Errors cleared');
 
     if (!loginForm.email || !loginForm.password) {
+      console.log('🔴 Missing email or password');
+      setLocalError('Please enter both email and password');
       return;
     }
 
+    console.log('🟡 About to call login function with:', loginForm.email);
+
     try {
       const result = await login(loginForm.email, loginForm.password);
+      console.log('🟡 Login function returned:', result);
       
-      if (result.success) {
-        console.log('Login successful');
+      if (result && result.success) {
+        console.log('✅ Login successful');
+        // Don't clear form here, let the app handle redirect
       } else {
-        console.log('Login failed:', result.error);
+        console.log('🔴 Login failed with result:', result);
+        // Set local error as backup
+        setLocalError(result?.error || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('🔴 Login error caught:', error);
+      setLocalError('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -131,10 +157,16 @@ const LoginPage = () => {
   const handleInputChange = (form, field, value) => {
     if (form === 'login') {
       setLoginForm(prev => ({ ...prev, [field]: value }));
+      // Clear errors when user starts typing
+      if (localError) setLocalError('');
+      if (error) clearError();
     } else if (form === 'change') {
       setChangePasswordForm(prev => ({ ...prev, [field]: value }));
     }
   };
+
+  // Get the error to display (prioritize context error, fallback to local)
+  const displayError = error || localError;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -217,6 +249,32 @@ const LoginPage = () => {
                   <p className="text-gray-600 text-sm">Sign in to access your dashboard</p>
                 </div>
 
+                {/* Enhanced Error Display - This will always show if there's an error */}
+                {displayError && (
+                  <div className="mb-6 bg-red-50 border-2 border-red-300 rounded-xl p-4 animate-pulse">
+                    <div className="flex items-start gap-3">
+                      <XCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-red-700 text-sm font-bold mb-1">Login Failed</p>
+                        <p className="text-red-600 text-sm">{displayError}</p>
+                        <p className="text-red-500 text-xs mt-2">Please check your email and password and try again.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rate Limit Warning */}
+                {rateLimitInfo && !rateLimitInfo.allowed && (
+                  <div className="mb-6 bg-orange-50 border-2 border-orange-300 rounded-xl p-4">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                      <p className="text-orange-700 text-sm font-medium">
+                        Too many failed attempts. Please try again in {rateLimitInfo.retryAfter} seconds.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700">
@@ -259,31 +317,6 @@ const LoginPage = () => {
                     </div>
                   </div>
 
-                  {/* Rate Limit Warning */}
-                  {rateLimitInfo && !rateLimitInfo.allowed && (
-                    <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-                      <div className="flex items-center gap-3">
-                        <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                        <p className="text-red-700 text-sm font-medium">
-                          Too many failed attempts. Please try again in {rateLimitInfo.retryAfter} seconds.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Login Error - Enhanced visibility */}
-                  {error && (
-                    <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 animate-pulse">
-                      <div className="flex items-center gap-3">
-                        <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
-                        <div>
-                          <p className="text-red-700 text-sm font-bold">Login Failed</p>
-                          <p className="text-red-600 text-sm">{error}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   <button
                     type="submit"
                     disabled={isLoading || (rateLimitInfo && !rateLimitInfo.allowed)}
@@ -302,6 +335,16 @@ const LoginPage = () => {
                     )}
                   </button>
                 </form>
+
+                {/* Debug Info - Remove this after testing */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs">
+                    <p><strong>Debug Info:</strong></p>
+                    <p>Context Error: {error || 'none'}</p>
+                    <p>Local Error: {localError || 'none'}</p>
+                    <p>Is Loading: {isLoading ? 'true' : 'false'}</p>
+                  </div>
+                )}
               </div>
             )}
 
