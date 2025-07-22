@@ -290,16 +290,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = useCallback(() => {
-    // Log logout
-    if (state.user) {
-      AuditLogger.log('LOGOUT', state.user.id, {
-        email: state.user.email,
-        method: 'user_initiated'
-      });
+    try {
+      // Log logout
+      if (state.user) {
+        AuditLogger.log('LOGOUT', state.user.id, {
+          email: state.user.email,
+          method: 'user_initiated'
+        });
+      }
+      
+      // Clear session immediately
+      clearUserSession();
+      
+      // Dispatch logout action
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if there's an error, still clear the session
+      clearUserSession();
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }
-    
-    clearUserSession();
-    dispatch({ type: AUTH_ACTIONS.LOGOUT });
   }, [state.user]);
 
   const updateUserProfile = async (profileData) => {
