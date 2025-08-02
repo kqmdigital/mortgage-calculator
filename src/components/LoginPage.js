@@ -151,23 +151,22 @@ const LoginPage = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-50"></div>
       
       <div className="relative z-10 w-full max-w-lg">
-        {/* Logo Section - Outside Form */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center">
-            <div className="relative">
-              <img 
-                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
-                alt="KeyQuest Mortgage Logo" 
-                className="w-42 h-36 lg:w-46 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
-              />
-            
-            </div>
-          </div>
-        </div>
-
         {/* Unified Form Container */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           
+          {/* Logo Section - Inside Form */}
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <div className="relative">
+                <img 
+                  src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
+                  alt="KeyQuest Mortgage Logo" 
+                  className="w-20 h-16 rounded-lg shadow-md border border-gray-200 object-cover"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Title Section */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-2">Employee Portal</h2>
