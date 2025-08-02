@@ -1,17 +1,16 @@
 // utils/passwordUtils.js
 // Password hashing utilities that match your existing authentication system
 
+import bcrypt from 'bcryptjs';
+
 /**
- * Hash a password using Web Crypto API (browser-compatible)
- * This matches the implementation in your supabase.js file
+ * Hash a password using bcrypt (most secure)
+ * This is now the current implementation in your supabase.js file
  */
 export const hashPassword = async (password) => {
   try {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password + 'keyquest_salt_2025'); // Same salt as in supabase.js
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hash));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const saltRounds = 12; // Higher security level than existing database hashes
+    return await bcrypt.hash(password, saltRounds);
   } catch (error) {
     console.error('Password hashing failed:', error);
     throw new Error('Password hashing failed');
@@ -19,12 +18,34 @@ export const hashPassword = async (password) => {
 };
 
 /**
- * Verify a password against a hash
+ * Verify a password against a hash (multi-format support)
  */
 export const verifyPassword = async (password, hashedPassword) => {
   try {
-    const inputHash = await hashPassword(password);
-    return inputHash === hashedPassword;
+    // Check if it's bcrypt format (starts with $2a$, $2b$, $2y$)
+    if (hashedPassword.startsWith('$2a$') || hashedPassword.startsWith('$2b$') || hashedPassword.startsWith('$2y$')) {
+      return await bcrypt.compare(password, hashedPassword);
+    }
+    
+    // Legacy SHA-256 verification (for existing users)
+    const encoder = new TextEncoder();
+    
+    // Try current format with salt first
+    const dataWithSalt = encoder.encode(password + 'keyquest_salt_2025');
+    const hashWithSalt = await crypto.subtle.digest('SHA-256', dataWithSalt);
+    const hashArrayWithSalt = Array.from(new Uint8Array(hashWithSalt));
+    const currentHash = hashArrayWithSalt.map(b => b.toString(16).padStart(2, '0')).join('');
+    if (currentHash === hashedPassword) {
+      return true;
+    }
+    
+    // Try legacy format without salt
+    const dataLegacy = encoder.encode(password);
+    const hashLegacy = await crypto.subtle.digest('SHA-256', dataLegacy);
+    const hashArrayLegacy = Array.from(new Uint8Array(hashLegacy));
+    const legacyHash = hashArrayLegacy.map(b => b.toString(16).padStart(2, '0')).join('');
+    return legacyHash === hashedPassword;
+    
   } catch (error) {
     console.error('Password verification failed:', error);
     return false;
@@ -66,7 +87,7 @@ window.hashPasswordForDB = async (password) => {
   try {
     const hash = await hashPassword(password);
     console.log('Password:', password);
-    console.log('Hashed:', hash);
+    console.log('Hashed (bcrypt):', hash);
     console.log('SQL Insert Example:');
     console.log(`INSERT INTO admin_users (email, name, role, password_hash) VALUES ('user@example.com', 'User Name', 'admin', '${hash}');`);
     return hash;

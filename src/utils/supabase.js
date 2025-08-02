@@ -18,7 +18,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Browser-compatible password hashing using Web Crypto API (Current format)
+// bcrypt password hashing (Current secure format)
+const hashPasswordBcrypt = async (password) => {
+  const saltRounds = 12; // Higher security level than existing $2a$06$
+  return await bcrypt.hash(password, saltRounds);
+};
+
+// Browser-compatible password hashing using Web Crypto API (Legacy format)
 const hashPassword = async (password) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + 'keyquest_salt_2025'); // Add salt
@@ -174,8 +180,8 @@ export class AuthService {
         throw new Error('User with this email already exists');
       }
 
-      // Hash password using browser-compatible method
-      const password_hash = await hashPassword(password);
+      // Hash password using bcrypt (most secure)
+      const password_hash = await hashPasswordBcrypt(password);
 
       // Insert new user
       const { data, error } = await supabase
@@ -236,8 +242,8 @@ export class AuthService {
         throw new Error(validation.errors.join('. '));
       }
 
-      // Hash new password
-      const newPasswordHash = await hashPassword(newPassword);
+      // Hash new password using bcrypt (most secure)
+      const newPasswordHash = await hashPasswordBcrypt(newPassword);
 
       // Update password
       const { error: updateError } = await supabase
