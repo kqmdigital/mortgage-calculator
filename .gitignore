@@ -102,3 +102,12 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+# Testing and development files
+.claude/
+playwright-report/
+test-results/
+tests/
+playwright.config.js
+*screenshot*.png
+*.jpg
