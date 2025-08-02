@@ -112,16 +112,18 @@ const LoginPage = () => {
       
       if (userData) {
         // Change password
-        await AuthService.changePassword(userData.id, currentPassword, newPassword);
+        const result = await AuthService.changePassword(userData.id, currentPassword, newPassword);
         
         setChangePasswordForm(prev => ({
           ...prev,
           isLoading: false,
-          message: 'Password changed successfully! You can now login with your new password.',
-          isSuccess: true,
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
+          message: result.success ? 
+            'Password changed successfully! You can now login with your new password.' :
+            'Failed to change password. Please verify your current password.',
+          isSuccess: result.success,
+          currentPassword: result.success ? '' : prev.currentPassword,
+          newPassword: result.success ? '' : prev.newPassword,
+          confirmPassword: result.success ? '' : prev.confirmPassword
         }));
       }
     } catch (error) {
