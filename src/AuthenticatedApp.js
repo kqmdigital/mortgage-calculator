@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X, Settings, UserPlus } from 'lucide-react';
+import { Calculator, Download, FileText, CheckCircle, XCircle, Info, Lock, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Shield, Users, Award, Menu, X, Settings, UserPlus, AlertTriangle } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
+import { validatePassword } from './utils/auth';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
@@ -1648,21 +1649,56 @@ const AuthenticatedApp = () => {
       return;
     }
 
+    // Validate new password strength
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      setPasswordForm(prev => ({ 
+        ...prev, 
+        message: passwordValidation.errors.join('. '),
+        isSuccess: false 
+      }));
+      return;
+    }
+
     setPasswordForm(prev => ({ ...prev, isLoading: true, message: '' }));
 
-    const result = await changePassword(currentPassword, newPassword);
-    
-    setPasswordForm(prev => ({
-      ...prev,
-      isLoading: false,
-      message: result.success ? 
-        'Password changed successfully!' : 
-        result.error || 'Failed to change password.',
-      isSuccess: result.success,
-      currentPassword: result.success ? '' : prev.currentPassword,
-      newPassword: result.success ? '' : prev.newPassword,
-      confirmPassword: result.success ? '' : prev.confirmPassword
-    }));
+    try {
+      const result = await changePassword(currentPassword, newPassword);
+      
+      setPasswordForm(prev => ({
+        ...prev,
+        isLoading: false,
+        message: result.success ? 
+          'Password changed successfully! Your new password is now active.' : 
+          result.error || 'Failed to change password.',
+        isSuccess: result.success,
+        currentPassword: result.success ? '' : prev.currentPassword,
+        newPassword: result.success ? '' : prev.newPassword,
+        confirmPassword: result.success ? '' : prev.confirmPassword
+      }));
+
+      // Auto-close modal on success after showing message
+      if (result.success) {
+        setTimeout(() => {
+          setShowChangePassword(false);
+          setPasswordForm({
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+            message: '',
+            isSuccess: false,
+            isLoading: false
+          });
+        }, 2000);
+      }
+    } catch (error) {
+      setPasswordForm(prev => ({
+        ...prev,
+        isLoading: false,
+        message: 'An unexpected error occurred. Please try again.',
+        isSuccess: false
+      }));
+    }
   };
 
   return (
@@ -1890,6 +1926,39 @@ const AuthenticatedApp = () => {
                 />
               </div>
 
+              {/* Password Requirements */}
+              {passwordForm.newPassword && (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <p className="font-semibold text-gray-700 mb-3 text-sm">Password Requirements:</p>
+                  <div className="grid grid-cols-1 gap-2 text-xs">
+                    <div className={`flex items-center gap-2 ${passwordForm.newPassword.length >= 8 ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${passwordForm.newPassword.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span>At least 8 characters</span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${/[A-Z]/.test(passwordForm.newPassword) ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${/[A-Z]/.test(passwordForm.newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span>One uppercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${/[a-z]/.test(passwordForm.newPassword) ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${/[a-z]/.test(passwordForm.newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span>One lowercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${/\d/.test(passwordForm.newPassword) ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${/\d/.test(passwordForm.newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span>One number</span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span>One special character</span>
+                    </div>
+                    <div className={`flex items-center gap-2 ${passwordForm.newPassword === passwordForm.confirmPassword && passwordForm.confirmPassword ? 'text-green-600' : 'text-gray-400'}`}>
+                      <div className={`w-2 h-2 rounded-full ${passwordForm.newPassword === passwordForm.confirmPassword && passwordForm.confirmPassword ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span>Passwords match</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {passwordForm.message && (
                 <div className={`result-card ${passwordForm.isSuccess ? 'success' : 'error'}`}>
                   <div className="result-header">
@@ -1909,7 +1978,13 @@ const AuthenticatedApp = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  disabled={passwordForm.isLoading}
+                  disabled={
+                    passwordForm.isLoading || 
+                    !passwordForm.currentPassword || 
+                    !passwordForm.newPassword ||
+                    passwordForm.newPassword !== passwordForm.confirmPassword ||
+                    !validatePassword(passwordForm.newPassword).isValid
+                  }
                   className="btn-standard btn-success flex-1"
                 >
                   {passwordForm.isLoading ? (
