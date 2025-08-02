@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
@@ -17,7 +18,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Browser-compatible password hashing using Web Crypto API
+// Browser-compatible password hashing using Web Crypto API (Current format)
 const hashPassword = async (password) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + 'keyquest_salt_2025'); // Add salt
@@ -26,41 +27,115 @@ const hashPassword = async (password) => {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
+// Legacy SHA-256 hashing without salt (for existing users)
+const hashPasswordLegacy = async (password) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password); // No salt for legacy
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// Multi-format password verification
 const verifyPassword = async (password, hashedPassword) => {
-  const inputHash = await hashPassword(password);
-  return inputHash === hashedPassword;
+  try {
+    // Format 1: Check if it's bcrypt format ($2a$, $2b$, $2y$)
+    if (hashedPassword.startsWith('$2a$') || hashedPassword.startsWith('$2b$') || hashedPassword.startsWith('$2y$')) {
+      return await bcrypt.compare(password, hashedPassword);
+    }
+    
+    // Format 2: Check if it's SHA-256 (64 characters, hex only)
+    if (hashedPassword.length === 64 && /^[a-f0-9]+$/i.test(hashedPassword)) {
+      // Try current format with salt first
+      const currentHash = await hashPassword(password);
+      if (currentHash === hashedPassword) {
+        return true;
+      }
+      
+      // Try legacy format without salt
+      const legacyHash = await hashPasswordLegacy(password);
+      return legacyHash === hashedPassword;
+    }
+    
+    // Fallback: Try current format
+    const inputHash = await hashPassword(password);
+    return inputHash === hashedPassword;
+    
+  } catch (error) {
+    console.error('Password verification error:', error);
+    return false;
+  }
 };
 
 // Database queries with error handling and security
 export class AuthService {
   
-  // Login user
+  // Login user with multi-format password support
   static async loginUser(email, password) {
     try {
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
 
+      // Get user data including account status fields
       const { data, error } = await supabase
         .from('admin_users')
-        .select('id, email, name, role, password_hash')
+        .select('id, email, name, role, password_hash, is_active, failed_login_attempts, locked_until')
         .eq('email', email.toLowerCase().trim())
         .single();
 
       if (error || !data) {
-  console.log('Supabase error:', error);
-  throw new Error('Invalid email or password. Please check your credentials and try again.');
-}
+        console.log('Supabase error:', error);
+        throw new Error('Invalid email or password. Please check your credentials and try again.');
+      }
 
-      // Verify password using browser-compatible hashing
+      // Check if account is active
+      if (!data.is_active || data.is_active === 'false') {
+        throw new Error('Account is disabled. Please contact administrator.');
+      }
+
+      // Check if account is locked
+      if (data.locked_until && new Date(data.locked_until) > new Date()) {
+        throw new Error('Account is temporarily locked due to multiple failed login attempts. Please try again later.');
+      }
+
+      // Verify password using multi-format verification
       const isValidPassword = await verifyPassword(password, data.password_hash);
 
       if (!isValidPassword) {
-  throw new Error('Invalid email or password. Please check your credentials and try again.');
-}
+        // Increment failed login attempts
+        const failedAttempts = parseInt(data.failed_login_attempts || 0) + 1;
+        const lockUntil = failedAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null; // Lock for 15 minutes after 5 failed attempts
+        
+        await supabase
+          .from('admin_users')
+          .update({
+            failed_login_attempts: failedAttempts,
+            locked_until: lockUntil?.toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', data.id);
 
-      // Don't return password hash
-      const { password_hash, ...userData } = data;
+        if (lockUntil) {
+          throw new Error('Too many failed login attempts. Account locked for 15 minutes.');
+        } else {
+          throw new Error(`Invalid email or password. ${5 - failedAttempts} attempts remaining.`);
+        }
+      }
+
+      // Successful login - reset failed attempts and update last login
+      await supabase
+        .from('admin_users')
+        .update({
+          failed_login_attempts: 0,
+          locked_until: null,
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.id);
+
+      // Don't return sensitive data
+      const { password_hash, failed_login_attempts, locked_until, ...userData } = data;
       return userData;
 
     } catch (error) {
