@@ -150,7 +150,7 @@ const LoginPage = () => {
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-50"></div>
       
-      <div className="relative z-10 w-full max-w-lg">
+      <div className="relative z-10 w-full max-w-md">
         {/* Unified Form Container */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           
