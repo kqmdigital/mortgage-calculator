@@ -166,83 +166,56 @@ const LoginPage = () => {
         </div>
 
         {/* Unified Form Container */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 transform hover:scale-[1.02] transition-all duration-300">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           
-          {/* Title and Navigation Section */}
+          {/* Title Section */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Employee Portal</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Employee Portal</h2>
+            <p className="text-gray-600 mb-6">Your Gateway to Mortgage Management</p>
             
-            {/* Navigation Tabs - Directly Below Title */}
-            <div className="flex justify-center mb-6">
-              <div className="bg-gray-100 rounded-xl shadow-inner border border-gray-200 p-1 inline-flex">
+            {/* Navigation Tabs - Only show if not on default login view */}
+            {activeView === 'change' && (
+              <div className="flex justify-center mb-6">
                 <button
                   onClick={() => setActiveView('login')}
-                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
-                    activeView === 'login' 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                  }`}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span>Login</span>
-                </button>
-                <button
-                  onClick={() => setActiveView('change')}
-                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
-                    activeView === 'change' 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-                  }`}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Change</span>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Login</span>
                 </button>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Login Form */}
           {activeView === 'login' && (
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-medium text-gray-700">
                   Email Address
                 </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={loginForm.email}
-                    onChange={(e) => handleInputChange('login', 'email', e.target.value)}
-                    className="w-full px-4 py-4 pl-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 text-gray-800 bg-gray-50 focus:bg-white"
-                    placeholder="Enter your email"
-                    required
-                  />
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                </div>
+                <input
+                  type="email"
+                  value={loginForm.email}
+                  onChange={(e) => handleInputChange('login', 'email', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                  placeholder="Enter your email"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={loginForm.password}
-                    onChange={(e) => handleInputChange('login', 'password', e.target.value)}
-                    className="w-full px-4 py-4 pl-12 pr-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 text-gray-800 bg-gray-50 focus:bg-white"
-                    placeholder="Enter your password"
-                    required
-                  />
-                  <Shield className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={loginForm.password}
+                  onChange={(e) => handleInputChange('login', 'password', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                  placeholder="Enter your password"
+                  required
+                />
               </div>
 
               {/* Rate Limit Warning */}
@@ -270,26 +243,29 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isLoading || (rateLimitInfo && !rateLimitInfo.allowed)}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Signing In...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-3">
-                    <LogIn className="w-5 h-5" />
-                    <span>Sign In</span>
-                  </div>
-                )}
+                {isLoading ? 'Signing In...' : 'Sign In'}
               </button>
+
+              {/* Change Password Link */}
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveView('change')}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
+                  Change Password
+                </button>
+              </div>
             </form>
           )}
 
           {/* Change Password Form */}
           {activeView === 'change' && (
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center">Change Password</h3>
+              <form onSubmit={handlePasswordChange} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Email Address
@@ -444,7 +420,8 @@ const LoginPage = () => {
                   </div>
                 )}
               </button>
-            </form>
+              </form>
+            </div>
           )}
         </div>
 
