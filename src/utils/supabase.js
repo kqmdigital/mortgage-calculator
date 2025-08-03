@@ -20,8 +20,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // bcrypt password hashing (Current secure format)
 const hashPasswordBcrypt = async (password) => {
-  const saltRounds = 12; // Higher security level than existing $2a$06$
-  return await bcrypt.hash(password, saltRounds);
+  try {
+    console.log('🔐 Attempting bcrypt hash...');
+    console.log('bcrypt available:', typeof bcrypt);
+    console.log('bcrypt.hash available:', typeof bcrypt.hash);
+    
+    const saltRounds = 12; // Higher security level than existing $2a$06$
+    const hash = await bcrypt.hash(password, saltRounds);
+    
+    console.log('✅ bcrypt hash successful:', hash.substring(0, 20) + '...');
+    console.log('Hash format check - starts with $2:', hash.startsWith('$2'));
+    
+    return hash;
+  } catch (error) {
+    console.error('❌ bcrypt hash failed:', error);
+    console.error('Error details:', error.message);
+    throw error; // Re-throw to prevent fallback
+  }
 };
 
 // Browser-compatible password hashing using Web Crypto API (Legacy format)
@@ -243,7 +258,11 @@ export class AuthService {
       }
 
       // Hash new password using bcrypt (most secure)
+      console.log('🔄 About to hash new password with bcrypt...');
       const newPasswordHash = await hashPasswordBcrypt(newPassword);
+      console.log('🎯 Final hash to save:', newPasswordHash.substring(0, 30) + '...');
+      console.log('🎯 Hash length:', newPasswordHash.length);
+      console.log('🎯 Is bcrypt format:', newPasswordHash.startsWith('$2'));
 
       // Update password
       const { error: updateError } = await supabase
