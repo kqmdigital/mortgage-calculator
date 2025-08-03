@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Calculator, Download, CheckCircle, XCircle, Info, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Users, Menu, UserPlus } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
+import logger from './utils/logger';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
@@ -856,7 +857,7 @@ const htmlContent = `
 This ensures all content fits properly without being cut off.`);
 
     } catch (error) {
-      console.error('Error generating report:', error);
+      logger.error('Error generating report:', error);
       alert('There was an error generating the report. Please try again.');
     }
   };

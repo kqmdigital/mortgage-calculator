@@ -1,27 +1,70 @@
 // Browser-compatible authentication utilities
 // Note: Password hashing and JWT generation should be done server-side in production
 
-// Simple browser-compatible session token generation
-export const generateSessionToken = (userData) => {
+// Simple secret for token signing (should be environment variable in production)
+const TOKEN_SECRET = process.env.REACT_APP_TOKEN_SECRET || 'keyquest-mortgage-calculator-2025-default-secret';
+
+// Generate simple hash for token signing
+const generateSimpleHash = async (data) => {
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data + TOKEN_SECRET);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// Enhanced session token generation with simple signing
+export const generateSessionToken = async (userData) => {
   const payload = {
     id: userData.id,
     email: userData.email,
     role: userData.role,
     name: userData.name,
     timestamp: Date.now(),
-    expires: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+    expires: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+    iat: Math.floor(Date.now() / 1000) // issued at time
   };
   
-  // Base64 encode the payload (not secure, but functional for demo)
-  return btoa(JSON.stringify(payload));
+  // Base64 encode the payload
+  const encodedPayload = btoa(JSON.stringify(payload));
+  
+  // Generate signature
+  const signature = await generateSimpleHash(encodedPayload);
+  
+  // Return token with payload and signature
+  return `${encodedPayload}.${signature}`;
 };
 
-export const verifySessionToken = (token) => {
+export const verifySessionToken = async (token) => {
   try {
-    const payload = JSON.parse(atob(token));
+    if (!token || typeof token !== 'string') {
+      return null;
+    }
+
+    // Split token into payload and signature
+    const parts = token.split('.');
+    if (parts.length !== 2) {
+      return null; // Invalid token format
+    }
+
+    const [encodedPayload, providedSignature] = parts;
+    
+    // Verify signature
+    const expectedSignature = await generateSimpleHash(encodedPayload);
+    if (providedSignature !== expectedSignature) {
+      return null; // Invalid signature
+    }
+
+    // Parse payload
+    const payload = JSON.parse(atob(encodedPayload));
     
     // Check if token is expired
     if (Date.now() > payload.expires) {
+      return null;
+    }
+
+    // Additional validation
+    if (!payload.id || !payload.email || !payload.role) {
       return null;
     }
     
@@ -76,7 +119,7 @@ export const setUserSession = (token, userData) => {
   sessionStorage.setItem('last_activity', Date.now().toString());
 };
 
-export const getUserSession = () => {
+export const getUserSession = async () => {
   const token = localStorage.getItem('auth_token');
   const userData = localStorage.getItem('user_data');
   
@@ -84,7 +127,7 @@ export const getUserSession = () => {
   
   try {
     const user = JSON.parse(userData);
-    const tokenData = verifySessionToken(token);
+    const tokenData = await verifySessionToken(token);
     
     if (!tokenData) {
       clearUserSession();

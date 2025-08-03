@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Home, Calculator, DollarSign, Calendar, TrendingUp, BarChart3, Clock, PieChart, Building2, Percent, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import logger from './utils/logger';
 
 // Enhanced Monthly Repayment Calculator Component
 const MonthlyRepaymentCalculator = () => {
@@ -693,7 +694,7 @@ const MonthlyRepaymentCalculator = () => {
 • Select "Portrait" orientation`);
 
     } catch (error) {
-      console.error('Error generating repayment report:', error);
+      logger.error('Error generating repayment report:', error);
       alert('There was an error generating the report. Please try again.');
     }
   };

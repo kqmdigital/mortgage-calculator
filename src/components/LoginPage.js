@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/EnhancedAuthContext';
 import { validatePassword, validateEmail } from '../utils/auth';
 import { AuthService } from '../utils/supabase';
 import SecurityUtils, { loginRateLimiter } from '../utils/SecurityUtils';
+import logger from '../utils/logger';
 
 const LoginPage = () => {
   const { login, error, isLoading, rateLimitInfo, clearError } = useAuth();
@@ -66,8 +67,15 @@ const LoginPage = () => {
     formData.append('email', email);
     formData.append('password', password);
 
+    logger.debug('Starting SecurityUtils validation...');
+    logger.debug('SecurityUtils available:', typeof SecurityUtils);
+    logger.debug('validateForm available:', typeof SecurityUtils.validateForm);
+    
     const validationErrors = SecurityUtils.validateForm(formData, validationRules);
+    logger.debug('Validation errors:', validationErrors);
+    
     if (validationErrors.length > 0) {
+      logger.debug('Setting local error:', validationErrors.join('. '));
       setLocalError(validationErrors.join('. '));
       return;
     }
@@ -86,7 +94,7 @@ const LoginPage = () => {
 
     try {
       setLocalLoading(true);
-      console.log('Attempting login with:', SecurityUtils.escapeHTML(email));
+      logger.security('Attempting login', { email: SecurityUtils.escapeHTML(email) });
       
       const result = await login(email, password);
       
@@ -114,7 +122,7 @@ const LoginPage = () => {
         setLocalError(errorMessage);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login error:', error);
       const sanitizedMessage = SecurityUtils.escapeHTML(error.message || 'Please try again.');
       setLocalError(`An unexpected error occurred: ${sanitizedMessage}`);
     } finally {

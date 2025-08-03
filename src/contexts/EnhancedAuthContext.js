@@ -186,7 +186,7 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       
-      const session = getUserSession();
+      const session = await getUserSession();
       
       if (session && session.user) {
         // Verify user still exists in database
@@ -253,7 +253,7 @@ export const AuthProvider = ({ children }) => {
       const userData = await AuthService.loginUser(cleanEmail, cleanPassword);
       
       // Generate JWT token
-      const token = generateSessionToken(userData);
+      const token = await generateSessionToken(userData);
       
       // Store session
       setUserSession(token, userData);
@@ -337,9 +337,9 @@ export const AuthProvider = ({ children }) => {
       const updatedUser = await AuthService.updateUserProfile(state.user.id, cleanData);
       
       // Update session with new data
-      const session = getUserSession();
+      const session = await getUserSession();
       if (session) {
-        const newToken = generateSessionToken(updatedUser);
+        const newToken = await generateSessionToken(updatedUser);
         setUserSession(newToken, updatedUser);
       }
       

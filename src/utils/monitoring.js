@@ -1,6 +1,7 @@
 // Application monitoring and health check utilities
 import { supabase } from './supabase';
 import { AuditLogger } from './security';
+import logger from './logger';
 
 // Performance monitoring
 export class PerformanceMonitor {
@@ -18,7 +19,7 @@ export class PerformanceMonitor {
   static endTiming(label) {
     const metric = this.metrics.get(label);
     if (!metric) {
-      console.warn(`Performance metric "${label}" not found`);
+      logger.warn(`Performance metric "${label}" not found`);
       return null;
     }
 
@@ -32,7 +33,7 @@ export class PerformanceMonitor {
     
     // Log slow operations
     if (duration > 2000) { // > 2 seconds
-      console.warn(`Slow operation detected: ${label} took ${duration.toFixed(2)}ms`);
+      logger.performance(label, duration);
       AuditLogger.log('SLOW_OPERATION', null, { label, duration });
     }
 
@@ -96,7 +97,7 @@ export class PerformanceMonitor {
 
     const status = value <= threshold[name] ? 'good' : 'needs-improvement';
     
-    console.log(`Core Web Vital - ${name}: ${value.toFixed(2)} (${status})`);
+    logger.performance(`Core Web Vital - ${name}`, value);
     
     if (status !== 'good') {
       AuditLogger.log('POOR_WEB_VITAL', null, { name, value, threshold: threshold[name] });
@@ -327,7 +328,7 @@ export class ErrorMonitor {
 
     // Console log in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('Application Error:', errorInfo);
+      logger.error('Application Error:', errorInfo);
     }
 
     // In production, send to monitoring service
@@ -506,8 +507,8 @@ export const initializeMonitoring = () => {
       userAgent: navigator.userAgent.substring(0, 100)
     });
     
-    console.log('🔍 Application monitoring initialized');
+    logger.info('Application monitoring initialized');
   } catch (error) {
-    console.error('Failed to initialize monitoring:', error);
+    logger.error('Failed to initialize monitoring:', error);
   }
 };

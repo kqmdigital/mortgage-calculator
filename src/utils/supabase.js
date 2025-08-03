@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
+import logger from './logger';
 
 // Secure Supabase Configuration - Credentials injected at build time by Render
 const SUPABASE_CONFIG = {
@@ -9,15 +10,15 @@ const SUPABASE_CONFIG = {
 
 // Validate that build process ran successfully
 if (SUPABASE_CONFIG.url.includes('{{') || SUPABASE_CONFIG.anonKey.includes('{{')) {
-  console.error('❌ Build process failed to inject environment variables');
-  console.error('Placeholders were not replaced. Please check:');
-  console.error('1. Environment variables are set in Render dashboard');
-  console.error('2. Build command includes environment injection');
-  console.error('3. Build script has proper file permissions');
+  logger.error('Build process failed to inject environment variables');
+  logger.error('Placeholders were not replaced. Please check:');
+  logger.error('1. Environment variables are set in Render dashboard');
+  logger.error('2. Build command includes environment injection');
+  logger.error('3. Build script has proper file permissions');
   throw new Error('Environment variables not injected. Build process failed.');
 }
 
-console.log('✅ Supabase configuration loaded from build-time injection');
+logger.info('Supabase configuration loaded from build-time injection');
 
 export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
   auth: {
@@ -32,9 +33,9 @@ export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKe
 // bcrypt password hashing (Current secure format)
 const hashPasswordBcrypt = async (password) => {
   try {
-    console.log('🔐 Attempting bcrypt hash with $2a$ format...');
-    console.log('bcrypt available:', typeof bcrypt);
-    console.log('bcrypt.hash available:', typeof bcrypt.hash);
+    logger.debug('Attempting bcrypt hash with $2a$ format...');
+    logger.debug('bcrypt available:', typeof bcrypt);
+    logger.debug('bcrypt.hash available:', typeof bcrypt.hash);
     
     // Use 12 salt rounds but force $2a$ format for compatibility with RPC function
     const saltRounds = 12;
@@ -43,14 +44,14 @@ const hashPasswordBcrypt = async (password) => {
     // Force $2a$ format if bcrypt generated $2b$ format
     const compatibleHash = hash.startsWith('$2b$') ? hash.replace('$2b$', '$2a$') : hash;
     
-    console.log('✅ bcrypt hash successful:', compatibleHash.substring(0, 20) + '...');
-    console.log('Hash format check - starts with $2a:', compatibleHash.startsWith('$2a$'));
-    console.log('Salt rounds:', compatibleHash.substring(4, 6));
+    logger.debug('bcrypt hash successful:', compatibleHash.substring(0, 20) + '...');
+    logger.debug('Hash format check - starts with $2a:', compatibleHash.startsWith('$2a$'));
+    logger.debug('Salt rounds:', compatibleHash.substring(4, 6));
     
     return compatibleHash;
   } catch (error) {
-    console.error('❌ bcrypt hash failed:', error);
-    console.error('Error details:', error.message);
+    logger.error('bcrypt hash failed:', error);
+    logger.error('Error details:', error.message);
     throw error; // Re-throw to prevent fallback
   }
 };
@@ -99,7 +100,7 @@ const verifyPassword = async (password, hashedPassword) => {
     return inputHash === hashedPassword;
     
   } catch (error) {
-    console.error('Password verification error:', error);
+    logger.error('Password verification error:', error);
     return false;
   }
 };
@@ -122,7 +123,7 @@ export class AuthService {
         .single();
 
       if (error || !data) {
-        console.log('Supabase error:', error);
+        logger.debug('Supabase error:', error);
         throw new Error('Invalid email or password. Please check your credentials and try again.');
       }
 
@@ -176,7 +177,7 @@ export class AuthService {
       return userData;
 
     } catch (error) {
-      console.error('Login error:', error.message);
+      logger.error('Login error:', error.message);
       throw new Error(error.message || 'Login failed');
     }
   }
@@ -235,7 +236,7 @@ export class AuthService {
       return data;
 
     } catch (error) {
-      console.error('User creation error:', error.message);
+      logger.error('User creation error:', error.message);
       throw new Error(error.message || 'Failed to create user');
     }
   }
@@ -274,11 +275,11 @@ export class AuthService {
       }
 
       // Hash new password using bcrypt (most secure)
-      console.log('🔄 About to hash new password with bcrypt...');
+      logger.debug('About to hash new password with bcrypt...');
       const newPasswordHash = await hashPasswordBcrypt(newPassword);
-      console.log('🎯 Final hash to save:', newPasswordHash.substring(0, 30) + '...');
-      console.log('🎯 Hash length:', newPasswordHash.length);
-      console.log('🎯 Is bcrypt format:', newPasswordHash.startsWith('$2'));
+      logger.debug('Final hash to save:', newPasswordHash.substring(0, 30) + '...');
+      logger.debug('Hash length:', newPasswordHash.length);
+      logger.debug('Is bcrypt format:', newPasswordHash.startsWith('$2'));
 
       // Update password
       const { error: updateError } = await supabase
@@ -296,7 +297,7 @@ export class AuthService {
       return { success: true };
 
     } catch (error) {
-      console.error('Password change error:', error.message);
+      logger.error('Password change error:', error.message);
       throw new Error(error.message || 'Failed to change password');
     }
   }
@@ -317,7 +318,7 @@ export class AuthService {
       return data;
 
     } catch (error) {
-      console.error('Profile fetch error:', error.message);
+      logger.error('Profile fetch error:', error.message);
       throw new Error(error.message || 'Failed to fetch profile');
     }
   }
@@ -368,7 +369,7 @@ export class AuthService {
       return data;
 
     } catch (error) {
-      console.error('Profile update error:', error.message);
+      logger.error('Profile update error:', error.message);
       throw new Error(error.message || 'Failed to update profile');
     }
   }
@@ -392,7 +393,7 @@ export class AuthService {
       return data || [];
 
     } catch (error) {
-      console.error('Users fetch error:', error.message);
+      logger.error('Users fetch error:', error.message);
       throw new Error(error.message || 'Failed to fetch users');
     }
   }
@@ -420,7 +421,7 @@ export class AuthService {
       return { success: true };
 
     } catch (error) {
-      console.error('User deletion error:', error.message);
+      logger.error('User deletion error:', error.message);
       throw new Error(error.message || 'Failed to delete user');
     }
   }
