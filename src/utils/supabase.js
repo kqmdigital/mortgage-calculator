@@ -21,17 +21,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // bcrypt password hashing (Current secure format)
 const hashPasswordBcrypt = async (password) => {
   try {
-    console.log('🔐 Attempting bcrypt hash...');
+    console.log('🔐 Attempting bcrypt hash with $2a$ format...');
     console.log('bcrypt available:', typeof bcrypt);
     console.log('bcrypt.hash available:', typeof bcrypt.hash);
     
-    const saltRounds = 12; // Higher security level than existing $2a$06$
+    // Use 12 salt rounds but force $2a$ format for compatibility with RPC function
+    const saltRounds = 12;
     const hash = await bcrypt.hash(password, saltRounds);
     
-    console.log('✅ bcrypt hash successful:', hash.substring(0, 20) + '...');
-    console.log('Hash format check - starts with $2:', hash.startsWith('$2'));
+    // Force $2a$ format if bcrypt generated $2b$ format
+    const compatibleHash = hash.startsWith('$2b$') ? hash.replace('$2b$', '$2a$') : hash;
     
-    return hash;
+    console.log('✅ bcrypt hash successful:', compatibleHash.substring(0, 20) + '...');
+    console.log('Hash format check - starts with $2a:', compatibleHash.startsWith('$2a$'));
+    console.log('Salt rounds:', compatibleHash.substring(4, 6));
+    
+    return compatibleHash;
   } catch (error) {
     console.error('❌ bcrypt hash failed:', error);
     console.error('Error details:', error.message);
