@@ -3,6 +3,7 @@ import { Shield, Eye, EyeOff, LogIn, Mail, User, ArrowLeft, CheckCircle, XCircle
 import { useAuth } from '../contexts/EnhancedAuthContext';
 import { validatePassword, validateEmail } from '../utils/auth';
 import { AuthService } from '../utils/supabase';
+import SecurityUtils, { loginRateLimiter } from '../utils/SecurityUtils';
 
 const LoginPage = () => {
   const { login, error, isLoading, rateLimitInfo, clearError } = useAuth();
@@ -12,6 +13,7 @@ const LoginPage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [localError, setLocalError] = useState('');
+  const [localLoading, setLocalLoading] = useState(false);
   
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -37,27 +39,86 @@ const LoginPage = () => {
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
-  // Handle login form submission
+  // Handle login form submission with enhanced validation
   const handleLogin = async (e) => {
     e.preventDefault();
     clearError();
     setLocalError('');
 
-    if (!loginForm.email || !loginForm.password) {
-      setLocalError('Please fill in all fields.');
+    const email = loginForm.email.trim();
+    const password = loginForm.password;
+
+    // Enhanced validation using SecurityUtils
+    const validationRules = {
+      email: { 
+        required: true, 
+        email: true, 
+        label: 'Email' 
+      },
+      password: { 
+        required: true, 
+        length: { min: 6, max: 128 }, 
+        label: 'Password' 
+      }
+    };
+
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+
+    const validationErrors = SecurityUtils.validateForm(formData, validationRules);
+    if (validationErrors.length > 0) {
+      setLocalError(validationErrors.join('. '));
+      return;
+    }
+
+    // Rate limiting check
+    if (!loginRateLimiter(email)) {
+      setLocalError('Too many login attempts. Please try again in 15 minutes.');
+      return;
+    }
+
+    // Check if authentication service is available
+    if (typeof AuthService === 'undefined') {
+      setLocalError('Authentication service not available. Please check your internet connection and try again.');
       return;
     }
 
     try {
-      const result = await login(loginForm.email, loginForm.password);
+      setLocalLoading(true);
+      console.log('Attempting login with:', SecurityUtils.escapeHTML(email));
+      
+      const result = await login(email, password);
       
       if (!result.success) {
-        // If login function returns error but doesn't set it in context
-        setLocalError(result.error || 'Login failed. Please check your email and password.');
+        let errorMessage = 'Login failed';
+        
+        if (result.error) {
+          // Sanitize error message to prevent XSS
+          const sanitizedError = SecurityUtils.escapeHTML(result.error);
+          
+          if (sanitizedError.includes('Invalid login credentials') || 
+              sanitizedError.includes('Invalid email or password')) {
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+          } else if (sanitizedError.includes('Email not confirmed')) {
+            errorMessage = 'Please check your email and click the confirmation link before signing in.';
+          } else if (sanitizedError.includes('Too many')) {
+            errorMessage = 'Too many login attempts. Please wait and try again.';
+          } else if (sanitizedError.includes('Admin access required')) {
+            errorMessage = 'Admin access required. Please contact your administrator.';
+          } else {
+            errorMessage = `Login failed: ${sanitizedError}`;
+          }
+        }
+        
+        setLocalError(errorMessage);
       }
     } catch (error) {
       console.error('Login error:', error);
-      setLocalError('An unexpected error occurred. Please try again.');
+      const sanitizedMessage = SecurityUtils.escapeHTML(error.message || 'Please try again.');
+      setLocalError(`An unexpected error occurred: ${sanitizedMessage}`);
+    } finally {
+      setLocalLoading(false);
     }
   };
 
@@ -243,10 +304,10 @@ const LoginPage = () => {
 
               <button
                 type="submit"
-                disabled={isLoading || (rateLimitInfo && !rateLimitInfo.allowed)}
+                disabled={isLoading || localLoading || (rateLimitInfo && !rateLimitInfo.allowed)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading || localLoading ? 'Signing In...' : 'Sign In'}
               </button>
 
               {/* Change Password Link */}
