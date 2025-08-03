@@ -902,7 +902,7 @@ const generateProgressivePaymentReport = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    value={inputs.purchasePrice}
+                    value={formatNumberInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="2,300,000.00"
@@ -970,7 +970,7 @@ const generateProgressivePaymentReport = () => {
                     <div className="relative">
                       <input
                         type="text"
-                        value={inputs.customLoanAmount}
+                        value={formatNumberInput(inputs.customLoanAmount)}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                         className="standard-input currency-input"
                         placeholder="1,725,000.00"
