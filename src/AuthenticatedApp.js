@@ -50,7 +50,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return isNaN(num) ? '' : num;
   };
 
-  const calculateAverageAge = () => {
+  const calculateAverageAge = useCallback(() => {
     const ageA = parseNumberInput(inputs.applicantAgeA) || 0;
     const ageB = parseNumberInput(inputs.applicantAgeB) || 0;
     
@@ -62,9 +62,9 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       return ageB;
     }
     return 0;
-  };
+  }, [inputs.applicantAgeA, inputs.applicantAgeB]);
 
-  const calculateMaxLoanTenor = () => {
+  const calculateMaxLoanTenor = useCallback(() => {
     const averageAge = calculateAverageAge();
     
     let loanPercentage;
@@ -99,7 +99,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
     
     return 30;
-  };
+  }, [inputs.propertyType, inputs.useCustomAmount, inputs.purchasePrice, inputs.customLoanAmount, inputs.loanPercentage, calculateAverageAge]);
 
   const calculatePMT = (rate, periods, principal) => {
     if (rate === 0) return principal / periods;
@@ -230,23 +230,14 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       averageAge,
       maxLoanTenor
     };
-  }, [inputs]);
+  }, [inputs, calculateAverageAge, calculateMaxLoanTenor]);
 
   // ✅ OPTIMIZED: Debounce inputs and memoize calculations
   const debouncedInputs = useDebounce(inputs, 300);
   
   const memoizedResults = useMemo(() => {
     return calculateMortgage();
-  }, [
-    debouncedInputs.loanAmount,
-    debouncedInputs.loanTenor,
-    debouncedInputs.interestRate,
-    debouncedInputs.existingMonthlyDebtService,
-    debouncedInputs.grossMonthlyIncome,
-    debouncedInputs.msr,
-    debouncedInputs.tdsr,
-    debouncedInputs.stressTestRate
-  ]);
+  }, [debouncedInputs, calculateMortgage]);
 
   React.useEffect(() => {
     setResults(memoizedResults);
