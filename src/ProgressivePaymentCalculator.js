@@ -503,9 +503,11 @@ const ProgressivePaymentCalculator = () => {
 
   const handleInputChange = (field, value) => {
     if (['purchasePrice', 'customLoanAmount'].includes(field)) {
+      // ✅ FIXED: Store raw value, don't parse immediately
+      // This allows empty fields to stay empty instead of showing "0"
       setInputs(prev => ({
         ...prev,
-        [field]: parseNumberInput(value)
+        [field]: value  // Store raw input value
       }));
     } else if (field === 'rates') {
       setInputs(prev => ({ ...prev, rates: value }));
@@ -900,7 +902,7 @@ const generateProgressivePaymentReport = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.purchasePrice)}
+                    value={inputs.purchasePrice}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="2,300,000.00"
@@ -968,7 +970,7 @@ const generateProgressivePaymentReport = () => {
                     <div className="relative">
                       <input
                         type="text"
-                        value={formatNumberInput(inputs.customLoanAmount)}
+                        value={inputs.customLoanAmount}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                         className="standard-input currency-input"
                         placeholder="1,725,000.00"

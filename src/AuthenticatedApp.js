@@ -270,18 +270,25 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     ];
     
     if (numericFields.includes(field)) {
-      const parsedValue = parseNumberInput(value);
+      // ✅ FIXED: Store raw value to allow empty fields  
       setInputs(prev => ({
         ...prev,
-        [field]: parsedValue
+        [field]: value  // Store raw input, parse only during calculations
       }));
     } else if (field === 'stressTestRate') {
-      const parsedValue = value === '' ? '' : Number(value);
+      // ✅ FIXED: Allow empty stress test rate
       setInputs(prev => ({
         ...prev,
-        [field]: parsedValue
+        [field]: value  // Store raw value
       }));
     } else if (field === 'loanTenor') {
+      // ✅ FIXED: Store raw value for loan tenor
+      setInputs(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else if (field === 'loanTenorValidation') {
+      // Separate validation logic
       const parsedValue = parseNumberInput(value);
       const maxTenor = calculateMaxLoanTenor();
       if (parsedValue === '' || parsedValue === null || parsedValue === undefined) {
@@ -947,7 +954,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.purchasePrice)}
+                    value={inputs.purchasePrice}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="1,000,000.00"
@@ -1015,7 +1022,7 @@ This ensures all content fits properly without being cut off.`);
                     <div className="relative">
                       <input
                         type="text"
-                        value={formatNumberInput(inputs.customLoanAmount)}
+                        value={inputs.customLoanAmount}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                         className="standard-input currency-input"
                         placeholder="750,000.00"
@@ -1090,7 +1097,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.monthlySalaryA)}
+                      value={inputs.monthlySalaryA}
                       onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="8,000.00"
@@ -1103,7 +1110,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.annualSalaryA)}
+                      value={inputs.annualSalaryA}
                       onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="120,000.00"
@@ -1116,7 +1123,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.applicantAgeA)}
+                      value={inputs.applicantAgeA}
                       onChange={(e) => handleInputChange('applicantAgeA', e.target.value)}
                       className="standard-input"
                       placeholder="35"
@@ -1133,7 +1140,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.monthlySalaryB)}
+                      value={inputs.monthlySalaryB}
                       onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="6,000.00"
@@ -1146,7 +1153,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.annualSalaryB)}
+                      value={inputs.annualSalaryB}
                       onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="90,000.00"
@@ -1159,7 +1166,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.applicantAgeB)}
+                      value={inputs.applicantAgeB}
                       onChange={(e) => handleInputChange('applicantAgeB', e.target.value)}
                       className="standard-input"
                       placeholder="32"
@@ -1189,7 +1196,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.showFundAmount)}
+                    value={inputs.showFundAmount}
                     onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="500,000.00"
@@ -1202,7 +1209,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.pledgeAmount)}
+                    value={inputs.pledgeAmount}
                     onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="300,000.00"
@@ -1231,7 +1238,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.carLoanA)}
+                    value={inputs.carLoanA}
                     onChange={(e) => handleInputChange('carLoanA', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="800.00"
@@ -1244,7 +1251,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.carLoanB)}
+                    value={inputs.carLoanB}
                     onChange={(e) => handleInputChange('carLoanB', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="600.00"
@@ -1257,7 +1264,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.personalLoanA)}
+                    value={inputs.personalLoanA}
                     onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="500.00"
@@ -1270,7 +1277,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.personalLoanB)}
+                    value={inputs.personalLoanB}
                     onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="300.00"
@@ -1283,7 +1290,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.propertyLoanA)}
+                    value={inputs.propertyLoanA}
                     onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="2,000.00"
@@ -1296,7 +1303,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.propertyLoanB)}
+                    value={inputs.propertyLoanB}
                     onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="1,500.00"

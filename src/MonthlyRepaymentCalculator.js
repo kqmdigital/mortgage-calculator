@@ -223,7 +223,7 @@ const MonthlyRepaymentCalculator = () => {
     if (field === 'subsequentRates') {
       setNewLoan(prev => ({ ...prev, subsequentRates: value }));
     } else if (['loanAmount'].includes(field)) {
-      setNewLoan(prev => ({ ...prev, [field]: parseNumberInput(value) }));
+      setNewLoan(prev => ({ ...prev, [field]: value }));
     } else if (['loanPeriodYears', 'loanPeriodMonths'].includes(field)) {
       setNewLoan(prev => ({ ...prev, [field]: parseInt(value) || 0 }));
     } else {
@@ -236,7 +236,7 @@ const MonthlyRepaymentCalculator = () => {
     if (field === 'newSubsequentRates') {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
     } else if (['outstandingAmount'].includes(field)) {
-      setExistingLoan(prev => ({ ...prev, [field]: parseNumberInput(value) }));
+      setExistingLoan(prev => ({ ...prev, [field]: value }));
     } else if (['remainingYears', 'remainingMonths', 'newLoanYears', 'newLoanMonths'].includes(field)) {
       setExistingLoan(prev => ({ ...prev, [field]: parseInt(value) || 0 }));
     } else {
@@ -748,7 +748,7 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(newLoan.loanAmount)}
+                      value={newLoan.loanAmount}
                       onChange={(e) => handleNewLoanChange('loanAmount', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="750,000.00"
@@ -1050,7 +1050,7 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(existingLoan.outstandingAmount)}
+                      value={existingLoan.outstandingAmount}
                       onChange={(e) => handleExistingLoanChange('outstandingAmount', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="500,000.00"
