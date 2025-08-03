@@ -1,14 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+// Secure Supabase Configuration - Credentials injected at build time by Render
+const SUPABASE_CONFIG = {
+  url: '{{RENDER_SUPABASE_URL}}',
+  anonKey: '{{RENDER_SUPABASE_ANON_KEY}}'
+};
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+// Validate that build process ran successfully
+if (SUPABASE_CONFIG.url.includes('{{') || SUPABASE_CONFIG.anonKey.includes('{{')) {
+  console.error('❌ Build process failed to inject environment variables');
+  console.error('Placeholders were not replaced. Please check:');
+  console.error('1. Environment variables are set in Render dashboard');
+  console.error('2. Build command includes environment injection');
+  console.error('3. Build script has proper file permissions');
+  throw new Error('Environment variables not injected. Build process failed.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+console.log('✅ Supabase configuration loaded from build-time injection');
+
+export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
