@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Download, Home, Calculator, DollarSign, Calendar, TrendingUp, BarChart3, Clock, PieChart, Building2, Percent, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import logger from './utils/logger';
+import useDebounce from './hooks/useDebounce';
 
 // Enhanced Monthly Repayment Calculator Component
 const MonthlyRepaymentCalculator = () => {

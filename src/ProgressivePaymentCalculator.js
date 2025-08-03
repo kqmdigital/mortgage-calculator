@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info, ChevronDown, ChevronUp, Home, Building2 } from 'lucide-react';
+import useDebounce from '../hooks/useDebounce';
 
 // Progressive Payment Calculator - Enhanced UI Version
 const ProgressivePaymentCalculator = () => {
@@ -27,6 +28,9 @@ const ProgressivePaymentCalculator = () => {
 
   const [results, setResults] = useState(null);
   const [expandedMonthlySchedule, setExpandedMonthlySchedule] = useState(false);
+
+  // ✅ OPTIMIZED: Debounce inputs to prevent excessive recalculations
+  const debouncedInputs = useDebounce(inputs, 300); // Wait 300ms after user stops typing
 
   // Time calculation chain
   const calculateExcelTimeChain = (otpDate, topDate) => {
@@ -207,21 +211,21 @@ const ProgressivePaymentCalculator = () => {
     return bankLoanSchedule;
   };
 
-  // Complete calculation
-  const calculateCompleteExcelSchedule = () => {
-    const purchasePrice = parseNumberInput(inputs.purchasePrice) || 0;
+  // ✅ OPTIMIZED: Complete calculation with inputs parameter
+  const calculateCompleteExcelSchedule = (inputsToUse = inputs) => {
+    const purchasePrice = parseNumberInput(inputsToUse.purchasePrice) || 0;
     
     let selectedLoanAmount;
-    if (inputs.useCustomAmount) {
-      selectedLoanAmount = parseNumberInput(inputs.customLoanAmount) || 0;
+    if (inputsToUse.useCustomAmount) {
+      selectedLoanAmount = parseNumberInput(inputsToUse.customLoanAmount) || 0;
     } else {
-      selectedLoanAmount = purchasePrice * (inputs.loanPercentage / 100);
+      selectedLoanAmount = purchasePrice * (inputsToUse.loanPercentage / 100);
     }
 
     if (purchasePrice <= 0 || selectedLoanAmount <= 0) return null;
 
     const totalCashCPFRequired = purchasePrice - selectedLoanAmount;
-    const timeChain = calculateExcelTimeChain(inputs.otpDate, inputs.topDate);
+    const timeChain = calculateExcelTimeChain(inputsToUse.otpDate, inputsToUse.topDate);
     const { K4, timelineCalculated } = timeChain;
     const constructionStages = calculateExcelConstructionTimings(K4);
 
@@ -301,12 +305,12 @@ const ProgressivePaymentCalculator = () => {
     };
   };
 
-  // Monthly payment schedule generation
-  const generateMonthlyPaymentSchedule = (bankLoanTimeline) => {
+  // ✅ OPTIMIZED: Monthly payment schedule generation with inputs parameter
+  const generateMonthlyPaymentSchedule = (bankLoanTimeline, inputsToUse = inputs) => {
     if (!bankLoanTimeline || bankLoanTimeline.length === 0) return [];
     
     const monthlySchedule = [];
-    const totalMonths = inputs.tenure * 12;
+    const totalMonths = inputsToUse.tenure * 12;
     let outstandingBalance = 0;
     
     const drawdownMap = new Map();
@@ -333,7 +337,7 @@ const ProgressivePaymentCalculator = () => {
       let principalPayment = 0;
       
       if (month >= firstDrawdownMonth && outstandingBalance > 0) {
-        const currentRate = getInterestRateForMonth(month);
+        const currentRate = getInterestRateForMonth(month, inputsToUse);
         const monthlyRate = currentRate / 100 / 12;
         
         interestPayment = outstandingBalance * monthlyRate;
@@ -357,7 +361,7 @@ const ProgressivePaymentCalculator = () => {
         interestPayment,
         principalPayment,
         endingBalance: outstandingBalance,
-        interestRate: (month >= firstDrawdownMonth) ? getInterestRateForMonth(month) : 0,
+        interestRate: (month >= firstDrawdownMonth) ? getInterestRateForMonth(month, inputsToUse) : 0,
         hasBankDrawdown: drawdownAmount > 0
       });
       
@@ -369,12 +373,12 @@ const ProgressivePaymentCalculator = () => {
     return monthlySchedule;
   };
 
-  // Main calculation function
-  const calculateProgressivePayments = () => {
-    const completeSchedule = calculateCompleteExcelSchedule();
+  // ✅ OPTIMIZED: Main calculation function with inputs parameter
+  const calculateProgressivePayments = (inputsToUse = inputs) => {
+    const completeSchedule = calculateCompleteExcelSchedule(inputsToUse);
     if (!completeSchedule) return null;
 
-    const monthlySchedule = generateMonthlyPaymentSchedule(completeSchedule.bankLoanTimeline);
+    const monthlySchedule = generateMonthlyPaymentSchedule(completeSchedule.bankLoanTimeline, inputsToUse);
     
     if (completeSchedule.bankLoanTimeline.length === 0) {
       return {
@@ -457,28 +461,28 @@ const ProgressivePaymentCalculator = () => {
     };
   };
 
-  // Helper functions
-  const formatNumberInput = (value) => {
+  // ✅ OPTIMIZED: Memoized helper functions
+  const formatNumberInput = useCallback((value) => {
     if (value === '' || value === null || value === undefined) return '';
     const num = parseFloat(value.toString().replace(/,/g, ''));
     if (isNaN(num)) return '';
     return num.toLocaleString();
-  };
+  }, []);
 
-  const parseNumberInput = (value) => {
+  const parseNumberInput = useCallback((value) => {
     if (value === '' || value === null || value === undefined) return '';
     const num = parseFloat(value.toString().replace(/,/g, ''));
     return isNaN(num) ? '' : num;
-  };
+  }, []);
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = useCallback((amount) => {
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
       currency: 'SGD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
-  };
+  }, []);
 
   const calculatePMT = (rate, periods, principal) => {
     if (rate === 0 || !rate) return principal / periods;
@@ -486,14 +490,14 @@ const ProgressivePaymentCalculator = () => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / (Math.pow(1 + monthlyRate, periods) - 1);
   };
 
-  const getInterestRateForMonth = (month) => {
+  const getInterestRateForMonth = (month, inputsToUse = inputs) => {
     const year = Math.ceil(month / 12);
     if (year <= 5) {
-      const rateInfo = inputs.rates.find(r => r.year === year);
-      return rateInfo ? rateInfo.rate : inputs.rates[0].rate;
+      const rateInfo = inputsToUse.rates.find(r => r.year === year);
+      return rateInfo ? rateInfo.rate : inputsToUse.rates[0].rate;
     } else {
-      const thereafterRate = inputs.rates.find(r => r.year === 'thereafter');
-      return thereafterRate ? thereafterRate.rate : inputs.rates[inputs.rates.length - 1].rate;
+      const thereafterRate = inputsToUse.rates.find(r => r.year === 'thereafter');
+      return thereafterRate ? thereafterRate.rate : inputsToUse.rates[inputsToUse.rates.length - 1].rate;
     }
   };
 
@@ -510,9 +514,25 @@ const ProgressivePaymentCalculator = () => {
     }
   };
 
+  // ✅ OPTIMIZED: Memoize expensive calculations with debounced inputs
+  const memoizedResults = useMemo(() => {
+    return calculateProgressivePayments(debouncedInputs);
+  }, [
+    debouncedInputs.purchasePrice,
+    debouncedInputs.loanPercentage, 
+    debouncedInputs.useCustomAmount,
+    debouncedInputs.customLoanAmount,
+    debouncedInputs.tenure,
+    debouncedInputs.otpDate,
+    debouncedInputs.topDate,
+    debouncedInputs.numOutstandingMortgages,
+    JSON.stringify(debouncedInputs.rates), // For deep comparison of rates array
+    debouncedInputs.currentSora
+  ]);
+
   React.useEffect(() => {
-    setResults(calculateProgressivePayments());
-  }, [inputs]);
+    setResults(memoizedResults);
+  }, [memoizedResults]);
 
 // Updated generateProgressivePaymentReport function
 

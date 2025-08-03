@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Calculator, Download, CheckCircle, XCircle, Info, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Users, Menu, UserPlus } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
 import logger from './utils/logger';
+import useDebounce from './hooks/useDebounce';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
@@ -231,9 +232,25 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     };
   }, [inputs]);
 
+  // ✅ OPTIMIZED: Debounce inputs and memoize calculations
+  const debouncedInputs = useDebounce(inputs, 300);
+  
+  const memoizedResults = useMemo(() => {
+    return calculateMortgage();
+  }, [
+    debouncedInputs.loanAmount,
+    debouncedInputs.loanTenor,
+    debouncedInputs.interestRate,
+    debouncedInputs.existingMonthlyDebtService,
+    debouncedInputs.grossMonthlyIncome,
+    debouncedInputs.msr,
+    debouncedInputs.tdsr,
+    debouncedInputs.stressTestRate
+  ]);
+
   React.useEffect(() => {
-    setResults(calculateMortgage());
-  }, [calculateMortgage]);
+    setResults(memoizedResults);
+  }, [memoizedResults]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-SG', {
