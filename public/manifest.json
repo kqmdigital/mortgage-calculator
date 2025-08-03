@@ -1,0 +1,11 @@
+{
+  "short_name": "Mortgage Calculator",
+  "name": "Employee Mortgage Calculator",
+  "description": "Professional mortgage affordability analysis tool for employees",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "categories": ["finance", "productivity", "business"]
+}

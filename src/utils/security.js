@@ -273,8 +273,15 @@ export const validateEnvironment = () => {
   const missing = requiredVars.filter(varName => !process.env[varName]);
   
   if (missing.length > 0) {
-    console.error('❌ Missing required environment variables:', missing);
-    return false;
+    // Only show error in production or when environment validation is specifically needed
+    if (process.env.NODE_ENV === 'production') {
+      console.error('❌ Missing required environment variables:', missing);
+      return false;
+    } else {
+      // In development, just warn about missing variables
+      console.warn('⚠️ Missing environment variables (development):', missing);
+      return true; // Allow development to continue
+    }
   }
 
   // Check JWT secret strength
