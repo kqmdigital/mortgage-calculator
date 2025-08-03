@@ -12,7 +12,6 @@ const ProgressivePaymentCalculator = () => {
     tenure: 20,
     otpDate: '',
     topDate: '',
-    numOutstandingMortgages: 0,
     
     rates: [
       { year: 1, rate: 2.6, description: '' },
@@ -527,7 +526,6 @@ const ProgressivePaymentCalculator = () => {
     debouncedInputs.tenure,
     debouncedInputs.otpDate,
     debouncedInputs.topDate,
-    debouncedInputs.numOutstandingMortgages,
     JSON.stringify(debouncedInputs.rates), // For deep comparison of rates array
     debouncedInputs.currentSora
   ]);
@@ -980,31 +978,18 @@ const generateProgressivePaymentReport = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={inputs.tenure}
-                    onChange={(e) => handleInputChange('tenure', e.target.value)}
-                    className="standard-input"
-                    min="5"
-                    max="35"
-                  />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Outstanding Mortgages</label>
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
+              <div className="relative">
                 <input
                   type="number"
-                  value={inputs.numOutstandingMortgages}
-                  onChange={(e) => handleInputChange('numOutstandingMortgages', e.target.value)}
+                  value={inputs.tenure}
+                  onChange={(e) => handleInputChange('tenure', e.target.value)}
                   className="standard-input"
-                  min="0"
-                  max="5"
+                  min="5"
+                  max="35"
                 />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
               </div>
             </div>
 
