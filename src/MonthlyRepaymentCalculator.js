@@ -225,7 +225,7 @@ const MonthlyRepaymentCalculator = () => {
     } else if (['loanAmount'].includes(field)) {
       setNewLoan(prev => ({ ...prev, [field]: value }));
     } else if (['loanPeriodYears', 'loanPeriodMonths'].includes(field)) {
-      setNewLoan(prev => ({ ...prev, [field]: parseInt(value) || 0 }));
+      setNewLoan(prev => ({ ...prev, [field]: value }));
     } else {
       setNewLoan(prev => ({ ...prev, [field]: value }));
     }
@@ -238,7 +238,7 @@ const MonthlyRepaymentCalculator = () => {
     } else if (['outstandingAmount'].includes(field)) {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
     } else if (['remainingYears', 'remainingMonths', 'newLoanYears', 'newLoanMonths'].includes(field)) {
-      setExistingLoan(prev => ({ ...prev, [field]: parseInt(value) || 0 }));
+      setExistingLoan(prev => ({ ...prev, [field]: value }));
     } else {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
     }

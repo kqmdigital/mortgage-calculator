@@ -310,7 +310,7 @@ const ProgressivePaymentCalculator = () => {
     if (!bankLoanTimeline || bankLoanTimeline.length === 0) return [];
     
     const monthlySchedule = [];
-    const totalMonths = inputsToUse.tenure * 12;
+    const totalMonths = (parseInt(inputsToUse.tenure) || 20) * 12;
     let outstandingBalance = 0;
     
     const drawdownMap = new Map();
@@ -494,10 +494,10 @@ const ProgressivePaymentCalculator = () => {
     const year = Math.ceil(month / 12);
     if (year <= 5) {
       const rateInfo = inputsToUse.rates.find(r => r.year === year);
-      return rateInfo ? rateInfo.rate : inputsToUse.rates[0].rate;
+      return rateInfo ? parseFloat(rateInfo.rate) || 0 : parseFloat(inputsToUse.rates[0].rate) || 0;
     } else {
       const thereafterRate = inputsToUse.rates.find(r => r.year === 'thereafter');
-      return thereafterRate ? thereafterRate.rate : inputsToUse.rates[inputsToUse.rates.length - 1].rate;
+      return thereafterRate ? parseFloat(thereafterRate.rate) || 0 : parseFloat(inputsToUse.rates[inputsToUse.rates.length - 1].rate) || 0;
     }
   };
 
@@ -988,7 +988,7 @@ const generateProgressivePaymentReport = () => {
                     <input
                       type="number"
                       value={inputs.tenure}
-                      onChange={(e) => handleInputChange('tenure', parseInt(e.target.value) || 20)}
+                      onChange={(e) => handleInputChange('tenure', e.target.value)}
                       className="standard-input"
                       min="5"
                       max="35"
@@ -1001,7 +1001,7 @@ const generateProgressivePaymentReport = () => {
                   <input
                     type="number"
                     value={inputs.numOutstandingMortgages}
-                    onChange={(e) => handleInputChange('numOutstandingMortgages', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleInputChange('numOutstandingMortgages', e.target.value)}
                     className="standard-input"
                     min="0"
                     max="5"
@@ -1059,7 +1059,7 @@ const generateProgressivePaymentReport = () => {
                         value={rate.rate}
                         onChange={(e) => {
                           const newRates = [...inputs.rates];
-                          newRates[index].rate = parseFloat(e.target.value) || 0;
+                          newRates[index].rate = e.target.value;
                           handleInputChange('rates', newRates);
                         }}
                         className="standard-input"
