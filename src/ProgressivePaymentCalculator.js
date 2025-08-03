@@ -881,231 +881,240 @@ const generateProgressivePaymentReport = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-        {/* Enhanced Input Section */}
-        <div className="space-y-8">
-          {/* Property Information Card */}
-          <div className="standard-card card-gradient-red">
-            <div className="section-header">
-              <div className="icon-container red">
-                <Building className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-content">
-                <h2>BUC Property Details</h2>
-                <p>Built Under Construction Payment Calculator</p>
-              </div>
+      {/* Input Sections - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* Property Information Card */}
+        <div className="standard-card card-gradient-red">
+          <div className="section-header">
+            <div className="icon-container red">
+              <Building className="w-6 h-6 text-white" />
             </div>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Purchase Price (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatNumberInput(inputs.purchasePrice)}
-                    onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="2,300,000.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-3 text-gray-700">Loan Amount Options</label>
-                <div className="radio-card-group">
-                  <label className="radio-card">
-                    <input
-                      type="radio"
-                      name="loanOption"
-                      checked={!inputs.useCustomAmount && inputs.loanPercentage === 75}
-                      onChange={() => {
-                        handleInputChange('useCustomAmount', false);
-                        handleInputChange('loanPercentage', 75);
-                      }}
-                    />
-                    <div className="radio-card-content">
-                      <div className="radio-card-title">75%</div>
-                      <div className="radio-card-subtitle">
-                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
-                      </div>
-                    </div>
-                  </label>
-                  
-                  <label className="radio-card">
-                    <input
-                      type="radio"
-                      name="loanOption"
-                      checked={!inputs.useCustomAmount && inputs.loanPercentage === 55}
-                      onChange={() => {
-                        handleInputChange('useCustomAmount', false);
-                        handleInputChange('loanPercentage', 55);
-                      }}
-                    />
-                    <div className="radio-card-content">
-                      <div className="radio-card-title">55%</div>
-                      <div className="radio-card-subtitle">
-                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
-                      </div>
-                    </div>
-                  </label>
-                  
-                  <label className="radio-card">
-                    <input
-                      type="radio"
-                      name="loanOption"
-                      checked={inputs.useCustomAmount}
-                      onChange={() => handleInputChange('useCustomAmount', true)}
-                    />
-                    <div className="radio-card-content">
-                      <div className="radio-card-title">Custom</div>
-                      <div className="radio-card-subtitle">Amount</div>
-                    </div>
-                  </label>
-                </div>
-                
-                {inputs.useCustomAmount && (
-                  <div className="mt-3 fade-in">
-                    <label className="block text-sm font-medium mb-1 text-gray-700">Custom Loan Amount</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={formatNumberInput(inputs.customLoanAmount)}
-                        onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
-                        className="standard-input currency-input"
-                        placeholder="1,725,000.00"
-                      />
-                      <span className="currency-symbol">SGD</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={inputs.tenure}
-                      onChange={(e) => handleInputChange('tenure', e.target.value)}
-                      className="standard-input"
-                      min="5"
-                      max="35"
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Outstanding Mortgages</label>
-                  <input
-                    type="number"
-                    value={inputs.numOutstandingMortgages}
-                    onChange={(e) => handleInputChange('numOutstandingMortgages', e.target.value)}
-                    className="standard-input"
-                    min="0"
-                    max="5"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">OTP Date</label>
-                  <input
-                    type="date"
-                    value={inputs.otpDate}
-                    onChange={(e) => handleInputChange('otpDate', e.target.value)}
-                    className="standard-input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Expected TOP Date</label>
-                  <input
-                    type="date"
-                    value={inputs.topDate}
-                    onChange={(e) => handleInputChange('topDate', e.target.value)}
-                    className="standard-input"
-                  />
-                </div>
-              </div>
+            <div className="text-content">
+              <h2>BUC Property Details</h2>
+              <p>Built Under Construction Payment Calculator</p>
             </div>
           </div>
-
-          {/* Interest Rate Configuration */}
-          <div className="standard-card card-gradient-blue">
-            <div className="section-header">
-              <div className="icon-container blue">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-content">
-                <h2>Variable Interest Rate Package</h2>
-                <p>Progressive rate structure</p>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Purchase Price (SGD)</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formatNumberInput(inputs.purchasePrice)}
+                  onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
+                  className="standard-input currency-input"
+                  placeholder="2,300,000.00"
+                />
+                <span className="currency-symbol">SGD</span>
               </div>
             </div>
-                      
-            <div className="standard-card">
-              <h4 className="font-medium mb-3 text-gray-700">Interest Rate Structure</h4>
-              <div className="space-y-4">
-                {inputs.rates.map((rate, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                    <div className="text-sm font-medium text-gray-600">
-                      {rate.year === 'thereafter' ? 'Year 6 onwards' : `Year ${rate.year}`}
+
+            <div>
+              <label className="block text-sm font-medium mb-3 text-gray-700">Loan Amount Options</label>
+              <div className="radio-card-group">
+                <label className="radio-card">
+                  <input
+                    type="radio"
+                    name="loanOption"
+                    checked={!inputs.useCustomAmount && inputs.loanPercentage === 75}
+                    onChange={() => {
+                      handleInputChange('useCustomAmount', false);
+                      handleInputChange('loanPercentage', 75);
+                    }}
+                  />
+                  <div className="radio-card-content">
+                    <div className="radio-card-title">75%</div>
+                    <div className="radio-card-subtitle">
+                      {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
                     </div>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={rate.rate}
-                        onChange={(e) => {
-                          const newRates = [...inputs.rates];
-                          newRates[index].rate = e.target.value;
-                          handleInputChange('rates', newRates);
-                        }}
-                        className="standard-input"
-                      />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">%</span>
-                    </div>
-                    <div className="text-xs text-gray-500">{rate.description}</div>
                   </div>
-                ))}
+                </label>
+                
+                <label className="radio-card">
+                  <input
+                    type="radio"
+                    name="loanOption"
+                    checked={!inputs.useCustomAmount && inputs.loanPercentage === 55}
+                    onChange={() => {
+                      handleInputChange('useCustomAmount', false);
+                      handleInputChange('loanPercentage', 55);
+                    }}
+                  />
+                  <div className="radio-card-content">
+                    <div className="radio-card-title">55%</div>
+                    <div className="radio-card-subtitle">
+                      {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="radio-card">
+                  <input
+                    type="radio"
+                    name="loanOption"
+                    checked={inputs.useCustomAmount}
+                    onChange={() => handleInputChange('useCustomAmount', true)}
+                  />
+                  <div className="radio-card-content">
+                    <div className="radio-card-title">Custom</div>
+                    <div className="radio-card-subtitle">Amount</div>
+                  </div>
+                </label>
+              </div>
+              
+              {inputs.useCustomAmount && (
+                <div className="mt-3 fade-in">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">Custom Loan Amount</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formatNumberInput(inputs.customLoanAmount)}
+                      onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
+                      className="standard-input currency-input"
+                      placeholder="1,725,000.00"
+                    />
+                    <span className="currency-symbol">SGD</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={inputs.tenure}
+                    onChange={(e) => handleInputChange('tenure', e.target.value)}
+                    className="standard-input"
+                    min="5"
+                    max="35"
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">years</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Outstanding Mortgages</label>
+                <input
+                  type="number"
+                  value={inputs.numOutstandingMortgages}
+                  onChange={(e) => handleInputChange('numOutstandingMortgages', e.target.value)}
+                  className="standard-input"
+                  min="0"
+                  max="5"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">OTP Date</label>
+                <input
+                  type="date"
+                  value={inputs.otpDate}
+                  onChange={(e) => handleInputChange('otpDate', e.target.value)}
+                  className="standard-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Expected TOP Date</label>
+                <input
+                  type="date"
+                  value={inputs.topDate}
+                  onChange={(e) => handleInputChange('topDate', e.target.value)}
+                  className="standard-input"
+                />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Results Section */}
-        <div className="space-y-8">
-          {results && (
-            <>
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="result-card success">
-                  <div className="result-header">
-                    <div className="result-icon bg-green-100">
-                      <DollarSign className="w-8 h-8 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="result-title">Cash/CPF Required</div>
-                      <div className="result-value success">{formatCurrency(results.totalCashCPF)}</div>
-                    </div>
+        {/* Interest Rate Configuration */}
+        <div className="standard-card card-gradient-blue">
+          <div className="section-header">
+            <div className="icon-container blue">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <div className="text-content">
+              <h2>Variable Interest Rate Package</h2>
+              <p>Progressive rate structure</p>
+            </div>
+          </div>
+                    
+          <div className="standard-card">
+            <h4 className="font-medium mb-3 text-gray-700">Interest Rate Structure</h4>
+            <div className="space-y-4">
+              {inputs.rates.map((rate, index) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                  <div className="text-sm font-medium text-gray-600">
+                    {rate.year === 'thereafter' ? 'Year 6 onwards' : `Year ${rate.year}`}
                   </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={rate.rate}
+                      onChange={(e) => {
+                        const newRates = [...inputs.rates];
+                        newRates[index].rate = e.target.value;
+                        handleInputChange('rates', newRates);
+                      }}
+                      className="standard-input"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">%</span>
+                  </div>
+                  <div className="text-xs text-gray-500">{rate.description}</div>
                 </div>
-                <div className="result-card">
-                  <div className="result-header">
-                    <div className="result-icon bg-blue-100">
-                      <TrendingUp className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="result-title">Total Bank Loan</div>
-                      <div className="result-value text-blue-600">{formatCurrency(results.totalBankLoan)}</div>
-                    </div>
-                  </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Results Section - Full Width Below */}
+      {results && (
+        <div className="space-y-8">
+          {/* Summary Cards - Main Results */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="result-card success">
+              <div className="result-header">
+                <div className="result-icon bg-green-100">
+                  <DollarSign className="w-8 h-8 text-green-600" />
+                </div>
+                <div>
+                  <div className="result-title">Cash/CPF Required</div>
+                  <div className="result-value success">{formatCurrency(results.totalCashCPF)}</div>
                 </div>
               </div>
+            </div>
+            <div className="result-card">
+              <div className="result-header">
+                <div className="result-icon bg-blue-100">
+                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <div className="result-title">Total Bank Loan</div>
+                  <div className="result-value text-blue-600">{formatCurrency(results.totalBankLoan)}</div>
+                </div>
+              </div>
+            </div>
+            <div className="result-card">
+              <div className="result-header">
+                <div className="result-icon bg-purple-100">
+                  <BarChart3 className="w-8 h-8 text-purple-600" />
+                </div>
+                <div>
+                  <div className="result-title">Total Interest</div>
+                  <div className="result-value text-purple-600">{formatCurrency(results.totalInterest)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              {/* Yearly Interest Breakdown */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Yearly Interest Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="result-card warning">
                   <div className="result-header">
                     <div className="result-icon bg-orange-100">
@@ -1479,23 +1488,21 @@ const generateProgressivePaymentReport = () => {
                 )}
               </div>
 
-              {/* Generate Report Button */}
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-1 shadow-lg">
-                <button
-                  onClick={generateProgressivePaymentReport}
-                  className="btn-standard btn-lg w-full bg-white text-red-600 hover:bg-gray-50"
-                >
-                  <Download className="w-6 h-6" />
-                  <div className="text-left">
-                    <div>Generate Progressive Payment Report</div>
-                    <div className="text-sm opacity-75">Complete BUC property payment schedule</div>
-                  </div>
-                </button>
+          {/* Generate Report Button */}
+          <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-xl p-1 shadow-lg">
+            <button
+              onClick={generateProgressivePaymentReport}
+              className="btn-standard btn-lg w-full bg-white text-red-600 hover:bg-gray-50"
+            >
+              <Download className="w-6 h-6" />
+              <div className="text-left">
+                <div>Generate Progressive Payment Report</div>
+                <div className="text-sm opacity-75">Complete BUC property payment schedule</div>
               </div>
-            </>
-          )}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
