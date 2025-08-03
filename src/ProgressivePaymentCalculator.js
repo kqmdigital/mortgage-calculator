@@ -880,10 +880,10 @@ const generateProgressivePaymentReport = () => {
 };
 
   return (
-    <div className="space-y-8">
-      <div className="grid-responsive cols-2">
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
         {/* Enhanced Input Section */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Property Information Card */}
           <div className="standard-card card-gradient-red">
             <div className="section-header">
@@ -896,7 +896,7 @@ const generateProgressivePaymentReport = () => {
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
@@ -981,7 +981,7 @@ const generateProgressivePaymentReport = () => {
                 )}
               </div>
 
-              <div className="grid-responsive cols-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">Loan Tenure</label>
                   <div className="relative">
@@ -1009,7 +1009,7 @@ const generateProgressivePaymentReport = () => {
                 </div>
               </div>
 
-              <div className="grid-responsive cols-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">OTP Date</label>
                   <input
@@ -1046,10 +1046,10 @@ const generateProgressivePaymentReport = () => {
                       
             <div className="standard-card">
               <h4 className="font-medium mb-3 text-gray-700">Interest Rate Structure</h4>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {inputs.rates.map((rate, index) => (
-                  <div key={index} className="grid-responsive cols-3">
-                    <div className="text-sm font-medium text-gray-600 flex items-center">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div className="text-sm font-medium text-gray-600">
                       {rate.year === 'thereafter' ? 'Year 6 onwards' : `Year ${rate.year}`}
                     </div>
                     <div className="relative">
@@ -1066,7 +1066,7 @@ const generateProgressivePaymentReport = () => {
                       />
                       <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">%</span>
                     </div>
-                    <div className="text-xs text-gray-500 flex items-center">{rate.description}</div>
+                    <div className="text-xs text-gray-500">{rate.description}</div>
                   </div>
                 ))}
               </div>
@@ -1075,11 +1075,11 @@ const generateProgressivePaymentReport = () => {
         </div>
 
         {/* Enhanced Results Section */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {results && (
             <>
               {/* Summary Cards */}
-              <div className="grid-responsive cols-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="result-card success">
                   <div className="result-header">
                     <div className="result-icon bg-green-100">
@@ -1105,7 +1105,7 @@ const generateProgressivePaymentReport = () => {
               </div>
 
               {/* Yearly Interest Breakdown */}
-              <div className="grid-responsive cols-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="result-card warning">
                   <div className="result-header">
                     <div className="result-icon bg-orange-100">
@@ -1216,7 +1216,7 @@ const generateProgressivePaymentReport = () => {
 
                 {/* Mobile Card View */}
                 <div className="lg:hidden">
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {results.stages.map((stage, index) => (
                       <div key={index} className={`standard-card ${
                         stage.isInitial ? 'card-gradient-blue' : 
@@ -1229,7 +1229,7 @@ const generateProgressivePaymentReport = () => {
                           <span className="text-sm font-medium text-gray-600">{stage.percentage.toFixed(1)}%</span>
                         </div>
                         <h4 className="font-medium text-gray-800 mb-3 leading-snug">{stage.stage}</h4>
-                        <div className="grid-responsive cols-2 text-sm">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
                             <span className="text-gray-600">Total Amount:</span>
                             <div className="font-semibold">{formatCurrency(stage.stageAmount)}</div>
@@ -1315,7 +1315,7 @@ const generateProgressivePaymentReport = () => {
 
                   {/* Mobile Card View */}
                   <div className="lg:hidden">
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {results.bankDrawdownSchedule.map((drawdown, index) => (
                         <div key={index} className={`standard-card ${
                           drawdown.stage.includes('Certificate of Statutory Completion') ? 'card-gradient-purple' : 
@@ -1423,7 +1423,7 @@ const generateProgressivePaymentReport = () => {
 
                     {/* Mobile Card View */}
                     <div className="lg:hidden">
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 24).map((month, index) => (
                           <div key={index} className={`standard-card ${
                             month.drawdownAmount > 0 ? 'card-gradient-yellow' : ''
@@ -1437,7 +1437,7 @@ const generateProgressivePaymentReport = () => {
                               )}
                             </div>
                             
-                            <div className="grid-responsive cols-2 text-sm">
+                            <div className="grid grid-cols-2 gap-3 text-sm">
                               <div>
                                 <span className="text-gray-600">Opening Balance:</span>
                                 <div className="font-semibold">{formatCurrency(month.openingBalance)}</div>
