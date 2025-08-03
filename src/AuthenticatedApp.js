@@ -1047,7 +1047,7 @@ This ensures all content fits properly without being cut off.`);
                     <input
                       type="number"
                       value={inputs.loanTenor}
-                      onChange={(e) => handleInputChange('loanTenor', Number(e.target.value))}
+                      onChange={(e) => handleInputChange('loanTenor', e.target.value)}
                       max={results ? results.maxLoanTenor : "35"}
                       min="0"
                       className="standard-input"
