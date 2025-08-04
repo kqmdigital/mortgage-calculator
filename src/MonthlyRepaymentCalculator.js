@@ -918,8 +918,8 @@ const MonthlyRepaymentCalculator = () => {
                     {newLoanResults.yearlyData.map((year, index) => (
                       <div key={index} className="expandable-section">
                         <div className="expandable-header">
-                          <div className="flex flex-col sm:flex-row sm:items-center w-full p-3 bg-gray-50 rounded-lg gap-3">
-                            <div className="flex flex-wrap items-center justify-between flex-1 gap-3 sm:gap-4 text-sm">
+                          <div className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg gap-3">
+                            <div className="flex flex-wrap items-center justify-between flex-1 gap-3 sm:gap-6 text-sm min-w-0">
                               <span className="font-medium whitespace-nowrap">{year.year}</span>
                               <span className="whitespace-nowrap">Rate: <span className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span></span>
                               <span className="whitespace-nowrap">Monthly Payment: <span className="font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</span></span>
@@ -931,7 +931,7 @@ const MonthlyRepaymentCalculator = () => {
                                 ...prev,
                                 [year.yearNumber]: !prev[year.yearNumber]
                               }))}
-                              className="btn-standard btn-secondary btn-sm self-start sm:self-center flex-shrink-0"
+                              className="btn-standard btn-secondary btn-sm flex-shrink-0 ml-3"
                             >
                               {showMonthlyBreakdown[year.yearNumber] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </button>
