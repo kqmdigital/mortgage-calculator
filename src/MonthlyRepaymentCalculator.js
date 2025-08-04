@@ -901,7 +901,6 @@ const MonthlyRepaymentCalculator = () => {
           
           {/* Full Width Repayment Schedule Section - Below Both Columns */}
           {newLoanResults && (
-                {/* Repayment Schedule */}
                 <div className="standard-card">
                   <div className="section-header">
                     <div className="icon-container green">
