@@ -1178,7 +1178,6 @@ const MonthlyRepaymentCalculator = () => {
                 </div>
               </div>
             </div>
-          </div>
             </div>
 
             {/* Right: Refinancing Savings Summary */}
