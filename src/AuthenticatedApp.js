@@ -947,13 +947,13 @@ This ensures all content fits properly without being cut off.`);
                 <input
                   type="radio"
                   name="propertyType"
-                  value="hdb"
-                  checked={inputs.propertyType === 'hdb'}
+                  value="ec"
+                  checked={inputs.propertyType === 'ec'}
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
                 />
                 <div className="radio-card-content">
-                  <Home className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                  <div className="radio-card-title text-sm">HDB Property</div>
+                  <Building2 className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                  <div className="radio-card-title text-sm">EC Property</div>
                   <div className="radio-card-subtitle text-xs">MSR + TDSR Assessment</div>
                 </div>
               </label>
@@ -962,13 +962,13 @@ This ensures all content fits properly without being cut off.`);
                 <input
                   type="radio"
                   name="propertyType"
-                  value="ec"
-                  checked={inputs.propertyType === 'ec'}
+                  value="hdb"
+                  checked={inputs.propertyType === 'hdb'}
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
                 />
                 <div className="radio-card-content">
-                  <Building2 className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                  <div className="radio-card-title text-sm">EC Property</div>
+                  <Home className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                  <div className="radio-card-title text-sm">HDB Property</div>
                   <div className="radio-card-subtitle text-xs">MSR + TDSR Assessment</div>
                 </div>
               </label>
