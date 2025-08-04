@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Calculator, Download, CheckCircle, XCircle, Info, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Users, Menu, UserPlus } from 'lucide-react';
+import { Calculator, Download, CheckCircle, XCircle, Info, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Users, Menu, UserPlus, Building2, Factory } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
 import logger from './utils/logger';
 import useDebounce from './hooks/useDebounce';
@@ -35,6 +35,27 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   });
 
   const [results, setResults] = useState(null);
+
+  // Helper function to get default stress test rate based on property type
+  const getDefaultStressTestRate = (propertyType) => {
+    switch (propertyType) {
+      case 'commercial':
+        return 5;
+      default:
+        return 4;
+    }
+  };
+
+  // Helper function to get property type display text
+  const getPropertyTypeText = (type) => {
+    switch (type) {
+      case 'private': return 'Private Property';
+      case 'hdb': return 'HDB Property';
+      case 'ec': return 'EC Property';
+      case 'commercial': return 'Commercial/Industrial Property';
+      default: return 'Property';
+    }
+  };
 
   // Helper functions (keeping the same logic as before)
   const formatNumberInput = (value) => {
@@ -80,6 +101,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       if (inputs.propertyType === 'hdb') {
         return loanPercentage >= 56 && loanPercentage <= 75 ? 25 : 30;
       } else {
+        // Private, EC, and Commercial follow same default rules
         return loanPercentage >= 56 && loanPercentage <= 75 ? 30 : 35;
       }
     }
@@ -91,6 +113,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         return Math.min(30, Math.max(1, 75 - averageAge));
       }
     } else {
+      // Private, EC, and Commercial properties use private property age rules
       if (loanPercentage >= 56 && loanPercentage <= 75) {
         return Math.min(30, Math.max(1, 65 - averageAge));
       } else if (loanPercentage <= 55) {
@@ -173,10 +196,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     let totalCommitments;
     let totalCommitmentsTDSR;
     
-    if (propertyType === 'hdb') {
+    if (propertyType === 'hdb' || propertyType === 'ec') {
+      // HDB and EC: MSR includes only property loans, TDSR includes all commitments
       totalCommitments = parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
       totalCommitmentsTDSR = parsedInputs.carLoanA + parsedInputs.carLoanB + parsedInputs.personalLoanA + parsedInputs.personalLoanB + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
     } else {
+      // Private and Commercial: TDSR only, includes all commitments
       totalCommitments = parsedInputs.carLoanA + parsedInputs.carLoanB + parsedInputs.personalLoanA + parsedInputs.personalLoanB + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
       totalCommitmentsTDSR = totalCommitments;
     }
@@ -294,6 +319,14 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
           [field]: cappedValue
         }));
       }
+    } else if (field === 'propertyType') {
+      // When property type changes, update stress test rate accordingly
+      const newStressTestRate = getDefaultStressTestRate(value);
+      setInputs(prev => ({
+        ...prev,
+        [field]: value,
+        stressTestRate: newStressTestRate
+      }));
     } else {
       setInputs(prev => ({
         ...prev,
@@ -309,7 +342,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
 
     try {
-      const propertyTypeText = inputs.propertyType === 'private' ? 'Private Property' : 'HDB Property';
+      const propertyTypeText = getPropertyTypeText(inputs.propertyType);
       const currentDate = new Date().toLocaleDateString('en-SG', {
         year: 'numeric',
         month: 'long',
@@ -633,9 +666,9 @@ const htmlContent = `
         </div>
     </div>
 
-    ${inputs.propertyType === 'hdb' ? `
+    ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
     <div class="section no-break">
-        <h2>📊 HDB DUAL ASSESSMENT (MSR & TDSR)</h2>
+        <h2>📊 ${propertyTypeText.toUpperCase()} DUAL ASSESSMENT (MSR & TDSR)</h2>
         <div class="dual-assessment">
             <div class="assessment-card msr-card">
                 <h3 style="margin-top: 0; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">MSR 30% Test</h3>
@@ -667,17 +700,17 @@ const htmlContent = `
             </div>
         </div>
         <div style="background: #eff6ff; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 11px;">
-            <strong>Note:</strong> For HDB loans, banks assess both MSR (30%) for property-related debt and TDSR (55%) for total debt servicing. Both tests must be passed for loan approval.
+            <strong>Note:</strong> For ${propertyTypeText} loans, banks assess both MSR (30%) for property-related debt and TDSR (55%) for total debt servicing. Both tests must be passed for loan approval.
         </div>
     </div>
     ` : ''}
 
-    ${(!results.tdsrPass || (inputs.propertyType === 'hdb' && !results.hdbPass)) ? `
+    ${(!results.tdsrPass || ((inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass)) ? `
     <div class="funding-section no-break">
         <h2>💡 FUNDING SOLUTIONS</h2>
-        <p style="text-align: center; margin-bottom: 15px;">To meet the ${inputs.propertyType === 'hdb' ? 'MSR and TDSR' : 'TDSR'} requirements, you need one of the following:</p>
+        <p style="text-align: center; margin-bottom: 15px;">To meet the ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? 'MSR and TDSR' : 'TDSR'} requirements, you need one of the following:</p>
         
-        ${inputs.propertyType === 'hdb' && !results.hdbPass ? `
+        ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass ? `
         <div style="margin-bottom: 20px;">
             <h4 style="color: #dc2626; margin-bottom: 10px;">For MSR (30%) Shortfall:</h4>
             <div class="funding-grid">
@@ -797,15 +830,15 @@ const htmlContent = `
 
     <div class="section no-break">
         <h2>📊 Monthly Commitments</h2>
-        ${inputs.propertyType === 'hdb' ? `
+        ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
         <div style="margin-bottom: 15px;">
             <h4 style="color: #dc2626; margin-bottom: 10px;">MSR Commitments: ${formatCurrency(results.totalCommitments)}</h4>
-            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>HDB MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments)}). Car loans and personal loans are excluded from MSR.</p>
+            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments)}). Car loans and personal loans are excluded from MSR.</p>
         </div>
         
         <div style="margin-bottom: 15px;">
             <h4 style="color: #dc2626; margin-bottom: 10px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}</h4>
-            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>HDB TDSR Calculation:</strong> Includes all commitments:</p>
+            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} TDSR Calculation:</strong> Includes all commitments:</p>
             <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
                 <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
                 <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
@@ -830,7 +863,7 @@ const htmlContent = `
         <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
         <p style="margin: 4px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
         <p style="margin: 4px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
-        <p style="margin: 4px 0;">• ${inputs.propertyType === 'private' ? 'TDSR limit: 55%' : 'MSR limit: 30% and TDSR limit: 55%'} of gross monthly income.</p>
+        <p style="margin: 4px 0;">• ${(inputs.propertyType === 'private' || inputs.propertyType === 'commercial') ? 'TDSR limit: 55%' : 'MSR limit: 30% and TDSR limit: 55%'} of gross monthly income.</p>
         <p style="margin: 4px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
         <p style="margin: 4px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
     </div>
@@ -894,7 +927,7 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
             
-            <div className="radio-card-group">
+            <div className="grid grid-cols-4 gap-3">
               <label className="radio-card">
                 <input
                   type="radio"
@@ -904,9 +937,9 @@ This ensures all content fits properly without being cut off.`);
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
                 />
                 <div className="radio-card-content">
-                  <Building className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                  <div className="radio-card-title">Private Property</div>
-                  <div className="radio-card-subtitle">TDSR Assessment</div>
+                  <Building className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                  <div className="radio-card-title text-sm">Private Property</div>
+                  <div className="radio-card-subtitle text-xs">TDSR Assessment</div>
                 </div>
               </label>
               
@@ -919,9 +952,39 @@ This ensures all content fits properly without being cut off.`);
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
                 />
                 <div className="radio-card-content">
-                  <Home className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                  <div className="radio-card-title">HDB Property</div>
-                  <div className="radio-card-subtitle">MSR + TDSR Assessment</div>
+                  <Home className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                  <div className="radio-card-title text-sm">HDB Property</div>
+                  <div className="radio-card-subtitle text-xs">MSR + TDSR Assessment</div>
+                </div>
+              </label>
+              
+              <label className="radio-card">
+                <input
+                  type="radio"
+                  name="propertyType"
+                  value="ec"
+                  checked={inputs.propertyType === 'ec'}
+                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                />
+                <div className="radio-card-content">
+                  <Building2 className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                  <div className="radio-card-title text-sm">EC Property</div>
+                  <div className="radio-card-subtitle text-xs">MSR + TDSR Assessment</div>
+                </div>
+              </label>
+              
+              <label className="radio-card">
+                <input
+                  type="radio"
+                  name="propertyType"
+                  value="commercial"
+                  checked={inputs.propertyType === 'commercial'}
+                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                />
+                <div className="radio-card-content">
+                  <Factory className="w-6 h-6 mx-auto mb-2 text-orange-600" />
+                  <div className="radio-card-title text-sm">Commercial/Industrial</div>
+                  <div className="radio-card-subtitle text-xs">TDSR Assessment</div>
                 </div>
               </label>
             </div>
@@ -1304,10 +1367,10 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
             
-            {inputs.propertyType === 'hdb' && (
+            {(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && (
               <div className="mt-4 p-4 bg-yellow-100 rounded-xl border border-yellow-300">
                 <p className="text-sm text-yellow-800 font-medium">
-                  <strong>Note for HDB (MSR Calculation):</strong> Only property loans are included in MSR calculation. 
+                  <strong>Note for {inputs.propertyType === 'hdb' ? 'HDB' : 'EC'} (MSR Calculation):</strong> Only property loans are included in MSR calculation. 
                   Car loans and personal loans are excluded from MSR but may still affect overall affordability.
                 </p>
               </div>
@@ -1334,7 +1397,7 @@ This ensures all content fits properly without being cut off.`);
                 </div>
                 <div className="text-content">
                   <h2>Assessment Results</h2>
-                  <p>{inputs.propertyType === 'private' ? 'Private Property Analysis' : 'HDB Property Analysis'}</p>
+                  <p>{getPropertyTypeText(inputs.propertyType)} Analysis</p>
                 </div>
               </div>
               
@@ -1393,14 +1456,14 @@ This ensures all content fits properly without being cut off.`);
             </div>
 
             {/* Property-specific Results */}
-            {inputs.propertyType === 'private' && (
+            {(inputs.propertyType === 'private' || inputs.propertyType === 'commercial') && (
               <div className={`result-card ${results.tdsrPass ? 'success' : 'error'}`}>
                 <div className="result-header">
                   <div className="result-icon">
                     {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
                   </div>
                   <div>
-                    <div className="result-title">Private Property (TDSR 55%)</div>
+                    <div className="result-title">{getPropertyTypeText(inputs.propertyType)} (TDSR 55%)</div>
                     <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
                       {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
                     </div>
@@ -1436,7 +1499,7 @@ This ensures all content fits properly without being cut off.`);
               </div>
             )}
 
-           {inputs.propertyType === 'hdb' && (
+           {(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && (
   <div className="space-y-6">
     {/* MSR 30% Assessment */}
     <div className={`result-card ${results.hdbPass ? 'success' : 'error'}`}>
@@ -1445,7 +1508,7 @@ This ensures all content fits properly without being cut off.`);
           {results.hdbPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
         </div>
         <div>
-          <div className="result-title">HDB Property (MSR 30%)</div>
+          <div className="result-title">{getPropertyTypeText(inputs.propertyType)} (MSR 30%)</div>
           <div className={`result-value ${results.hdbPass ? 'success' : 'error'}`}>
             {results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
           </div>
@@ -1489,7 +1552,7 @@ This ensures all content fits properly without being cut off.`);
           {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
         </div>
         <div>
-          <div className="result-title">HDB Property (TDSR 55%)</div>
+          <div className="result-title">{getPropertyTypeText(inputs.propertyType)} (TDSR 55%)</div>
           <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
             {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
           </div>
@@ -1526,10 +1589,10 @@ This ensures all content fits properly without being cut off.`);
       )}
     </div>
 
-    {/* Overall HDB Assessment */}
+    {/* Overall Assessment */}
     <div className={`result-card text-center ${(results.hdbPass && results.tdsrPass) ? 'success' : 'error'}`}>
       <div className="result-title text-2xl mb-4">
-        Overall HDB Assessment: {(results.hdbPass && results.tdsrPass) ? 
+        Overall {getPropertyTypeText(inputs.propertyType)} Assessment: {(results.hdbPass && results.tdsrPass) ? 
           <span className="text-green-700">PASS ✓</span> : 
           <span className="text-red-700">FAIL ✗</span>
         }
