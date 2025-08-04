@@ -1010,8 +1010,7 @@ const MonthlyRepaymentCalculator = () => {
                     </button>
                   </div>
                 </div>
-            )}
-          </div>
+          )}
         </div>
       )}
 
