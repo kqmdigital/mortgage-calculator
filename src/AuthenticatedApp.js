@@ -35,6 +35,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   });
 
   const [results, setResults] = useState(null);
+  const [loanTenorManuallyEdited, setLoanTenorManuallyEdited] = useState(false);
 
   // Helper function to get default stress test rate based on property type
   const getDefaultStressTestRate = (propertyType) => {
@@ -268,6 +269,16 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     setResults(memoizedResults);
   }, [memoizedResults]);
 
+  // Auto-populate loan tenor with max loan tenor if user hasn't manually edited it
+  React.useEffect(() => {
+    if (!loanTenorManuallyEdited && results?.maxLoanTenor) {
+      setInputs(prev => ({
+        ...prev,
+        loanTenor: results.maxLoanTenor.toString()
+      }));
+    }
+  }, [results?.maxLoanTenor, loanTenorManuallyEdited]);
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
@@ -298,7 +309,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         [field]: value  // Store raw value
       }));
     } else if (field === 'loanTenor') {
-      // ✅ FIXED: Store raw value for loan tenor
+      // ✅ FIXED: Store raw value for loan tenor and mark as manually edited
+      setLoanTenorManuallyEdited(true);
       setInputs(prev => ({
         ...prev,
         [field]: value
@@ -320,8 +332,9 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         }));
       }
     } else if (field === 'propertyType') {
-      // When property type changes, update stress test rate accordingly
+      // When property type changes, update stress test rate and reset loan tenor manual edit flag
       const newStressTestRate = getDefaultStressTestRate(value);
+      setLoanTenorManuallyEdited(false); // Allow auto-population for new property type
       setInputs(prev => ({
         ...prev,
         [field]: value,
@@ -1114,7 +1127,7 @@ This ensures all content fits properly without being cut off.`);
                       max={results ? results.maxLoanTenor : "35"}
                       min="0"
                       className="standard-input"
-                      placeholder="30"
+                      placeholder="Auto-filled based on age & property type"
                     />
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">years</span>
                   </div>
