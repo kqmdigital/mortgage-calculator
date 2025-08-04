@@ -918,20 +918,20 @@ const MonthlyRepaymentCalculator = () => {
                     {newLoanResults.yearlyData.map((year, index) => (
                       <div key={index} className="expandable-section">
                         <div className="expandable-header">
-                          <div className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-6 text-sm">
-                              <span className="font-medium">{year.year}</span>
-                              <span>Rate: <span className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span></span>
-                              <span>Monthly Payment: <span className="font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</span></span>
-                              <span>Interest: <span className="font-medium text-red-600">{formatCurrency(year.interestPaid)}</span></span>
-                              <span>Principal: <span className="font-medium text-green-600">{formatCurrency(year.principalPaid)}</span></span>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full p-3 bg-gray-50 rounded-lg gap-3">
+                            <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm">
+                              <span className="font-medium whitespace-nowrap">{year.year}</span>
+                              <span className="whitespace-nowrap">Rate: <span className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span></span>
+                              <span className="whitespace-nowrap">Monthly Payment: <span className="font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</span></span>
+                              <span className="whitespace-nowrap">Interest: <span className="font-medium text-red-600">{formatCurrency(year.interestPaid)}</span></span>
+                              <span className="whitespace-nowrap">Principal: <span className="font-medium text-green-600">{formatCurrency(year.principalPaid)}</span></span>
                             </div>
                             <button
                               onClick={() => setShowMonthlyBreakdown(prev => ({
                                 ...prev,
                                 [year.yearNumber]: !prev[year.yearNumber]
                               }))}
-                              className="btn-standard btn-secondary btn-sm"
+                              className="btn-standard btn-secondary btn-sm self-start sm:self-center"
                             >
                               {showMonthlyBreakdown[year.yearNumber] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </button>
@@ -1250,69 +1250,75 @@ const MonthlyRepaymentCalculator = () => {
                     </p>
                   </div>
                 </div>
-
-                <div className="standard-card">
-                  <div className="section-header">
-                    <div className="icon-container blue">
-                      <BarChart3 className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-content">
-                      <h2>Your New Repayment Schedule</h2>
-                      <p>Refinanced loan payment breakdown</p>
-                    </div>
+              </>
+            )}
+            </div>
+          </div>
+          
+          {/* Bottom Row: Full Width Repayment Schedule */}
+          {refinancingResults && (
+            <div className="w-full">
+              <div className="standard-card">
+                <div className="section-header">
+                  <div className="icon-container blue">
+                    <BarChart3 className="w-6 h-6 text-white" />
                   </div>
-
-                  <div className="grid-responsive cols-3 mb-6">
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <div className="text-xs text-red-600 mb-1">Total Interest</div>
-                      <div className="font-bold text-lg text-red-600">{formatCurrency(refinancingResults.new.totalInterest)}</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-xs text-green-600 mb-1">Total Principal</div>
-                      <div className="font-bold text-lg text-green-600">{formatCurrency(refinancingResults.new.totalPrincipal)}</div>
-                    </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-xs text-blue-600 mb-1">Total Payable</div>
-                      <div className="font-bold text-lg text-blue-600">{formatCurrency(refinancingResults.new.totalPayable)}</div>
-                    </div>
+                  <div className="text-content">
+                    <h2>Your New Repayment Schedule</h2>
+                    <p>Refinanced loan payment breakdown</p>
                   </div>
+                </div>
 
-                  <div className="space-y-4">
-                    {refinancingResults.new.yearlyData.map((year, index) => (
-                      <div key={index} className="expandable-section">
-                        <div className="expandable-header">
-                          <div className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-6 text-sm">
-                              <span className="font-medium">{year.year}</span>
-                              <span>Rate: <span className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span></span>
-                              <span>Monthly Payment: <span className="font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</span></span>
-                              <span>Interest: <span className="font-medium text-red-600">{formatCurrency(year.interestPaid)}</span></span>
-                              <span>Principal: <span className="font-medium text-green-600">{formatCurrency(year.principalPaid)}</span></span>
-                              <span>Balance: <span className="font-medium">{formatCurrency(year.endingPrincipal)}</span></span>
-                            </div>
+                <div className="grid-responsive cols-3 mb-6">
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <div className="text-xs text-red-600 mb-1">Total Interest</div>
+                    <div className="font-bold text-lg text-red-600">{formatCurrency(refinancingResults.new.totalInterest)}</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-xs text-green-600 mb-1">Total Principal</div>
+                    <div className="font-bold text-lg text-green-600">{formatCurrency(refinancingResults.new.totalPrincipal)}</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-xs text-blue-600 mb-1">Total Payable</div>
+                    <div className="font-bold text-lg text-blue-600">{formatCurrency(refinancingResults.new.totalPayable)}</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {refinancingResults.new.yearlyData.map((year, index) => (
+                    <div key={index} className="expandable-section">
+                      <div className="expandable-header">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full p-3 bg-gray-50 rounded-lg gap-3">
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm">
+                            <span className="font-medium whitespace-nowrap">{year.year}</span>
+                            <span className="whitespace-nowrap">Rate: <span className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span></span>
+                            <span className="whitespace-nowrap">Monthly Payment: <span className="font-semibold text-blue-600">{formatCurrency(year.monthlyInstalment)}</span></span>
+                            <span className="whitespace-nowrap">Interest: <span className="font-medium text-red-600">{formatCurrency(year.interestPaid)}</span></span>
+                            <span className="whitespace-nowrap">Principal: <span className="font-medium text-green-600">{formatCurrency(year.principalPaid)}</span></span>
+                            <span className="whitespace-nowrap">Balance: <span className="font-medium">{formatCurrency(year.endingPrincipal)}</span></span>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  
-                  {/* Generate Report Button for Refinancing */}
-                  <div className="mt-6">
-                    <button
-                      onClick={() => generateRepaymentPDFReport(refinancingResults.new, 'refinancing')}
-                      className="btn-standard btn-primary btn-lg w-full"
-                    >
-                      <Download className="w-5 h-5" />
-                      <div className="text-left">
-                        <div>Generate Refinancing Report (PDF)</div>
-                        <div className="text-sm opacity-90">Comprehensive comparison and schedule</div>
-                      </div>
-                    </button>
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              </>
-            )}
-          </div>
+                
+                {/* Generate Report Button for Refinancing */}
+                <div className="mt-6">
+                  <button
+                    onClick={() => generateRepaymentPDFReport(refinancingResults.new, 'refinancing')}
+                    className="btn-standard btn-primary btn-lg w-full"
+                  >
+                    <Download className="w-5 h-5" />
+                    <div className="text-left">
+                      <div>Generate Refinancing Report (PDF)</div>
+                      <div className="text-sm opacity-90">Comprehensive comparison and schedule</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
