@@ -894,8 +894,11 @@ const MonthlyRepaymentCalculator = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </>
+              )}
             </div>
+            {/* End of top row */}
+            
             {/* Bottom Row: Repayment Schedule (Full Width) */}
             {newLoanResults && (
               <div className="w-full">
