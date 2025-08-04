@@ -957,7 +957,7 @@ const MonthlyRepaymentCalculator = () => {
                         {showMonthlyBreakdown[year.yearNumber] && (
                           <div className="expandable-content fade-in">
                             <h5 className="font-medium text-gray-700 mb-3">Monthly Breakdown</h5>
-                            <div className="grid-responsive cols-6">
+                            <div className="grid-responsive cols-3">
                               {year.months.map((month, mIndex) => (
                                 <div key={mIndex} className="standard-card">
                                   <div className="text-center">
