@@ -431,13 +431,13 @@ const ProgressivePaymentCalculator = () => {
       
       // Special case for OTP - Cash only
       if (stage.stage === 'Upon grant of Option to Purchase') {
-        paymentMode = `Cash (${roundedCashCPFPercentage.toFixed(1)}%)`;
+        paymentMode = 'Cash';
       } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage > 0) {
-        paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%) + Bank Loan (${roundedBankLoanPercentage.toFixed(1)}%)`;
+        paymentMode = 'Cash/CPF + Bank Loan';
       } else if (roundedCashCPFPercentage > 0 && roundedBankLoanPercentage <= 0) {
-        paymentMode = `Cash/CPF (${roundedCashCPFPercentage.toFixed(1)}%)`;
+        paymentMode = 'Cash/CPF';
       } else if (roundedBankLoanPercentage > 0 && roundedCashCPFPercentage <= 0) {
-        paymentMode = `Bank Loan (${roundedBankLoanPercentage.toFixed(1)}%)`;
+        paymentMode = 'Bank Loan';
       } else {
         paymentMode = 'No Payment Required';
       }
@@ -1288,78 +1288,144 @@ const generateProgressivePaymentReport = () => {
                 </div>
               </div>
 
-              {/* Bank Loan Drawdown Schedule */}
-              {results.bankDrawdownSchedule.length > 0 && (
-                <div className="standard-card">
-                  <div className="section-header">
-                    <div className="icon-container yellow">
-                      <DollarSign className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-content">
-                      <h2>Bank Loan Drawdown Schedule</h2>
-                      <p>Bank loan disbursement timing based on construction progress</p>
-                    </div>
+              {/* Monthly Payment Schedule */}
+              <div className="standard-card">
+                <div className="section-header">
+                  <div className="icon-container green">
+                    <Calendar className="w-6 h-6 text-white" />
                   </div>
-                  
-                  {/* Desktop Table View */}
-                  <div className="hidden lg:block">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b-2 border-gray-200">
-                          <th className="text-center py-3 font-medium text-gray-700">Project Month</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Bank Loan Month</th>
-                          <th className="text-left py-3 font-medium text-gray-700">Construction Stage</th>
-                          <th className="text-center py-3 font-medium text-gray-700">Bank Loan Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {results.bankDrawdownSchedule.map((drawdown, index) => (
-                          <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
-                            drawdown.stage.includes('Certificate of Statutory Completion') ? 'bg-purple-50' : 
-                            drawdown.stage.includes('TOP') ? 'bg-green-50' : 'bg-yellow-50'
-                          }`}>
-                            <td className="py-4 text-center">{drawdown.projectMonth}</td>
-                            <td className="py-4 text-center">
-                              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">
-                                {drawdown.bankLoanMonth}
-                              </span>
-                            </td>
-                            <td className="py-4 text-left">{drawdown.stage}</td>
-                            <td className="py-4 text-center font-semibold text-green-600">
-                              {formatCurrency(drawdown.bankLoanAmount)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="text-content">
+                    <h2>Monthly Payment Schedule</h2>
+                    <p>
+                      {results.firstBankDrawdownMonth ? (
+                        `Payment schedule starts from Month ${results.firstBankDrawdownMonth} with progressive loan drawdowns`
+                      ) : (
+                        '100% Cash/CPF payment - No bank loan servicing required'
+                      )}
+                    </p>
                   </div>
-
-                  {/* Mobile Card View */}
-                  <div className="lg:hidden">
-                    <div className="space-y-6">
-                      {results.bankDrawdownSchedule.map((drawdown, index) => (
-                        <div key={index} className={`standard-card ${
-                          drawdown.stage.includes('Certificate of Statutory Completion') ? 'card-gradient-purple' : 
-                          drawdown.stage.includes('TOP') ? 'card-gradient-green' : 
-                          'card-gradient-yellow'
-                        }`}>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-semibold text-gray-700">Project Month {drawdown.projectMonth}</span>
-                            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm">
-                              Bank Month {drawdown.bankLoanMonth}
-                            </span>
-                          </div>
-                          <h4 className="font-medium text-gray-800 mb-2 leading-snug">{drawdown.stage}</h4>
-                          <div className="text-right">
-                            <span className="text-sm text-gray-600">Bank Loan Amount:</span>
-                            <div className="text-lg font-bold text-green-600">{formatCurrency(drawdown.bankLoanAmount)}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div>
+                    <button
+                      onClick={() => setExpandedMonthlySchedule(!expandedMonthlySchedule)}
+                      className="btn-standard btn-secondary btn-sm"
+                    >
+                      <span className="text-sm font-medium">
+                        {expandedMonthlySchedule ? 'Show Less' : 'Show More'}
+                      </span>
+                      {expandedMonthlySchedule ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
-              )}
+
+                {results.monthlySchedule.length > 0 && (
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b-2 border-gray-200">
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Month</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Opening Balance</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Bank Drawdown</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Monthly Payment</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Interest</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[100px]">Principal</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[120px]">Ending Balance</th>
+                              <th className="text-center py-3 font-medium text-gray-700 min-w-[60px]">Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 60).map((month, index) => (
+                              <tr key={index} className={`border-b hover:bg-gray-50 transition-colors ${
+                                month.drawdownAmount > 0 ? 'bg-yellow-100' : ''
+                              }`}>
+                                <td className="py-3 text-center font-medium">{month.month}</td>
+                                <td className="py-3 text-center">{formatCurrency(month.openingBalance)}</td>
+                                <td className="py-3 text-center">
+                                  {month.drawdownAmount > 0 ? (
+                                    <span className="text-green-600 font-medium">
+                                      {formatCurrency(month.drawdownAmount)}
+                                    </span>
+                                  ) : '-'}
+                                </td>
+                                <td className="py-3 text-center font-semibold text-blue-600">
+                                  {month.monthlyPayment > 0 ? formatCurrency(month.monthlyPayment) : '-'}
+                                </td>
+                                <td className="py-3 text-center">
+                                  {month.interestPayment > 0 ? formatCurrency(month.interestPayment) : '-'}
+                                </td>
+                                <td className="py-3 text-center">
+                                  {month.principalPayment > 0 ? formatCurrency(month.principalPayment) : '-'}
+                                </td>
+                                <td className="py-3 text-center">{formatCurrency(month.endingBalance)}</td>
+                                <td className="py-3 text-center">
+                                  {month.interestRate > 0 ? `${month.interestRate.toFixed(2)}%` : '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden">
+                      <div className="space-y-6">
+                        {results.monthlySchedule.slice(0, expandedMonthlySchedule ? 120 : 24).map((month, index) => (
+                          <div key={index} className={`standard-card ${
+                            month.drawdownAmount > 0 ? 'card-gradient-yellow' : ''
+                          }`}>
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="text-lg font-semibold text-gray-800">Month {month.month}</span>
+                              {month.interestRate > 0 && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
+                                  {month.interestRate.toFixed(2)}%
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <span className="text-gray-600">Opening Balance:</span>
+                                <div className="font-semibold">{formatCurrency(month.openingBalance)}</div>
+                              </div>
+                              {month.drawdownAmount > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Bank Drawdown:</span>
+                                  <div className="font-semibold text-green-600">{formatCurrency(month.drawdownAmount)}</div>
+                                </div>
+                              )}
+                              {month.monthlyPayment > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Monthly Payment:</span>
+                                  <div className="font-semibold text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
+                                </div>
+                              )}
+                              {month.interestPayment > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Interest:</span>
+                                  <div className="font-semibold">{formatCurrency(month.interestPayment)}</div>
+                                </div>
+                              )}
+                              {month.principalPayment > 0 && (
+                                <div>
+                                  <span className="text-gray-600">Principal:</span>
+                                  <div className="font-semibold">{formatCurrency(month.principalPayment)}</div>
+                                </div>
+                              )}
+                              <div>
+                                <span className="text-gray-600">Ending Balance:</span>
+                                <div className="font-semibold">{formatCurrency(month.endingBalance)}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
 
           {/* Generate Report Button */}
