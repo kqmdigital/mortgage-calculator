@@ -446,6 +446,8 @@ const MonthlyRepaymentCalculator = () => {
             font-size: 8px;
         }
         .repayment-table td { font-size: 7px; }
+        .highlight-rate { background-color: #fff3cd !important; font-weight: bold; }
+        .highlight-installment { background-color: #d1ecf1 !important; font-weight: bold; }
         .monthly-table {
             width: 100%;
             border-collapse: collapse;
@@ -553,9 +555,9 @@ const MonthlyRepaymentCalculator = () => {
                 <thead>
                     <tr>
                         <th>Year</th>
-                        <th>Interest Rate</th>
+                        <th class="highlight-rate">Interest Rate</th>
                         <th>Beginning Principal</th>
-                        <th>Monthly Installment</th>
+                        <th class="highlight-installment">Monthly Installment</th>
                         <th>Interest Paid</th>
                         <th>Principal Paid</th>
                         <th>Ending Principal</th>
@@ -564,10 +566,10 @@ const MonthlyRepaymentCalculator = () => {
                 <tbody>
                     ${results.yearlyData.map(year => `
                     <tr>
-                        <td>${year.year}</td>
-                        <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
+                        <td>${year.yearNumber}</td>
+                        <td class="highlight-rate">${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
                         <td>${formatCurrency(year.beginningPrincipal)}</td>
-                        <td>${formatCurrency(year.monthlyInstalment)}</td>
+                        <td class="highlight-installment">${formatCurrency(year.monthlyInstalment)}</td>
                         <td>${formatCurrency(year.interestPaid)}</td>
                         <td>${formatCurrency(year.principalPaid)}</td>
                         <td>${formatCurrency(year.endingPrincipal)}</td>
@@ -627,7 +629,7 @@ const MonthlyRepaymentCalculator = () => {
                         <tr>
                             <th>Year</th>
                             <th>Month</th>
-                            <th>Monthly Payment</th>
+                            <th class="highlight-installment">Monthly Payment</th>
                             <th>Interest Paid</th>
                             <th>Principal Paid</th>
                             <th>Ending Balance</th>
@@ -636,9 +638,9 @@ const MonthlyRepaymentCalculator = () => {
                     <tbody>
                         ${first5YearsMonthly.map(month => `
                         <tr>
-                            <td>Year ${month.year}</td>
+                            <td>${month.year}</td>
                             <td>${month.monthName}</td>
-                            <td>${formatCurrency(month.monthlyPayment)}</td>
+                            <td class="highlight-installment">${formatCurrency(month.monthlyPayment)}</td>
                             <td>${formatCurrency(month.interestPayment)}</td>
                             <td>${formatCurrency(month.principalPayment)}</td>
                             <td>${formatCurrency(month.endingBalance)}</td>
