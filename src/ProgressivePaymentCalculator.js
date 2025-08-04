@@ -5,6 +5,7 @@ import useDebounce from './hooks/useDebounce';
 // Progressive Payment Calculator - Enhanced UI Version
 const ProgressivePaymentCalculator = () => {
   const [inputs, setInputs] = useState({
+    clientName: '',
     purchasePrice: '',
     loanPercentage: 75,
     useCustomAmount: false,
@@ -30,6 +31,23 @@ const ProgressivePaymentCalculator = () => {
 
   // ✅ OPTIMIZED: Debounce inputs to prevent excessive recalculations
   const debouncedInputs = useDebounce(inputs, 300); // Wait 300ms after user stops typing
+
+  // Calculate monthly installment for a given loan amount
+  const calculateMonthlyInstallment = (loanAmount, rates, tenure) => {
+    if (!loanAmount || loanAmount <= 0) return 0;
+    
+    // Use the first year rate for installment calculation
+    const firstYearRate = rates[0]?.rate || 3.0;
+    const monthlyRate = firstYearRate / 100 / 12;
+    const numberOfPayments = tenure * 12;
+    
+    if (monthlyRate === 0) {
+      return loanAmount / numberOfPayments;
+    }
+    
+    const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+    return monthlyPayment;
+  };
 
   // Time calculation chain
   const calculateExcelTimeChain = (otpDate, topDate) => {
@@ -423,6 +441,16 @@ const ProgressivePaymentCalculator = () => {
         paymentMode = 'No Payment Required';
       }
       
+      // Find corresponding bank loan month from drawdown schedule
+      const drawdownEntry = completeSchedule.bankLoanTimeline.find(
+        drawdown => drawdown.projectMonth === stage.month
+      );
+      const bankLoanMonth = drawdownEntry ? drawdownEntry.bankLoanMonth : null;
+      
+      // Calculate monthly installment for this stage
+      const monthlyInstallment = stage.bankLoanAmount > 0 ? 
+        calculateMonthlyInstallment(stage.bankLoanAmount, inputsToUse.rates, inputsToUse.tenure) : null;
+      
       return {
         stage: stage.stage,
         percentage: stage.percentage,
@@ -431,6 +459,8 @@ const ProgressivePaymentCalculator = () => {
         cashCPFAmount: stage.cashCPFAmount,
         paymentMode,
         month: stage.month,
+        bankLoanMonth,
+        monthlyInstallment,
         isInitial: stage.isCashCPFOnly || false,
         isTOP: stage.isTOP || false,
         isCSC: stage.isCSC || false
@@ -687,6 +717,11 @@ const generateProgressivePaymentReport = () => {
         <h2>🏗️ PROJECT SUMMARY</h2>
         <div class="info-grid">
             <div>
+                ${inputs.clientName ? `
+                <div class="info-row">
+                    <span class="info-label">Client Name:</span>
+                    <span class="info-value">${inputs.clientName}</span>
+                </div>` : ''}
                 <div class="info-row">
                     <span class="info-label">Purchase Price:</span>
                     <span class="info-value">${formatCurrency(results.purchasePrice)}</span>
@@ -700,48 +735,22 @@ const generateProgressivePaymentReport = () => {
                     <span class="info-value">${formatCurrency(results.totalCashCPF)}</span>
                 </div>
             </div>
-            <div>
-                <div class="info-row">
-                    <span class="info-label">1st Year Interest:</span>
-                    <span class="info-value">${formatCurrency(results.yearlyInterest.year1)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">2nd Year Interest:</span>
-                    <span class="info-value">${formatCurrency(results.yearlyInterest.year2)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">3rd Year Interest:</span>
-                    <span class="info-value">${formatCurrency(results.yearlyInterest.year3)}</span>
-                </div>
-            </div>
-            <div>
-                <div class="info-row">
-                    <span class="info-label">Total Interest:</span>
-                    <span class="info-value">${formatCurrency(results.totalInterest)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Construction Time:</span>
-                    <span class="info-value">${results.constructionTime} months</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Timeline Method:</span>
-                    <span class="info-value">${results.timelineCalculated ? 'Date-Calculated' : 'Default'}</span>
-                </div>
-            </div>
         </div>
     </div>
 
     <div class="section no-break">
-        <h2>🏗️ CONSTRUCTION PAYMENT SCHEDULE</h2>
+        <h2>🏗️ SCHEDULE SUMMARY</h2>
         <table class="payment-table">
             <thead>
                 <tr>
-                    <th>Month</th>
+                    <th>Project Month</th>
+                    <th>Bank Loan Month</th>
                     <th>Construction Stage</th>
                     <th>%</th>
                     <th>Total Amount</th>
                     <th>Cash/CPF</th>
                     <th>Bank Loan</th>
+                    <th>Monthly Installment</th>
                     <th>Payment Mode</th>
                 </tr>
             </thead>
@@ -754,46 +763,19 @@ const generateProgressivePaymentReport = () => {
                   stage.bankLoanAmount > 0 ? 'drawdown-highlight' : ''
                 }">
                     <td>${stage.month}</td>
+                    <td>${stage.bankLoanMonth || '-'}</td>
                     <td style="text-align: left;">${stage.stage}</td>
                     <td>${stage.percentage.toFixed(1)}%</td>
                     <td>${formatCurrency(stage.stageAmount)}</td>
                     <td>${stage.cashCPFAmount > 0 ? formatCurrency(stage.cashCPFAmount) : '-'}</td>
                     <td>${stage.bankLoanAmount > 0 ? formatCurrency(stage.bankLoanAmount) : '-'}</td>
-                    <td style="font-size: 6px;">${stage.paymentMode}</td>
+                    <td>${stage.monthlyInstallment ? formatCurrency(stage.monthlyInstallment) : '-'}</td>
+                    <td style="font-size: 6px;">${stage.paymentMode.replace(/\s*\([^)]*\)/g, '')}</td>
                 </tr>
                 `).join('')}
             </tbody>
         </table>
     </div>
-
-    ${results.bankDrawdownSchedule.length > 0 ? `
-    <div class="section no-break">
-        <h2>💰 BANK LOAN DRAWDOWN SCHEDULE</h2>
-        <table class="payment-table">
-            <thead>
-                <tr>
-                    <th>Project Month</th>
-                    <th>Bank Loan Month</th>
-                    <th>Construction Stage</th>
-                    <th>Bank Loan Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${results.bankDrawdownSchedule.map(drawdown => `
-                <tr class="${
-                  drawdown.stage.includes('Certificate of Statutory Completion') ? 'csc-highlight' : 
-                  drawdown.stage.includes('TOP') ? 'top-highlight' : 'drawdown-highlight'
-                }">
-                    <td>${drawdown.projectMonth}</td>
-                    <td>${drawdown.bankLoanMonth}</td>
-                    <td style="text-align: left;">${drawdown.stage}</td>
-                    <td>${formatCurrency(drawdown.bankLoanAmount)}</td>
-                </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    </div>
-    ` : ''}
 
     ${results.monthlySchedule.length > 0 ? `
     <div class="page-break">
@@ -894,6 +876,17 @@ const generateProgressivePaymentReport = () => {
           </div>
           
           <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700">Client Name</label>
+              <input
+                type="text"
+                value={inputs.clientName}
+                onChange={(e) => handleInputChange('clientName', e.target.value)}
+                className="standard-input"
+                placeholder="Enter client name"
+              />
+            </div>
+            
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">Purchase Price (SGD)</label>
               <div className="relative">
