@@ -938,7 +938,7 @@ This ensures all content fits properly without being cut off.`);
                 />
                 <div className="radio-card-content">
                   <Building className="w-6 h-6 mx-auto mb-2 text-blue-600" />
-                  <div className="radio-card-title text-sm">Private Property</div>
+                  <div className="radio-card-title text-sm">PTE Property</div>
                   <div className="radio-card-subtitle text-xs">TDSR Assessment</div>
                 </div>
               </label>
@@ -983,7 +983,7 @@ This ensures all content fits properly without being cut off.`);
                 />
                 <div className="radio-card-content">
                   <Factory className="w-6 h-6 mx-auto mb-2 text-orange-600" />
-                  <div className="radio-card-title text-sm">Commercial/Industrial</div>
+                  <div className="radio-card-title text-sm">Comm/Ind Property</div>
                   <div className="radio-card-subtitle text-xs">TDSR Assessment</div>
                 </div>
               </label>
