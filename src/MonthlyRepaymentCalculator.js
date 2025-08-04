@@ -728,10 +728,12 @@ const MonthlyRepaymentCalculator = () => {
 
       {/* New Loan Tab */}
       {activeTab === 'new' && (
-        <div className="grid-responsive cols-2">
-          {/* Enhanced Input Section */}
-          <div className="space-y-6">
-            <div className="standard-card card-gradient-green">
+        <div className="space-y-8">
+          {/* Top Row: Loan Configuration and Loan Repayment Summary Side by Side */}
+          <div className="grid-responsive cols-2">
+            {/* Left: Loan Configuration */}
+            <div className="space-y-6">
+              <div className="standard-card card-gradient-green">
               <div className="section-header">
                 <div className="icon-container green">
                   <DollarSign className="w-6 h-6 text-white" />
@@ -844,41 +846,12 @@ const MonthlyRepaymentCalculator = () => {
                 )}
               </div>
             </div>
-          </div>
+            </div>
 
-          {/* Enhanced Results Section */}
-          <div className="space-y-6">
-            {newLoanResults && (
+            {/* Right: Loan Repayment Summary (with integrated Loan Completion) */}
+            <div className="space-y-6">
+              {newLoanResults && (
               <>
-                {/* Summary Cards */}
-                <div className="grid-responsive cols-2">
-                  <div className="result-card">
-                    <div className="result-header">
-                      <div className="result-icon bg-blue-100">
-                        <Calendar className="w-8 h-8 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="result-title">Loan Completion</div>
-                        <div className="result-value text-blue-600">
-                          {new Date().getFullYear() + parseInt(newLoan.loanPeriodYears || 0) + Math.ceil(parseInt(newLoan.loanPeriodMonths || 0) / 12)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="result-card">
-                    <div className="result-header">
-                      <div className="result-icon bg-red-100">
-                        <PieChart className="w-8 h-8 text-red-600" />
-                      </div>
-                      <div>
-                        <div className="result-title">Total Interest</div>
-                        <div className="result-value text-red-600">{formatCurrency(newLoanResults.totalInterest)}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Loan Summary */}
                 <div className="standard-card card-gradient-blue">
                   <div className="section-header">
                     <div className="icon-container blue">
@@ -893,7 +866,7 @@ const MonthlyRepaymentCalculator = () => {
                   <p className="text-gray-700 mb-4">
                     You will pay off your home loan by year{' '}
                     <span className="font-semibold text-blue-600">
-                     {new Date().getFullYear() + parseInt(newLoan.loanPeriodYears || 0) + Math.ceil(parseInt(newLoan.loanPeriodMonths || 0) / 12)}
+                      {new Date().getFullYear() + parseInt(newLoan.loanPeriodYears || 0) + Math.ceil(parseInt(newLoan.loanPeriodMonths || 0) / 12)}
                     </span>
                     , with a total of{' '}
                     <span className="font-semibold text-red-600">
@@ -905,7 +878,7 @@ const MonthlyRepaymentCalculator = () => {
                     </span>{' '}
                     in principal.
                   </p>
-
+                  
                   <div className="grid-responsive cols-3">
                     <div className="text-center p-4 bg-red-50 rounded-lg">
                       <div className="text-xs text-red-600 mb-1">Total Interest</div>
@@ -921,7 +894,11 @@ const MonthlyRepaymentCalculator = () => {
                     </div>
                   </div>
                 </div>
-
+              </div>
+            </div>
+            {/* Bottom Row: Repayment Schedule (Full Width) */}
+            {newLoanResults && (
+              <div className="w-full">
                 {/* Repayment Schedule */}
                 <div className="standard-card">
                   <div className="section-header">
@@ -1022,7 +999,7 @@ const MonthlyRepaymentCalculator = () => {
                     </button>
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -1030,10 +1007,12 @@ const MonthlyRepaymentCalculator = () => {
 
       {/* Existing Loan Tab (Refinancing) */}
       {activeTab === 'existing' && (
-        <div className="grid-responsive cols-2">
-          {/* Enhanced Input Section */}
-          <div className="space-y-6">
-            <div className="standard-card card-gradient-blue">
+        <div className="space-y-8">
+          {/* Top Row: Refinancing Configuration and Savings Summary Side by Side */}
+          <div className="grid-responsive cols-2">
+            {/* Left: Refinancing Configuration */}
+            <div className="space-y-6">
+              <div className="standard-card card-gradient-blue">
               <div className="section-header">
                 <div className="icon-container blue">
                   <Building2 className="w-6 h-6 text-white" />
@@ -1212,10 +1191,11 @@ const MonthlyRepaymentCalculator = () => {
               </div>
             </div>
           </div>
+            </div>
 
-          {/* Enhanced Results Section */}
-          <div className="space-y-6">
-            {refinancingResults && (
+            {/* Right: Refinancing Savings Summary */}
+            <div className="space-y-6">
+              {refinancingResults && (
               <>
                 {/* Savings Summary */}
                 <div className="standard-card card-gradient-green">
