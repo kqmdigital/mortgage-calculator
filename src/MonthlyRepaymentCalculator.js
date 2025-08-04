@@ -918,8 +918,8 @@ const MonthlyRepaymentCalculator = () => {
                     {newLoanResults.yearlyData.map((year, index) => (
                       <div key={index} className="expandable-section">
                         <div className="expandable-header" style={{ display: 'block', padding: 0, background: 'transparent' }}>
-                          <div className="w-full p-3 bg-gray-50 rounded-lg">
-                            <div className="grid grid-cols-6 gap-4 items-center text-sm">
+                          <div className="w-full p-4 bg-gray-50 rounded-lg">
+                            <div className="grid grid-cols-8 gap-3 items-center text-sm">
                               <div className="text-center">
                                 <div className="text-xs text-gray-500 mb-1">Year</div>
                                 <div className="font-medium">{year.year}</div>
@@ -927,6 +927,10 @@ const MonthlyRepaymentCalculator = () => {
                               <div className="text-center">
                                 <div className="text-xs text-gray-500 mb-1">Rate</div>
                                 <div className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Beginning Balance</div>
+                                <div className="font-medium text-gray-800 text-sm">{formatCurrency(year.beginningPrincipal)}</div>
                               </div>
                               <div className="text-center">
                                 <div className="text-xs text-gray-500 mb-1">Monthly Payment</div>
@@ -939,6 +943,10 @@ const MonthlyRepaymentCalculator = () => {
                               <div className="text-center">
                                 <div className="text-xs text-gray-500 mb-1">Principal</div>
                                 <div className="font-medium text-green-600 text-sm">{formatCurrency(year.principalPaid)}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xs text-gray-500 mb-1">Ending Balance</div>
+                                <div className="font-medium text-purple-600 text-sm">{formatCurrency(year.endingPrincipal)}</div>
                               </div>
                               <div className="text-center">
                                 <button
@@ -957,27 +965,27 @@ const MonthlyRepaymentCalculator = () => {
                         {showMonthlyBreakdown[year.yearNumber] && (
                           <div className="expandable-content fade-in">
                             <h5 className="font-medium text-gray-700 mb-3">Monthly Breakdown</h5>
-                            <div className="grid grid-cols-6 gap-3">
+                            <div className="grid grid-cols-4 xl:grid-cols-6 gap-2">
                               {year.months.map((month, mIndex) => (
-                                <div key={mIndex} className="bg-white border border-gray-200 rounded-lg p-3">
+                                <div key={mIndex} className="bg-white border border-gray-200 rounded-lg p-2">
                                   <div className="text-center">
-                                    <div className="font-medium text-gray-800 mb-2 text-sm">{month.monthName}</div>
+                                    <div className="font-medium text-gray-800 mb-2 text-xs">{month.monthName}</div>
                                     <div className="space-y-1 text-xs">
                                       <div className="text-center">
-                                        <div className="text-gray-500">Payment</div>
-                                        <div className="font-medium text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
+                                        <div className="text-gray-500 text-xs">Payment</div>
+                                        <div className="font-medium text-blue-600 text-xs">{formatCurrency(month.monthlyPayment)}</div>
                                       </div>
                                       <div className="text-center">
-                                        <div className="text-gray-500">Interest</div>
-                                        <div className="text-red-600">{formatCurrency(month.interestPayment)}</div>
+                                        <div className="text-gray-500 text-xs">Interest</div>
+                                        <div className="text-red-600 text-xs">{formatCurrency(month.interestPayment)}</div>
                                       </div>
                                       <div className="text-center">
-                                        <div className="text-gray-500">Principal</div>
-                                        <div className="text-green-600">{formatCurrency(month.principalPayment)}</div>
+                                        <div className="text-gray-500 text-xs">Principal</div>
+                                        <div className="text-green-600 text-xs">{formatCurrency(month.principalPayment)}</div>
                                       </div>
                                       <div className="text-center border-t pt-1 mt-1">
-                                        <div className="text-gray-500">Balance</div>
-                                        <div className="font-medium">{formatCurrency(month.endingBalance)}</div>
+                                        <div className="text-gray-500 text-xs">Balance</div>
+                                        <div className="font-medium text-xs">{formatCurrency(month.endingBalance)}</div>
                                       </div>
                                     </div>
                                   </div>
@@ -1304,8 +1312,8 @@ const MonthlyRepaymentCalculator = () => {
                   {refinancingResults.new.yearlyData.map((year, index) => (
                     <div key={index} className="expandable-section">
                       <div className="expandable-header" style={{ display: 'block', padding: 0, background: 'transparent' }}>
-                        <div className="w-full p-3 bg-gray-50 rounded-lg">
-                          <div className="grid grid-cols-6 gap-4 items-center text-sm">
+                        <div className="w-full p-4 bg-gray-50 rounded-lg">
+                          <div className="grid grid-cols-8 gap-3 items-center text-sm">
                             <div className="text-center">
                               <div className="text-xs text-gray-500 mb-1">Year</div>
                               <div className="font-medium">{year.year}</div>
@@ -1313,6 +1321,10 @@ const MonthlyRepaymentCalculator = () => {
                             <div className="text-center">
                               <div className="text-xs text-gray-500 mb-1">Rate</div>
                               <div className="font-medium">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-xs text-gray-500 mb-1">Beginning Balance</div>
+                              <div className="font-medium text-gray-800 text-sm">{formatCurrency(year.beginningPrincipal)}</div>
                             </div>
                             <div className="text-center">
                               <div className="text-xs text-gray-500 mb-1">Monthly Payment</div>
@@ -1327,8 +1339,12 @@ const MonthlyRepaymentCalculator = () => {
                               <div className="font-medium text-green-600 text-sm">{formatCurrency(year.principalPaid)}</div>
                             </div>
                             <div className="text-center">
-                              <div className="text-xs text-gray-500 mb-1">Balance</div>
-                              <div className="font-medium text-sm">{formatCurrency(year.endingPrincipal)}</div>
+                              <div className="text-xs text-gray-500 mb-1">Ending Balance</div>
+                              <div className="font-medium text-purple-600 text-sm">{formatCurrency(year.endingPrincipal)}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-xs text-gray-500 mb-1">Actions</div>
+                              <div className="font-medium text-gray-400 text-xs">View Details</div>
                             </div>
                           </div>
                         </div>
