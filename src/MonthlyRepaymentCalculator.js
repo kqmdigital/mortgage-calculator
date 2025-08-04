@@ -446,7 +446,7 @@ const MonthlyRepaymentCalculator = () => {
             font-size: 8px;
         }
         .repayment-table td { font-size: 7px; }
-        .highlight-rate { background-color: #fff3cd !important; font-weight: bold; }
+        .highlight-rate { background-color: #d1ecf1 !important; font-weight: bold; }
         .highlight-installment { background-color: #d1ecf1 !important; font-weight: bold; }
         .monthly-table {
             width: 100%;
