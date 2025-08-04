@@ -36,6 +36,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
 
   const [results, setResults] = useState(null);
   const [loanTenorManuallyEdited, setLoanTenorManuallyEdited] = useState(false);
+  const [annualSalaryAManuallyEdited, setAnnualSalaryAManuallyEdited] = useState(false);
+  const [annualSalaryBManuallyEdited, setAnnualSalaryBManuallyEdited] = useState(false);
 
   // Helper function to get default stress test rate based on property type
   const getDefaultStressTestRate = (propertyType) => {
@@ -279,6 +281,42 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
   }, [results?.maxLoanTenor, loanTenorManuallyEdited]);
 
+  // Auto-populate annual salary A with monthly salary A × 12 if user hasn't manually edited it
+  React.useEffect(() => {
+    const monthlySalaryA = parseNumberInput(inputs.monthlySalaryA);
+    if (!annualSalaryAManuallyEdited && monthlySalaryA > 0) {
+      const calculatedAnnual = monthlySalaryA * 12;
+      setInputs(prev => ({
+        ...prev,
+        annualSalaryA: calculatedAnnual.toString()
+      }));
+    } else if (!monthlySalaryA && !annualSalaryAManuallyEdited) {
+      // Reset annual salary when monthly is cleared
+      setInputs(prev => ({
+        ...prev,
+        annualSalaryA: ''
+      }));
+    }
+  }, [inputs.monthlySalaryA, annualSalaryAManuallyEdited]);
+
+  // Auto-populate annual salary B with monthly salary B × 12 if user hasn't manually edited it
+  React.useEffect(() => {
+    const monthlySalaryB = parseNumberInput(inputs.monthlySalaryB);
+    if (!annualSalaryBManuallyEdited && monthlySalaryB > 0) {
+      const calculatedAnnual = monthlySalaryB * 12;
+      setInputs(prev => ({
+        ...prev,
+        annualSalaryB: calculatedAnnual.toString()
+      }));
+    } else if (!monthlySalaryB && !annualSalaryBManuallyEdited) {
+      // Reset annual salary when monthly is cleared  
+      setInputs(prev => ({
+        ...prev,
+        annualSalaryB: ''
+      }));
+    }
+  }, [inputs.monthlySalaryB, annualSalaryBManuallyEdited]);
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
@@ -296,7 +334,39 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       'propertyLoanA', 'propertyLoanB', 'applicantAgeA', 'applicantAgeB'
     ];
     
-    if (numericFields.includes(field)) {
+    if (field === 'monthlySalaryA') {
+      // Handle monthly salary A changes and reset annual salary manual edit flag if cleared
+      if (value === '' || value === null || value === undefined) {
+        setAnnualSalaryAManuallyEdited(false); // Reset flag when monthly is cleared
+      }
+      setInputs(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else if (field === 'monthlySalaryB') {
+      // Handle monthly salary B changes and reset annual salary manual edit flag if cleared
+      if (value === '' || value === null || value === undefined) {
+        setAnnualSalaryBManuallyEdited(false); // Reset flag when monthly is cleared
+      }
+      setInputs(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else if (field === 'annualSalaryA') {
+      // Mark annual salary A as manually edited when user changes it
+      setAnnualSalaryAManuallyEdited(true);
+      setInputs(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else if (field === 'annualSalaryB') {
+      // Mark annual salary B as manually edited when user changes it
+      setAnnualSalaryBManuallyEdited(true);
+      setInputs(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else if (numericFields.includes(field)) {
       // ✅ FIXED: Store raw value to allow empty fields  
       setInputs(prev => ({
         ...prev,
@@ -1180,7 +1250,7 @@ This ensures all content fits properly without being cut off.`);
                       value={formatNumberInput(inputs.annualSalaryA)}
                       onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
                       className="standard-input currency-input"
-                      placeholder="120,000.00"
+                      placeholder="Auto-filled (Monthly × 12)"
                     />
                     <span className="currency-symbol">SGD</span>
                   </div>
@@ -1223,7 +1293,7 @@ This ensures all content fits properly without being cut off.`);
                       value={formatNumberInput(inputs.annualSalaryB)}
                       onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
                       className="standard-input currency-input"
-                      placeholder="90,000.00"
+                      placeholder="Auto-filled (Monthly × 12)"
                     />
                     <span className="currency-symbol">SGD</span>
                   </div>
