@@ -118,4 +118,24 @@ html, body {
   input, select, textarea {
     font-size: 16px !important; /* Prevent iOS zoom */
   }
+  
+  /* TDSR/MSR Calculator mobile improvements */
+  .radio-card {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  .radio-card input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for TDSR forms */
+  .standard-card .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .standard-card .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
 }

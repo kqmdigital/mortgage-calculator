@@ -1010,7 +1010,7 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
             
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <label className="radio-card">
                 <input
                   type="radio"
@@ -1021,7 +1021,7 @@ This ensures all content fits properly without being cut off.`);
                 />
                 <div className="radio-card-content">
                   <Building className="w-6 h-6 mx-auto mb-2 text-blue-600" />
-                  <div className="radio-card-title text-sm">PTE Property</div>
+                  <div className="radio-card-title text-sm">PTE</div>
                   <div className="radio-card-subtitle text-xs">TDSR Assessment</div>
                 </div>
               </label>
@@ -1036,7 +1036,7 @@ This ensures all content fits properly without being cut off.`);
                 />
                 <div className="radio-card-content">
                   <Building2 className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                  <div className="radio-card-title text-sm">EC Property</div>
+                  <div className="radio-card-title text-sm">EC</div>
                   <div className="radio-card-subtitle text-xs">MSR + TDSR Assessment</div>
                 </div>
               </label>
@@ -1051,7 +1051,7 @@ This ensures all content fits properly without being cut off.`);
                 />
                 <div className="radio-card-content">
                   <Home className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                  <div className="radio-card-title text-sm">HDB Property</div>
+                  <div className="radio-card-title text-sm">HDB</div>
                   <div className="radio-card-subtitle text-xs">MSR + TDSR Assessment</div>
                 </div>
               </label>
@@ -1066,7 +1066,7 @@ This ensures all content fits properly without being cut off.`);
                 />
                 <div className="radio-card-content">
                   <Factory className="w-6 h-6 mx-auto mb-2 text-orange-600" />
-                  <div className="radio-card-title text-sm">Comm/Ind Property</div>
+                  <div className="radio-card-title text-sm">Comm/Ind</div>
                   <div className="radio-card-subtitle text-xs">TDSR Assessment</div>
                 </div>
               </label>
