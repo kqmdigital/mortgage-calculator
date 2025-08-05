@@ -226,6 +226,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const cashPledgeTDSR = tdsrPass ? 0 : Math.abs(tdsrDeficit) * 48;
     const cashPledgeHDB = hdbPass ? 0 : Math.abs(hdbDeficit) * 48;
 
+    // Calculate actual TDSR and MSR percentages
+    const actualTDSRPercentage = combinedMonthlyIncome > 0 ? ((monthlyInstallment + totalCommitmentsTDSR) / combinedMonthlyIncome) * 100 : 0;
+    const actualMSRPercentage = combinedMonthlyIncome > 0 ? ((monthlyInstallment + totalCommitments) / combinedMonthlyIncome) * 100 : 0;
+
     return {
       propertyType,
       loanAmount,
@@ -256,6 +260,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       totalCommitments,
       totalCommitmentsTDSR,
       averageAge,
+      actualTDSRPercentage,
+      actualMSRPercentage,
       maxLoanTenor
     };
   }, [inputs, calculateAverageAge, calculateMaxLoanTenor]);
@@ -737,7 +743,7 @@ const htmlContent = `
     <div class="affordability-result">
         <div class="affordability-title">
             ${inputs.propertyType === 'private' 
-                ? `TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}`
+                ? `TDSR Assessment: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%) - ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}`
                 : `Overall HDB Assessment: ${(results.hdbPass && results.tdsrPass) ? 'PASS ✓' : 'FAIL ✗'}`
             }
         </div>
@@ -754,7 +760,7 @@ const htmlContent = `
         <h2>📊 ${propertyTypeText.toUpperCase()} DUAL ASSESSMENT (MSR & TDSR)</h2>
         <div class="dual-assessment">
             <div class="assessment-card msr-card">
-                <h3 style="margin-top: 0; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">MSR 30% Test</h3>
+                <h3 style="margin-top: 0; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">MSR: ${results.actualMSRPercentage.toFixed(1)}% (Limit: 30%)</h3>
                 <div class="info-row">
                     <span class="info-label">Required Income:</span>
                     <span class="info-value">${formatCurrency(results.requiredIncomeHDB)}</span>
@@ -768,7 +774,7 @@ const htmlContent = `
                 </div>
             </div>
             <div class="assessment-card tdsr-card">
-                <h3 style="margin-top: 0; color: ${results.tdsrPass ? '#16a34a' : '#dc2626'};">TDSR 55% Test</h3>
+                <h3 style="margin-top: 0; color: ${results.tdsrPass ? '#16a34a' : '#dc2626'};">TDSR: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</h3>
                 <div class="info-row">
                     <span class="info-label">Required Income:</span>
                     <span class="info-value">${formatCurrency(results.requiredIncomeTDSR)}</span>
@@ -1546,7 +1552,7 @@ This ensures all content fits properly without being cut off.`);
                     {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
                   </div>
                   <div>
-                    <div className="result-title">{getPropertyTypeText(inputs.propertyType)} (TDSR 55%)</div>
+                    <div className="result-title">{getPropertyTypeText(inputs.propertyType)} - TDSR: {results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</div>
                     <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
                       {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
                     </div>
@@ -1591,7 +1597,7 @@ This ensures all content fits properly without being cut off.`);
           {results.hdbPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
         </div>
         <div>
-          <div className="result-title">{getPropertyTypeText(inputs.propertyType)} (MSR 30%)</div>
+          <div className="result-title">{getPropertyTypeText(inputs.propertyType)} - MSR: {results.actualMSRPercentage.toFixed(1)}% (Limit: 30%)</div>
           <div className={`result-value ${results.hdbPass ? 'success' : 'error'}`}>
             {results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
           </div>
@@ -1635,7 +1641,7 @@ This ensures all content fits properly without being cut off.`);
           {results.tdsrPass ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
         </div>
         <div>
-          <div className="result-title">{getPropertyTypeText(inputs.propertyType)} (TDSR 55%)</div>
+          <div className="result-title">{getPropertyTypeText(inputs.propertyType)} - TDSR: {results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</div>
           <div className={`result-value ${results.tdsrPass ? 'success' : 'error'}`}>
             {results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
           </div>
