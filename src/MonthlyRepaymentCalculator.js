@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { Download, Home, Calculator, DollarSign, Calendar, TrendingUp, BarChart3, Clock, PieChart, Building2, Percent, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, Home, Calculator, DollarSign, TrendingUp, BarChart3, Clock, Building2, ChevronDown, ChevronUp } from 'lucide-react';
 import logger from './utils/logger';
-import useDebounce from './hooks/useDebounce';
 
 // Enhanced Monthly Repayment Calculator Component
 const MonthlyRepaymentCalculator = () => {
@@ -918,8 +917,9 @@ const MonthlyRepaymentCalculator = () => {
                     {newLoanResults.yearlyData.map((year, index) => (
                       <div key={index} className="expandable-section">
                         <div className="expandable-header" style={{ display: 'block', padding: 0, background: 'transparent' }}>
-                          <div className="w-full p-4 bg-gray-50 rounded-lg">
-                            <div className="grid grid-cols-8 gap-3 items-center text-sm">
+                          {/* Desktop Layout */}
+                          <div className="w-full p-4 bg-gray-50 rounded-lg desktop-yearly-grid hidden md:block">
+                            <div className="grid grid-cols-8 gap-3 items-center text-sm lg:grid-cols-8 md:grid-cols-4 sm:grid-cols-2">
                               <div className="text-center">
                                 <div className="text-xs text-gray-500 mb-1">Year</div>
                                 <div className="font-medium">{year.year}</div>
@@ -961,11 +961,53 @@ const MonthlyRepaymentCalculator = () => {
                               </div>
                             </div>
                           </div>
+                          
+                          {/* Mobile Layout */}
+                          <div className="mobile-yearly-summary md:hidden">
+                            <div className="mobile-table-card">
+                              <div className="flex justify-between items-center mb-3">
+                                <h4 className="font-semibold text-lg text-gray-800">{year.year}</h4>
+                                <button
+                                  onClick={() => setShowMonthlyBreakdown(prev => ({
+                                    ...prev,
+                                    [year.yearNumber]: !prev[year.yearNumber]
+                                  }))}
+                                  className="btn-standard btn-secondary btn-sm"
+                                >
+                                  {showMonthlyBreakdown[year.yearNumber] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="mobile-table-row">
+                                  <span className="mobile-table-label">Interest Rate</span>
+                                  <span className="mobile-table-value">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span>
+                                </div>
+                                <div className="mobile-table-row">
+                                  <span className="mobile-table-label">Monthly Payment</span>
+                                  <span className="mobile-table-value text-blue-600">{formatCurrency(year.monthlyInstalment)}</span>
+                                </div>
+                                <div className="mobile-table-row">
+                                  <span className="mobile-table-label">Interest Paid</span>
+                                  <span className="mobile-table-value text-red-600">{formatCurrency(year.interestPaid)}</span>
+                                </div>
+                                <div className="mobile-table-row">
+                                  <span className="mobile-table-label">Principal Paid</span>
+                                  <span className="mobile-table-value text-green-600">{formatCurrency(year.principalPaid)}</span>
+                                </div>
+                                <div className="mobile-table-row">
+                                  <span className="mobile-table-label">Ending Balance</span>
+                                  <span className="mobile-table-value text-purple-600">{formatCurrency(year.endingPrincipal)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         {showMonthlyBreakdown[year.yearNumber] && (
                           <div className="expandable-content fade-in">
                             <h5 className="font-medium text-gray-700 mb-3">Monthly Breakdown</h5>
-                            <div className="grid grid-cols-4 xl:grid-cols-6 gap-2">
+                            
+                            {/* Desktop Monthly Breakdown */}
+                            <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2">
                               {year.months.map((month, mIndex) => (
                                 <div key={mIndex} className="bg-white border border-gray-200 rounded-lg p-2">
                                   <div className="text-center">
@@ -987,6 +1029,33 @@ const MonthlyRepaymentCalculator = () => {
                                         <div className="text-gray-500 text-xs">Balance</div>
                                         <div className="font-medium text-xs">{formatCurrency(month.endingBalance)}</div>
                                       </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            {/* Mobile Monthly Breakdown */}
+                            <div className="sm:hidden space-y-3">
+                              {year.months.map((month, mIndex) => (
+                                <div key={mIndex} className="mobile-monthly-card">
+                                  <div className="mobile-monthly-header">{month.monthName}</div>
+                                  <div className="mobile-monthly-details">
+                                    <div className="mobile-monthly-item">
+                                      <div className="mobile-monthly-label">Payment</div>
+                                      <div className="mobile-monthly-value text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
+                                    </div>
+                                    <div className="mobile-monthly-item">
+                                      <div className="mobile-monthly-label">Interest</div>
+                                      <div className="mobile-monthly-value text-red-600">{formatCurrency(month.interestPayment)}</div>
+                                    </div>
+                                    <div className="mobile-monthly-item">
+                                      <div className="mobile-monthly-label">Principal</div>
+                                      <div className="mobile-monthly-value text-green-600">{formatCurrency(month.principalPayment)}</div>
+                                    </div>
+                                    <div className="mobile-monthly-item">
+                                      <div className="mobile-monthly-label">Balance</div>
+                                      <div className="mobile-monthly-value text-purple-600">{formatCurrency(month.endingBalance)}</div>
                                     </div>
                                   </div>
                                 </div>
@@ -1310,7 +1379,8 @@ const MonthlyRepaymentCalculator = () => {
                   {refinancingResults.new.yearlyData.map((year, index) => (
                     <div key={index} className="expandable-section">
                       <div className="expandable-header" style={{ display: 'block', padding: 0, background: 'transparent' }}>
-                        <div className="w-full p-4 bg-gray-50 rounded-lg">
+                        {/* Desktop Layout */}
+                        <div className="w-full p-4 bg-gray-50 rounded-lg desktop-yearly-grid hidden md:block">
                           <div className="grid grid-cols-8 gap-3 items-center text-sm">
                             <div className="text-center">
                               <div className="text-xs text-gray-500 mb-1">Year</div>
@@ -1355,11 +1425,53 @@ const MonthlyRepaymentCalculator = () => {
                             </div>
                           </div>
                         </div>
+                        
+                        {/* Mobile Layout */}
+                        <div className="mobile-yearly-summary md:hidden">
+                          <div className="mobile-table-card">
+                            <div className="flex justify-between items-center mb-3">
+                              <h4 className="font-semibold text-lg text-gray-800">{year.year}</h4>
+                              <button
+                                onClick={() => setShowMonthlyBreakdown(prev => ({
+                                  ...prev,
+                                  [`refinancing_${year.yearNumber}`]: !prev[`refinancing_${year.yearNumber}`]
+                                }))}
+                                className="btn-standard btn-secondary btn-sm"
+                              >
+                                {showMonthlyBreakdown[`refinancing_${year.yearNumber}`] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="mobile-table-row">
+                                <span className="mobile-table-label">Interest Rate</span>
+                                <span className="mobile-table-value">{typeof year.rate === 'string' ? year.rate : `${year.rate.toFixed(2)}%`}</span>
+                              </div>
+                              <div className="mobile-table-row">
+                                <span className="mobile-table-label">Monthly Payment</span>
+                                <span className="mobile-table-value text-blue-600">{formatCurrency(year.monthlyInstalment)}</span>
+                              </div>
+                              <div className="mobile-table-row">
+                                <span className="mobile-table-label">Interest Paid</span>
+                                <span className="mobile-table-value text-red-600">{formatCurrency(year.interestPaid)}</span>
+                              </div>
+                              <div className="mobile-table-row">
+                                <span className="mobile-table-label">Principal Paid</span>
+                                <span className="mobile-table-value text-green-600">{formatCurrency(year.principalPaid)}</span>
+                              </div>
+                              <div className="mobile-table-row">
+                                <span className="mobile-table-label">Ending Balance</span>
+                                <span className="mobile-table-value text-purple-600">{formatCurrency(year.endingPrincipal)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       {showMonthlyBreakdown[`refinancing_${year.yearNumber}`] && (
                         <div className="expandable-content fade-in">
                           <h5 className="font-medium text-gray-700 mb-3">Monthly Breakdown</h5>
-                          <div className="grid grid-cols-4 xl:grid-cols-6 gap-2">
+                          
+                          {/* Desktop Monthly Breakdown */}
+                          <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2">
                             {year.months.map((month, mIndex) => (
                               <div key={mIndex} className="bg-white border border-gray-200 rounded-lg p-2">
                                 <div className="text-center">
@@ -1381,6 +1493,33 @@ const MonthlyRepaymentCalculator = () => {
                                       <span className="text-gray-500">Balance:</span>
                                       <div className="font-medium text-purple-600">{formatCurrency(month.endingBalance)}</div>
                                     </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Mobile Monthly Breakdown */}
+                          <div className="sm:hidden space-y-3">
+                            {year.months.map((month, mIndex) => (
+                              <div key={mIndex} className="mobile-monthly-card">
+                                <div className="mobile-monthly-header">{month.monthName}</div>
+                                <div className="mobile-monthly-details">
+                                  <div className="mobile-monthly-item">
+                                    <div className="mobile-monthly-label">Payment</div>
+                                    <div className="mobile-monthly-value text-blue-600">{formatCurrency(month.monthlyPayment)}</div>
+                                  </div>
+                                  <div className="mobile-monthly-item">
+                                    <div className="mobile-monthly-label">Interest</div>
+                                    <div className="mobile-monthly-value text-red-600">{formatCurrency(month.interestPayment)}</div>
+                                  </div>
+                                  <div className="mobile-monthly-item">
+                                    <div className="mobile-monthly-label">Principal</div>
+                                    <div className="mobile-monthly-value text-green-600">{formatCurrency(month.principalPayment)}</div>
+                                  </div>
+                                  <div className="mobile-monthly-item">
+                                    <div className="mobile-monthly-label">Balance</div>
+                                    <div className="mobile-monthly-value text-purple-600">{formatCurrency(month.endingBalance)}</div>
                                   </div>
                                 </div>
                               </div>
