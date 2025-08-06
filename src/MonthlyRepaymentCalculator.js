@@ -376,10 +376,6 @@ const MonthlyRepaymentCalculator = () => {
             left: 50%;
             width: 250px;
             height: 250px;
-            background-image: url('https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
             opacity: 0.15;
             transform: translate(-50%, -50%) rotate(-15deg);
             z-index: 0;
@@ -388,14 +384,34 @@ const MonthlyRepaymentCalculator = () => {
             -webkit-print-color-adjust: exact;
         }
         
+        .watermark::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+        
         @media print {
             .watermark {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                width: 200px;
-                height: 200px;
-                opacity: 0.12;
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                width: 200px !important;
+                height: 200px !important;
+                opacity: 0.2 !important;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+            
+            .watermark::before {
                 print-color-adjust: exact !important;
                 -webkit-print-color-adjust: exact !important;
             }
@@ -603,7 +619,7 @@ const MonthlyRepaymentCalculator = () => {
     <div class="watermark"></div>
     <div class="header no-page-break">
         <div class="logo-section">
-            <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="KeyQuest Mortgage Logo">
+            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" alt="KeyQuest Mortgage Logo">
         </div>
         
         <div class="report-title">
