@@ -1935,61 +1935,61 @@ This ensures all content fits properly without being cut off.`);
                 </p>
               </div>
             )}
-            
-            {/* Simplified Maximum Affordability - Right Column */}
-            {memoizedAffordability && memoizedAffordability.hasValidData && (
-              <div className="mt-6">
-                <div className="standard-card card-gradient-purple">
-                  <div className="section-header">
-                    <div className="icon-container purple">
-                      <TrendingUp className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-content">
-                      <h2>Maximum Affordability</h2>
-                      <p>Based on your income and commitments</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {/* 75% LTV Option */}
-                    <div className="result-card">
-                      <div className="result-header">
-                        <div className="result-icon bg-blue-100">
-                          <Building2 className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="result-title">Standard (75% LTV)</div>
-                          <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
-                          <div className="result-subtitle">
-                            Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)} • {memoizedAffordability.maxTenure75}yr tenure
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* 55% LTV Option */}
-                    <div className="result-card">
-                      <div className="result-header">
-                        <div className="result-icon bg-orange-100">
-                          <Building className="w-5 h-5 text-orange-600" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="result-title">Conservative (55% LTV)</div>
-                          <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
-                          <div className="result-subtitle">
-                            Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)} • {memoizedAffordability.maxTenure55}yr tenure
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
           </div>
         </div>
       </div>
+
+      {/* Separate Maximum Affordability Section - Full Width */}
+      {memoizedAffordability && memoizedAffordability.hasValidData && (
+        <div className="space-y-8">
+          <div className="standard-card card-gradient-purple">
+            <div className="section-header">
+              <div className="icon-container purple">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-content">
+                <h2>Maximum Affordability</h2>
+                <p>Based on your income and commitments</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 75% LTV Option */}
+              <div className="result-card">
+                <div className="result-header">
+                  <div className="result-icon bg-blue-100">
+                    <Building2 className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="result-title">Standard (75% LTV)</div>
+                    <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
+                    <div className="result-subtitle">
+                      Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)} • {memoizedAffordability.maxTenure75}yr tenure
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 55% LTV Option */}
+              <div className="result-card">
+                <div className="result-header">
+                  <div className="result-icon bg-orange-100">
+                    <Building className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="result-title">Conservative (55% LTV)</div>
+                    <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
+                    <div className="result-subtitle">
+                      Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)} • {memoizedAffordability.maxTenure55}yr tenure
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Results Section - Full Width */}
       {results && (
