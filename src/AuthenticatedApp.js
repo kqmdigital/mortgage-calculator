@@ -1420,10 +1420,17 @@ This ensures all content fits properly without being cut off.`);
   };
 
   return (
-    <div className="space-y-8">
-      <div className="grid-responsive cols-2">
-        {/* Enhanced Input Section */}
-        <div className="space-y-6">
+    <div className="space-y-12">
+      {/* Input Section - Full Width */}
+      <div className="space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">TDSR/MSR Calculator</h1>
+          <p className="text-lg text-gray-600">Configure your loan details and financial commitments</p>
+        </div>
+        
+        {/* Input Cards in Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="space-y-6">{/* Property & Loan Config */}
           {/* Property Type Selection */}
           <div className="standard-card card-gradient-purple">
             <div className="section-header">
@@ -1640,7 +1647,9 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
           </div>
+          </div>
 
+          <div className="space-y-6">{/* Applicant & Income Details */}
           {/* Enhanced Applicant Information */}
           <div className="standard-card card-gradient-green">
             <div className="section-header">
@@ -1741,7 +1750,9 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
           </div>
+          </div>
 
+          <div className="space-y-6">{/* Funding & Commitments */}
           {/* Enhanced Additional Funding */}
           <div className="standard-card card-gradient-yellow">
             <div className="section-header">
@@ -1895,10 +1906,17 @@ This ensures all content fits properly without being cut off.`);
               </div>
             )}
           </div>
+          </div>
         </div>
+      </div>
 
-        {/* Enhanced Results Section */}
-        {results && (
+      {/* Enhanced Results Section - Full Width */}
+      {results && (
+        <div className="space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Assessment Results</h1>
+            <p className="text-lg text-gray-600">Your TDSR/MSR calculation results and financial recommendations</p>
+          </div>
           <div className="space-y-6">
             <div className="standard-card">
               <div className="section-header">
@@ -2430,8 +2448,8 @@ This ensures all content fits properly without being cut off.`);
               </button>
             </div>
           </div>
-   )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
