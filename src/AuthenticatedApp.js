@@ -490,18 +490,33 @@ const htmlContent = `
         body::before {
             content: '';
             position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 200px;
-            height: 200px;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background-image: url('https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192');
-            background-size: contain;
-            background-repeat: no-repeat;
+            background-size: 300px 300px;
+            background-repeat: repeat;
             background-position: center;
-            opacity: 0.05;
-            transform: translate(-50%, -50%) rotate(-15deg);
+            opacity: 0.03;
+            transform: rotate(-15deg);
             z-index: -1;
             pointer-events: none;
+        }
+        
+        @media print {
+            body::before {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-size: 250px 250px;
+                background-repeat: repeat;
+                opacity: 0.04;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
         }
         
         .header {
@@ -922,17 +937,17 @@ const htmlContent = `
             ` : ''}
             
             ${(parseNumberInput(inputs.showFundAmount) > 0 || parseNumberInput(inputs.pledgeAmount) > 0) ? `
-            <div style="margin-top: 20px; padding: 15px; background: #FEF3C7; border-radius: 6px;">
+            <div style="margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 6px;">
                 <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Additional Funding Options</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     ${parseNumberInput(inputs.showFundAmount) > 0 ? `
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F59E0B;">
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
                         <span class="info-label" style="font-weight: 600; color: #374151;">Show Fund Amount:</span>
                         <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.showFundAmount) || 0)}</span>
                     </div>
                     ` : ''}
                     ${parseNumberInput(inputs.pledgeAmount) > 0 ? `
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F59E0B;">
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
                         <span class="info-label" style="font-weight: 600; color: #374151;">Pledge Amount:</span>
                         <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.pledgeAmount) || 0)}</span>
                     </div>
