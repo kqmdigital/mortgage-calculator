@@ -836,7 +836,7 @@ const htmlContent = `
 
     ${!results.tdsrPass ? `
     <div class="section no-break">
-        <div class="section-header">💡 FUNDING SOLUTIONS</div>
+        <div class="section-header">💡 TDSR FUNDING SOLUTIONS</div>
         <div class="section-content" style="padding: 15px; text-align: center;">
             <p style="margin-bottom: 15px; font-size: 11px;">To meet the TDSR requirements, you need one of the following:</p>
             
@@ -904,35 +904,40 @@ const htmlContent = `
                 <div style="font-size: 20px; font-weight: bold; color: #264A82;">${formatCurrency(results.combinedMonthlyIncome || 0)}</div>
             </div>
             
+            
             ${results.averageAge > 0 ? `
-            <div style="margin-top: 15px;">
-                <h4 style="color: #264A82; margin-bottom: 10px; font-size: 14px;">Age & Tenor Information</h4>
-                <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                    <span class="info-label" style="font-weight: 600; color: #374151;">Average Age:</span>
-                    <span class="info-value" style="font-weight: bold; color: #111827;">${results.averageAge.toFixed(1)} years</span>
-                </div>
-                <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
-                    <span class="info-label" style="font-weight: 600; color: #374151;">Max Loan Tenor:</span>
-                    <span class="info-value" style="font-weight: bold; color: #111827;">${results.finalLoanTenure || inputs.loanTenor || 0} years</span>
+            <div style="margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 6px;">
+                <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Age & Tenor Information</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Average Age:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${results.averageAge.toFixed(1)} years</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Max Loan Tenor:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${results.finalLoanTenure || inputs.loanTenor || 0} years</span>
+                    </div>
                 </div>
             </div>
             ` : ''}
             
             ${(parseNumberInput(inputs.showFundAmount) > 0 || parseNumberInput(inputs.pledgeAmount) > 0) ? `
-            <div style="margin-top: 15px;">
-                <h4 style="color: #264A82; margin-bottom: 10px; font-size: 14px;">Additional Funding Options</h4>
-                ${parseNumberInput(inputs.showFundAmount) > 0 ? `
-                <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                    <span class="info-label" style="font-weight: 600; color: #374151;">Show Fund Amount:</span>
-                    <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.showFundAmount) || 0)}</span>
+            <div style="margin-top: 20px; padding: 15px; background: #FEF3C7; border-radius: 6px;">
+                <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Additional Funding Options</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    ${parseNumberInput(inputs.showFundAmount) > 0 ? `
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F59E0B;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Show Fund Amount:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.showFundAmount) || 0)}</span>
+                    </div>
+                    ` : ''}
+                    ${parseNumberInput(inputs.pledgeAmount) > 0 ? `
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F59E0B;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Pledge Amount:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.pledgeAmount) || 0)}</span>
+                    </div>
+                    ` : ''}
                 </div>
-                ` : ''}
-                ${parseNumberInput(inputs.pledgeAmount) > 0 ? `
-                <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
-                    <span class="info-label" style="font-weight: 600; color: #374151;">Pledge Amount:</span>
-                    <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.pledgeAmount) || 0)}</span>
-                </div>
-                ` : ''}
             </div>
             ` : ''}
         </div>
