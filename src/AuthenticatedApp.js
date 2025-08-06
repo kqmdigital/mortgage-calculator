@@ -134,6 +134,76 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
   };
 
+  // Calculate stamp duty based on property type and purchase price
+  const calculateStampDuty = (purchasePrice, propertyType) => {
+    if (!purchasePrice || purchasePrice <= 0) return 0;
+    
+    // Residential properties (Private, EC, HDB)
+    if (propertyType !== 'commercial') {
+      if (purchasePrice <= 180000) {
+        return purchasePrice * 0.01;
+      } else if (purchasePrice <= 360000) {
+        return 1800 + (purchasePrice - 180000) * 0.02;
+      } else if (purchasePrice <= 1000000) {
+        return 1800 + 3600 + (purchasePrice - 360000) * 0.03;
+      } else {
+        return 1800 + 3600 + 19200 + (purchasePrice - 1000000) * 0.04;
+      }
+    } else {
+      // Commercial/Industrial properties
+      if (purchasePrice <= 180000) {
+        return purchasePrice * 0.01;
+      } else if (purchasePrice <= 360000) {
+        return 1800 + (purchasePrice - 180000) * 0.02;
+      } else {
+        return 1800 + 3600 + (purchasePrice - 360000) * 0.03;
+      }
+    }
+  };
+
+  // Calculate downpayment breakdown
+  const calculateDownPayment = (purchasePrice, loanAmount, propertyType, loanPercentage) => {
+    if (!purchasePrice || purchasePrice <= 0) return { cashRequired: 0, cpfAllowed: 0, totalDownPayment: 0 };
+    
+    const totalDownPayment = purchasePrice - loanAmount;
+    
+    // Commercial/Industrial properties - cash only, no CPF
+    if (propertyType === 'commercial') {
+      return {
+        cashRequired: totalDownPayment, // 20% cash for 80% loan
+        cpfAllowed: 0,
+        totalDownPayment
+      };
+    }
+    
+    // Residential properties (PTE, EC, HDB) - different cash requirements based on loan percentage
+    let cashPercentage = 0;
+    let cpfPercentage = 0;
+    
+    if (loanPercentage <= 55) {
+      // 55% loan: 10% cash + 35% CPF/Cash
+      cashPercentage = 10;
+      cpfPercentage = 35;
+    } else if (loanPercentage <= 75) {
+      // 75% loan: 5% cash + 20% CPF/Cash  
+      cashPercentage = 5;
+      cpfPercentage = 20;
+    } else {
+      // Higher loan percentages - minimum 5% cash
+      cashPercentage = 5;
+      cpfPercentage = Math.max(0, (100 - loanPercentage) - 5);
+    }
+    
+    const cashRequired = (purchasePrice * cashPercentage) / 100;
+    const cpfAllowed = (purchasePrice * cpfPercentage) / 100;
+    
+    return {
+      cashRequired,
+      cpfAllowed,
+      totalDownPayment
+    };
+  };
+
   const calculateMortgage = useCallback(() => {
     const {
       propertyType, purchasePrice, loanPercentage, customLoanAmount, useCustomAmount,
@@ -230,6 +300,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const actualTDSRPercentage = combinedMonthlyIncome > 0 ? ((monthlyInstallment + totalCommitmentsTDSR) / combinedMonthlyIncome) * 100 : 0;
     const actualMSRPercentage = combinedMonthlyIncome > 0 ? ((monthlyInstallment + totalCommitments) / combinedMonthlyIncome) * 100 : 0;
 
+    // Calculate stamp duty and downpayment
+    const stampDuty = calculateStampDuty(parsedInputs.purchasePrice, propertyType);
+    const downPayment = calculateDownPayment(parsedInputs.purchasePrice, loanAmount, propertyType, useCustomAmount ? ((parsedInputs.customLoanAmount / parsedInputs.purchasePrice) * 100) : loanPercentage);
+
     return {
       propertyType,
       loanAmount,
@@ -262,7 +336,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       averageAge,
       actualTDSRPercentage,
       actualMSRPercentage,
-      maxLoanTenor
+      maxLoanTenor,
+      stampDuty,
+      downPayment,
+      purchasePrice: parsedInputs.purchasePrice
     };
   }, [inputs, calculateAverageAge, calculateMaxLoanTenor]);
 
@@ -408,13 +485,15 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         }));
       }
     } else if (field === 'propertyType') {
-      // When property type changes, update stress test rate and reset loan tenor manual edit flag
+      // When property type changes, update stress test rate, loan percentage defaults, and reset loan tenor manual edit flag
       const newStressTestRate = getDefaultStressTestRate(value);
+      const defaultLoanPercentage = value === 'commercial' ? 80 : 75;
       setLoanTenorManuallyEdited(false); // Allow auto-population for new property type
       setInputs(prev => ({
         ...prev,
         [field]: value,
-        stressTestRate: newStressTestRate
+        stressTestRate: newStressTestRate,
+        loanPercentage: prev.useCustomAmount ? prev.loanPercentage : defaultLoanPercentage
       }));
     } else {
       setInputs(prev => ({
@@ -825,6 +904,58 @@ const htmlContent = `
         </div>
     </div>
 
+    <div class="section no-break">
+        <div class="section-header">💰 FINANCIAL REQUIREMENTS</div>
+        <div class="section-content">
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Downpayment Breakdown</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Cash Required:</td>
+                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(results.downPayment.cashRequired)}</td>
+                        <td class="info-label">CPF Allowed:</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">
+                            ${inputs.propertyType === 'commercial' ? 'Not Allowed' : formatCurrency(results.downPayment.cpfAllowed)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="info-label">Total Downpayment:</td>
+                        <td class="info-value" style="color: #059669; font-weight: bold;">${formatCurrency(results.downPayment.totalDownPayment)}</td>
+                        <td class="info-label">% of Purchase Price:</td>
+                        <td class="info-value">${(((results.downPayment.totalDownPayment) / results.purchasePrice) * 100).toFixed(1)}%</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                    <strong>Requirements:</strong> 
+                    ${inputs.propertyType === 'commercial' 
+                        ? 'Commercial properties require 20% cash downpayment (no CPF allowed)'
+                        : inputs.loanPercentage <= 55 
+                            ? 'Residential: 10% cash + 35% CPF/Cash allowed'
+                            : 'Residential: 5% cash + 20% CPF/Cash allowed'
+                    }
+                </div>
+            </div>
+            
+            <div>
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Stamp Duty</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Buyer's Stamp Duty (BSD):</td>
+                        <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(results.stampDuty)}</td>
+                        <td class="info-label">Effective Rate:</td>
+                        <td class="info-value">${((results.stampDuty / results.purchasePrice) * 100).toFixed(3)}%</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                    <strong>Note:</strong> Additional stamp duties (ABSD, etc.) and legal fees not included. 
+                    ${inputs.propertyType === 'commercial' ? 'Commercial/Industrial rates applied.' : 'Residential rates applied.'}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div style="background: ${results.tdsrPass ? '#F0FDF4' : '#FEF2F2'}; border: 2px solid ${results.tdsrPass ? '#166534' : '#DC2626'}; color: ${results.tdsrPass ? '#166534' : '#DC2626'}; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 16px; border-radius: 8px;">
         TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
         <br/>
@@ -1178,16 +1309,17 @@ This ensures all content fits properly without being cut off.`);
                     <input
                       type="radio"
                       name="loanOption"
-                      checked={!inputs.useCustomAmount && inputs.loanPercentage === 75}
+                      checked={!inputs.useCustomAmount && inputs.loanPercentage === (inputs.propertyType === 'commercial' ? 80 : 75)}
                       onChange={() => {
+                        const defaultPercentage = inputs.propertyType === 'commercial' ? 80 : 75;
                         handleInputChange('useCustomAmount', false);
-                        handleInputChange('loanPercentage', 75);
+                        handleInputChange('loanPercentage', defaultPercentage);
                       }}
                     />
                     <div className="radio-card-content">
-                      <div className="radio-card-title">75%</div>
+                      <div className="radio-card-title">{inputs.propertyType === 'commercial' ? '80%' : '75%'}</div>
                       <div className="radio-card-subtitle text-xs">
-                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.75)}
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * (inputs.propertyType === 'commercial' ? 0.80 : 0.75))}
                       </div>
                     </div>
                   </label>
@@ -1603,6 +1735,133 @@ This ensures all content fits properly without being cut off.`);
                           <div className="result-value text-gray-700">{((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Downpayment and Stamp Duty Information */}
+            <div className="standard-card">
+              <div className="section-header">
+                <div className="icon-container green">
+                  <Home className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-content">
+                  <h2>Financial Requirements</h2>
+                  <p>Downpayment breakdown and stamp duty</p>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-4 text-gray-800">Downpayment Requirements</h3>
+                  <div className="grid-responsive cols-3">
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-red-100">
+                          <DollarSign className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Cash Required</div>
+                          <div className="result-value text-red-600">{formatCurrency(results.downPayment.cashRequired)}</div>
+                          <div className="result-subtitle">
+                            {inputs.propertyType === 'commercial' 
+                              ? '20% cash (no CPF allowed)'
+                              : inputs.loanPercentage <= 55 
+                                ? '10% cash requirement'
+                                : '5% cash requirement'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-blue-100">
+                          <Building className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">CPF Allowed</div>
+                          <div className="result-value text-blue-600">
+                            {inputs.propertyType === 'commercial' 
+                              ? 'Not Allowed' 
+                              : formatCurrency(results.downPayment.cpfAllowed)
+                            }
+                          </div>
+                          <div className="result-subtitle">
+                            {inputs.propertyType === 'commercial' 
+                              ? 'Commercial properties'
+                              : inputs.loanPercentage <= 55 
+                                ? '35% CPF/Cash allowed'
+                                : '20% CPF/Cash allowed'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-green-100">
+                          <TrendingUp className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Total Downpayment</div>
+                          <div className="result-value text-green-600">{formatCurrency(results.downPayment.totalDownPayment)}</div>
+                          <div className="result-subtitle">
+                            {(((results.downPayment.totalDownPayment) / results.purchasePrice) * 100).toFixed(1)}% of purchase price
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4 text-gray-800">Stamp Duty</h3>
+                  <div className="grid-responsive cols-1">
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-purple-100">
+                          <BarChart3 className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Buyer's Stamp Duty (BSD)</div>
+                          <div className="result-value text-purple-600">{formatCurrency(results.stampDuty)}</div>
+                          <div className="result-subtitle">
+                            {inputs.propertyType === 'commercial' 
+                              ? 'Commercial/Industrial rate'
+                              : 'Residential property rate'
+                            } - {((results.stampDuty / results.purchasePrice) * 100).toFixed(3)}% effective rate
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div className="text-sm text-gray-700">
+                      <p className="font-medium mb-2">Important Notes:</p>
+                      <ul className="space-y-1 list-disc list-inside">
+                        {inputs.propertyType === 'commercial' ? (
+                          <>
+                            <li>Commercial/Industrial properties require 20% cash downpayment (no CPF allowed)</li>
+                            <li>Additional stamp duties may apply (ABSD, etc.)</li>
+                          </>
+                        ) : (
+                          <>
+                            <li>Cash component is mandatory and cannot be substituted with CPF</li>
+                            <li>CPF/Cash portion can be paid using CPF OA or cash</li>
+                            <li>Additional stamp duties may apply for non-residents or multiple property owners</li>
+                          </>
+                        )}
+                        <li>Legal fees, valuation fees, and other costs not included</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
