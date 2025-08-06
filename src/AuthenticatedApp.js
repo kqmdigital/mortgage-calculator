@@ -448,7 +448,7 @@ const htmlContent = `
     <style>
         @page {
             size: A4;
-            margin: 0.5in 0.75in;
+            margin: 0.5in;
         }
         
         @media print {
@@ -480,168 +480,212 @@ const htmlContent = `
             color: #333;
             max-width: 100%;
             margin: 0;
-            padding: 10px;
+            padding: 0;
             background: white;
             font-size: 12px;
+            position: relative;
+        }
+
+        /* Watermark styling */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            background-image: url('https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.05;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            z-index: -1;
+            pointer-events: none;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #1d4ed8;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #264A82;
+            position: relative;
+            z-index: 1;
         }
         
         .logo-section {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
         
         .logo-section img {
-            max-width: 100px !important;
-            width: 100px !important;
+            max-width: 120px !important;
+            width: 120px !important;
             height: auto !important;
             display: block;
         }
         
+        .report-title {
+            color: #DC2626;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .property-type-banner {
+            background: #264A82;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
         .report-info {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 10px;
             color: #666;
         }
         
-        .property-type-banner {
-            background: ${inputs.propertyType === 'private' ? '#1d4ed8' : '#059669'};
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            margin: 8px 0;
-        }
-        
         .section {
-            margin: 15px 0;
-            padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            background: #fafafa;
+            margin: 20px 0;
             page-break-inside: avoid;
             break-inside: avoid;
+            position: relative;
+            z-index: 1;
         }
         
-        .section h2 {
-            color: #1d4ed8;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
+        .section-header {
+            background: #264A82;
+            color: white;
+            padding: 8px 15px;
             font-size: 14px;
-            margin-top: 0;
+            font-weight: bold;
+            margin-bottom: 0;
         }
         
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .section-content {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-top: none;
         }
         
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dotted #ccc;
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        
+        .info-table tr:nth-child(even) {
+            background: #F3F4F6;
+        }
+        
+        .info-table tr:nth-child(odd) {
+            background: white;
+        }
+        
+        .info-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #E5E7EB;
             font-size: 11px;
         }
         
         .info-label {
             font-weight: 600;
-            color: #555;
+            color: #374151;
+            width: 60%;
         }
         
         .info-value {
             font-weight: bold;
-            color: #333;
+            color: #111827;
+            text-align: right;
+            width: 40%;
         }
         
-        .highlight-box {
-            background: #eff6ff;
-            border: 1px solid #3b82f6;
-            border-radius: 4px;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        
-        .affordability-result {
-            background: ${(inputs.propertyType === 'private' ? results.tdsrPass : (results.tdsrPass && results.hdbPass)) ? '#f0fdf4' : '#fef2f2'};
-            border: 2px solid ${(inputs.propertyType === 'private' ? results.tdsrPass : (results.tdsrPass && results.hdbPass)) ? '#22c55e' : '#ef4444'};
-            border-radius: 8px;
-            padding: 15px;
+        .highlight-section {
+            background: #264A82;
+            color: white;
+            padding: 12px 15px;
             margin: 15px 0;
             text-align: center;
-        }
-        
-        .affordability-title {
-            font-size: 16px;
             font-weight: bold;
-            color: ${(inputs.propertyType === 'private' ? results.tdsrPass : (results.tdsrPass && results.hdbPass)) ? '#16a34a' : '#dc2626'};
-            margin-bottom: 10px;
+            font-size: 14px;
         }
         
-        .dual-assessment {
+        .assessment-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 0;
             margin: 15px 0;
+            border: 1px solid #E5E7EB;
         }
         
         .assessment-card {
-            border: 2px solid;
-            border-radius: 8px;
             padding: 15px;
             text-align: center;
+            border-right: 1px solid #E5E7EB;
         }
         
-        .msr-card {
-            background: ${results.hdbPass ? '#f0fdf4' : '#fef2f2'};
-            border-color: ${results.hdbPass ? '#22c55e' : '#ef4444'};
+        .assessment-card:last-child {
+            border-right: none;
         }
         
-        .tdsr-card {
-            background: ${results.tdsrPass ? '#f0fdf4' : '#fef2f2'};
-            border-color: ${results.tdsrPass ? '#22c55e' : '#ef4444'};
+        .assessment-card.pass {
+            background: #F0FDF4;
+            color: #166534;
+        }
+        
+        .assessment-card.fail {
+            background: #FEF2F2;
+            color: #DC2626;
+        }
+        
+        .assessment-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .assessment-result {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 8px 0;
         }
         
         .funding-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 0;
             margin: 10px 0;
+            border: 1px solid #E5E7EB;
         }
         
         .funding-card {
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             font-size: 11px;
+            border-right: 1px solid #E5E7EB;
         }
         
-        .funding-section {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            background: #fafafa;
-            page-break-inside: avoid;
-            break-inside: avoid;
+        .funding-card:last-child {
+            border-right: none;
+        }
+        
+        .funding-amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: #DC2626;
+            margin-top: 5px;
         }
         
         .footer {
-            margin-top: 20px;
+            margin-top: 30px;
             padding-top: 15px;
             border-top: 1px solid #e5e7eb;
             text-align: center;
@@ -649,28 +693,46 @@ const htmlContent = `
             font-size: 9px;
             page-break-inside: avoid;
             break-inside: avoid;
+            position: relative;
+            z-index: 1;
         }
         
         .disclaimer {
-            background: #f3f4f6;
-            padding: 10px;
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            padding: 12px;
             border-radius: 4px;
-            margin: 15px 0;
+            margin: 20px 0;
             font-size: 9px;
             color: #555;
             page-break-inside: avoid;
             break-inside: avoid;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .disclaimer h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 11px;
         }
         
         @media print {
-            .two-column, .funding-grid, .dual-assessment { 
+            .assessment-grid, .funding-grid { 
                 grid-template-columns: 1fr 1fr !important; 
             }
         }
         
         @media (max-width: 600px) {
-            .two-column, .funding-grid, .dual-assessment { 
+            .assessment-grid, .funding-grid { 
                 grid-template-columns: 1fr; 
+            }
+            .assessment-card, .funding-card {
+                border-right: none;
+                border-bottom: 1px solid #E5E7EB;
+            }
+            .assessment-card:last-child, .funding-card:last-child {
+                border-bottom: none;
             }
         }
     </style>
@@ -680,291 +742,249 @@ const htmlContent = `
         <div class="logo-section">
             <img 
                 src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
-                alt="KeyQuest Mortgage Logo" 
-                className="w-42 h-36 lg:w-46 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
-              />
-
+                alt="KeyQuest Mortgage Logo"
+            />
         </div>
         
-        <div class="property-type-banner">
-            ${propertyTypeText} TDSR/MSR Analysis
+        <div class="report-title">
+            TDSR/MSR Analysis Report
         </div>
         
         <div class="report-info">
-            <strong>Mortgage Affordability Assessment Report</strong><br>
             Generated: ${currentDate} | Report ID: KQM-${Date.now()}
         </div>
     </div>
 
     <div class="section no-break">
-        <h2>📋 LOAN SUMMARY</h2>
-        <div class="highlight-box">
-            <div class="two-column">
-                <div>
-                    <div class="info-row">
-                        <span class="info-label">Property Type:</span>
-                        <span class="info-value">${propertyTypeText}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Property Value:</span>
-                        <span class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Loan Amount:</span>
-                        <span class="info-value">${formatCurrency(results.loanAmount)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Loan-to-Value:</span>
-                        <span class="info-value">${((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</span>
-                    </div>
-                </div>
-                <div>
-                    <div class="info-row">
-                        <span class="info-label">Combined Income:</span>
-                        <span class="info-value">${formatCurrency(results.combinedMonthlyIncome)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Loan Tenure:</span>
-                        <span class="info-value">${inputs.loanTenor} years</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Stress Test Rate:</span>
-                        <span class="info-value">${inputs.stressTestRate}%</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Monthly Installment (Stress):</span>
-                        <span class="info-value">${formatCurrency(results.monthlyInstallmentStressTest)}</span>
-                    </div>
-                </div>
-            </div>
+        <div class="section-header">Input Details</div>
+        <div class="section-content">
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Property Type</td>
+                    <td class="info-value">${propertyTypeText}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Purchase Type</td>
+                    <td class="info-value">${(parseNumberInput(inputs.monthlySalaryB) > 0 || parseNumberInput(inputs.annualSalaryB) > 0) ? 'Joint Applicant' : 'Single Applicant'}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Applicant Age</td>
+                    <td class="info-value">${results.averageAge > 0 ? results.averageAge.toFixed(0) + ' years' : (parseNumberInput(inputs.applicantAgeA) || 0) + ' years'}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Stress Test</td>
+                    <td class="info-value">${inputs.stressTestRate}%</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Monthly Salary</td>
+                    <td class="info-value">${formatCurrency((parseNumberInput(inputs.monthlySalaryA) || 0) + (parseNumberInput(inputs.monthlySalaryB) || 0))}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Annual Income</td>
+                    <td class="info-value">${formatCurrency((parseNumberInput(inputs.annualSalaryA) || 0) + (parseNumberInput(inputs.annualSalaryB) || 0))}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Credit Cards Minimum Payments</td>
+                    <td class="info-value">$ 0</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Other Commitments</td>
+                    <td class="info-value">${formatCurrency(results.totalCommitmentsTDSR)}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Car Loans</td>
+                    <td class="info-value">${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    <div class="affordability-result">
-        <div class="affordability-title">
-            ${inputs.propertyType === 'private' 
-                ? `TDSR Assessment: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%) - ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}`
-                : `Overall HDB Assessment: ${(results.hdbPass && results.tdsrPass) ? 'PASS ✓' : 'FAIL ✗'}`
-            }
-        </div>
-        <div style="font-size: 14px;">
-            ${inputs.propertyType === 'private'
-                ? `Required Income: ${formatCurrency(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}`
-                : `Must pass BOTH MSR (30%) AND TDSR (55%) tests`
-            }
+    <div class="section no-break">
+        <div class="section-header">Your Affordability Breakdown</div>
+        <div class="section-content">
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Affordable Purchase Price</td>
+                    <td class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Affordable Loan</td>
+                    <td class="info-value">${formatCurrency(results.loanAmount)}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Loan Tenure</td>
+                    <td class="info-value">${inputs.loanTenor} Year(s)</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Property Type</td>
+                    <td class="info-value">${propertyTypeText}</td>
+                </tr>
+            </table>
         </div>
     </div>
+
+    ${inputs.propertyType === 'private' ? `
+    <div class="highlight-section">
+        TDSR Assessment Result: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%) - ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+    </div>
+    ` : `
+    <div class="highlight-section">
+        Overall Assessment: ${(results.hdbPass && results.tdsrPass) ? 'PASS ✓' : 'FAIL ✗'} - Must pass BOTH MSR (30%) AND TDSR (55%) tests
+    </div>
+    `}
 
     ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
     <div class="section no-break">
-        <h2>📊 ${propertyTypeText.toUpperCase()} DUAL ASSESSMENT (MSR & TDSR)</h2>
-        <div class="dual-assessment">
-            <div class="assessment-card msr-card">
-                <h3 style="margin-top: 0; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">MSR: ${results.actualMSRPercentage.toFixed(1)}% (Limit: 30%)</h3>
-                <div class="info-row">
-                    <span class="info-label">Required Income:</span>
-                    <span class="info-value">${formatCurrency(results.requiredIncomeHDB)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Deficit/Surplus:</span>
-                    <span class="info-value" style="color: ${results.hdbDeficit >= 0 ? '#16a34a' : '#dc2626'};">${formatCurrency(results.hdbDeficit)}</span>
-                </div>
-                <div style="margin-top: 10px; font-weight: bold; color: ${results.hdbPass ? '#16a34a' : '#dc2626'};">
-                    ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
-                </div>
+        <div class="section-header">${propertyTypeText.toUpperCase()} DUAL ASSESSMENT (MSR & TDSR)</div>
+        <div class="assessment-grid">
+            <div class="assessment-card ${results.hdbPass ? 'pass' : 'fail'}">
+                <div class="assessment-title">MSR: ${results.actualMSRPercentage.toFixed(1)}% (Limit: 30%)</div>
+                <div class="assessment-result">${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}</div>
+                <table style="width: 100%; margin-top: 10px; font-size: 10px;">
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <td style="padding: 4px; text-align: left;">Required Income:</td>
+                        <td style="padding: 4px; text-align: right; font-weight: bold;">${formatCurrency(results.requiredIncomeHDB)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px; text-align: left;">Deficit/Surplus:</td>
+                        <td style="padding: 4px; text-align: right; font-weight: bold; color: ${results.hdbDeficit >= 0 ? '#166534' : '#DC2626'};">${formatCurrency(results.hdbDeficit)}</td>
+                    </tr>
+                </table>
             </div>
-            <div class="assessment-card tdsr-card">
-                <h3 style="margin-top: 0; color: ${results.tdsrPass ? '#16a34a' : '#dc2626'};">TDSR: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</h3>
-                <div class="info-row">
-                    <span class="info-label">Required Income:</span>
-                    <span class="info-value">${formatCurrency(results.requiredIncomeTDSR)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Deficit/Surplus:</span>
-                    <span class="info-value" style="color: ${results.tdsrDeficit >= 0 ? '#16a34a' : '#dc2626'};">${formatCurrency(results.tdsrDeficit)}</span>
-                </div>
-                <div style="margin-top: 10px; font-weight: bold; color: ${results.tdsrPass ? '#16a34a' : '#dc2626'};">
-                    ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
-                </div>
+            <div class="assessment-card ${results.tdsrPass ? 'pass' : 'fail'}">
+                <div class="assessment-title">TDSR: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</div>
+                <div class="assessment-result">${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}</div>
+                <table style="width: 100%; margin-top: 10px; font-size: 10px;">
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <td style="padding: 4px; text-align: left;">Required Income:</td>
+                        <td style="padding: 4px; text-align: right; font-weight: bold;">${formatCurrency(results.requiredIncomeTDSR)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px; text-align: left;">Deficit/Surplus:</td>
+                        <td style="padding: 4px; text-align: right; font-weight: bold; color: ${results.tdsrDeficit >= 0 ? '#166534' : '#DC2626'};">${formatCurrency(results.tdsrDeficit)}</td>
+                    </tr>
+                </table>
             </div>
         </div>
-        <div style="background: #eff6ff; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 11px;">
-            <strong>Note:</strong> For ${propertyTypeText} loans, banks assess both MSR (30%) for property-related debt and TDSR (55%) for total debt servicing. Both tests must be passed for loan approval.
+    </div>
+    ` : `
+    <div class="section no-break">
+        <div class="section-header">TDSR ASSESSMENT RESULT</div>
+        <div class="assessment-grid">
+            <div class="assessment-card ${results.tdsrPass ? 'pass' : 'fail'}" style="grid-column: 1 / -1;">
+                <div class="assessment-title">TDSR: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</div>
+                <div class="assessment-result">${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}</div>
+                <table style="width: 100%; margin-top: 10px; font-size: 10px;">
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <td style="padding: 4px; text-align: left;">Required Income:</td>
+                        <td style="padding: 4px; text-align: right; font-weight: bold;">${formatCurrency(results.requiredIncomeTDSR)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px; text-align: left;">Deficit/Surplus:</td>
+                        <td style="padding: 4px; text-align: right; font-weight: bold; color: ${results.tdsrDeficit >= 0 ? '#166534' : '#DC2626'};">${formatCurrency(results.tdsrDeficit)}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    `}
+
+    ${(!results.tdsrPass || ((inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass)) ? `
+    <div class="section no-break">
+        <div class="section-header">FUNDING SOLUTIONS</div>
+        <div class="section-content" style="padding: 15px; text-align: center;">
+            <p style="margin-bottom: 15px; font-size: 11px;">To meet the ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? 'MSR and TDSR' : 'TDSR'} requirements, you need one of the following:</p>
+            
+            ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass ? `
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 12px;">For MSR (30%) Shortfall:</h4>
+                <div class="funding-grid">
+                    <div class="funding-card">
+                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
+                        <div class="funding-amount">${formatCurrency(results.cashShowHDB)}</div>
+                    </div>
+                    <div class="funding-card">
+                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
+                        <div class="funding-amount">${formatCurrency(results.cashPledgeHDB)}</div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+            
+            ${!results.tdsrPass ? `
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 12px;">For TDSR (55%) Shortfall:</h4>
+                <div class="funding-grid">
+                    <div class="funding-card">
+                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
+                        <div class="funding-amount">${formatCurrency(results.cashShowTDSR)}</div>
+                    </div>
+                    <div class="funding-card">
+                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
+                        <div class="funding-amount">${formatCurrency(results.cashPledgeTDSR)}</div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+            
+            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
         </div>
     </div>
     ` : ''}
 
     ${(!results.tdsrPass || ((inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass)) ? `
-    <div class="funding-section no-break">
-        <h2>💡 FUNDING SOLUTIONS</h2>
-        <p style="text-align: center; margin-bottom: 15px;">To meet the ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? 'MSR and TDSR' : 'TDSR'} requirements, you need one of the following:</p>
-        
-        ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass ? `
-        <div style="margin-bottom: 20px;">
-            <h4 style="color: #dc2626; margin-bottom: 10px;">For MSR (30%) Shortfall:</h4>
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <h5 style="margin: 0 0 5px 0; color: #666;">Show Fund Option</h5>
-                    <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.cashShowHDB)}</div>
-                </div>
-                <div class="funding-card">
-                    <h5 style="margin: 0 0 5px 0; color: #666;">Pledge Option</h5>
-                    <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.cashPledgeHDB)}</div>
-                </div>
-            </div>
-        </div>
-        ` : ''}
-        
-        ${!results.tdsrPass ? `
-        <div style="margin-bottom: 20px;">
-            <h4 style="color: #dc2626; margin-bottom: 10px;">For TDSR (55%) Shortfall:</h4>
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <h5 style="margin: 0 0 5px 0; color: #666;">Show Fund Option</h5>
-                    <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.cashShowTDSR)}</div>
-                </div>
-                <div class="funding-card">
-                    <h5 style="margin: 0 0 5px 0; color: #666;">Pledge Option</h5>
-                    <div style="font-size: 16px; font-weight: bold; color: #dc2626;">${formatCurrency(results.cashPledgeTDSR)}</div>
-                </div>
-            </div>
-        </div>
-        ` : ''}
-        
-        <p style="text-align: center; font-style: italic; color: #666; font-size: 10px;">Choose either Show Fund OR Pledge option, not both</p>
-    </div>
-    ` : ''}
-
-    <div class="page-break"></div>
-
     <div class="section no-break">
-        <h2>👥 APPLICANT DETAILS</h2>
-        <div class="two-column">
-            <div>
-                <h4 style="margin-bottom: 10px; color: #1d4ed8;">Primary Applicant</h4>
-                <div class="info-row">
-                    <span class="info-label">Monthly Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Annual Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Age:</span>
-                    <span class="info-value">${parseNumberInput(inputs.applicantAgeA) || 0} years</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Total Income:</span>
-                    <span class="info-value">${formatCurrency(results.totalMonthlyIncomeA)}</span>
-                </div>
+        <div class="section-header">What's Next?</div>
+        <div class="assessment-grid" style="grid-template-columns: 1fr 1fr;">
+            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
+                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Confirm your maximum loan eligibility</h4>
+                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
+                    An In-Principle-Approval gives you a clear idea of how much you can borrow from a bank. 
+                    We'll check your eligibility across your preferred banks and recommend the IPA that best fits your profile.
+                </p>
             </div>
-            <div>
-                <h4 style="margin-bottom: 10px; color: #1d4ed8;">Co-Applicant</h4>
-                <div class="info-row">
-                    <span class="info-label">Monthly Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Annual Salary:</span>
-                    <span class="info-value">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Age:</span>
-                    <span class="info-value">${parseNumberInput(inputs.applicantAgeB) || 0} years</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Total Income:</span>
-                    <span class="info-value">${formatCurrency(results.totalMonthlyIncomeB)}</span>
-                </div>
+            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
+                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Need help understanding your affordability?</h4>
+                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
+                    Contact our mortgage specialists for personalized advice on improving your loan eligibility 
+                    and exploring alternative financing solutions.
+                </p>
             </div>
         </div>
-        <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
-            <h4 style="color: #1d4ed8; margin-bottom: 5px;">Combined Household Income</h4>
-            <div style="font-size: 20px; font-weight: bold; color: #16a34a;">${formatCurrency(results.combinedMonthlyIncome)}</div>
-        </div>
-        
-        ${results.averageAge > 0 ? `
-        <div style="margin-top: 15px;">
-            <h4 style="color: #1d4ed8; margin-bottom: 10px;">Age & Tenor Information</h4>
-            <div class="info-row">
-                <span class="info-label">Average Age:</span>
-                <span class="info-value">${results.averageAge.toFixed(1)} years</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Max Loan Tenor:</span>
-                <span class="info-value">${results.maxLoanTenor} years</span>
-            </div>
-        </div>
-        ` : ''}
-        
-        ${(parseNumberInput(inputs.showFundAmount) > 0 || parseNumberInput(inputs.pledgeAmount) > 0) ? `
-        <div style="margin-top: 15px;">
-            <h4 style="color: #1d4ed8; margin-bottom: 10px;">Additional Funding Options</h4>
-            ${parseNumberInput(inputs.showFundAmount) > 0 ? `
-            <div class="info-row">
-                <span class="info-label">Show Fund Amount:</span>
-                <span class="info-value">${formatCurrency(parseNumberInput(inputs.showFundAmount))}</span>
-            </div>
-            ` : ''}
-            ${parseNumberInput(inputs.pledgeAmount) > 0 ? `
-            <div class="info-row">
-                <span class="info-label">Pledge Amount:</span>
-                <span class="info-value">${formatCurrency(parseNumberInput(inputs.pledgeAmount))}</span>
-            </div>
-            ` : ''}
-        </div>
-        ` : ''}
     </div>
-
+    ` : `
     <div class="section no-break">
-        <h2>📊 Monthly Commitments</h2>
-        ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #dc2626; margin-bottom: 10px;">MSR Commitments: ${formatCurrency(results.totalCommitments)}</h4>
-            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments)}). Car loans and personal loans are excluded from MSR.</p>
+        <div class="section-header">What's Next?</div>
+        <div class="assessment-grid" style="grid-template-columns: 1fr 1fr;">
+            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
+                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Proceed with your loan application</h4>
+                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
+                    You meet the affordability requirements! Let's help you secure the best mortgage package 
+                    from our partner banks with competitive rates and terms.
+                </p>
+            </div>
+            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
+                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Get your In-Principle-Approval</h4>
+                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
+                    Secure your IPA with our trusted banking partners. We'll guide you through the entire 
+                    application process for a smooth home buying journey.
+                </p>
+            </div>
         </div>
-        
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #dc2626; margin-bottom: 10px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}</h4>
-            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} TDSR Calculation:</strong> Includes all commitments:</p>
-            <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
-                <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
-                <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
-                <li>Property loans: ${formatCurrency((parseNumberInput(inputs.propertyLoanA) || 0) + (parseNumberInput(inputs.propertyLoanB) || 0))}</li>
-            </ul>
-        </div>
-        ` : `
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #dc2626; margin-bottom: 10px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}</h4>
-            <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>Private Property TDSR Calculation:</strong> Includes all commitments:</p>
-            <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
-                <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
-                <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
-                <li>Property loans: ${formatCurrency((parseNumberInput(inputs.propertyLoanA) || 0) + (parseNumberInput(inputs.propertyLoanB) || 0))}</li>
-            </ul>
-        </div>
-        `}
     </div>
+    `}
 
     <div class="disclaimer no-break">
-        <h4 style="margin: 0 0 8px 0; color: #333; font-size: 12px;">Important Notes</h4>
-        <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
-        <p style="margin: 4px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
-        <p style="margin: 4px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
-        <p style="margin: 4px 0;">• ${(inputs.propertyType === 'private' || inputs.propertyType === 'commercial') ? 'TDSR limit: 55%' : 'MSR limit: 30% and TDSR limit: 55%'} of gross monthly income.</p>
-        <p style="margin: 4px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
-        <p style="margin: 4px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
+        <h4>Disclaimer</h4>
+        <p style="margin: 2px 0;">1. Up to 75%ltv for your first residential property loan.</p>
+        <p style="margin: 2px 0;">2. The amount you borrow against your property is your Loan-To-Value %. Current MAS regulations allow you to borrow up to 55% of the value of your property.</p>
+        <p style="margin: 2px 0;">3. After 30% deduction on monthly variable pay as per MAS regulations.</p>
+        <p style="margin: 8px 0 0 0; font-style: italic;">* This report is for indicative purpose only. ${currentDate}</p>
     </div>
 
     <div class="footer no-break">        
-        <div style="margin-bottom: 8px;">
-            📧 kenneth@keyquestmortgage.com.sg | 📞 +65 9795 2338 
-        </div>
-        
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 10px;">
-            <p style="margin: 0; font-size: 9px;">This report is confidential and intended for the named applicant(s). 
-            Your Trusted Mortgage Advisory Partner</p>
+        <div style="margin-bottom: 8px; font-size: 10px;">
+            www.keyquestmortgage.com.sg
         </div>
     </div>
 </body>
