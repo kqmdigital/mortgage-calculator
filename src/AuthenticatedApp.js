@@ -770,7 +770,7 @@ const htmlContent = `
                     <td class="info-label">Property Type:</td>
                     <td class="info-value">${propertyTypeText}</td>
                     <td class="info-label">Combined Income:</td>
-                    <td class="info-value">${formatCurrency(results.totalCombinedIncome || 0)}</td>
+                    <td class="info-value">${formatCurrency(results.combinedMonthlyIncome || 0)}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Property Value:</td>
@@ -787,8 +787,8 @@ const htmlContent = `
                 <tr>
                     <td class="info-label">Loan-to-Value:</td>
                     <td class="info-value">${parseNumberInput(inputs.purchasePrice) > 0 ? ((results.loanAmount || 0) / parseNumberInput(inputs.purchasePrice) * 100).toFixed(1) + '%' : '0.0%'}</td>
-                    <td class="info-label">Monthly Installment (Stress):</td>
-                    <td class="info-value">${formatCurrency(results.monthlyInstallmentStress || 0)}</td>
+                    <td class="info-label"></td>
+                    <td class="info-value"></td>
                 </tr>
             </table>
         </div>
@@ -801,6 +801,16 @@ const htmlContent = `
             Required Income: ${formatCurrency(results.requiredIncomeTDSR || 0)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit || 0)}
         </span>
     </div>
+
+    ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
+    <div style="background: ${results.hdbPass ? '#F0FDF4' : '#FEF2F2'}; border: 2px solid ${results.hdbPass ? '#166534' : '#DC2626'}; color: ${results.hdbPass ? '#166534' : '#DC2626'}; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 16px; border-radius: 8px;">
+        MSR Assessment: ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
+        <br/>
+        <span style="font-size: 14px; margin-top: 5px; display: block;">
+            Required Income: ${formatCurrency(results.requiredIncomeHDB || 0)} | Deficit/Surplus: ${formatCurrency(results.hdbDeficit || 0)}
+        </span>
+    </div>
+    ` : ''}
 
     ${!results.tdsrPass ? `
     <div class="section no-break">
