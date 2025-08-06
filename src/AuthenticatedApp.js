@@ -487,8 +487,7 @@ const htmlContent = `
         }
 
         /* Watermark styling */
-        body::before {
-            content: '';
+        .watermark {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -502,21 +501,20 @@ const htmlContent = `
             transform: translate(-50%, -50%) rotate(-15deg);
             z-index: 0;
             pointer-events: none;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
         }
         
         @media print {
-            body::before {
+            .watermark {
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 width: 250px;
                 height: 250px;
-                background-size: contain;
-                background-repeat: no-repeat;
                 opacity: 0.12;
-                transform: translate(-50%, -50%) rotate(-15deg);
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
             }
         }
         
@@ -758,10 +756,11 @@ const htmlContent = `
     </style>
 </head>
 <body>
+    <div class="watermark"></div>
     <div class="header no-break">
         <div class="logo-section">
             <img 
-                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
+                src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                 alt="KeyQuest Mortgage Logo"
             />
         </div>

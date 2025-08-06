@@ -370,8 +370,7 @@ const MonthlyRepaymentCalculator = () => {
         }
 
         /* Watermark styling */
-        body::before {
-            content: '';
+        .watermark {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -381,10 +380,25 @@ const MonthlyRepaymentCalculator = () => {
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            opacity: 0.12;
+            opacity: 0.15;
             transform: translate(-50%, -50%) rotate(-15deg);
             z-index: 0;
             pointer-events: none;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+        
+        @media print {
+            .watermark {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 200px;
+                height: 200px;
+                opacity: 0.12;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
         }
 
         .header {
@@ -586,6 +600,7 @@ const MonthlyRepaymentCalculator = () => {
     </style>
 </head>
 <body>
+    <div class="watermark"></div>
     <div class="header no-page-break">
         <div class="logo-section">
             <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="KeyQuest Mortgage Logo">
