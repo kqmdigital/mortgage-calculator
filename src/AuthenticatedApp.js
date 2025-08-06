@@ -61,7 +61,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   };
 
   // Helper functions (keeping the same logic as before)
-  const formatNumberInput = (value) => {
+  const formatCurrencyInput = (value) => {
     if (value === '' || value === null || value === undefined) return '';
     const num = parseFloat(value.toString().replace(/,/g, ''));
     if (isNaN(num)) return '';
@@ -770,17 +770,17 @@ const htmlContent = `
                     <td class="info-label">Property Type:</td>
                     <td class="info-value">${propertyTypeText}</td>
                     <td class="info-label">Combined Income:</td>
-                    <td class="info-value">$${formatNumber(results.totalCombinedIncome)}</td>
+                    <td class="info-value">$${formatCurrency(results.totalCombinedIncome)}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Property Value:</td>
-                    <td class="info-value">$${formatNumber(parseNumberInput(inputs.propertyValue))}</td>
+                    <td class="info-value">$${formatCurrency(parseNumberInput(inputs.propertyValue))}</td>
                     <td class="info-label">Loan Tenure:</td>
                     <td class="info-value">${results.finalLoanTenure} years</td>
                 </tr>
                 <tr>
                     <td class="info-label">Loan Amount:</td>
-                    <td class="info-value">$${formatNumber(results.loanAmount)}</td>
+                    <td class="info-value">$${formatCurrency(results.loanAmount)}</td>
                     <td class="info-label">Stress Test Rate:</td>
                     <td class="info-value">${inputs.stressTestRate}%</td>
                 </tr>
@@ -788,7 +788,7 @@ const htmlContent = `
                     <td class="info-label">Loan-to-Value:</td>
                     <td class="info-value">${(results.loanAmount / parseNumberInput(inputs.propertyValue) * 100).toFixed(1)}%</td>
                     <td class="info-label">Monthly Installment (Stress):</td>
-                    <td class="info-value">$${formatNumber(results.monthlyInstallmentStress)}</td>
+                    <td class="info-value">$${formatCurrency(results.monthlyInstallmentStress)}</td>
                 </tr>
             </table>
         </div>
@@ -798,7 +798,7 @@ const htmlContent = `
         TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
         <br/>
         <span style="font-size: 14px; margin-top: 5px; display: block;">
-            Required Income: $${formatNumber(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}
+            Required Income: $${formatCurrency(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}
         </span>
     </div>
 
@@ -811,11 +811,11 @@ const htmlContent = `
             <div class="funding-grid">
                 <div class="funding-card">
                     <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
-                    <div class="funding-amount">$${formatNumber(results.cashShowTDSR)}</div>
+                    <div class="funding-amount">$${formatCurrency(results.cashShowTDSR)}</div>
                 </div>
                 <div class="funding-card">
                     <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
-                    <div class="funding-amount">$${formatNumber(results.cashPledgeTDSR)}</div>
+                    <div class="funding-amount">$${formatCurrency(results.cashPledgeTDSR)}</div>
                 </div>
             </div>
             
@@ -833,11 +833,11 @@ const htmlContent = `
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
                     <tr style="border-bottom: 1px solid #E5E7EB;">
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Monthly Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #E5E7EB;">
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Annual Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #E5E7EB;">
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Age:</td>
@@ -845,7 +845,7 @@ const htmlContent = `
                     </tr>
                     <tr>
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Total Income:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(results.totalMonthlyIncomeA)}</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(results.totalMonthlyIncomeA)}</td>
                     </tr>
                 </table>
             </div>
@@ -856,11 +856,11 @@ const htmlContent = `
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
                     <tr style="border-bottom: 1px solid #E5E7EB;">
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Monthly Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #E5E7EB;">
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Annual Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #E5E7EB;">
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Age:</td>
@@ -868,13 +868,13 @@ const htmlContent = `
                     </tr>
                     <tr>
                         <td style="padding: 6px 0; font-weight: 600; color: #374151;">Total Income:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(results.totalMonthlyIncomeA)}</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(results.totalMonthlyIncomeA)}</td>
                     </tr>
                 </table>
                 
                 <div style="background: #F3F4F6; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
                     <h4 style="color: #264A82; margin-bottom: 5px; font-size: 16px;">Combined Household Income</h4>
-                    <div style="color: #264A82; font-size: 20px; font-weight: bold;">$${formatNumber(results.totalCombinedIncome)}</div>
+                    <div style="color: #264A82; font-size: 20px; font-weight: bold;">$${formatCurrency(results.totalCombinedIncome)}</div>
                 </div>
                 
                 <div style="margin-top: 15px;">
@@ -1047,7 +1047,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.purchasePrice)}
+                    value={formatCurrencyInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="1,000,000.00"
@@ -1115,7 +1115,7 @@ This ensures all content fits properly without being cut off.`);
                     <div className="relative">
                       <input
                         type="text"
-                        value={formatNumberInput(inputs.customLoanAmount)}
+                        value={formatCurrencyInput(inputs.customLoanAmount)}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                         className="standard-input currency-input"
                         placeholder="750,000.00"
@@ -1190,7 +1190,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.monthlySalaryA)}
+                      value={formatCurrencyInput(inputs.monthlySalaryA)}
                       onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="8,000.00"
@@ -1203,7 +1203,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.annualSalaryA)}
+                      value={formatCurrencyInput(inputs.annualSalaryA)}
                       onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="Auto-filled (Monthly × 12)"
@@ -1233,7 +1233,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.monthlySalaryB)}
+                      value={formatCurrencyInput(inputs.monthlySalaryB)}
                       onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="6,000.00"
@@ -1246,7 +1246,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
-                      value={formatNumberInput(inputs.annualSalaryB)}
+                      value={formatCurrencyInput(inputs.annualSalaryB)}
                       onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
                       className="standard-input currency-input"
                       placeholder="Auto-filled (Monthly × 12)"
@@ -1289,7 +1289,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.showFundAmount)}
+                    value={formatCurrencyInput(inputs.showFundAmount)}
                     onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="500,000.00"
@@ -1302,7 +1302,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.pledgeAmount)}
+                    value={formatCurrencyInput(inputs.pledgeAmount)}
                     onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="300,000.00"
@@ -1331,7 +1331,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.carLoanA)}
+                    value={formatCurrencyInput(inputs.carLoanA)}
                     onChange={(e) => handleInputChange('carLoanA', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="800.00"
@@ -1344,7 +1344,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.carLoanB)}
+                    value={formatCurrencyInput(inputs.carLoanB)}
                     onChange={(e) => handleInputChange('carLoanB', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="600.00"
@@ -1357,7 +1357,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.personalLoanA)}
+                    value={formatCurrencyInput(inputs.personalLoanA)}
                     onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="500.00"
@@ -1370,7 +1370,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.personalLoanB)}
+                    value={formatCurrencyInput(inputs.personalLoanB)}
                     onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="300.00"
@@ -1383,7 +1383,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.propertyLoanA)}
+                    value={formatCurrencyInput(inputs.propertyLoanA)}
                     onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="2,000.00"
@@ -1396,7 +1396,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
-                    value={formatNumberInput(inputs.propertyLoanB)}
+                    value={formatCurrencyInput(inputs.propertyLoanB)}
                     onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
                     className="standard-input currency-input"
                     placeholder="1,500.00"
