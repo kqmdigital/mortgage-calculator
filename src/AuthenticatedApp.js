@@ -204,6 +204,128 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     };
   };
 
+  // Calculate maximum affordability based on income and commitments
+  const calculateMaxAffordability = useCallback(() => {
+    const {
+      propertyType,
+      monthlySalaryA, annualSalaryA, applicantAgeA,
+      monthlySalaryB, annualSalaryB, applicantAgeB,
+      showFundAmount, pledgeAmount,
+      carLoanA, carLoanB, personalLoanA, personalLoanB,
+      propertyLoanA, propertyLoanB, stressTestRate
+    } = inputs;
+
+    const parsedInputs = {
+      monthlySalaryA: parseNumberInput(monthlySalaryA) || 0,
+      annualSalaryA: parseNumberInput(annualSalaryA) || 0,
+      monthlySalaryB: parseNumberInput(monthlySalaryB) || 0,
+      annualSalaryB: parseNumberInput(annualSalaryB) || 0,
+      showFundAmount: parseNumberInput(showFundAmount) || 0,
+      pledgeAmount: parseNumberInput(pledgeAmount) || 0,
+      carLoanA: parseNumberInput(carLoanA) || 0,
+      carLoanB: parseNumberInput(carLoanB) || 0,
+      personalLoanA: parseNumberInput(personalLoanA) || 0,
+      personalLoanB: parseNumberInput(personalLoanB) || 0,
+      propertyLoanA: parseNumberInput(propertyLoanA) || 0,
+      propertyLoanB: parseNumberInput(propertyLoanB) || 0,
+      stressTestRate: parseNumberInput(stressTestRate) || 0
+    };
+
+    // Return early if no income data
+    if (parsedInputs.monthlySalaryA === 0 && parsedInputs.monthlySalaryB === 0) {
+      return null;
+    }
+
+    // Calculate total monthly income (same logic as main calculator)
+    const baseSalaryA = parsedInputs.monthlySalaryA * 12;
+    const baseSalaryB = parsedInputs.monthlySalaryB * 12;
+    const bonusIncomeA = Math.max(0, (parsedInputs.annualSalaryA - baseSalaryA) / 12) * 0.7;
+    const bonusIncomeB = Math.max(0, (parsedInputs.annualSalaryB - baseSalaryB) / 12) * 0.7;
+    
+    const showFundIncomeA = parsedInputs.showFundAmount * 0.00625;
+    const pledgeIncomeB = parsedInputs.pledgeAmount / 48;
+    
+    const totalMonthlyIncomeA = parsedInputs.monthlySalaryA + bonusIncomeA + showFundIncomeA;
+    const totalMonthlyIncomeB = parsedInputs.monthlySalaryB + bonusIncomeB + pledgeIncomeB;
+    const combinedMonthlyIncome = totalMonthlyIncomeA + totalMonthlyIncomeB;
+
+    // Calculate total commitments
+    const totalCommitments = parsedInputs.carLoanA + parsedInputs.carLoanB + 
+                            parsedInputs.personalLoanA + parsedInputs.personalLoanB;
+    const totalCommitmentsTDSR = totalCommitments + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
+
+    // Calculate maximum monthly installment based on income limits
+    const maxMonthlyTDSR = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR;
+    const maxMonthlyMSR = (combinedMonthlyIncome * 0.30) - totalCommitments;
+
+    // Use the more restrictive limit
+    let maxMonthlyInstallment;
+    let limitingFactor;
+    
+    if (propertyType === 'hdb' || propertyType === 'ec') {
+      // HDB/EC uses the more restrictive of MSR or TDSR
+      if (maxMonthlyMSR < maxMonthlyTDSR) {
+        maxMonthlyInstallment = maxMonthlyMSR;
+        limitingFactor = 'MSR (30%)';
+      } else {
+        maxMonthlyInstallment = maxMonthlyTDSR;
+        limitingFactor = 'TDSR (55%)';
+      }
+    } else {
+      // Private and Commercial use TDSR only
+      maxMonthlyInstallment = maxMonthlyTDSR;
+      limitingFactor = 'TDSR (55%)';
+    }
+
+    // Ensure positive value
+    maxMonthlyInstallment = Math.max(0, maxMonthlyInstallment);
+
+    if (maxMonthlyInstallment <= 0 || parsedInputs.stressTestRate <= 0) {
+      return {
+        combinedMonthlyIncome,
+        maxMonthlyInstallment: 0,
+        maxLoanAmount: 0,
+        maxPropertyPrice75: 0,
+        maxPropertyPrice80: 0,
+        maxPropertyPrice55: 0,
+        limitingFactor,
+        hasValidData: false
+      };
+    }
+
+    // Calculate maximum loan amount based on different loan tenure scenarios
+    const averageAge = calculateAverageAge();
+    const maxTenure30 = Math.min(30, Math.max(1, averageAge > 0 ? 65 - averageAge : 30)) * 12;
+    const maxTenure25 = Math.min(25, Math.max(1, averageAge > 0 ? 65 - averageAge : 25)) * 12;
+    
+    // Use 30-year tenure for affordability calculation (most optimistic scenario)
+    const maxLoanAmount = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure30, maxMonthlyInstallment);
+
+    // Calculate maximum property prices for different LTV ratios
+    const maxPropertyPrice75 = maxLoanAmount / 0.75;  // 75% LTV
+    const maxPropertyPrice80 = maxLoanAmount / 0.80;  // 80% LTV (commercial)
+    const maxPropertyPrice55 = maxLoanAmount / 0.55;  // 55% LTV
+
+    return {
+      combinedMonthlyIncome,
+      maxMonthlyInstallment,
+      maxLoanAmount,
+      maxPropertyPrice75,
+      maxPropertyPrice80,
+      maxPropertyPrice55,
+      limitingFactor,
+      hasValidData: true,
+      maxTenureUsed: maxTenure30 / 12
+    };
+  }, [inputs, calculateAverageAge]);
+
+  // Helper function to calculate loan amount from PMT (reverse PMT calculation)
+  const calculateLoanFromPMT = (rate, periods, monthlyPayment) => {
+    if (rate === 0) return monthlyPayment * periods;
+    const monthlyRate = rate / 100 / 12;
+    return monthlyPayment * (Math.pow(1 + monthlyRate, periods) - 1) / (monthlyRate * Math.pow(1 + monthlyRate, periods));
+  };
+
   const calculateMortgage = useCallback(() => {
     const {
       propertyType, purchasePrice, loanPercentage, customLoanAmount, useCustomAmount,
@@ -349,6 +471,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   const memoizedResults = useMemo(() => {
     return calculateMortgage();
   }, [debouncedInputs, calculateMortgage]);
+
+  // Memoize affordability calculations
+  const memoizedAffordability = useMemo(() => {
+    return calculateMaxAffordability();
+  }, [debouncedInputs, calculateMaxAffordability]);
 
   React.useEffect(() => {
     setResults(memoizedResults);
@@ -955,6 +1082,56 @@ const htmlContent = `
             </div>
         </div>
     </div>
+
+    ${memoizedAffordability && memoizedAffordability.hasValidData ? `
+    <div class="section no-break">
+        <div class="section-header">📊 MAXIMUM AFFORDABILITY ANALYSIS</div>
+        <div class="section-content">
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Based on Income & Commitments (Limited by ${memoizedAffordability.limitingFactor})</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Max Property Price:</td>
+                        <td class="info-value" style="color: #059669; font-weight: bold;">
+                            ${formatCurrency(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75)}
+                        </td>
+                        <td class="info-label">Max Loan Amount:</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount)}</td>
+                    </tr>
+                    <tr>
+                        <td class="info-label">Max Monthly Payment:</td>
+                        <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
+                        <td class="info-label">Max Tenure Used:</td>
+                        <td class="info-value">${memoizedAffordability.maxTenureUsed} years</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div>
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Different LTV Scenarios</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Conservative (55% LTV):</td>
+                        <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice55)}</td>
+                        <td class="info-label">Standard (75% LTV):</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice75)}</td>
+                    </tr>
+                    <tr>
+                        <td class="info-label">Maximum (80% LTV):</td>
+                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice80)}</td>
+                        <td class="info-label">Combined Income:</td>
+                        <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                    <strong>Note:</strong> Affordability based on ${inputs.stressTestRate}% stress test rate. Limited by ${memoizedAffordability.limitingFactor} requirements. 
+                    Does not include stamp duty, legal fees, or other transaction costs.
+                </div>
+            </div>
+        </div>
+    </div>
+    ` : ''}
 
     <div style="background: ${results.tdsrPass ? '#F0FDF4' : '#FEF2F2'}; border: 2px solid ${results.tdsrPass ? '#166534' : '#DC2626'}; color: ${results.tdsrPass ? '#166534' : '#DC2626'}; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 16px; border-radius: 8px;">
         TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
@@ -1740,6 +1917,158 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
             </div>
+
+            {/* Maximum Affordability Analysis */}
+            {memoizedAffordability && memoizedAffordability.hasValidData && (
+              <div className="standard-card">
+                <div className="section-header">
+                  <div className="icon-container purple">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-content">
+                    <h2>Maximum Affordability</h2>
+                    <p>Based on your income and commitments - Limited by {memoizedAffordability.limitingFactor}</p>
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => {
+                        const maxPrice = inputs.propertyType === 'commercial' 
+                          ? memoizedAffordability.maxPropertyPrice80 
+                          : memoizedAffordability.maxPropertyPrice75;
+                        handleInputChange('purchasePrice', maxPrice.toString());
+                      }}
+                      className="btn-standard btn-secondary btn-sm"
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      <span>Use Max Price</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-4 text-gray-800">Maximum Purchasing Power</h3>
+                    <div className="grid-responsive cols-3">
+                      <div className="result-card success">
+                        <div className="result-header">
+                          <div className="result-icon bg-green-100">
+                            <Home className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <div className="result-title">
+                              Max Property Price
+                              {inputs.propertyType === 'commercial' ? ' (80% Loan)' : ' (75% Loan)'}
+                            </div>
+                            <div className="result-value text-green-600">
+                              {formatCurrency(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75)}
+                            </div>
+                            <div className="result-subtitle">
+                              {inputs.propertyType === 'commercial' ? '80% LTV for Commercial' : '75% LTV for Residential'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="result-card">
+                        <div className="result-header">
+                          <div className="result-icon bg-blue-100">
+                            <DollarSign className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="result-title">Max Loan Amount</div>
+                            <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxLoanAmount)}</div>
+                            <div className="result-subtitle">
+                              {memoizedAffordability.maxTenureUsed}-year tenure at {inputs.stressTestRate}%
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="result-card">
+                        <div className="result-header">
+                          <div className="result-icon bg-purple-100">
+                            <BarChart3 className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="result-title">Max Monthly Payment</div>
+                            <div className="result-value text-purple-600">{formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</div>
+                            <div className="result-subtitle">
+                              After existing commitments
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold mb-4 text-gray-800">Different Loan-to-Value Scenarios</h3>
+                    <div className="grid-responsive cols-3">
+                      <div className="result-card">
+                        <div className="result-header">
+                          <div className="result-icon bg-orange-100">
+                            <Building className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <div className="result-title">Conservative (55% LTV)</div>
+                            <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
+                            <div className="result-subtitle">
+                              Lower downpayment cash requirement
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="result-card">
+                        <div className="result-header">
+                          <div className="result-icon bg-blue-100">
+                            <Building2 className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="result-title">Standard (75% LTV)</div>
+                            <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
+                            <div className="result-subtitle">
+                              Most common for residential
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="result-card">
+                        <div className="result-header">
+                          <div className="result-icon bg-red-100">
+                            <Factory className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div>
+                            <div className="result-title">Maximum (80% LTV)</div>
+                            <div className="result-value text-red-600">{formatCurrency(memoizedAffordability.maxPropertyPrice80)}</div>
+                            <div className="result-subtitle">
+                              Commercial properties only
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium mb-2">Affordability Analysis Notes:</p>
+                        <ul className="space-y-1 list-disc list-inside">
+                          <li>Calculations based on {inputs.stressTestRate}% stress test rate and {memoizedAffordability.maxTenureUsed}-year maximum tenure</li>
+                          <li>Limited by <strong>{memoizedAffordability.limitingFactor}</strong> regulatory requirement</li>
+                          <li>Assumes optimal loan tenure based on applicant age(s)</li>
+                          <li>Does not include additional costs like stamp duty, legal fees, or renovation</li>
+                          <li>Actual bank approval may vary based on credit assessment and property valuation</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Downpayment and Stamp Duty Information */}
             <div className="standard-card">
