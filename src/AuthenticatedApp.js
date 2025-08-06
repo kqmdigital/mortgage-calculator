@@ -580,6 +580,10 @@ const htmlContent = `
             margin: 0;
         }
         
+        .info-table td {
+            width: 25%;
+        }
+        
         .info-table tr:nth-child(even) {
             background: #F3F4F6;
         }
@@ -746,8 +750,11 @@ const htmlContent = `
             />
         </div>
         
+        <div class="property-type-banner">
+            ${propertyTypeText} TDSR/MSR Analysis
+        </div>
         <div class="report-title">
-            TDSR/MSR Analysis Report
+            Mortgage Affordability Assessment Report
         </div>
         
         <div class="report-info">
@@ -756,176 +763,61 @@ const htmlContent = `
     </div>
 
     <div class="section no-break">
-        <div class="section-header">Input Details</div>
+        <div class="section-header">📋 LOAN SUMMARY</div>
         <div class="section-content">
             <table class="info-table">
                 <tr>
-                    <td class="info-label">Property Type</td>
+                    <td class="info-label">Property Type:</td>
                     <td class="info-value">${propertyTypeText}</td>
+                    <td class="info-label">Combined Income:</td>
+                    <td class="info-value">$${formatNumber(results.totalCombinedIncome)}</td>
                 </tr>
                 <tr>
-                    <td class="info-label">Purchase Type</td>
-                    <td class="info-value">${(parseNumberInput(inputs.monthlySalaryB) > 0 || parseNumberInput(inputs.annualSalaryB) > 0) ? 'Joint Applicant' : 'Single Applicant'}</td>
+                    <td class="info-label">Property Value:</td>
+                    <td class="info-value">$${formatNumber(parseNumberInput(inputs.propertyValue))}</td>
+                    <td class="info-label">Loan Tenure:</td>
+                    <td class="info-value">${results.finalLoanTenure} years</td>
                 </tr>
                 <tr>
-                    <td class="info-label">Applicant Age</td>
-                    <td class="info-value">${results.averageAge > 0 ? results.averageAge.toFixed(0) + ' years' : (parseNumberInput(inputs.applicantAgeA) || 0) + ' years'}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Stress Test</td>
+                    <td class="info-label">Loan Amount:</td>
+                    <td class="info-value">$${formatNumber(results.loanAmount)}</td>
+                    <td class="info-label">Stress Test Rate:</td>
                     <td class="info-value">${inputs.stressTestRate}%</td>
                 </tr>
                 <tr>
-                    <td class="info-label">Monthly Salary</td>
-                    <td class="info-value">${formatCurrency((parseNumberInput(inputs.monthlySalaryA) || 0) + (parseNumberInput(inputs.monthlySalaryB) || 0))}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Annual Income</td>
-                    <td class="info-value">${formatCurrency((parseNumberInput(inputs.annualSalaryA) || 0) + (parseNumberInput(inputs.annualSalaryB) || 0))}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Credit Cards Minimum Payments</td>
-                    <td class="info-value">$ 0</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Other Commitments</td>
-                    <td class="info-value">${formatCurrency(results.totalCommitmentsTDSR)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Car Loans</td>
-                    <td class="info-value">${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</td>
+                    <td class="info-label">Loan-to-Value:</td>
+                    <td class="info-value">${(results.loanAmount / parseNumberInput(inputs.propertyValue) * 100).toFixed(1)}%</td>
+                    <td class="info-label">Monthly Installment (Stress):</td>
+                    <td class="info-value">$${formatNumber(results.monthlyInstallmentStress)}</td>
                 </tr>
             </table>
         </div>
     </div>
 
-    <div class="section no-break">
-        <div class="section-header">Your Affordability Breakdown</div>
-        <div class="section-content">
-            <table class="info-table">
-                <tr>
-                    <td class="info-label">Affordable Purchase Price</td>
-                    <td class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Affordable Loan</td>
-                    <td class="info-value">${formatCurrency(results.loanAmount)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Loan Tenure</td>
-                    <td class="info-value">${inputs.loanTenor} Year(s)</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Property Type</td>
-                    <td class="info-value">${propertyTypeText}</td>
-                </tr>
-            </table>
-        </div>
+    <div style="background: ${results.tdsrPass ? '#F0FDF4' : '#FEF2F2'}; border: 2px solid ${results.tdsrPass ? '#166534' : '#DC2626'}; color: ${results.tdsrPass ? '#166534' : '#DC2626'}; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 16px; border-radius: 8px;">
+        TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+        <br/>
+        <span style="font-size: 14px; margin-top: 5px; display: block;">
+            Required Income: $${formatNumber(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}
+        </span>
     </div>
 
-    ${inputs.propertyType === 'private' ? `
-    <div class="highlight-section">
-        TDSR Assessment Result: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%) - ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
-    </div>
-    ` : `
-    <div class="highlight-section">
-        Overall Assessment: ${(results.hdbPass && results.tdsrPass) ? 'PASS ✓' : 'FAIL ✗'} - Must pass BOTH MSR (30%) AND TDSR (55%) tests
-    </div>
-    `}
-
-    ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
+    ${!results.tdsrPass ? `
     <div class="section no-break">
-        <div class="section-header">${propertyTypeText.toUpperCase()} DUAL ASSESSMENT (MSR & TDSR)</div>
-        <div class="assessment-grid">
-            <div class="assessment-card ${results.hdbPass ? 'pass' : 'fail'}">
-                <div class="assessment-title">MSR: ${results.actualMSRPercentage.toFixed(1)}% (Limit: 30%)</div>
-                <div class="assessment-result">${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}</div>
-                <table style="width: 100%; margin-top: 10px; font-size: 10px;">
-                    <tr style="border-bottom: 1px solid #ccc;">
-                        <td style="padding: 4px; text-align: left;">Required Income:</td>
-                        <td style="padding: 4px; text-align: right; font-weight: bold;">${formatCurrency(results.requiredIncomeHDB)}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 4px; text-align: left;">Deficit/Surplus:</td>
-                        <td style="padding: 4px; text-align: right; font-weight: bold; color: ${results.hdbDeficit >= 0 ? '#166534' : '#DC2626'};">${formatCurrency(results.hdbDeficit)}</td>
-                    </tr>
-                </table>
-            </div>
-            <div class="assessment-card ${results.tdsrPass ? 'pass' : 'fail'}">
-                <div class="assessment-title">TDSR: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</div>
-                <div class="assessment-result">${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}</div>
-                <table style="width: 100%; margin-top: 10px; font-size: 10px;">
-                    <tr style="border-bottom: 1px solid #ccc;">
-                        <td style="padding: 4px; text-align: left;">Required Income:</td>
-                        <td style="padding: 4px; text-align: right; font-weight: bold;">${formatCurrency(results.requiredIncomeTDSR)}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 4px; text-align: left;">Deficit/Surplus:</td>
-                        <td style="padding: 4px; text-align: right; font-weight: bold; color: ${results.tdsrDeficit >= 0 ? '#166534' : '#DC2626'};">${formatCurrency(results.tdsrDeficit)}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-    ` : `
-    <div class="section no-break">
-        <div class="section-header">TDSR ASSESSMENT RESULT</div>
-        <div class="assessment-grid">
-            <div class="assessment-card ${results.tdsrPass ? 'pass' : 'fail'}" style="grid-column: 1 / -1;">
-                <div class="assessment-title">TDSR: ${results.actualTDSRPercentage.toFixed(1)}% (Limit: 55%)</div>
-                <div class="assessment-result">${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}</div>
-                <table style="width: 100%; margin-top: 10px; font-size: 10px;">
-                    <tr style="border-bottom: 1px solid #ccc;">
-                        <td style="padding: 4px; text-align: left;">Required Income:</td>
-                        <td style="padding: 4px; text-align: right; font-weight: bold;">${formatCurrency(results.requiredIncomeTDSR)}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 4px; text-align: left;">Deficit/Surplus:</td>
-                        <td style="padding: 4px; text-align: right; font-weight: bold; color: ${results.tdsrDeficit >= 0 ? '#166534' : '#DC2626'};">${formatCurrency(results.tdsrDeficit)}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-    `}
-
-    ${(!results.tdsrPass || ((inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass)) ? `
-    <div class="section no-break">
-        <div class="section-header">FUNDING SOLUTIONS</div>
+        <div class="section-header">💡 FUNDING SOLUTIONS</div>
         <div class="section-content" style="padding: 15px; text-align: center;">
-            <p style="margin-bottom: 15px; font-size: 11px;">To meet the ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? 'MSR and TDSR' : 'TDSR'} requirements, you need one of the following:</p>
+            <p style="margin-bottom: 15px; font-size: 11px;">To meet the TDSR requirements, you need one of the following:</p>
             
-            ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass ? `
-            <div style="margin-bottom: 20px;">
-                <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 12px;">For MSR (30%) Shortfall:</h4>
-                <div class="funding-grid">
-                    <div class="funding-card">
-                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
-                        <div class="funding-amount">${formatCurrency(results.cashShowHDB)}</div>
-                    </div>
-                    <div class="funding-card">
-                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
-                        <div class="funding-amount">${formatCurrency(results.cashPledgeHDB)}</div>
-                    </div>
+            <div class="funding-grid">
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
+                    <div class="funding-amount">$${formatNumber(results.cashShowTDSR)}</div>
+                </div>
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
+                    <div class="funding-amount">$${formatNumber(results.cashPledgeTDSR)}</div>
                 </div>
             </div>
-            ` : ''}
-            
-            ${!results.tdsrPass ? `
-            <div style="margin-bottom: 20px;">
-                <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 12px;">For TDSR (55%) Shortfall:</h4>
-                <div class="funding-grid">
-                    <div class="funding-card">
-                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
-                        <div class="funding-amount">${formatCurrency(results.cashShowTDSR)}</div>
-                    </div>
-                    <div class="funding-card">
-                        <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
-                        <div class="funding-amount">${formatCurrency(results.cashPledgeTDSR)}</div>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
             
             <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
         </div>
@@ -933,242 +825,98 @@ const htmlContent = `
     ` : ''}
 
     <div class="section no-break">
-        <div class="section-header">LOAN SUMMARY</div>
+        <div class="section-header">👥 APPLICANT DETAILS</div>
         <div class="section-content">
-            <table class="info-table">
-                <tr>
-                    <td class="info-label">Property Value</td>
-                    <td class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Loan Amount</td>
-                    <td class="info-value">${formatCurrency(results.loanAmount)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Loan-to-Value Ratio</td>
-                    <td class="info-value">${((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Combined Monthly Income</td>
-                    <td class="info-value">${formatCurrency(results.combinedMonthlyIncome)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Loan Tenure</td>
-                    <td class="info-value">${inputs.loanTenor} years</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Monthly Installment (Stress Test)</td>
-                    <td class="info-value">${formatCurrency(results.monthlyInstallmentStressTest)}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    <div class="page-break"></div>
-
-    <div class="section no-break">
-        <div class="section-header">APPLICANT DETAILS</div>
-        <div class="section-content">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 15px;">
-                <div>
-                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 12px;">Primary Applicant</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Monthly Salary:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Annual Salary:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Age:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${parseNumberInput(inputs.applicantAgeA) || 0} years</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Total Monthly Income:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${formatCurrency(results.totalMonthlyIncomeA)}</td>
-                        </tr>
-                    </table>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 12px;">Co-Applicant</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Monthly Salary:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Annual Salary:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Age:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${parseNumberInput(inputs.applicantAgeB) || 0} years</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0; font-weight: 600; color: #374151; font-size: 10px;">Total Monthly Income:</td>
-                            <td style="padding: 4px 0; font-weight: bold; color: #111827; text-align: right; font-size: 10px;">${formatCurrency(results.totalMonthlyIncomeB)}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            
-            ${results.averageAge > 0 ? `
-            <div style="padding: 15px; border-top: 1px solid #E5E7EB;">
-                <h4 style="color: #264A82; margin-bottom: 10px; font-size: 12px;">Age & Tenure Information</h4>
-                <table class="info-table">
-                    <tr>
-                        <td class="info-label">Average Age</td>
-                        <td class="info-value">${results.averageAge.toFixed(1)} years</td>
-                    </tr>
-                    <tr>
-                        <td class="info-label">Maximum Loan Tenure</td>
-                        <td class="info-value">${results.maxLoanTenor} years</td>
-                    </tr>
-                </table>
-            </div>
-            ` : ''}
-            
-            ${(parseNumberInput(inputs.showFundAmount) > 0 || parseNumberInput(inputs.pledgeAmount) > 0) ? `
-            <div style="padding: 15px; border-top: 1px solid #E5E7EB;">
-                <h4 style="color: #264A82; margin-bottom: 10px; font-size: 12px;">Additional Funding Options</h4>
-                <table class="info-table">
-                    ${parseNumberInput(inputs.showFundAmount) > 0 ? `
-                    <tr>
-                        <td class="info-label">Show Fund Amount</td>
-                        <td class="info-value">${formatCurrency(parseNumberInput(inputs.showFundAmount))}</td>
-                    </tr>
-                    ` : ''}
-                    ${parseNumberInput(inputs.pledgeAmount) > 0 ? `
-                    <tr>
-                        <td class="info-label">Pledge Amount</td>
-                        <td class="info-value">${formatCurrency(parseNumberInput(inputs.pledgeAmount))}</td>
-                    </tr>
-                    ` : ''}
-                </table>
-            </div>
-            ` : ''}
-        </div>
-    </div>
-
-    <div class="section no-break">
-        <div class="section-header">MONTHLY COMMITMENTS BREAKDOWN</div>
-        <div class="section-content">
-            ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
+            ${(parseNumberInput(inputs.monthlySalaryB) > 0 || parseNumberInput(inputs.annualSalaryB) > 0) ? `
             <div style="padding: 15px;">
-                <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 12px;">MSR Commitments: ${formatCurrency(results.totalCommitments)}</h4>
-                <p style="font-size: 10px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only. Car loans and personal loans are excluded from MSR.</p>
-                
-                <h4 style="color: #DC2626; margin: 15px 0 10px 0; font-size: 12px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}</h4>
-                <p style="font-size: 10px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} TDSR Calculation:</strong> Includes all commitments:</p>
-                <table class="info-table" style="margin-top: 10px;">
-                    <tr>
-                        <td class="info-label">Car Loans</td>
-                        <td class="info-value">${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</td>
+                <h4 style="margin-bottom: 10px; color: #374151; font-size: 14px;">Primary Applicant</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Monthly Salary:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Annual Salary:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Age:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${parseNumberInput(inputs.applicantAgeA) || 0} years</td>
                     </tr>
                     <tr>
-                        <td class="info-label">Personal Loans</td>
-                        <td class="info-value">${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</td>
-                    </tr>
-                    <tr>
-                        <td class="info-label">Property Loans</td>
-                        <td class="info-value">${formatCurrency((parseNumberInput(inputs.propertyLoanA) || 0) + (parseNumberInput(inputs.propertyLoanB) || 0))}</td>
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Total Income:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(results.totalMonthlyIncomeA)}</td>
                     </tr>
                 </table>
             </div>
             ` : `
             <div style="padding: 15px;">
-                <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 12px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR)}</h4>
-                <p style="font-size: 10px; color: #666; margin-bottom: 10px;"><strong>Private Property TDSR Calculation:</strong> Includes all commitments:</p>
-                <table class="info-table" style="margin-top: 10px;">
-                    <tr>
-                        <td class="info-label">Car Loans</td>
-                        <td class="info-value">${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</td>
+                <h4 style="margin-bottom: 10px; color: #374151; font-size: 14px;">Primary Applicant</h4>
+                <div style="text-align: right; font-style: italic; color: #666; margin-bottom: 15px;">Single applicant application</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Monthly Salary:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Annual Salary:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Age:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${parseNumberInput(inputs.applicantAgeA) || 0} years</td>
                     </tr>
                     <tr>
-                        <td class="info-label">Personal Loans</td>
-                        <td class="info-value">${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</td>
-                    </tr>
-                    <tr>
-                        <td class="info-label">Property Loans</td>
-                        <td class="info-value">${formatCurrency((parseNumberInput(inputs.propertyLoanA) || 0) + (parseNumberInput(inputs.propertyLoanB) || 0))}</td>
+                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Total Income:</td>
+                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatNumber(results.totalMonthlyIncomeA)}</td>
                     </tr>
                 </table>
+                
+                <div style="background: #F3F4F6; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
+                    <h4 style="color: #264A82; margin-bottom: 5px; font-size: 16px;">Combined Household Income</h4>
+                    <div style="color: #264A82; font-size: 20px; font-weight: bold;">$${formatNumber(results.totalCombinedIncome)}</div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <h4 style="margin-bottom: 10px; color: #374151; font-size: 14px;">Age & Tenor Information</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #E5E7EB;">
+                            <td style="padding: 6px 0; font-weight: 600; color: #374151;">Average Age:</td>
+                            <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${parseNumberInput(inputs.applicantAgeA) || 0}.0 years</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0; font-weight: 600; color: #374151;">Max Loan Tenor:</td>
+                            <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${results.finalLoanTenure} years</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             `}
         </div>
     </div>
 
-    ${(!results.tdsrPass || ((inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') && !results.hdbPass)) ? `
     <div class="section no-break">
-        <div class="section-header">What's Next?</div>
-        <div class="assessment-grid" style="grid-template-columns: 1fr 1fr;">
-            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
-                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Confirm your maximum loan eligibility</h4>
-                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
-                    An In-Principle-Approval gives you a clear idea of how much you can borrow from a bank. 
-                    We'll check your eligibility across your preferred banks and recommend the IPA that best fits your profile.
-                </p>
-            </div>
-            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
-                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Need help understanding your affordability?</h4>
-                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
-                    Contact our mortgage specialists for personalized advice on improving your loan eligibility 
-                    and exploring alternative financing solutions.
-                </p>
-            </div>
-        </div>
-    </div>
-    ` : `
-    <div class="section no-break">
-        <div class="section-header">What's Next?</div>
-        <div class="assessment-grid" style="grid-template-columns: 1fr 1fr;">
-            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
-                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Proceed with your loan application</h4>
-                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
-                    You meet the affordability requirements! Let's help you secure the best mortgage package 
-                    from our partner banks with competitive rates and terms.
-                </p>
-            </div>
-            <div style="padding: 20px; text-align: left; background: #F9FAFB;">
-                <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 14px;">Get your In-Principle-Approval</h4>
-                <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.4;">
-                    Secure your IPA with our trusted banking partners. We'll guide you through the entire 
-                    application process for a smooth home buying journey.
-                </p>
-            </div>
-        </div>
-    </div>
-    `}
-
-    <div class="section no-break">
-        <div class="section-header">IMPORTANT NOTES</div>
+        <div class="section-header">Important Notes</div>
         <div class="section-content">
-            <div style="padding: 10px; font-size: 10px; color: #555;">
-                <p style="margin: 4px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
-                <p style="margin: 4px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
-                <p style="margin: 4px 0;">• Maximum loan tenure is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
-                <p style="margin: 4px 0;">• ${(inputs.propertyType === 'private' || inputs.propertyType === 'commercial') ? 'TDSR limit: 55%' : 'MSR limit: 30% and TDSR limit: 55%'} of gross monthly income.</p>
-                <p style="margin: 4px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
-                <p style="margin: 4px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
+            <div style="padding: 15px; font-size: 11px; color: #555; line-height: 1.5;">
+                <p style="margin: 6px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
+                <p style="margin: 6px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
+                <p style="margin: 6px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
+                <p style="margin: 6px 0;">• TDSR limit: 55% of gross monthly income.</p>
+                <p style="margin: 6px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
+                <p style="margin: 6px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
             </div>
         </div>
     </div>
 
-    <div class="disclaimer no-break">
-        <h4>Disclaimer</h4>
-        <p style="margin: 2px 0;">1. Up to 75%ltv for your first residential property loan.</p>
-        <p style="margin: 2px 0;">2. The amount you borrow against your property is your Loan-To-Value %. Current MAS regulations allow you to borrow up to 55% of the value of your property.</p>
-        <p style="margin: 2px 0;">3. After 30% deduction on monthly variable pay as per MAS regulations.</p>
-        <p style="margin: 8px 0 0 0; font-style: italic;">* This report is for indicative purpose only. ${currentDate}</p>
-    </div>
-
-    <div class="footer no-break">        
-        <div style="margin-bottom: 8px; font-size: 10px;">
-            www.keyquestmortgage.com.sg
+    <div class="footer no-break" style="text-align: center; margin-top: 30px; padding: 15px; color: #264A82; border-top: 1px solid #E5E7EB;">
+        <div style="margin-bottom: 5px;">📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg</div>
+        <div style="margin-top: 10px; font-size: 10px; color: #666;">
+            This report is confidential and intended for the named applicant(s). <strong>Your Trusted Mortgage Advisory Partner</strong>
         </div>
     </div>
+
+
 </body>
 </html>
 `;
