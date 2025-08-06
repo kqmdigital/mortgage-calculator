@@ -490,30 +490,31 @@ const htmlContent = `
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: url('https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192');
-            background-size: 300px 300px;
-            background-repeat: repeat;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background-image: url('https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682');
+            background-size: contain;
+            background-repeat: no-repeat;
             background-position: center;
-            opacity: 0.03;
-            transform: rotate(-15deg);
-            z-index: -1;
+            opacity: 0.15;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            z-index: 0;
             pointer-events: none;
         }
         
         @media print {
             body::before {
                 position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-size: 250px 250px;
-                background-repeat: repeat;
-                opacity: 0.04;
+                top: 50%;
+                left: 50%;
+                width: 250px;
+                height: 250px;
+                background-size: contain;
+                background-repeat: no-repeat;
+                opacity: 0.12;
+                transform: translate(-50%, -50%) rotate(-15deg);
                 print-color-adjust: exact;
                 -webkit-print-color-adjust: exact;
             }
