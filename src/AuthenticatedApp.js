@@ -770,25 +770,25 @@ const htmlContent = `
                     <td class="info-label">Property Type:</td>
                     <td class="info-value">${propertyTypeText}</td>
                     <td class="info-label">Combined Income:</td>
-                    <td class="info-value">$${formatCurrency(results.totalCombinedIncome)}</td>
+                    <td class="info-value">${formatCurrency(results.totalCombinedIncome || 0)}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Property Value:</td>
-                    <td class="info-value">$${formatCurrency(parseNumberInput(inputs.propertyValue))}</td>
+                    <td class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</td>
                     <td class="info-label">Loan Tenure:</td>
-                    <td class="info-value">${results.finalLoanTenure} years</td>
+                    <td class="info-value">${results.finalLoanTenure || inputs.loanTenor || 0} years</td>
                 </tr>
                 <tr>
                     <td class="info-label">Loan Amount:</td>
-                    <td class="info-value">$${formatCurrency(results.loanAmount)}</td>
+                    <td class="info-value">${formatCurrency(results.loanAmount || 0)}</td>
                     <td class="info-label">Stress Test Rate:</td>
                     <td class="info-value">${inputs.stressTestRate}%</td>
                 </tr>
                 <tr>
                     <td class="info-label">Loan-to-Value:</td>
-                    <td class="info-value">${(results.loanAmount / parseNumberInput(inputs.propertyValue) * 100).toFixed(1)}%</td>
+                    <td class="info-value">${parseNumberInput(inputs.purchasePrice) > 0 ? ((results.loanAmount || 0) / parseNumberInput(inputs.purchasePrice) * 100).toFixed(1) + '%' : '0.0%'}</td>
                     <td class="info-label">Monthly Installment (Stress):</td>
-                    <td class="info-value">$${formatCurrency(results.monthlyInstallmentStress)}</td>
+                    <td class="info-value">${formatCurrency(results.monthlyInstallmentStress || 0)}</td>
                 </tr>
             </table>
         </div>
@@ -798,7 +798,7 @@ const htmlContent = `
         TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
         <br/>
         <span style="font-size: 14px; margin-top: 5px; display: block;">
-            Required Income: $${formatCurrency(results.requiredIncomeTDSR)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit)}
+            Required Income: ${formatCurrency(results.requiredIncomeTDSR || 0)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit || 0)}
         </span>
     </div>
 
@@ -811,11 +811,11 @@ const htmlContent = `
             <div class="funding-grid">
                 <div class="funding-card">
                     <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
-                    <div class="funding-amount">$${formatCurrency(results.cashShowTDSR)}</div>
+                    <div class="funding-amount">${formatCurrency(results.cashShowTDSR)}</div>
                 </div>
                 <div class="funding-card">
                     <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
-                    <div class="funding-amount">$${formatCurrency(results.cashPledgeTDSR)}</div>
+                    <div class="funding-amount">${formatCurrency(results.cashPledgeTDSR)}</div>
                 </div>
             </div>
             
@@ -827,71 +827,64 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">👥 APPLICANT DETAILS</div>
         <div class="section-content">
-            ${(parseNumberInput(inputs.monthlySalaryB) > 0 || parseNumberInput(inputs.annualSalaryB) > 0) ? `
-            <div style="padding: 15px;">
-                <h4 style="margin-bottom: 10px; color: #374151; font-size: 14px;">Primary Applicant</h4>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-                    <tr style="border-bottom: 1px solid #E5E7EB;">
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Monthly Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #E5E7EB;">
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Annual Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #E5E7EB;">
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Age:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${parseNumberInput(inputs.applicantAgeA) || 0} years</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Total Income:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(results.totalMonthlyIncomeA)}</td>
-                    </tr>
-                </table>
-            </div>
-            ` : `
-            <div style="padding: 15px;">
-                <h4 style="margin-bottom: 10px; color: #374151; font-size: 14px;">Primary Applicant</h4>
-                <div style="text-align: right; font-style: italic; color: #666; margin-bottom: 15px;">Single applicant application</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-                    <tr style="border-bottom: 1px solid #E5E7EB;">
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Monthly Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #E5E7EB;">
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Annual Salary:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #E5E7EB;">
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Age:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${parseNumberInput(inputs.applicantAgeA) || 0} years</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 6px 0; font-weight: 600; color: #374151;">Total Income:</td>
-                        <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">$${formatCurrency(results.totalMonthlyIncomeA)}</td>
-                    </tr>
-                </table>
-                
-                <div style="background: #F3F4F6; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 15px;">
-                    <h4 style="color: #264A82; margin-bottom: 5px; font-size: 16px;">Combined Household Income</h4>
-                    <div style="color: #264A82; font-size: 20px; font-weight: bold;">$${formatCurrency(results.totalCombinedIncome)}</div>
+            <div class="two-column" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 15px;">
+                <div>
+                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Primary Applicant</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Monthly Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Annual Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Age:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${parseNumberInput(inputs.applicantAgeA) || 0} years</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Total Income:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(results.totalMonthlyIncomeA || 0)}</span>
+                    </div>
                 </div>
-                
-                <div style="margin-top: 15px;">
-                    <h4 style="margin-bottom: 10px; color: #374151; font-size: 14px;">Age & Tenor Information</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #E5E7EB;">
-                            <td style="padding: 6px 0; font-weight: 600; color: #374151;">Average Age:</td>
-                            <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${parseNumberInput(inputs.applicantAgeA) || 0}.0 years</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 6px 0; font-weight: 600; color: #374151;">Max Loan Tenor:</td>
-                            <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${results.finalLoanTenure} years</td>
-                        </tr>
-                    </table>
+                <div>
+                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Co-Applicant</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Monthly Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Annual Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Age:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${parseNumberInput(inputs.applicantAgeB) || 0} years</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Total Income:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(results.totalMonthlyIncomeB || 0)}</span>
+                    </div>
                 </div>
             </div>
-            `}
+            <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #E5E7EB;">
+                <h4 style="color: #264A82; margin-bottom: 5px; font-size: 16px;">Combined Household Income</h4>
+                <div style="font-size: 20px; font-weight: bold; color: #264A82;">${formatCurrency(results.combinedMonthlyIncome || 0)}</div>
+            </div>
+            
+            ${results.averageAge > 0 ? `
+            <div style="margin-top: 15px;">
+                <h4 style="color: #264A82; margin-bottom: 10px; font-size: 14px;">Age & Tenor Information</h4>
+                <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                    <span class="info-label" style="font-weight: 600; color: #374151;">Average Age:</span>
+                    <span class="info-value" style="font-weight: bold; color: #111827;">${results.averageAge.toFixed(1)} years</span>
+                </div>
+                <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
+                    <span class="info-label" style="font-weight: 600; color: #374151;">Max Loan Tenor:</span>
+                    <span class="info-value" style="font-weight: bold; color: #111827;">${results.finalLoanTenure || inputs.loanTenor || 0} years</span>
+                </div>
+            </div>
+            ` : ''}
         </div>
     </div>
 
