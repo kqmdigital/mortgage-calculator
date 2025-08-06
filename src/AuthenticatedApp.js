@@ -810,6 +810,28 @@ const htmlContent = `
             Required Income: ${formatCurrency(results.requiredIncomeHDB || 0)} | Deficit/Surplus: ${formatCurrency(results.hdbDeficit || 0)}
         </span>
     </div>
+
+    ${!results.hdbPass ? `
+    <div class="section no-break">
+        <div class="section-header">💡 MSR FUNDING SOLUTIONS</div>
+        <div class="section-content" style="padding: 15px; text-align: center;">
+            <p style="margin-bottom: 15px; font-size: 11px;">To meet the MSR requirements, you need one of the following:</p>
+            
+            <div class="funding-grid">
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
+                    <div class="funding-amount">${formatCurrency(results.cashShowHDB || 0)}</div>
+                </div>
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
+                    <div class="funding-amount">${formatCurrency(results.cashPledgeHDB || 0)}</div>
+                </div>
+            </div>
+            
+            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
+        </div>
+    </div>
+    ` : ''}
     ` : ''}
 
     ${!results.tdsrPass ? `
