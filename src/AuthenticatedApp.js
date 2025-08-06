@@ -1429,8 +1429,8 @@ This ensures all content fits properly without being cut off.`);
         </div>
         
         {/* Input Cards in Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          <div className="space-y-6">{/* Property & Loan Config */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">{/* Left Column: Property & Loan Config */}
           {/* Property Type Selection */}
           <div className="standard-card card-gradient-purple">
             <div className="section-header">
@@ -1647,9 +1647,7 @@ This ensures all content fits properly without being cut off.`);
               </div>
             </div>
           </div>
-          </div>
-
-          <div className="space-y-6">{/* Applicant & Income Details */}
+          
           {/* Enhanced Applicant Information */}
           <div className="standard-card card-gradient-green">
             <div className="section-header">
@@ -1752,7 +1750,7 @@ This ensures all content fits properly without being cut off.`);
           </div>
           </div>
 
-          <div className="space-y-6">{/* Funding & Commitments */}
+          <div className="space-y-6">{/* Right Column: Funding & Commitments */}
           {/* Enhanced Additional Funding */}
           <div className="standard-card card-gradient-yellow">
             <div className="section-header">
