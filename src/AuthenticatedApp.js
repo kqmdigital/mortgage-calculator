@@ -127,6 +127,38 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return 30;
   }, [inputs.propertyType, inputs.useCustomAmount, inputs.purchasePrice, inputs.customLoanAmount, inputs.loanPercentage, calculateAverageAge]);
 
+  // Helper function to calculate max tenure for a specific loan percentage
+  const calculateMaxTenureForLTV = useCallback((loanPercentage, propertyType, averageAge) => {
+    if (averageAge === 0) {
+      if (propertyType === 'hdb') {
+        return loanPercentage >= 56 && loanPercentage <= 75 ? 25 : 30;
+      } else {
+        // Private, EC, and Commercial follow same default rules
+        return loanPercentage >= 56 && loanPercentage <= 75 ? 30 : 35;
+      }
+    }
+    
+    if (propertyType === 'hdb') {
+      if (loanPercentage >= 56 && loanPercentage <= 75) {
+        return Math.min(25, Math.max(1, 65 - averageAge));
+      } else if (loanPercentage <= 55) {
+        return Math.min(30, Math.max(1, 75 - averageAge));
+      }
+    } else {
+      // Private, EC, and Commercial properties use private property age rules
+      if (loanPercentage >= 56 && loanPercentage <= 75) {
+        return Math.min(30, Math.max(1, 65 - averageAge));
+      } else if (loanPercentage <= 55) {
+        return Math.min(35, Math.max(1, 75 - averageAge));
+      } else if (loanPercentage >= 76 && loanPercentage <= 80) {
+        // For 80% commercial loans, use similar rules as 75% but potentially shorter
+        return Math.min(30, Math.max(1, 65 - averageAge));
+      }
+    }
+    
+    return 30;
+  }, []);
+
   const calculatePMT = (rate, periods, principal) => {
     if (rate === 0) return principal / periods;
     const monthlyRate = rate / 100 / 12;
@@ -293,31 +325,46 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       };
     }
 
-    // Calculate maximum loan amount based on different loan tenure scenarios
+    // Calculate maximum loan amounts and property prices for different LTV scenarios with proper tenures
     const averageAge = calculateAverageAge();
-    const maxTenure30 = Math.min(30, Math.max(1, averageAge > 0 ? 65 - averageAge : 30)) * 12;
-    const maxTenure25 = Math.min(25, Math.max(1, averageAge > 0 ? 65 - averageAge : 25)) * 12;
     
-    // Use 30-year tenure for affordability calculation (most optimistic scenario)
-    const maxLoanAmount = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure30, maxMonthlyInstallment);
+    // Get maximum tenure for different LTV ratios based on loan percentage rules
+    const maxTenure55 = calculateMaxTenureForLTV(55, propertyType, averageAge);
+    const maxTenure75 = calculateMaxTenureForLTV(75, propertyType, averageAge);
+    const maxTenure80 = calculateMaxTenureForLTV(80, propertyType, averageAge);
+    
+    // Calculate maximum loan amounts for each LTV scenario using their respective tenures
+    const maxLoanAmount55 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure55 * 12, maxMonthlyInstallment);
+    const maxLoanAmount75 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure75 * 12, maxMonthlyInstallment);
+    const maxLoanAmount80 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure80 * 12, maxMonthlyInstallment);
 
     // Calculate maximum property prices for different LTV ratios
-    const maxPropertyPrice75 = maxLoanAmount / 0.75;  // 75% LTV
-    const maxPropertyPrice80 = maxLoanAmount / 0.80;  // 80% LTV (commercial)
-    const maxPropertyPrice55 = maxLoanAmount / 0.55;  // 55% LTV
+    const maxPropertyPrice55 = maxLoanAmount55 / 0.55;  // 55% LTV with longer tenure
+    const maxPropertyPrice75 = maxLoanAmount75 / 0.75;  // 75% LTV with standard tenure
+    const maxPropertyPrice80 = maxLoanAmount80 / 0.80;  // 80% LTV with commercial tenure
+
+    // Use the most common scenario (75% for residential, 80% for commercial) as the primary loan amount
+    const primaryLoanAmount = propertyType === 'commercial' ? maxLoanAmount80 : maxLoanAmount75;
+    const primaryTenure = propertyType === 'commercial' ? maxTenure80 : maxTenure75;
 
     return {
       combinedMonthlyIncome,
       maxMonthlyInstallment,
-      maxLoanAmount,
+      maxLoanAmount: primaryLoanAmount,
+      maxLoanAmount55,
+      maxLoanAmount75,
+      maxLoanAmount80,
       maxPropertyPrice75,
       maxPropertyPrice80,
       maxPropertyPrice55,
+      maxTenure55,
+      maxTenure75,
+      maxTenure80,
       limitingFactor,
       hasValidData: true,
-      maxTenureUsed: maxTenure30 / 12
+      maxTenureUsed: primaryTenure
     };
-  }, [inputs, calculateAverageAge]);
+  }, [inputs, calculateAverageAge, calculateMaxTenureForLTV]);
 
   // Helper function to calculate loan amount from PMT (reverse PMT calculation)
   const calculateLoanFromPMT = (rate, periods, monthlyPayment) => {
@@ -1101,7 +1148,7 @@ const htmlContent = `
                     <tr>
                         <td class="info-label">Max Monthly Payment:</td>
                         <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
-                        <td class="info-label">Max Tenure Used:</td>
+                        <td class="info-label">Primary Tenure:</td>
                         <td class="info-value">${memoizedAffordability.maxTenureUsed} years</td>
                     </tr>
                 </table>
@@ -1111,13 +1158,13 @@ const htmlContent = `
                 <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Different LTV Scenarios</div>
                 <table class="info-table">
                     <tr>
-                        <td class="info-label">Conservative (55% LTV):</td>
+                        <td class="info-label">55% LTV (${memoizedAffordability.maxTenure55}yr):</td>
                         <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice55)}</td>
-                        <td class="info-label">Standard (75% LTV):</td>
+                        <td class="info-label">75% LTV (${memoizedAffordability.maxTenure75}yr):</td>
                         <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice75)}</td>
                     </tr>
                     <tr>
-                        <td class="info-label">Maximum (80% LTV):</td>
+                        <td class="info-label">80% LTV (${memoizedAffordability.maxTenure80}yr):</td>
                         <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice80)}</td>
                         <td class="info-label">Combined Income:</td>
                         <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
@@ -1125,8 +1172,8 @@ const htmlContent = `
                 </table>
                 
                 <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
-                    <strong>Note:</strong> Affordability based on ${inputs.stressTestRate}% stress test rate. Limited by ${memoizedAffordability.limitingFactor} requirements. 
-                    Does not include stamp duty, legal fees, or other transaction costs.
+                    <strong>Note:</strong> Calculations use loan percentage-specific maximum tenures based on MAS regulations and applicant age. 
+                    Limited by ${memoizedAffordability.limitingFactor} requirements. Does not include stamp duty, legal fees, or other transaction costs.
                 </div>
             </div>
         </div>
@@ -1978,7 +2025,7 @@ This ensures all content fits properly without being cut off.`);
                             <div className="result-title">Max Loan Amount</div>
                             <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxLoanAmount)}</div>
                             <div className="result-subtitle">
-                              {memoizedAffordability.maxTenureUsed}-year tenure at {inputs.stressTestRate}%
+                              {memoizedAffordability.maxTenureUsed}-year max tenure at {inputs.stressTestRate}%
                             </div>
                           </div>
                         </div>
@@ -2013,7 +2060,7 @@ This ensures all content fits properly without being cut off.`);
                             <div className="result-title">Conservative (55% LTV)</div>
                             <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
                             <div className="result-subtitle">
-                              Lower downpayment cash requirement
+                              {memoizedAffordability.maxTenure55}yr tenure, 10% cash + 35% CPF
                             </div>
                           </div>
                         </div>
@@ -2028,7 +2075,7 @@ This ensures all content fits properly without being cut off.`);
                             <div className="result-title">Standard (75% LTV)</div>
                             <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
                             <div className="result-subtitle">
-                              Most common for residential
+                              {memoizedAffordability.maxTenure75}yr tenure, 5% cash + 20% CPF
                             </div>
                           </div>
                         </div>
@@ -2043,7 +2090,7 @@ This ensures all content fits properly without being cut off.`);
                             <div className="result-title">Maximum (80% LTV)</div>
                             <div className="result-value text-red-600">{formatCurrency(memoizedAffordability.maxPropertyPrice80)}</div>
                             <div className="result-subtitle">
-                              Commercial properties only
+                              {memoizedAffordability.maxTenure80}yr tenure, 20% cash (Commercial)
                             </div>
                           </div>
                         </div>
@@ -2057,10 +2104,11 @@ This ensures all content fits properly without being cut off.`);
                       <div className="text-sm text-blue-800">
                         <p className="font-medium mb-2">Affordability Analysis Notes:</p>
                         <ul className="space-y-1 list-disc list-inside">
-                          <li>Calculations based on {inputs.stressTestRate}% stress test rate and {memoizedAffordability.maxTenureUsed}-year maximum tenure</li>
-                          <li>Limited by <strong>{memoizedAffordability.limitingFactor}</strong> regulatory requirement</li>
-                          <li>Assumes optimal loan tenure based on applicant age(s)</li>
-                          <li>Does not include additional costs like stamp duty, legal fees, or renovation</li>
+                          <li>Calculations use loan percentage-specific maximum tenures: 55% LTV = {memoizedAffordability.maxTenure55}yr, 75% LTV = {memoizedAffordability.maxTenure75}yr, 80% LTV = {memoizedAffordability.maxTenure80}yr</li>
+                          <li>Limited by <strong>{memoizedAffordability.limitingFactor}</strong> regulatory requirement and {inputs.stressTestRate}% stress test rate</li>
+                          <li>Maximum tenures calculated based on applicant age(s) and loan percentage rules</li>
+                          <li>Different LTV ratios have different maximum tenure limits as per MAS regulations</li>
+                          <li>Does not include stamp duty, legal fees, or renovation costs</li>
                           <li>Actual bank approval may vary based on credit assessment and property valuation</li>
                         </ul>
                       </div>
