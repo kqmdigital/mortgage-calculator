@@ -282,13 +282,14 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const combinedMonthlyIncome = totalMonthlyIncomeA + totalMonthlyIncomeB;
 
     // Calculate total commitments
-    const totalCommitments = parsedInputs.carLoanA + parsedInputs.carLoanB + 
-                            parsedInputs.personalLoanA + parsedInputs.personalLoanB;
-    const totalCommitmentsTDSR = totalCommitments + parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
+    const totalCarPersonalLoans = parsedInputs.carLoanA + parsedInputs.carLoanB + 
+                                  parsedInputs.personalLoanA + parsedInputs.personalLoanB;
+    const totalPropertyLoans = parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
+    const totalCommitmentsTDSR = totalCarPersonalLoans + totalPropertyLoans;
 
     // Calculate maximum monthly installment based on income limits
     const maxMonthlyTDSR = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR;
-    const maxMonthlyMSR = (combinedMonthlyIncome * 0.30) - totalCommitments;
+    const maxMonthlyMSR = (combinedMonthlyIncome * 0.30) - totalPropertyLoans; // MSR only considers property loans
 
     // Use the more restrictive limit
     let maxMonthlyInstallment;
@@ -300,7 +301,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       if (maxMonthlyMSR < maxMonthlyTDSR) {
         maxMonthlyInstallment = maxMonthlyMSR;
         limitingFactor = 'MSR (30%)';
-        relevantCommitments = totalCommitments; // MSR excludes property loans
+        relevantCommitments = totalPropertyLoans; // MSR only includes property loans
       } else {
         maxMonthlyInstallment = maxMonthlyTDSR;
         limitingFactor = 'TDSR (55%)';
