@@ -293,20 +293,24 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     // Use the more restrictive limit
     let maxMonthlyInstallment;
     let limitingFactor;
+    let relevantCommitments;
     
     if (propertyType === 'hdb' || propertyType === 'ec') {
       // HDB/EC uses the more restrictive of MSR or TDSR
       if (maxMonthlyMSR < maxMonthlyTDSR) {
         maxMonthlyInstallment = maxMonthlyMSR;
         limitingFactor = 'MSR (30%)';
+        relevantCommitments = totalCommitments; // MSR excludes property loans
       } else {
         maxMonthlyInstallment = maxMonthlyTDSR;
         limitingFactor = 'TDSR (55%)';
+        relevantCommitments = totalCommitmentsTDSR; // TDSR includes all commitments
       }
     } else {
       // Private and Commercial use TDSR only
       maxMonthlyInstallment = maxMonthlyTDSR;
       limitingFactor = 'TDSR (55%)';
+      relevantCommitments = totalCommitmentsTDSR; // TDSR includes all commitments
     }
 
     // Ensure positive value
@@ -315,6 +319,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     if (maxMonthlyInstallment <= 0 || parsedInputs.stressTestRate <= 0) {
       return {
         combinedMonthlyIncome,
+        totalCommitmentsTDSR: relevantCommitments,
         maxMonthlyInstallment: 0,
         maxLoanAmount: 0,
         maxPropertyPrice75: 0,
@@ -349,6 +354,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
 
     return {
       combinedMonthlyIncome,
+      totalCommitmentsTDSR: relevantCommitments,
       maxMonthlyInstallment,
       maxLoanAmount: primaryLoanAmount,
       maxLoanAmount55,
@@ -1771,6 +1777,20 @@ This ensures all content fits properly without being cut off.`);
               </div>
               
               <div className="space-y-4">
+                {/* Combined Income and Commitment Summary */}
+                <div className="result-card bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-gray-600 mb-1">Combined Monthly Income</div>
+                      <div className="text-lg font-bold text-indigo-600">{formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-gray-600 mb-1">Combined Monthly Commitment</div>
+                      <div className="text-lg font-bold text-purple-600">{formatCurrency(memoizedAffordability.totalCommitmentsTDSR || 0)}</div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* 75% LTV Option */}
                 <div className="result-card">
                   <div className="result-header">
