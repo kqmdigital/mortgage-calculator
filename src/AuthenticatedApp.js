@@ -38,7 +38,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   const [loanTenorManuallyEdited, setLoanTenorManuallyEdited] = useState(false);
   const [annualSalaryAManuallyEdited, setAnnualSalaryAManuallyEdited] = useState(false);
   const [annualSalaryBManuallyEdited, setAnnualSalaryBManuallyEdited] = useState(false);
-  const [purchasePriceManuallyEdited, setPurchasePriceManuallyEdited] = useState(false);
 
   // Helper function to get default stress test rate based on property type
   const getDefaultStressTestRate = (propertyType) => {
@@ -625,10 +624,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         [field]: value
       }));
     } else if (field === 'purchasePrice') {
-      // Mark purchase price as manually edited when user changes it
-      if (value && value.trim() !== '') {
-        setPurchasePriceManuallyEdited(true);
-      }
       setInputs(prev => ({
         ...prev,
         [field]: value
@@ -639,27 +634,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         ...prev,
         [field]: value  // Store raw input, parse only during calculations
       }));
-      
-      // Auto-populate purchase price if it hasn't been manually edited and we have income data
-      if (['monthlySalaryA', 'monthlySalaryB', 'annualSalaryA', 'annualSalaryB', 'applicantAgeA', 'applicantAgeB',
-           'carLoanA', 'carLoanB', 'personalLoanA', 'personalLoanB', 'propertyLoanA', 'propertyLoanB'].includes(field)) {
-        setTimeout(() => {
-          if (!purchasePriceManuallyEdited) {
-            const affordability = calculateMaxAffordability();
-            if (affordability && affordability.hasValidData) {
-              const maxPrice = inputs.propertyType === 'commercial' 
-                ? affordability.maxPropertyPrice80 
-                : affordability.maxPropertyPrice75;
-              if (maxPrice > 0) {
-                setInputs(prev => ({
-                  ...prev,
-                  purchasePrice: maxPrice.toString()
-                }));
-              }
-            }
-          }
-        }, 100);
-      }
     } else if (field === 'stressTestRate') {
       // ✅ FIXED: Allow empty stress test rate
       setInputs(prev => ({
@@ -694,7 +668,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       const newStressTestRate = getDefaultStressTestRate(value);
       const defaultLoanPercentage = value === 'commercial' ? 80 : 75;
       setLoanTenorManuallyEdited(false); // Allow auto-population for new property type
-      setPurchasePriceManuallyEdited(false); // Allow auto-population for new property type
       setInputs(prev => ({
         ...prev,
         [field]: value,
