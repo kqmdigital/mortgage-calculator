@@ -1582,11 +1582,7 @@ This ensures all content fits properly without being cut off.`);
                     <div className="radio-card-content">
                       <div className="radio-card-title">{inputs.propertyType === 'commercial' ? '80%' : '75%'}</div>
                       <div className="radio-card-subtitle text-xs">
-                        {memoizedAffordability && memoizedAffordability.hasValidData
-                          ? formatCurrency(inputs.propertyType === 'commercial' 
-                              ? memoizedAffordability.maxLoanAmount80 
-                              : memoizedAffordability.maxLoanAmount75)
-                          : formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * (inputs.propertyType === 'commercial' ? 0.80 : 0.75))}
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * (inputs.propertyType === 'commercial' ? 0.80 : 0.75))}
                       </div>
                     </div>
                   </label>
@@ -1604,9 +1600,7 @@ This ensures all content fits properly without being cut off.`);
                     <div className="radio-card-content">
                       <div className="radio-card-title">55%</div>
                       <div className="radio-card-subtitle text-xs">
-                        {memoizedAffordability && memoizedAffordability.hasValidData
-                          ? formatCurrency(memoizedAffordability.maxLoanAmount55)
-                          : formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
+                        {formatCurrency((parseNumberInput(inputs.purchasePrice) || 0) * 0.55)}
                       </div>
                     </div>
                   </label>
