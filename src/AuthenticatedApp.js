@@ -1994,73 +1994,7 @@ This ensures all content fits properly without being cut off.`);
             <p className="text-lg text-gray-600">Your TDSR/MSR calculation results and financial recommendations</p>
           </div>
           <div className="space-y-6">
-            <div className="standard-card">
-              <div className="section-header">
-                <div className="icon-container blue">
-                  <Calculator className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-content">
-                  <h2>Assessment Results</h2>
-                  <p>{getPropertyTypeText(inputs.propertyType)} Analysis</p>
-                </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-4 text-gray-800">Loan Configuration</h3>
-                  <div className="grid-responsive cols-2">
-                    <div className="result-card">
-                      <div className="result-header">
-                        <div className="result-icon bg-blue-100">
-                          <DollarSign className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="result-title">Selected Loan Amount</div>
-                          <div className="result-value text-blue-600">{formatCurrency(results.loanAmount)}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="result-card">
-                      <div className="result-header">
-                        <div className="result-icon bg-green-100">
-                          <TrendingUp className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                          <div className="result-title">Combined Monthly Income</div>
-                          <div className="result-value text-green-600">{formatCurrency(results.combinedMonthlyIncome)}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="result-card">
-                      <div className="result-header">
-                        <div className="result-icon bg-red-100">
-                          <BarChart3 className="w-5 h-5 text-red-600" />
-                        </div>
-                        <div>
-                          <div className="result-title">Monthly Installment (Stress)</div>
-                          <div className="result-value text-red-600">{formatCurrency(results.monthlyInstallmentStressTest)}</div>
-                          <div className="result-subtitle">Using {inputs.stressTestRate}% stress test rate</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="result-card">
-                      <div className="result-header">
-                        <div className="result-icon bg-gray-100">
-                          <Info className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <div className="result-title">Loan-to-Value Ratio</div>
-                          <div className="result-value text-gray-700">{((results.loanAmount / (parseNumberInput(inputs.purchasePrice) || 1)) * 100).toFixed(1)}%</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-            {/* Downpayment and Stamp Duty Information */}
+            {/* Financial Requirements section */}
             <div className="standard-card">
               <div className="section-header">
                 <div className="icon-container green">
@@ -2131,6 +2065,26 @@ This ensures all content fits properly without being cut off.`);
                           <div className="result-value text-green-600">{formatCurrency(results.downPayment.totalDownPayment)}</div>
                           <div className="result-subtitle">
                             {(((results.downPayment.totalDownPayment) / results.purchasePrice) * 100).toFixed(1)}% of purchase price
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4 text-gray-800">Loan Details</h3>
+                  <div className="grid-responsive cols-1">
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-blue-100">
+                          <Calculator className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="result-title">Selected Loan Amount</div>
+                          <div className="result-value text-blue-600">{formatCurrency(results.loanAmount)}</div>
+                          <div className="result-subtitle">
+                            {((results.loanAmount / results.purchasePrice) * 100).toFixed(1)}% of purchase price
                           </div>
                         </div>
                       </div>
