@@ -1915,68 +1915,81 @@ This ensures all content fits properly without being cut off.`);
             )}
           </div>
 
-          {/* Maximum Affordability Section - Below Existing Monthly Commitments */}
-          {memoizedAffordability && memoizedAffordability.hasValidData && (
-            <div className="standard-card card-gradient-purple">
-              <div className="section-header">
-                <div className="icon-container purple">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-content">
-                  <h2>Maximum Affordability</h2>
-                  <p>Based on your income and commitments</p>
-                </div>
+          {/* Maximum Affordability Section - Always Visible */}
+          <div className="standard-card card-gradient-purple">
+            <div className="section-header">
+              <div className="icon-container purple">
+                <TrendingUp className="w-6 h-6 text-white" />
               </div>
-              
-              <div className="space-y-4">
+              <div className="text-content">
+                <h2>Maximum Affordability</h2>
+                <p>Based on your income and commitments</p>
+              </div>
+            </div>
+            
+            {memoizedAffordability && memoizedAffordability.hasValidData ? (
+              <div className="space-y-3">
                 {/* Combined Income and Commitment Summary */}
                 <div className="result-card bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
                       <div className="text-sm font-medium text-gray-600 mb-1">Combined Monthly Income</div>
-                      <div className="text-lg font-bold text-indigo-600">{formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</div>
+                      <div className="text-xl font-bold text-indigo-600">{formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-sm font-medium text-gray-600 mb-1">Combined Monthly Commitment</div>
-                      <div className="text-lg font-bold text-purple-600">{formatCurrency(memoizedAffordability.totalCommitmentsTDSR || 0)}</div>
+                      <div className="text-xl font-bold text-purple-600">{formatCurrency(memoizedAffordability.totalCommitmentsTDSR || 0)}</div>
                     </div>
                   </div>
                 </div>
 
-                {/* 75% LTV Option */}
-                <div className="result-card">
-                  <div className="result-header">
-                    <div className="result-icon bg-blue-100">
-                      <Building2 className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="result-title">Standard (75% LTV)</div>
-                      <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
-                      <div className="result-subtitle">
-                        Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)} • {memoizedAffordability.maxTenure75}yr tenure
+                {/* LTV Options in 2-column grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Standard 75% LTV Option */}
+                  <div className="result-card">
+                    <div className="result-header">
+                      <div className="result-icon bg-blue-100">
+                        <Building2 className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="result-title">Standard (75% LTV)</div>
+                        <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
+                        <div className="result-subtitle">
+                          Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)} • {memoizedAffordability.maxTenure75}yr tenure
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* 55% LTV Option */}
-                <div className="result-card">
-                  <div className="result-header">
-                    <div className="result-icon bg-orange-100">
-                      <Building className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="result-title">Conservative (55% LTV)</div>
-                      <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
-                      <div className="result-subtitle">
-                        Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)} • {memoizedAffordability.maxTenure55}yr tenure
+                  
+                  {/* Conservative 55% LTV Option */}
+                  <div className="result-card">
+                    <div className="result-header">
+                      <div className="result-icon bg-orange-100">
+                        <Building className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="result-title">Conservative (55% LTV)</div>
+                        <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
+                        <div className="result-subtitle">
+                          Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)} • {memoizedAffordability.maxTenure55}yr tenure
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-gray-400 mb-4">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-600 mb-2">Enter Your Details</h3>
+                <p className="text-sm text-gray-500">
+                  Fill in the applicant details above to see your maximum affordability analysis
+                </p>
+              </div>
+            )}
+          </div>
           </div>
         </div>
       </div>
