@@ -1435,10 +1435,6 @@ This ensures all content fits properly without being cut off.`);
     <div className="space-y-12">
       {/* Input Section - Full Width */}
       <div className="space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">TDSR/MSR Calculator</h1>
-          <p className="text-lg text-gray-600">Configure your loan details and financial commitments</p>
-        </div>
         
         {/* Input Cards in Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -1989,10 +1985,6 @@ This ensures all content fits properly without being cut off.`);
       {/* Enhanced Results Section - Full Width */}
       {results && (
         <div className="space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Assessment Results</h1>
-            <p className="text-lg text-gray-600">Your TDSR/MSR calculation results and financial recommendations</p>
-          </div>
           <div className="space-y-6">
             {/* Financial Requirements section */}
             <div className="standard-card">
