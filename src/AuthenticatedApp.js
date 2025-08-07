@@ -1998,10 +1998,10 @@ This ensures all content fits properly without being cut off.`);
                 </div>
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold mb-4 text-gray-800">Downpayment Requirements</h3>
-                  <div className="grid-responsive cols-3">
+                  <h3 className="font-semibold mb-3 text-gray-800">Downpayment Requirements</h3>
+                  <div className="grid-responsive cols-3 gap-3">
                     <div className="result-card">
                       <div className="result-header">
                         <div className="result-icon bg-red-100">
@@ -2064,9 +2064,9 @@ This ensures all content fits properly without being cut off.`);
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="font-semibold mb-4 text-gray-800">Loan Details</h3>
-                  <div className="grid-responsive cols-1">
+                <div className="grid-responsive cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold mb-3 text-gray-800">Loan Details</h3>
                     <div className="result-card">
                       <div className="result-header">
                         <div className="result-icon bg-blue-100">
@@ -2082,11 +2082,9 @@ This ensures all content fits properly without being cut off.`);
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <h3 className="font-semibold mb-4 text-gray-800">Stamp Duty</h3>
-                  <div className="grid-responsive cols-1">
+                  <div>
+                    <h3 className="font-semibold mb-3 text-gray-800">Stamp Duty</h3>
                     <div className="result-card">
                       <div className="result-header">
                         <div className="result-icon bg-purple-100">
@@ -2107,29 +2105,6 @@ This ensures all content fits properly without being cut off.`);
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-                    <div className="text-sm text-gray-700">
-                      <p className="font-medium mb-2">Important Notes:</p>
-                      <ul className="space-y-1 list-disc list-inside">
-                        {inputs.propertyType === 'commercial' ? (
-                          <>
-                            <li>Commercial/Industrial properties require 20% cash downpayment (no CPF allowed)</li>
-                            <li>Additional stamp duties may apply (ABSD, etc.)</li>
-                          </>
-                        ) : (
-                          <>
-                            <li>Cash component is mandatory and cannot be substituted with CPF</li>
-                            <li>CPF/Cash portion can be paid using CPF OA or cash</li>
-                            <li>Additional stamp duties may apply for non-residents or multiple property owners</li>
-                          </>
-                        )}
-                        <li>Legal fees, valuation fees, and other costs not included</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
