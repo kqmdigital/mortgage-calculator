@@ -1943,35 +1943,43 @@ This ensures all content fits properly without being cut off.`);
                   </div>
                 </div>
 
-                {/* LTV Options in 2-column grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* Standard 75% LTV Option */}
-                  <div className="result-card">
-                    <div className="result-header">
-                      <div className="result-icon bg-blue-100">
-                        <Building2 className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="result-title">Standard (75% LTV)</div>
-                        <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
-                        <div className="result-subtitle">
-                          Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)} • {memoizedAffordability.maxTenure75}yr tenure
+                {/* Maximum Affordability Results */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Maximum Purchase Price You Can Afford</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Standard 75% LTV Option */}
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-blue-100">
+                          <Building2 className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="result-title">Standard (75% LTV)</div>
+                          <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
+                          <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
+                          <div className="result-subtitle">
+                            Loan Amount: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)}<br />
+                            Loan Tenure: {memoizedAffordability.maxTenure75} years
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Conservative 55% LTV Option */}
-                  <div className="result-card">
-                    <div className="result-header">
-                      <div className="result-icon bg-orange-100">
-                        <Building className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="result-title">Conservative (55% LTV)</div>
-                        <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
-                        <div className="result-subtitle">
-                          Loan: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)} • {memoizedAffordability.maxTenure55}yr tenure
+                    
+                    {/* Conservative 55% LTV Option */}
+                    <div className="result-card">
+                      <div className="result-header">
+                        <div className="result-icon bg-orange-100">
+                          <Building className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="result-title">Conservative (55% LTV)</div>
+                          <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
+                          <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
+                          <div className="result-subtitle">
+                            Loan Amount: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)}<br />
+                            Loan Tenure: {memoizedAffordability.maxTenure55} years
+                          </div>
                         </div>
                       </div>
                     </div>
