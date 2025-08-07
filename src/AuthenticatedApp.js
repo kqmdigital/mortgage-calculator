@@ -103,8 +103,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     if (averageAge === 0) {
       if (inputs.propertyType === 'hdb') {
         return loanPercentage >= 56 && loanPercentage <= 75 ? 25 : 30;
+      } else if (inputs.propertyType === 'commercial') {
+        // Commercial/Industrial properties: max 30 years regardless of LTV
+        return 30;
       } else {
-        // Private, EC, and Commercial follow same default rules
+        // Private and EC properties
         return loanPercentage >= 56 && loanPercentage <= 75 ? 30 : 35;
       }
     }
@@ -115,8 +118,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       } else if (loanPercentage <= 55) {
         return Math.min(30, Math.max(1, 75 - averageAge));
       }
+    } else if (inputs.propertyType === 'commercial') {
+      // Commercial/Industrial properties: max 30 years, age limit up to 75
+      return Math.min(30, Math.max(1, 75 - averageAge));
     } else {
-      // Private, EC, and Commercial properties use private property age rules
+      // Private and EC properties use standard private property age rules
       if (loanPercentage >= 56 && loanPercentage <= 75) {
         return Math.min(30, Math.max(1, 65 - averageAge));
       } else if (loanPercentage <= 55) {
@@ -132,8 +138,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     if (averageAge === 0) {
       if (propertyType === 'hdb') {
         return loanPercentage >= 56 && loanPercentage <= 75 ? 25 : 30;
+      } else if (propertyType === 'commercial') {
+        // Commercial/Industrial properties: max 30 years regardless of LTV
+        return 30;
       } else {
-        // Private, EC, and Commercial follow same default rules
+        // Private and EC properties
         return loanPercentage >= 56 && loanPercentage <= 75 ? 30 : 35;
       }
     }
@@ -144,15 +153,15 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       } else if (loanPercentage <= 55) {
         return Math.min(30, Math.max(1, 75 - averageAge));
       }
+    } else if (propertyType === 'commercial') {
+      // Commercial/Industrial properties: max 30 years, age limit up to 75
+      return Math.min(30, Math.max(1, 75 - averageAge));
     } else {
-      // Private, EC, and Commercial properties use private property age rules
+      // Private and EC properties use standard private property age rules
       if (loanPercentage >= 56 && loanPercentage <= 75) {
         return Math.min(30, Math.max(1, 65 - averageAge));
       } else if (loanPercentage <= 55) {
         return Math.min(35, Math.max(1, 75 - averageAge));
-      } else if (loanPercentage >= 76 && loanPercentage <= 80) {
-        // For 80% commercial loans, use similar rules as 75% but potentially shorter
-        return Math.min(30, Math.max(1, 65 - averageAge));
       }
     }
     
