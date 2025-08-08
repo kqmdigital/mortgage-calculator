@@ -2498,7 +2498,7 @@ const AuthenticatedApp = () => {
             width: auto !important;
             display: block !important;
             object-fit: contain !important;
-            transform: scale(2.0) !important;
+            transform: scale(1.5) !important;
             transform-origin: center !important;
           }
           
@@ -2515,7 +2515,7 @@ const AuthenticatedApp = () => {
           html body img[src*="KeyQuest"],
           html body div.relative img[src*="KeyQuest"],
           html body div.flex img[alt*="KeyQuest"] {
-            transform: scale(2.0) !important;
+            transform: scale(1.5) !important;
             transform-origin: center !important;
             height: auto !important;
             width: auto !important;
@@ -2549,7 +2549,7 @@ const AuthenticatedApp = () => {
                       width: 'auto',
                       display: 'block',
                       objectFit: 'contain',
-                      transform: 'scale(2.0)',
+                      transform: 'scale(1.5)',
                       transformOrigin: 'center'
                     }}
                   />
