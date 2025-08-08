@@ -2509,7 +2509,7 @@ const AuthenticatedApp = () => {
         <div className="mb-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4">
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-              <div className="header-logo-container flex-1 flex justify-center lg:justify-start" style={{ height: '48px', alignItems: 'center' }}>
+              <div className="header-logo-container flex-1 flex justify-center lg:justify-start" style={{ height: '48px', alignItems: 'center', backgroundColor: 'red', border: '3px solid blue' }}>
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
@@ -2523,11 +2523,12 @@ const AuthenticatedApp = () => {
                     display: 'block',
                     objectFit: 'contain',
                     transform: 'none',
-                    border: 'none',
+                    border: '2px solid green',
                     outline: 'none',
                     fontSize: '0'
                   }}
                 />
+                <span style={{ color: 'white', backgroundColor: 'black', padding: '2px' }}>LOGO DEBUG</span>
               </div>
               
               {/* User Menu */}
