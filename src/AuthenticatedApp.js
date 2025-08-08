@@ -723,6 +723,28 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
   };
 
+  // Handle click on affordability card to auto-populate loan configuration
+  const handleAffordabilityCardClick = (ltvPercentage) => {
+    if (!memoizedAffordability?.hasValidData) return;
+
+    let maxPrice;
+    
+    if (ltvPercentage === 75) {
+      maxPrice = roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75);
+    } else if (ltvPercentage === 55) {
+      maxPrice = roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55);
+    }
+
+    // Update the inputs to populate purchase price and loan settings
+    setInputs(prev => ({
+      ...prev,
+      purchasePrice: maxPrice.toString(),
+      loanPercentage: ltvPercentage,
+      useCustomAmount: false, // Reset to percentage-based loan
+      customLoanAmount: '' // Clear custom amount
+    }));
+  };
+
   const generatePDFReport = () => {
     if (!results) {
       alert('Please calculate the mortgage first before generating a report.');
@@ -1983,7 +2005,11 @@ This ensures all content fits properly without being cut off.`);
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Standard 75% LTV Option */}
-                    <div className="result-card">
+                    <div 
+                      className="result-card cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 relative group"
+                      onClick={() => handleAffordabilityCardClick(75)}
+                      title="Click to use this affordability calculation"
+                    >
                       <div className="result-header">
                         <div className="result-icon bg-blue-100">
                           <Building2 className="w-5 h-5 text-blue-600" />
@@ -1996,12 +2022,25 @@ This ensures all content fits properly without being cut off.`);
                             Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75 * 0.75))}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure75)} years
                           </div>
+                          {/* Use This Button */}
+                          <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="inline-flex items-center text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              <span>Click to use this</span>
+                              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                              </svg>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                     
                     {/* Conservative 55% LTV Option */}
-                    <div className="result-card">
+                    <div 
+                      className="result-card cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 relative group"
+                      onClick={() => handleAffordabilityCardClick(55)}
+                      title="Click to use this affordability calculation"
+                    >
                       <div className="result-header">
                         <div className="result-icon bg-orange-100">
                           <Building className="w-5 h-5 text-orange-600" />
@@ -2013,6 +2052,15 @@ This ensures all content fits properly without being cut off.`);
                           <div className="result-subtitle">
                             Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55 * 0.55))}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure55)} years
+                          </div>
+                          {/* Use This Button */}
+                          <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="inline-flex items-center text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                              <span>Click to use this</span>
+                              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                              </svg>
+                            </div>
                           </div>
                         </div>
                       </div>
