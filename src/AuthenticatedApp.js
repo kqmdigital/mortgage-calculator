@@ -2461,10 +2461,10 @@ const AuthenticatedApp = () => {
       <style>
         {`
           .header-logo {
-            height: 48px !important;
+            height: 60px !important;
             max-width: none !important;
             width: auto !important;
-            min-height: 48px !important;
+            min-height: 60px !important;
             display: block !important;
           }
         `}
