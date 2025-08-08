@@ -2468,17 +2468,19 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <style>
         {`
-          /* TARGETED HEADER LOGO ONLY - Don't affect login or other logos */
-          html body .header-logo-container img.header-logo[alt="Keyquest Mortgage"] { 
-            height: 48px !important; 
+          /* TARGETED HEADER LOGO CONTAINER - Force size constraint */
+          .header-logo-container div {
+            height: 48px !important;
             max-height: 48px !important;
-            min-height: 48px !important;
-            width: auto !important; 
-            max-width: none !important;
-            min-width: auto !important;
+            overflow: hidden !important;
+          }
+          
+          .header-logo-container div img {
+            height: 48px !important;
+            max-height: 48px !important;
+            width: auto !important;
             display: block !important;
             object-fit: contain !important;
-            transform: none !important;
           }
           html body div.min-h-screen img[src*="KEYQUEST"],
           html body div.min-h-screen img[src*="KeyQuest"],
@@ -2509,26 +2511,26 @@ const AuthenticatedApp = () => {
         <div className="mb-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4">
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
-              <div className="header-logo-container flex-1 flex justify-center lg:justify-start" style={{ height: '48px', alignItems: 'center', backgroundColor: 'red', border: '3px solid blue' }}>
-                <img 
-                  src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
-                  alt="Keyquest Mortgage" 
-                  style={{
-                    height: '48px',
-                    maxHeight: '48px',
-                    minHeight: '48px',
-                    width: 'auto',
-                    maxWidth: 'none',
-                    minWidth: 'auto',
-                    display: 'block',
-                    objectFit: 'contain',
-                    transform: 'none',
-                    border: '2px solid green',
-                    outline: 'none',
-                    fontSize: '0'
-                  }}
-                />
-                <span style={{ color: 'white', backgroundColor: 'black', padding: '2px' }}>LOGO DEBUG</span>
+              <div className="header-logo-container flex-1 flex justify-center lg:justify-start">
+                <div style={{ 
+                  height: '48px', 
+                  width: 'auto', 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  maxHeight: '48px',
+                  overflow: 'hidden'
+                }}>
+                  <img 
+                    src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
+                    alt="Keyquest Mortgage" 
+                    style={{
+                      height: '48px',
+                      width: 'auto',
+                      display: 'block',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </div>
               </div>
               
               {/* User Menu */}
