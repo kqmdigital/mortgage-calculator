@@ -2460,20 +2460,15 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <style>
         {`
-          img.header-logo {
+          div.header-logo-container > img.header-logo {
             height: 60px !important;
-            max-width: none !important;
-            width: auto !important;
+            max-height: 60px !important;
             min-height: 60px !important;
-            display: block !important;
-          }
-          
-          .header-logo-container img {
-            height: 60px !important;
             max-width: none !important;
+            min-width: auto !important;
             width: auto !important;
-            min-height: 60px !important;
             display: block !important;
+            object-fit: contain !important;
           }
         `}
       </style>
@@ -2486,7 +2481,7 @@ const AuthenticatedApp = () => {
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
-                  className="header-logo w-auto object-contain"
+                  className="header-logo"
                 />
               </div>
               
