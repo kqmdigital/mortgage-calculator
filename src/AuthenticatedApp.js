@@ -2460,7 +2460,11 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <style>
         {`
-          div.header-logo-container > img.header-logo {
+          /* Target the main page header logo specifically */
+          .mb-6 img[alt="Keyquest Mortgage"],
+          .header-logo-container img,
+          div.header-logo-container > img.header-logo,
+          img[src*="KEYQUEST%20LOGO"] {
             height: 60px !important;
             max-height: 60px !important;
             min-height: 60px !important;
