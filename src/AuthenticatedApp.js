@@ -77,8 +77,20 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   const calculateAverageAge = useCallback(() => {
     const ageA = parseNumberInput(inputs.applicantAgeA) || 0;
     const ageB = parseNumberInput(inputs.applicantAgeB) || 0;
+    const salaryA = parseNumberInput(inputs.monthlySalaryA) || 0;
+    const salaryB = parseNumberInput(inputs.monthlySalaryB) || 0;
     
-    if (ageA > 0 && ageB > 0) {
+    // Use Income Weighted Average Age (IWAA) formula
+    // Formula: (age1*salary1) + (age2*salary2) / (salary1 + salary2)
+    if (ageA > 0 && ageB > 0 && salaryA > 0 && salaryB > 0) {
+      const totalSalary = salaryA + salaryB;
+      return ((ageA * salaryA) + (ageB * salaryB)) / totalSalary;
+    } else if (ageA > 0 && salaryA > 0) {
+      return ageA; // Single applicant A
+    } else if (ageB > 0 && salaryB > 0) {
+      return ageB; // Single applicant B
+    } else if (ageA > 0 && ageB > 0) {
+      // Fallback to simple average if no salary data
       return (ageA + ageB) / 2;
     } else if (ageA > 0) {
       return ageA;
@@ -86,7 +98,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       return ageB;
     }
     return 0;
-  }, [inputs.applicantAgeA, inputs.applicantAgeB]);
+  }, [inputs.applicantAgeA, inputs.applicantAgeB, inputs.monthlySalaryA, inputs.monthlySalaryB]);
 
   const calculateMaxLoanTenor = useCallback(() => {
     const averageAge = calculateAverageAge();
