@@ -126,19 +126,19 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     
     if (inputs.propertyType === 'hdb') {
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        return Math.min(25, Math.max(1, 65 - averageAge));
+        return Math.floor(Math.min(25, Math.max(1, 65 - averageAge)));
       } else if (loanPercentage <= 55) {
-        return Math.min(30, Math.max(1, 75 - averageAge));
+        return Math.floor(Math.min(30, Math.max(1, 75 - averageAge)));
       }
     } else if (inputs.propertyType === 'commercial') {
       // Commercial/Industrial properties: max 30 years, age limit up to 75
-      return Math.min(30, Math.max(1, 75 - averageAge));
+      return Math.floor(Math.min(30, Math.max(1, 75 - averageAge)));
     } else {
       // Private and EC properties use standard private property age rules
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        return Math.min(30, Math.max(1, 65 - averageAge));
+        return Math.floor(Math.min(30, Math.max(1, 65 - averageAge)));
       } else if (loanPercentage <= 55) {
-        return Math.min(35, Math.max(1, 75 - averageAge));
+        return Math.floor(Math.min(35, Math.max(1, 75 - averageAge)));
       }
     }
     
@@ -161,19 +161,19 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     
     if (propertyType === 'hdb') {
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        return Math.min(25, Math.max(1, 65 - averageAge));
+        return Math.floor(Math.min(25, Math.max(1, 65 - averageAge)));
       } else if (loanPercentage <= 55) {
-        return Math.min(30, Math.max(1, 75 - averageAge));
+        return Math.floor(Math.min(30, Math.max(1, 75 - averageAge)));
       }
     } else if (propertyType === 'commercial') {
       // Commercial/Industrial properties: max 30 years, age limit up to 75
-      return Math.min(30, Math.max(1, 75 - averageAge));
+      return Math.floor(Math.min(30, Math.max(1, 75 - averageAge)));
     } else {
       // Private and EC properties use standard private property age rules
       if (loanPercentage >= 56 && loanPercentage <= 75) {
-        return Math.min(30, Math.max(1, 65 - averageAge));
+        return Math.floor(Math.min(30, Math.max(1, 65 - averageAge)));
       } else if (loanPercentage <= 55) {
-        return Math.min(35, Math.max(1, 75 - averageAge));
+        return Math.floor(Math.min(35, Math.max(1, 75 - averageAge)));
       }
     }
     
@@ -609,6 +609,18 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount);
+  };
+
+  // Helper function to round down tenor to nearest whole number
+  const roundDownTenor = (value) => {
+    if (!value || isNaN(value)) return 0;
+    return Math.floor(parseFloat(value));
+  };
+
+  // Helper function to round down loan amount to nearest hundred
+  const roundDownToNearestHundred = (amount) => {
+    if (!amount || isNaN(amount)) return 0;
+    return Math.floor(parseFloat(amount) / 100) * 100;
   };
 
   const handleInputChange = (field, value) => {
@@ -1093,7 +1105,7 @@ const htmlContent = `
                     <td class="info-label">Property Value:</td>
                     <td class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</td>
                     <td class="info-label">Loan Tenure:</td>
-                    <td class="info-value">${results.finalLoanTenure || inputs.loanTenor || 0} years</td>
+                    <td class="info-value">${roundDownTenor(results.finalLoanTenure || inputs.loanTenor || 0)} years</td>
                 </tr>
                 <tr>
                     <td class="info-label">Loan Amount:</td>
@@ -1182,7 +1194,7 @@ const htmlContent = `
                         <td class="info-label">Max Monthly Payment:</td>
                         <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
                         <td class="info-label">Primary Tenure:</td>
-                        <td class="info-value">${memoizedAffordability.maxTenureUsed} years</td>
+                        <td class="info-value">${roundDownTenor(memoizedAffordability.maxTenureUsed)} years</td>
                     </tr>
                 </table>
             </div>
@@ -1334,7 +1346,7 @@ const htmlContent = `
                     </div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
                         <span class="info-label" style="font-weight: 600; color: #374151;">Max Loan Tenor:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${results.finalLoanTenure || inputs.loanTenor || 0} years</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${roundDownTenor(results.finalLoanTenure || inputs.loanTenor || 0)} years</span>
                     </div>
                 </div>
             </div>
@@ -1666,7 +1678,7 @@ This ensures all content fits properly without being cut off.`);
                   </div>
                   {results && (
                     <div className="mt-2 text-xs text-gray-600 space-y-1">
-                      <p><strong>Max tenor:</strong> {results.maxLoanTenor} years</p>
+                      <p><strong>Max tenor:</strong> {roundDownTenor(results.maxLoanTenor)} years</p>
                       {results.averageAge > 0 && (
                         <p><strong>Average age:</strong> {results.averageAge.toFixed(1)} years</p>
                       )}
@@ -1980,8 +1992,8 @@ This ensures all content fits properly without being cut off.`);
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
                           <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
                           <div className="result-subtitle">
-                            Loan Amount: {formatCurrency(memoizedAffordability.maxPropertyPrice75 * 0.75)}<br />
-                            Loan Tenure: {memoizedAffordability.maxTenure75} years
+                            Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75 * 0.75))}<br />
+                            Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure75)} years
                           </div>
                         </div>
                       </div>
@@ -1998,8 +2010,8 @@ This ensures all content fits properly without being cut off.`);
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
                           <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
                           <div className="result-subtitle">
-                            Loan Amount: {formatCurrency(memoizedAffordability.maxPropertyPrice55 * 0.55)}<br />
-                            Loan Tenure: {memoizedAffordability.maxTenure55} years
+                            Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55 * 0.55))}<br />
+                            Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure55)} years
                           </div>
                         </div>
                       </div>
