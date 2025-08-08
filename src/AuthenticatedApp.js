@@ -876,10 +876,10 @@ const htmlContent = `
         }
         
         .header-logo {
-            height: 80px !important;
+            height: 48px !important;
             max-width: none !important;
             width: auto !important;
-            min-height: 80px !important;
+            min-height: 48px !important;
             display: block !important;
         }
         
