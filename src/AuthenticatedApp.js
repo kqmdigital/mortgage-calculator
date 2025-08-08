@@ -793,6 +793,11 @@ const htmlContent = `
                 page-break-inside: avoid; 
                 break-inside: avoid;
             }
+            
+            .logo-section img {
+                width: 80px !important;
+                height: auto !important;
+            }
         }
         
         body {
@@ -872,7 +877,10 @@ const htmlContent = `
         }
         
         .logo-section img {
+            width: 96px !important;
+            height: auto !important;
             display: block;
+            margin: 0 auto;
         }
         
         .header-logo {
@@ -2464,6 +2472,8 @@ const AuthenticatedApp = () => {
           .mb-6 img[alt="Keyquest Mortgage"],
           .header-logo-container img,
           div.header-logo-container > img.header-logo,
+          img.header-logo,
+          .header-logo,
           img[src*="KEYQUEST%20LOGO"],
           img[src*="KeyQuest"] {
             height: 48px !important;
