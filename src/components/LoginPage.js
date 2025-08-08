@@ -218,30 +218,6 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      {/* ULTIMATE NUCLEAR LOGO SIZING - Force 48px height with triple redundancy */}
-      <style>
-        {`
-          html body * img[src*="KEYQUEST"] { height: 48px !important; width: auto !important; }
-          html body * img[src*="KeyQuest"] { height: 48px !important; width: auto !important; }
-          html body * img[alt*="KeyQuest"] { height: 48px !important; width: auto !important; }
-          html body div.min-h-screen img[src*="KEYQUEST"],
-          html body div.min-h-screen img[src*="KeyQuest"],
-          html body div img[alt*="KeyQuest"],
-          html body div.relative img[src*="KeyQuest"],
-          html body div.flex img[alt*="KeyQuest"] {
-            height: 48px !important;
-            max-height: 48px !important;
-            min-height: 48px !important;
-            max-width: none !important;
-            min-width: auto !important;
-            width: auto !important;
-            display: block !important;
-            object-fit: contain !important;
-            transform: none !important;
-          }
-        `}
-      </style>
-      
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-50"></div>
       
@@ -257,17 +233,6 @@ const LoginPage = () => {
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="KeyQuest Mortgage Logo" 
                   className="h-12 w-auto rounded-lg object-contain"
-                  style={{
-                    height: '48px',
-                    maxHeight: '48px',
-                    minHeight: '48px',
-                    width: 'auto',
-                    maxWidth: 'none',
-                    minWidth: 'auto',
-                    display: 'block',
-                    objectFit: 'contain',
-                    transform: 'none'
-                  }}
                 />
               </div>
             </div>
