@@ -2468,7 +2468,13 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <style>
         {`
-          /* NUCLEAR LOGO SIZING - Maximum Specificity Override */
+          /* ULTIMATE NUCLEAR LOGO SIZING - Triple Redundancy Override */
+          html body * img[src*="KEYQUEST"] { height: 48px !important; width: auto !important; }
+          html body * img[src*="KeyQuest"] { height: 48px !important; width: auto !important; }
+          html body * img[alt*="KeyQuest"] { height: 48px !important; width: auto !important; }
+          html body * img[alt="Keyquest Mortgage"] { height: 48px !important; width: auto !important; }
+          html body * img.header-logo { height: 48px !important; width: auto !important; }
+          html body .header-logo-container * img { height: 48px !important; width: auto !important; }
           html body div.min-h-screen img[src*="KEYQUEST"],
           html body div.min-h-screen img[src*="KeyQuest"],
           html body div img[alt*="KeyQuest"],
@@ -2503,6 +2509,17 @@ const AuthenticatedApp = () => {
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
                   className="header-logo"
+                  style={{
+                    height: '48px',
+                    maxHeight: '48px',
+                    minHeight: '48px',
+                    width: 'auto',
+                    maxWidth: 'none',
+                    minWidth: 'auto',
+                    display: 'block',
+                    objectFit: 'contain',
+                    transform: 'none'
+                  }}
                 />
               </div>
               
