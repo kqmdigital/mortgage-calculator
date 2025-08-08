@@ -365,10 +365,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const maxLoanAmount75 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure75 * 12, maxMonthlyInstallment);
     const maxLoanAmount80 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure80 * 12, maxMonthlyInstallment);
 
-    // Calculate maximum property prices for different LTV ratios
-    const maxPropertyPrice55 = maxLoanAmount55 / 0.55;  // 55% LTV with longer tenure
-    const maxPropertyPrice75 = maxLoanAmount75 / 0.75;  // 75% LTV with standard tenure
-    const maxPropertyPrice80 = maxLoanAmount80 / 0.80;  // 80% LTV with commercial tenure
+    // Calculate maximum property prices for different LTV ratios (rounded down to nearest hundred)
+    const maxPropertyPrice55 = roundDownToNearestHundred(maxLoanAmount55 / 0.55);  // 55% LTV with longer tenure
+    const maxPropertyPrice75 = roundDownToNearestHundred(maxLoanAmount75 / 0.75);  // 75% LTV with standard tenure
+    const maxPropertyPrice80 = roundDownToNearestHundred(maxLoanAmount80 / 0.80);  // 80% LTV with commercial tenure
 
     // Use the most common scenario (75% for residential, 80% for commercial) as the primary loan amount
     const primaryLoanAmount = propertyType === 'commercial' ? maxLoanAmount80 : maxLoanAmount75;
@@ -1185,7 +1185,7 @@ const htmlContent = `
                     <tr>
                         <td class="info-label">Max Property Price:</td>
                         <td class="info-value" style="color: #059669; font-weight: bold;">
-                            ${formatCurrency(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75)}
+                            ${formatCurrency(roundDownToNearestHundred(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75))}
                         </td>
                         <td class="info-label">Max Loan Amount:</td>
                         <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount)}</td>
@@ -1204,13 +1204,13 @@ const htmlContent = `
                 <table class="info-table">
                     <tr>
                         <td class="info-label">55% LTV (${memoizedAffordability.maxTenure55}yr):</td>
-                        <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice55)}</td>
+                        <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</td>
                         <td class="info-label">75% LTV (${memoizedAffordability.maxTenure75}yr):</td>
-                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice75)}</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</td>
                     </tr>
                     <tr>
                         <td class="info-label">80% LTV (${memoizedAffordability.maxTenure80}yr):</td>
-                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice80)}</td>
+                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice80))}</td>
                         <td class="info-label">Combined Income:</td>
                         <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
                     </tr>
@@ -1990,7 +1990,7 @@ This ensures all content fits properly without being cut off.`);
                         <div className="flex-1">
                           <div className="result-title">Standard (75% LTV)</div>
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
-                          <div className="result-value text-blue-600">{formatCurrency(memoizedAffordability.maxPropertyPrice75)}</div>
+                          <div className="result-value text-blue-600">{formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</div>
                           <div className="result-subtitle">
                             Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75 * 0.75))}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure75)} years
@@ -2008,7 +2008,7 @@ This ensures all content fits properly without being cut off.`);
                         <div className="flex-1">
                           <div className="result-title">Conservative (55% LTV)</div>
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
-                          <div className="result-value text-orange-600">{formatCurrency(memoizedAffordability.maxPropertyPrice55)}</div>
+                          <div className="result-value text-orange-600">{formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</div>
                           <div className="result-subtitle">
                             Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55 * 0.55))}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure55)} years
