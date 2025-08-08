@@ -2468,14 +2468,19 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <style>
         {`
-          /* Unified logo sizing system - matching profile card size */
-          .mb-6 img[alt="Keyquest Mortgage"],
-          .header-logo-container img,
-          div.header-logo-container > img.header-logo,
-          img.header-logo,
-          .header-logo,
-          img[src*="KEYQUEST%20LOGO"],
-          img[src*="KeyQuest"] {
+          /* NUCLEAR LOGO SIZING - Maximum Specificity Override */
+          html body div.min-h-screen img[src*="KEYQUEST"],
+          html body div.min-h-screen img[src*="KeyQuest"],
+          html body div img[alt*="KeyQuest"],
+          html body .mb-6 img[alt="Keyquest Mortgage"],
+          html body .header-logo-container img,
+          html body div.header-logo-container > img.header-logo,
+          html body img.header-logo,
+          html body .header-logo,
+          html body img[src*="KEYQUEST%20LOGO"],
+          html body img[src*="KeyQuest"],
+          html body div.relative img[src*="KeyQuest"],
+          html body div.flex img[alt*="KeyQuest"] {
             height: 48px !important;
             max-height: 48px !important;
             min-height: 48px !important;
@@ -2484,6 +2489,7 @@ const AuthenticatedApp = () => {
             width: auto !important;
             display: block !important;
             object-fit: contain !important;
+            transform: none !important;
           }
         `}
       </style>

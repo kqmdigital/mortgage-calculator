@@ -218,6 +218,27 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      {/* NUCLEAR LOGO SIZING - Force 48px height */}
+      <style>
+        {`
+          html body div.min-h-screen img[src*="KEYQUEST"],
+          html body div.min-h-screen img[src*="KeyQuest"],
+          html body div img[alt*="KeyQuest"],
+          html body div.relative img[src*="KeyQuest"],
+          html body div.flex img[alt*="KeyQuest"] {
+            height: 48px !important;
+            max-height: 48px !important;
+            min-height: 48px !important;
+            max-width: none !important;
+            min-width: auto !important;
+            width: auto !important;
+            display: block !important;
+            object-fit: contain !important;
+            transform: none !important;
+          }
+        `}
+      </style>
+      
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50 opacity-50"></div>
       
