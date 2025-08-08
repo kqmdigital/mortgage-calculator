@@ -2455,15 +2455,14 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Enhanced Header */}
-        <div className="mb-8">
-          
+        <div className="mb-6">
           <div className="standard-card">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-              <div>
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+              <div className="flex-1 flex justify-center lg:justify-start">
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
-                  className="h-20 lg:h-28 w-auto object-contain"
+                  className="h-24 lg:h-36 w-auto object-contain"
                 />
               </div>
               
@@ -2527,36 +2526,86 @@ const AuthenticatedApp = () => {
         </div>
 
         {/* Enhanced Calculator Type Selection */}
-        <div className="mb-8 overflow-x-auto">
-          <div className="tab-navigation">
+        <div className="mb-6">
+          <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
             <button
               onClick={() => setCalculatorType('tdsr')}
-              className={`tab-button ${calculatorType === 'tdsr' ? 'active' : ''}`}
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+                calculatorType === 'tdsr' 
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-600 text-white shadow-xl' 
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300 shadow-md hover:shadow-lg'
+              }`}
             >
-              <TrendingUp className="w-5 h-5" />
-              <div className="tab-text">
-                <div>TDSR/MSR Calculator</div>
-                <div className="text-xs opacity-75">Affordability Assessment</div>
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className={`p-2 rounded-lg ${
+                  calculatorType === 'tdsr' 
+                    ? 'bg-white/20' 
+                    : 'bg-blue-50'
+                }`}>
+                  <TrendingUp className={`w-5 h-5 ${
+                    calculatorType === 'tdsr' 
+                      ? 'text-white' 
+                      : 'text-blue-600'
+                  }`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">TDSR/MSR Calculator</div>
+                  <div className="text-xs opacity-75">Affordability Assessment</div>
+                </div>
               </div>
             </button>
+            
             <button
               onClick={() => setCalculatorType('repayment')}
-              className={`tab-button ${calculatorType === 'repayment' ? 'active' : ''}`}
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+                calculatorType === 'repayment' 
+                  ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-600 text-white shadow-xl' 
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-green-300 shadow-md hover:shadow-lg'
+              }`}
             >
-              <DollarSign className="w-5 h-5" />
-              <div className="tab-text">
-                <div>Monthly Repayment Calculator</div>
-                <div className="text-xs opacity-75">Payment Schedules</div>
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className={`p-2 rounded-lg ${
+                  calculatorType === 'repayment' 
+                    ? 'bg-white/20' 
+                    : 'bg-green-50'
+                }`}>
+                  <DollarSign className={`w-5 h-5 ${
+                    calculatorType === 'repayment' 
+                      ? 'text-white' 
+                      : 'text-green-600'
+                  }`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Monthly Repayment Calculator</div>
+                  <div className="text-xs opacity-75">Payment Schedules</div>
+                </div>
               </div>
             </button>
+            
             <button
               onClick={() => setCalculatorType('progressive')}
-              className={`tab-button ${calculatorType === 'progressive' ? 'active' : ''}`}
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+                calculatorType === 'progressive' 
+                  ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-600 text-white shadow-xl' 
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300 shadow-md hover:shadow-lg'
+              }`}
             >
-              <BarChart3 className="w-5 h-5" />
-              <div className="tab-text">
-                <div>Progressive Payment Calculator</div>
-                <div className="text-xs opacity-75">BUC Properties</div>
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className={`p-2 rounded-lg ${
+                  calculatorType === 'progressive' 
+                    ? 'bg-white/20' 
+                    : 'bg-purple-50'
+                }`}>
+                  <BarChart3 className={`w-5 h-5 ${
+                    calculatorType === 'progressive' 
+                      ? 'text-white' 
+                      : 'text-purple-600'
+                  }`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Progressive Payment Calculator</div>
+                  <div className="text-xs opacity-75">BUC Properties</div>
+                </div>
               </div>
             </button>
           </div>
