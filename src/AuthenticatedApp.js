@@ -2456,18 +2456,6 @@ const AuthenticatedApp = () => {
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Enhanced Header */}
         <div className="mb-8">
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <img 
-                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
-                alt="KeyQuest Mortgage Logo" 
-                className="w-42 h-36 lg:w-46 lg:h-40 rounded-2xl shadow-lg border-2 border-white object-cover"
-              />
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-            </div>
-          </div>
           
           <div className="standard-card">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
@@ -2475,7 +2463,7 @@ const AuthenticatedApp = () => {
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
-                  className="h-12 lg:h-16 w-auto object-contain"
+                  className="h-20 lg:h-28 w-auto object-contain"
                 />
               </div>
               
@@ -2491,7 +2479,6 @@ const AuthenticatedApp = () => {
                       </div>
                       <div>
                         <p className="font-bold text-gray-800">{user?.name}</p>
-                        <p className="text-sm text-gray-600">{user?.email}</p>
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                           {user?.role?.replace('_', ' ').toUpperCase()}
                         </span>
