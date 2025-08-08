@@ -230,9 +230,9 @@ const LoginPage = () => {
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <img 
-                  src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
+                  src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="KeyQuest Mortgage Logo" 
-                  className="w-24 h-20 rounded-lg object-cover"
+                  className="h-12 w-auto rounded-lg object-contain"
                 />
               </div>
             </div>

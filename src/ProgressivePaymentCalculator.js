@@ -611,7 +611,7 @@ const generateProgressivePaymentReport = () => {
             border-bottom: 2px solid #1d4ed8;
         }
         .logo-section img { 
-            width: 80px !important; 
+            width: 96px !important; 
             height: auto !important; 
             margin: 0 auto 6px; 
             display: block; 
@@ -711,7 +711,7 @@ const generateProgressivePaymentReport = () => {
 <body>
     <div class="header no-break">
         <div class="logo-section">
-            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo.jpeg?updatedAt=1748073687798" alt="KeyQuest Mortgage Logo">
+            <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="KeyQuest Mortgage Logo">
         </div>
         <div class="property-banner">BUC Property - Progressive Payment Schedule</div>
         <div class="report-info">

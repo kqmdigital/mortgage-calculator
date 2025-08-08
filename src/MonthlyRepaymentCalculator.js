@@ -432,7 +432,7 @@ const MonthlyRepaymentCalculator = () => {
             margin-bottom: 10px;
         }
         .logo-section img {
-            width: 120px !important;
+            width: 96px !important;
             height: auto !important;
             display: block;
             margin: 0 auto;
@@ -607,7 +607,7 @@ const MonthlyRepaymentCalculator = () => {
                 padding: 0 !important;
             }
             .logo-section img {
-                width: 100px !important;
+                width: 80px !important;
                 height: auto !important;
                 display: block !important;
                 margin: 0 auto !important;
@@ -619,7 +619,7 @@ const MonthlyRepaymentCalculator = () => {
     <div class="watermark"></div>
     <div class="header no-page-break">
         <div class="logo-section">
-            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" alt="KeyQuest Mortgage Logo">
+            <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="KeyQuest Mortgage Logo">
         </div>
         
         <div class="report-title">
