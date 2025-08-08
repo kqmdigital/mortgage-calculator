@@ -2456,13 +2456,13 @@ const AuthenticatedApp = () => {
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Enhanced Header */}
         <div className="mb-6">
-          <div className="standard-card">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4">
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
               <div className="flex-1 flex justify-center lg:justify-start">
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
-                  className="h-24 lg:h-36 w-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
               </div>
               
