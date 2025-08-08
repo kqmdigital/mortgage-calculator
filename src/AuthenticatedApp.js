@@ -100,6 +100,18 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return 0;
   }, [inputs.applicantAgeA, inputs.applicantAgeB, inputs.monthlySalaryA, inputs.monthlySalaryB]);
 
+  // Helper function to round down tenor to nearest whole number
+  const roundDownTenor = (value) => {
+    if (!value || isNaN(value)) return 0;
+    return Math.floor(parseFloat(value));
+  };
+
+  // Helper function to round down loan amount to nearest hundred
+  const roundDownToNearestHundred = (amount) => {
+    if (!amount || isNaN(amount)) return 0;
+    return Math.floor(parseFloat(amount) / 100) * 100;
+  };
+
   const calculateMaxLoanTenor = useCallback(() => {
     const averageAge = calculateAverageAge();
     
@@ -611,17 +623,6 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }).format(amount);
   };
 
-  // Helper function to round down tenor to nearest whole number
-  const roundDownTenor = (value) => {
-    if (!value || isNaN(value)) return 0;
-    return Math.floor(parseFloat(value));
-  };
-
-  // Helper function to round down loan amount to nearest hundred
-  const roundDownToNearestHundred = (amount) => {
-    if (!amount || isNaN(amount)) return 0;
-    return Math.floor(parseFloat(amount) / 100) * 100;
-  };
 
   const handleInputChange = (field, value) => {
     const numericFields = [
