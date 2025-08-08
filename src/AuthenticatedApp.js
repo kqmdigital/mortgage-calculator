@@ -2472,11 +2472,11 @@ const AuthenticatedApp = () => {
           <div className="standard-card">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div>
-                <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-                  <Calculator className="text-blue-600 w-8 lg:w-10 h-8 lg:h-10" />
-                  Comprehensive Mortgage Calculator Suite
-                </h1>
-                <p className="text-sm lg:text-base text-gray-600 mt-2">Professional mortgage analysis tools for property financing</p>
+                <img 
+                  src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
+                  alt="Keyquest Mortgage" 
+                  className="h-12 lg:h-16 w-auto object-contain"
+                />
               </div>
               
               {/* User Menu */}
