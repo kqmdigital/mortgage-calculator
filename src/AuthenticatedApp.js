@@ -101,16 +101,16 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   }, [inputs.applicantAgeA, inputs.applicantAgeB, inputs.monthlySalaryA, inputs.monthlySalaryB]);
 
   // Helper function to round down tenor to nearest whole number
-  const roundDownTenor = (value) => {
+  const roundDownTenor = useCallback((value) => {
     if (!value || isNaN(value)) return 0;
     return Math.floor(parseFloat(value));
-  };
+  }, []);
 
   // Helper function to round down loan amount to nearest hundred
-  const roundDownToNearestHundred = (amount) => {
+  const roundDownToNearestHundred = useCallback((amount) => {
     if (!amount || isNaN(amount)) return 0;
     return Math.floor(parseFloat(amount) / 100) * 100;
-  };
+  }, []);
 
   const calculateMaxLoanTenor = useCallback(() => {
     const averageAge = calculateAverageAge();
@@ -404,7 +404,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       hasValidData: true,
       maxTenureUsed: primaryTenure
     };
-  }, [inputs, calculateAverageAge, calculateMaxTenureForLTV]);
+  }, [inputs, calculateAverageAge, calculateMaxTenureForLTV, roundDownToNearestHundred]);
 
   // Helper function to calculate loan amount from PMT (reverse PMT calculation)
   const calculateLoanFromPMT = (rate, periods, monthlyPayment) => {
