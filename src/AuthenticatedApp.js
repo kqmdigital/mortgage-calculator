@@ -2459,7 +2459,8 @@ const AuthenticatedApp = () => {
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
-                  className="h-20 w-auto object-contain"
+                  className="w-auto object-contain"
+                  style={{height: '80px', maxWidth: 'none', width: 'auto'}}
                 />
               </div>
               
