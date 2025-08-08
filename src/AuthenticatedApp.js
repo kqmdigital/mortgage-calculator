@@ -872,9 +872,6 @@ const htmlContent = `
         }
         
         .logo-section img {
-            max-width: 120px !important;
-            width: 120px !important;
-            height: auto !important;
             display: block;
         }
         
