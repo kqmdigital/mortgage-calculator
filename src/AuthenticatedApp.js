@@ -875,6 +875,14 @@ const htmlContent = `
             display: block;
         }
         
+        .header-logo {
+            height: 80px !important;
+            max-width: none !important;
+            width: auto !important;
+            min-height: 80px !important;
+            display: block !important;
+        }
+        
         .report-title {
             color: #DC2626;
             font-size: 24px;
@@ -2459,8 +2467,7 @@ const AuthenticatedApp = () => {
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="Keyquest Mortgage" 
-                  className="w-auto object-contain"
-                  style={{height: '80px', maxWidth: 'none', width: 'auto'}}
+                  className="header-logo w-auto object-contain"
                 />
               </div>
               
