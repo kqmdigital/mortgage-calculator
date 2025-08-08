@@ -6,7 +6,6 @@ import useDebounce from './hooks/useDebounce';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
-import { generatePDFReport } from './utils/pdfReportGenerator';
 
 // Import your existing TDSRMSRCalculator component from App.js
 // Main TDSR/MSR Calculator Component
@@ -711,6 +710,747 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     }
   };
 
+  const generatePDFReport = () => {
+    if (!results) {
+      alert('Please calculate the mortgage first before generating a report.');
+      return;
+    }
+
+    try {
+      const propertyTypeText = getPropertyTypeText(inputs.propertyType);
+      const currentDate = new Date().toLocaleDateString('en-SG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TDSR/MSR Analysis Report - ${propertyTypeText}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.5in;
+        }
+        
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            body { 
+                margin: 0; 
+                padding: 0;
+                font-size: 11px;
+                line-height: 1.3;
+            }
+            
+            .page-break { 
+                page-break-before: always; 
+            }
+            
+            .no-break { 
+                page-break-inside: avoid; 
+                break-inside: avoid;
+            }
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            background: white;
+            font-size: 12px;
+            position: relative;
+        }
+
+        /* Watermark styling */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            opacity: 0.15;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            z-index: 0;
+            pointer-events: none;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+        
+        .watermark::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+        
+        @media print {
+            .watermark {
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                width: 250px !important;
+                height: 250px !important;
+                opacity: 0.2 !important;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+            
+            .watermark::before {
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #264A82;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo-section img {
+            max-width: 120px !important;
+            width: 120px !important;
+            height: auto !important;
+            display: block;
+        }
+        
+        .report-title {
+            color: #DC2626;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .property-type-banner {
+            background: #264A82;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .report-info {
+            margin-top: 8px;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .section {
+            margin: 20px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section-header {
+            background: #264A82;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
+        .section-content {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-top: none;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        
+        .info-table td {
+            width: 25%;
+        }
+        
+        .info-table tr:nth-child(even) {
+            background: #F3F4F6;
+        }
+        
+        .info-table tr:nth-child(odd) {
+            background: white;
+        }
+        
+        .info-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #E5E7EB;
+            font-size: 11px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #374151;
+            width: 60%;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #111827;
+            text-align: right;
+            width: 40%;
+        }
+        
+        .highlight-section {
+            background: #264A82;
+            color: white;
+            padding: 12px 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .assessment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            margin: 15px 0;
+            border: 1px solid #E5E7EB;
+        }
+        
+        .assessment-card {
+            padding: 15px;
+            text-align: center;
+            border-right: 1px solid #E5E7EB;
+        }
+        
+        .assessment-card:last-child {
+            border-right: none;
+        }
+        
+        .assessment-card.pass {
+            background: #F0FDF4;
+            color: #166534;
+        }
+        
+        .assessment-card.fail {
+            background: #FEF2F2;
+            color: #DC2626;
+        }
+        
+        .assessment-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .assessment-result {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .funding-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            margin: 10px 0;
+            border: 1px solid #E5E7EB;
+        }
+        
+        .funding-card {
+            background: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 11px;
+            border-right: 1px solid #E5E7EB;
+        }
+        
+        .funding-card:last-child {
+            border-right: none;
+        }
+        
+        .funding-amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: #DC2626;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #666;
+            font-size: 9px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .disclaimer {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 9px;
+            color: #555;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .disclaimer h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 11px;
+        }
+        
+        @media print {
+            .assessment-grid, .funding-grid { 
+                grid-template-columns: 1fr 1fr !important; 
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .assessment-grid, .funding-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .assessment-card, .funding-card {
+                border-right: none;
+                border-bottom: 1px solid #E5E7EB;
+            }
+            .assessment-card:last-child, .funding-card:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark"></div>
+    <div class="header no-break">
+        <div class="logo-section">
+            <img 
+                src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
+                alt="KeyQuest Mortgage Logo"
+            />
+        </div>
+        
+        <div class="property-type-banner">
+            ${propertyTypeText} TDSR/MSR Analysis
+        </div>
+        <div class="report-title">
+            Mortgage Affordability Assessment Report
+        </div>
+        
+        <div class="report-info">
+            Generated: ${currentDate} | Report ID: KQM-${Date.now()}
+        </div>
+    </div>
+
+    <div class="section no-break">
+        <div class="section-header">📋 LOAN SUMMARY</div>
+        <div class="section-content">
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Property Type:</td>
+                    <td class="info-value">${propertyTypeText}</td>
+                    <td class="info-label">Combined Income:</td>
+                    <td class="info-value">${formatCurrency(results.combinedMonthlyIncome || 0)}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Property Value:</td>
+                    <td class="info-value">${formatCurrency(parseNumberInput(inputs.purchasePrice) || 0)}</td>
+                    <td class="info-label">Loan Tenure:</td>
+                    <td class="info-value">${results.finalLoanTenure || inputs.loanTenor || 0} years</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Loan Amount:</td>
+                    <td class="info-value">${formatCurrency(results.loanAmount || 0)}</td>
+                    <td class="info-label">Stress Test Rate:</td>
+                    <td class="info-value">${inputs.stressTestRate}%</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Loan-to-Value:</td>
+                    <td class="info-value">${parseNumberInput(inputs.purchasePrice) > 0 ? ((results.loanAmount || 0) / parseNumberInput(inputs.purchasePrice) * 100).toFixed(1) + '%' : '0.0%'}</td>
+                    <td class="info-label"></td>
+                    <td class="info-value"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section no-break">
+        <div class="section-header">💰 FINANCIAL REQUIREMENTS</div>
+        <div class="section-content">
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Downpayment Breakdown</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Cash Required:</td>
+                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(results.downPayment.cashRequired)}</td>
+                        <td class="info-label">CPF Allowed:</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">
+                            ${inputs.propertyType === 'commercial' ? 'Not Allowed' : formatCurrency(results.downPayment.cpfAllowed)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="info-label">Total Downpayment:</td>
+                        <td class="info-value" style="color: #059669; font-weight: bold;">${formatCurrency(results.downPayment.totalDownPayment)}</td>
+                        <td class="info-label">% of Purchase Price:</td>
+                        <td class="info-value">${(((results.downPayment.totalDownPayment) / results.purchasePrice) * 100).toFixed(1)}%</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                    <strong>Requirements:</strong> 
+                    ${inputs.propertyType === 'commercial' 
+                        ? 'Commercial properties require 20% cash downpayment (no CPF allowed)'
+                        : inputs.loanPercentage <= 55 
+                            ? 'Residential: 10% cash + 35% CPF/Cash allowed'
+                            : 'Residential: 5% cash + 20% CPF/Cash allowed'
+                    }
+                </div>
+            </div>
+            
+            <div>
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Stamp Duty</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Buyer's Stamp Duty (BSD):</td>
+                        <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(results.stampDuty)}</td>
+                        <td class="info-label">Effective Rate:</td>
+                        <td class="info-value">${((results.stampDuty / results.purchasePrice) * 100).toFixed(3)}%</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                    <strong>Note:</strong> Additional stamp duties (ABSD, etc.) and legal fees not included. 
+                    ${inputs.propertyType === 'commercial' ? 'Commercial/Industrial rates applied.' : 'Residential rates applied.'}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    ${memoizedAffordability && memoizedAffordability.hasValidData ? `
+    <div class="section no-break">
+        <div class="section-header">📊 MAXIMUM AFFORDABILITY ANALYSIS</div>
+        <div class="section-content">
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Based on Income & Commitments (Limited by ${memoizedAffordability.limitingFactor})</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">Max Property Price:</td>
+                        <td class="info-value" style="color: #059669; font-weight: bold;">
+                            ${formatCurrency(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75)}
+                        </td>
+                        <td class="info-label">Max Loan Amount:</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount)}</td>
+                    </tr>
+                    <tr>
+                        <td class="info-label">Max Monthly Payment:</td>
+                        <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
+                        <td class="info-label">Primary Tenure:</td>
+                        <td class="info-value">${memoizedAffordability.maxTenureUsed} years</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div>
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Different LTV Scenarios</div>
+                <table class="info-table">
+                    <tr>
+                        <td class="info-label">55% LTV (${memoizedAffordability.maxTenure55}yr):</td>
+                        <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice55)}</td>
+                        <td class="info-label">75% LTV (${memoizedAffordability.maxTenure75}yr):</td>
+                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice75)}</td>
+                    </tr>
+                    <tr>
+                        <td class="info-label">80% LTV (${memoizedAffordability.maxTenure80}yr):</td>
+                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(memoizedAffordability.maxPropertyPrice80)}</td>
+                        <td class="info-label">Combined Income:</td>
+                        <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                    <strong>Note:</strong> Calculations use loan percentage-specific maximum tenures based on MAS regulations and applicant age. 
+                    Limited by ${memoizedAffordability.limitingFactor} requirements. Does not include stamp duty, legal fees, or other transaction costs.
+                </div>
+            </div>
+        </div>
+    </div>
+    ` : ''}
+
+    <div style="background: ${results.tdsrPass ? '#F0FDF4' : '#FEF2F2'}; border: 2px solid ${results.tdsrPass ? '#166534' : '#DC2626'}; color: ${results.tdsrPass ? '#166534' : '#DC2626'}; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 16px; border-radius: 8px;">
+        TDSR Assessment: ${results.tdsrPass ? 'PASS ✓' : 'FAIL ✗'}
+        <br/>
+        <span style="font-size: 14px; margin-top: 5px; display: block;">
+            Required Income: ${formatCurrency(results.requiredIncomeTDSR || 0)} | Deficit/Surplus: ${formatCurrency(results.tdsrDeficit || 0)}
+        </span>
+    </div>
+
+    ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
+    <div style="background: ${results.hdbPass ? '#F0FDF4' : '#FEF2F2'}; border: 2px solid ${results.hdbPass ? '#166534' : '#DC2626'}; color: ${results.hdbPass ? '#166534' : '#DC2626'}; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 16px; border-radius: 8px;">
+        MSR Assessment: ${results.hdbPass ? 'PASS ✓' : 'FAIL ✗'}
+        <br/>
+        <span style="font-size: 14px; margin-top: 5px; display: block;">
+            Required Income: ${formatCurrency(results.requiredIncomeHDB || 0)} | Deficit/Surplus: ${formatCurrency(results.hdbDeficit || 0)}
+        </span>
+    </div>
+
+    ${!results.hdbPass ? `
+    <div class="section no-break">
+        <div class="section-header">💡 MSR FUNDING SOLUTIONS</div>
+        <div class="section-content" style="padding: 15px; text-align: center;">
+            <p style="margin-bottom: 15px; font-size: 11px;">To meet the MSR requirements, you need one of the following:</p>
+            
+            <div class="funding-grid">
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
+                    <div class="funding-amount">${formatCurrency(results.cashShowHDB || 0)}</div>
+                </div>
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
+                    <div class="funding-amount">${formatCurrency(results.cashPledgeHDB || 0)}</div>
+                </div>
+            </div>
+            
+            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
+        </div>
+    </div>
+    ` : ''}
+    ` : ''}
+
+    ${!results.tdsrPass ? `
+    <div class="section no-break">
+        <div class="section-header">💡 TDSR FUNDING SOLUTIONS</div>
+        <div class="section-content" style="padding: 15px; text-align: center;">
+            <p style="margin-bottom: 15px; font-size: 11px;">To meet the TDSR requirements, you need one of the following:</p>
+            
+            <div class="funding-grid">
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
+                    <div class="funding-amount">${formatCurrency(results.cashShowTDSR)}</div>
+                </div>
+                <div class="funding-card">
+                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
+                    <div class="funding-amount">${formatCurrency(results.cashPledgeTDSR)}</div>
+                </div>
+            </div>
+            
+            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
+        </div>
+    </div>
+    ` : ''}
+
+    <div class="section no-break">
+        <div class="section-header">👥 APPLICANT DETAILS</div>
+        <div class="section-content">
+            <div class="two-column" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 15px;">
+                <div>
+                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Primary Applicant</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Monthly Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Annual Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Age:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${parseNumberInput(inputs.applicantAgeA) || 0} years</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Total Income:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(results.totalMonthlyIncomeA || 0)}</span>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Co-Applicant</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Monthly Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Annual Salary:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Age:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${parseNumberInput(inputs.applicantAgeB) || 0} years</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Total Income:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(results.totalMonthlyIncomeB || 0)}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #E5E7EB;">
+                <h4 style="color: #264A82; margin-bottom: 5px; font-size: 16px;">Combined Household Income</h4>
+                <div style="font-size: 20px; font-weight: bold; color: #264A82;">${formatCurrency(results.combinedMonthlyIncome || 0)}</div>
+            </div>
+            
+            
+            ${results.averageAge > 0 ? `
+            <div style="margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 6px;">
+                <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Age & Tenor Information</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Average Age:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${results.averageAge.toFixed(1)} years</span>
+                    </div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Max Loan Tenor:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${results.finalLoanTenure || inputs.loanTenor || 0} years</span>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+            
+            ${(parseNumberInput(inputs.showFundAmount) > 0 || parseNumberInput(inputs.pledgeAmount) > 0) ? `
+            <div style="margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 6px;">
+                <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Additional Funding Options</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    ${parseNumberInput(inputs.showFundAmount) > 0 ? `
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Show Fund Amount:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.showFundAmount) || 0)}</span>
+                    </div>
+                    ` : ''}
+                    ${parseNumberInput(inputs.pledgeAmount) > 0 ? `
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
+                        <span class="info-label" style="font-weight: 600; color: #374151;">Pledge Amount:</span>
+                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.pledgeAmount) || 0)}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    </div>
+
+    <div class="section no-break">
+        <div class="section-header">📊 MONTHLY COMMITMENTS</div>
+        <div class="section-content">
+            ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
+            <div style="padding: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">MSR Commitments: ${formatCurrency(results.totalCommitments || 0)}</h4>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments || 0)}). Car loans and personal loans are excluded from MSR.</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} TDSR Calculation:</strong> Includes all commitments:</p>
+                    <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
+                        <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
+                        <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
+                        <li>Property loans: ${formatCurrency((parseNumberInput(inputs.propertyLoanA) || 0) + (parseNumberInput(inputs.propertyLoanB) || 0))}</li>
+                    </ul>
+                </div>
+            </div>
+            ` : `
+            <div style="padding: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>Private Property TDSR Calculation:</strong> Includes all commitments:</p>
+                    <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
+                        <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
+                        <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
+                        <li>Property loans: ${formatCurrency((parseNumberInput(inputs.propertyLoanA) || 0) + (parseNumberInput(inputs.propertyLoanB) || 0))}</li>
+                    </ul>
+                </div>
+            </div>
+            `}
+        </div>
+    </div>
+
+    <div class="section no-break">
+        <div class="section-header">Important Notes</div>
+        <div class="section-content">
+            <div style="padding: 15px; font-size: 11px; color: #555; line-height: 1.5;">
+                <p style="margin: 6px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
+                <p style="margin: 6px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
+                <p style="margin: 6px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
+                <p style="margin: 6px 0;">• TDSR limit: 55% of gross monthly income.</p>
+                <p style="margin: 6px 0;">• Stress test rate of ${inputs.stressTestRate}% is used for affordability assessment.</p>
+                <p style="margin: 6px 0;">• Consult our specialists for detailed analysis tailored to your situation.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer no-break" style="text-align: center; margin-top: 30px; padding: 15px; color: #264A82; border-top: 1px solid #E5E7EB;">
+        <div style="margin-bottom: 5px;">📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg</div>
+        <div style="margin-top: 10px; font-size: 10px; color: #666;">
+            This report is confidential and intended for the named applicant(s). <strong>Your Trusted Mortgage Advisory Partner</strong>
+        </div>
+    </div>
+
+
+</body>
+</html>
+`;
+
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(htmlContent);
+      newWindow.document.close();
+      
+      setTimeout(() => {
+        newWindow.focus();
+        newWindow.print();
+      }, 500);
+
+      alert(`Professional report generated successfully! 
+
+📄 FOR BEST PDF RESULTS:
+• Use Chrome or Edge browser for printing
+• In print dialog, select "More settings"
+• Set margins to "Minimum" or "Custom" (0.5 inch)
+• Choose "A4" paper size
+• Enable "Background graphics"
+• Set scale to "100%" or "Fit to page width"
+• Select "Portrait" orientation
+
+This ensures all content fits properly without being cut off.`);
+
+    } catch (error) {
+      logger.error('Error generating report:', error);
+      alert('There was an error generating the report. Please try again.');
+    }
+  };
 
   return (
     <div className="space-y-12">
@@ -1584,7 +2324,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
             {/* Generate Report Button */}
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-1 shadow-lg">
               <button
-                onClick={() => generatePDFReport(inputs, results)}
+                onClick={generatePDFReport}
                 className="btn-standard btn-lg w-full bg-white text-blue-600 hover:bg-gray-50"
               >
                 <Download className="w-6 h-6" />
