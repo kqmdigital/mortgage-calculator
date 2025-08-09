@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   Home, 
   Repeat, 
@@ -197,28 +197,28 @@ const RecommendedPackages = () => {
     logger.info(`Selected loan type: ${loanType}`);
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = useCallback((field, value) => {
     setSearchForm(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
-  const handleBankSelection = (bank, isSelected) => {
+  const handleBankSelection = useCallback((bank, isSelected) => {
     if (isSelected) {
       setSelectedBanks(prev => [...prev, bank]);
     } else {
       setSelectedBanks(prev => prev.filter(b => b !== bank));
     }
-  };
+  }, []);
 
-  const handleFeatureSelection = (feature, isSelected) => {
+  const handleFeatureSelection = useCallback((feature, isSelected) => {
     if (isSelected) {
       setSelectedFeatures(prev => [...prev, feature]);
     } else {
       setSelectedFeatures(prev => prev.filter(f => f !== feature));
     }
-  };
+  }, []);
 
   // EXACT calculation functions from recommended-packages-core.js
   const calculateNumericRate = (pkg, year) => {
@@ -321,7 +321,7 @@ const RecommendedPackages = () => {
     }
   };
 
-  const searchPackages = async (e) => {
+  const searchPackages = useCallback(async (e) => {
     if (e) e.preventDefault();
     
     try {
@@ -403,7 +403,7 @@ const RecommendedPackages = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment]);
 
   const clearAllFilters = () => {
     setSearchForm({
@@ -810,8 +810,8 @@ const RecommendedPackages = () => {
     }
   };
 
-  // PackageCard Component - matches HTML implementation exactly
-  const PackageCard = ({ 
+  // PackageCard Component - optimized with memoization
+  const PackageCard = React.memo(({ 
     pkg, 
     index, 
     isSelected, 
@@ -825,8 +825,8 @@ const RecommendedPackages = () => {
   }) => {
     const rank = index + 1;
     
-    // Generate rate schedule - exact same logic as HTML
-    const generateRateSchedule = () => {
+    // Generate rate schedule - memoized for performance
+    const generateRateSchedule = useMemo(() => {
       const rates = [];
       
       // Always show Years 1-5 (auto-populate empty years with thereafter rate)
@@ -842,26 +842,26 @@ const RecommendedPackages = () => {
           // Use thereafter rate if available
           if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
             rates.push(
-              <div key={year} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium text-gray-600">Year {year}</span>
-                <span className="text-sm text-blue-600">{formatRateDisplay(pkg, 'thereafter')}</span>
+              <div key={year} className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                <div className="text-xs font-medium text-blue-600 mb-1">Year {year}</div>
+                <div className="text-sm font-semibold text-blue-700">{formatRateDisplay(pkg, 'thereafter')}</div>
               </div>
             );
           } else {
             // Only show dash if no thereafter rate exists
             rates.push(
-              <div key={year} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium text-gray-600">Year {year}</span>
-                <span className="text-sm text-gray-400">-</span>
+              <div key={year} className="bg-gray-50 border border-gray-100 p-3 rounded-lg">
+                <div className="text-xs font-medium text-gray-500 mb-1">Year {year}</div>
+                <div className="text-sm font-semibold text-gray-400">-</div>
               </div>
             );
           }
         } else {
           // Show actual data for this year
           rates.push(
-            <div key={year} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-              <span className="text-sm font-medium text-gray-600">Year {year}</span>
-              <span className="text-sm text-blue-600">{formatRateDisplay(pkg, year)}</span>
+            <div key={year} className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+              <div className="text-xs font-medium text-blue-600 mb-1">Year {year}</div>
+              <div className="text-sm font-semibold text-blue-700">{formatRateDisplay(pkg, year)}</div>
             </div>
           );
         }
@@ -871,131 +871,187 @@ const RecommendedPackages = () => {
       const thereafterRate = calculateInterestRate(pkg, 'thereafter');
       if (thereafterRate > 0) {
         rates.push(
-          <div key="thereafter" className="flex justify-between items-center py-2 px-3 bg-blue-50 rounded border-l-4 border-blue-500">
-            <span className="text-sm font-medium text-blue-700">Thereafter</span>
-            <span className="text-sm font-bold text-blue-700">{formatRateDisplay(pkg, 'thereafter')}</span>
+          <div key="thereafter" className="bg-emerald-50 border border-emerald-200 p-3 rounded-lg ring-2 ring-emerald-100">
+            <div className="text-xs font-medium text-emerald-600 mb-1">Thereafter</div>
+            <div className="text-sm font-bold text-emerald-700">{formatRateDisplay(pkg, 'thereafter')}</div>
           </div>
         );
       }
 
       return rates;
-    };
+    }, [pkg, formatRateDisplay, calculateInterestRate]);
 
     return (
-      <div className={`border rounded-xl shadow-lg bg-white overflow-hidden transition-all duration-200 ${
-        isSelected ? 'ring-2 ring-blue-500' : 'hover:shadow-xl'
+      <div className={`border border-gray-200 rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-md ${
+        isSelected ? 'ring-2 ring-blue-500 shadow-md' : ''
       }`}>
-        {/* Package Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b">
-          <div className="flex items-center justify-between">
+        {/* Package Header - Cleaner Design */}
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-sm">
                 {rank}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">
                   {hideBankNames ? `Bank ${String.fromCharCode(64 + rank)}` : pkg.bank_name}
                 </h3>
-                <p className="text-blue-600 font-medium">{pkg.rate_type_category || 'Rate Package'}</p>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    pkg.rate_type_category === 'Fixed' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {pkg.rate_type_category || 'Floating'}
+                  </span>
+                </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-green-600 mb-1">
+              <div className="text-2xl font-bold text-emerald-600 mb-1">
                 {formatPercentage(pkg.avgFirst2Years)}
               </div>
-              <div className="text-blue-600 font-medium">
+              <div className="text-sm text-gray-600 font-medium">
                 {formatCurrency(pkg.monthlyInstallment)}/mo
               </div>
             </div>
           </div>
 
-          {/* Package Details Row */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500 font-medium">Property:</span>
-              <div className="text-gray-800 font-semibold">{pkg.property_type}</div>
+          {/* Package Details Row - Improved Layout */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-xs text-gray-500 font-medium mb-1">Property</div>
+              <div className="text-sm font-semibold text-gray-900">{pkg.property_type}</div>
             </div>
-            <div>
-              <span className="text-gray-500 font-medium">Status:</span>
-              <div className="text-gray-800 font-semibold">{pkg.property_status}</div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-xs text-gray-500 font-medium mb-1">Status</div>
+              <div className="text-sm font-semibold text-gray-900">{pkg.property_status}</div>
             </div>
-            <div>
-              <span className="text-gray-500 font-medium">Buy Under:</span>
-              <div className="text-gray-800 font-semibold">{pkg.buy_under}</div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-xs text-gray-500 font-medium mb-1">Buy Under</div>
+              <div className="text-sm font-semibold text-gray-900">{pkg.buy_under}</div>
             </div>
-            <div>
-              <span className="text-gray-500 font-medium">Lock:</span>
-              <div className="text-gray-800 font-semibold">{pkg.lock_period || 'No Lock-in'}</div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-xs text-gray-500 font-medium mb-1">Lock Period</div>
+              <div className="text-sm font-semibold text-gray-900">{pkg.lock_period || 'No Lock-in'}</div>
             </div>
-            <div>
-              <span className="text-gray-500 font-medium">Min Loan:</span>
-              <div className="text-gray-800 font-semibold">{formatCurrency(pkg.minimum_loan_size || 0)}</div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-xs text-gray-500 font-medium mb-1">Min Loan</div>
+              <div className="text-sm font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</div>
             </div>
           </div>
 
-          {/* Selection Checkbox */}
+          {/* Selection Checkbox - Better Styling */}
           <div className="mt-4 flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={onToggleSelection}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700">Include in report</span>
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={onToggleSelection}
+                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                />
+                {isSelected && (
+                  <CheckSquare className="w-4 h-4 text-blue-600 absolute top-0 left-0 pointer-events-none" />
+                )}
+              </div>
+              <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
+                Include in report
+              </span>
             </label>
           </div>
         </div>
 
-        {/* Interest Rate Schedule */}
-        <div className="p-6 border-b bg-gray-50">
+        {/* Interest Rate Schedule - Enhanced Design */}
+        <div className="p-6 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-            <h4 className="text-lg font-semibold text-gray-800">Interest Rate Schedule</h4>
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-blue-600" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900">Interest Rate Schedule</h4>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {generateRateSchedule()}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {generateRateSchedule}
           </div>
         </div>
 
-        {/* Package Features Editor */}
-        <div className="p-6 border-b">
+        {/* Package Features Editor - Enhanced */}
+        <div className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-4">
-            <CheckSquare className="w-5 h-5 text-green-600" />
-            <h4 className="text-lg font-semibold text-gray-800">Package Features (Editable)</h4>
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckSquare className="w-4 h-4 text-green-600" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900">Package Features</h4>
+            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Editable</span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {featureOptions.map(feature => (
-              <label key={feature.value} className="flex items-center gap-2 cursor-pointer">
+              <label key={feature.value} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group">
                 <input
                   type="checkbox"
                   checked={pkg[feature.value] === 'true' || pkg[feature.value] === true}
                   onChange={(e) => onUpdateFeature(feature.value, e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
                 />
-                <span className="text-sm text-gray-700">{feature.label}</span>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+                  {feature.label}
+                </span>
               </label>
             ))}
           </div>
         </div>
 
-        {/* Client Remarks Editor */}
-        <div className="p-6">
+        {/* Client Remarks Editor - Enhanced */}
+        <div className="p-6 bg-gray-50">
           <div className="flex items-center gap-2 mb-3">
-            <FileText className="w-5 h-5 text-purple-600" />
-            <h4 className="text-lg font-semibold text-gray-800">Client Remarks (Editable)</h4>
+            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-purple-600" />
+            </div>
+            <h4 className="text-lg font-semibold text-gray-900">Client Remarks</h4>
+            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Editable</span>
           </div>
           <textarea
             value={pkg.custom_remarks || pkg.remarks || ''}
             onChange={(e) => onUpdateRemarks(e.target.value)}
             placeholder="Add custom remarks for this package..."
             rows="3"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none transition-all duration-200 text-sm"
           />
         </div>
       </div>
     );
-  };
+  });
+
+  // Loading Skeleton Component for better UX
+  const PackageCardSkeleton = () => (
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-6 animate-pulse">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
+          <div>
+            <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-16"></div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="h-6 bg-gray-200 rounded w-16 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-12"></div>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="bg-gray-50 p-3 rounded-lg">
+            <div className="h-3 bg-gray-200 rounded w-16 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-12"></div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="h-32 bg-gray-100 rounded-lg mb-4"></div>
+      <div className="h-24 bg-gray-100 rounded-lg"></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -1382,8 +1438,14 @@ const RecommendedPackages = () => {
               </div>
             </div>
 
-            {/* Packages List */}
-            {filteredPackages.length === 0 ? (
+            {/* Packages List with Loading States */}
+            {loading ? (
+              <div className="space-y-6">
+                {[...Array(3)].map((_, i) => (
+                  <PackageCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : filteredPackages.length === 0 ? (
               <div className="text-center py-12">
                 <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-600 mb-2">No Matching Packages Found</h3>
