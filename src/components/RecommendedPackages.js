@@ -1,0 +1,1121 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Home, 
+  Repeat, 
+  Briefcase, 
+  Search, 
+  RotateCcw, 
+  CheckSquare, 
+  FileText, 
+  Download, 
+  TrendingUp,
+  ChevronDown
+} from 'lucide-react';
+import { useAuth } from '../contexts/EnhancedAuthContext';
+import { supabase } from '../utils/supabase';
+import logger from '../utils/logger';
+
+const RecommendedPackages = () => {
+  const { user } = useAuth();
+  
+  // State management for all functionality
+  const [selectedLoanType, setSelectedLoanType] = useState('New Home Loan');
+  const [searchForm, setSearchForm] = useState({
+    propertyType: '',
+    propertyStatus: '',
+    buyUnder: '',
+    loanAmount: '',
+    loanTenure: '',
+    existingInterestRate: '',
+    existingBank: '',
+    rateType: '',
+    lockPeriod: ''
+  });
+  
+  const [selectedBanks, setSelectedBanks] = useState([]);
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [allPackages, setAllPackages] = useState([]);
+  const [filteredPackages, setFilteredPackages] = useState([]);
+  const [, setRateTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [clientName, setClientName] = useState('');
+  const [hideBankNames, setHideBankNames] = useState(false);
+  const [selectedPackages, setSelectedPackages] = useState(new Set());
+  
+  // Multi-select dropdown states
+  const [showBankDropdown, setShowBankDropdown] = useState(false);
+  const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
+  
+  // Refs for dropdowns
+  const bankDropdownRef = useRef(null);
+  const featuresDropdownRef = useRef(null);
+  
+  // Available options
+  const bankOptions = [
+    'CIMB', 'OCBC', 'UOB', 'DBS', 'MBB', 'SCB', 
+    'HSBC', 'SBI', 'BOC', 'HLF', 'SF', 'RHB', 'SIF', 'Citibank'
+  ];
+  
+  const featureOptions = [
+    { value: 'legal_fee_subsidy', label: 'Legal Fee Subsidy' },
+    { value: 'cash_rebate', label: 'Cash Rebate' },
+    { value: 'free_package_conversion_12m', label: 'Free Conversion (12M)' },
+    { value: 'free_package_conversion_24m', label: 'Free Conversion (24M)' },
+    { value: 'valuation_subsidy', label: 'Valuation Subsidy' },
+    { value: 'partial_repayment', label: 'Partial Repayment' },
+    { value: 'waiver_due_to_sales', label: 'Waiver Due to Sales' }
+  ];
+
+  // Load data on component mount
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Handle click outside for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (bankDropdownRef.current && !bankDropdownRef.current.contains(event.target)) {
+        setShowBankDropdown(false);
+      }
+      if (featuresDropdownRef.current && !featuresDropdownRef.current.contains(event.target)) {
+        setShowFeaturesDropdown(false);
+      }
+    };
+
+    if (showBankDropdown || showFeaturesDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showBankDropdown, showFeaturesDropdown]);
+
+  // Show/hide refinancing fields based on loan type
+  useEffect(() => {
+    if (selectedLoanType === 'Refinancing Home Loan') {
+      // Show refinancing-specific fields
+    } else {
+      // Hide refinancing-specific fields and clear values
+      setSearchForm(prev => ({
+        ...prev,
+        existingInterestRate: '',
+        existingBank: ''
+      }));
+    }
+  }, [selectedLoanType]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      logger.info('Loading recommended packages data...');
+      
+      // Check if supabase is available (not in development mode)
+      if (supabase) {
+        // Load packages from database
+        const { data: packagesData, error: packagesError } = await supabase
+          .from('rate_packages')
+          .select(`
+            *,
+            banks!inner(name, is_active)
+          `)
+          .eq('banks.is_active', true);
+
+        if (packagesError) throw packagesError;
+
+        setAllPackages(packagesData || []);
+        
+        // Load rate types
+        const { data: rateTypesData, error: rateTypesError } = await supabase
+          .from('rate_types')
+          .select('*');
+
+        if (rateTypesError) {
+          // If rate_types table doesn't exist, use default values
+          setRateTypes([
+            { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
+            { id: 2, name: 'Floating', description: 'Variable interest rate' }
+          ]);
+        } else {
+          setRateTypes(rateTypesData || []);
+        }
+
+        logger.info(`Loaded ${packagesData?.length || 0} packages`);
+      } else {
+        // Development mode - use mock data
+        logger.info('Development mode: Using mock packages data');
+        const mockPackages = [
+          {
+            id: 1,
+            banks: { name: 'OCBC', is_active: true },
+            bank_name: 'OCBC',
+            package_name: 'HomeSecure Fixed Rate Package',
+            interest_rate: 3.25,
+            rate_type: 'Fixed',
+            lock_period: '2 Years',
+            property_type: 'Private Property',
+            property_status: 'Completed',
+            loan_type: 'New Home Loan',
+            cash_rebate: 0.8,
+            legal_fee_subsidy: true,
+            valuation_subsidy: true,
+            partial_repayment: false,
+            buy_under: 'Individual Name'
+          },
+          {
+            id: 2,
+            banks: { name: 'DBS', is_active: true },
+            bank_name: 'DBS',
+            package_name: 'DBS Fixed HomeLoan',
+            interest_rate: 3.15,
+            rate_type: 'Fixed',
+            lock_period: '3 Years',
+            property_type: 'Private Property',
+            property_status: 'Completed',
+            loan_type: 'New Home Loan',
+            cash_rebate: 1.0,
+            legal_fee_subsidy: false,
+            valuation_subsidy: true,
+            partial_repayment: true,
+            buy_under: 'Individual Name'
+          },
+          {
+            id: 3,
+            banks: { name: 'UOB', is_active: true },
+            bank_name: 'UOB',
+            package_name: 'UOB Variable Home Loan',
+            interest_rate: 3.35,
+            rate_type: 'Floating',
+            lock_period: '1 Year',
+            property_type: 'Private Property',
+            property_status: 'Completed',
+            loan_type: 'New Home Loan',
+            cash_rebate: 0.5,
+            legal_fee_subsidy: true,
+            valuation_subsidy: false,
+            partial_repayment: true,
+            buy_under: 'Individual Name'
+          }
+        ];
+
+        setAllPackages(mockPackages);
+        setRateTypes([
+          { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
+          { id: 2, name: 'Floating', description: 'Variable interest rate' }
+        ]);
+
+        logger.info(`Loaded ${mockPackages.length} mock packages for development`);
+      }
+      
+    } catch (error) {
+      logger.error('Error loading data:', error);
+      // In case of database error, show message to user but don't block UI
+      logger.warn('Unable to load packages data from database, using fallback');
+      
+      // Fallback to mock data
+      const mockPackages = [
+        {
+          id: 1,
+          banks: { name: 'OCBC', is_active: true },
+          bank_name: 'OCBC',
+          package_name: 'HomeSecure Package',
+          interest_rate: 3.25,
+          rate_type: 'Fixed',
+          lock_period: '2 Years',
+          property_type: 'Private Property',
+          property_status: 'Completed',
+          loan_type: 'New Home Loan',
+          cash_rebate: 0.8,
+          legal_fee_subsidy: true,
+          valuation_subsidy: true,
+          partial_repayment: false
+        }
+      ];
+      
+      setAllPackages(mockPackages);
+      setRateTypes([
+        { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
+        { id: 2, name: 'Floating', description: 'Variable interest rate' }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoanTypeSelect = (loanType) => {
+    setSelectedLoanType(loanType);
+    logger.info(`Selected loan type: ${loanType}`);
+  };
+
+  const handleInputChange = (field, value) => {
+    setSearchForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleBankSelection = (bank, isSelected) => {
+    if (isSelected) {
+      setSelectedBanks(prev => [...prev, bank]);
+    } else {
+      setSelectedBanks(prev => prev.filter(b => b !== bank));
+    }
+  };
+
+  const handleFeatureSelection = (feature, isSelected) => {
+    if (isSelected) {
+      setSelectedFeatures(prev => [...prev, feature]);
+    } else {
+      setSelectedFeatures(prev => prev.filter(f => f !== feature));
+    }
+  };
+
+  const toggleAllBanks = () => {
+    if (selectedBanks.length === bankOptions.length) {
+      setSelectedBanks([]);
+    } else {
+      setSelectedBanks([...bankOptions]);
+    }
+  };
+
+  const toggleAllFeatures = () => {
+    const allFeatureValues = featureOptions.map(f => f.value);
+    if (selectedFeatures.length === allFeatureValues.length) {
+      setSelectedFeatures([]);
+    } else {
+      setSelectedFeatures([...allFeatureValues]);
+    }
+  };
+
+  const searchPackages = async (e) => {
+    if (e) e.preventDefault();
+    
+    try {
+      setLoading(true);
+      logger.info('Searching packages with filters:', { 
+        loanType: selectedLoanType, 
+        form: searchForm,
+        banks: selectedBanks,
+        features: selectedFeatures 
+      });
+
+      let filtered = [...allPackages];
+
+      // Apply loan type filter
+      filtered = filtered.filter(pkg => pkg.loan_type === selectedLoanType);
+
+      // Apply form filters
+      if (searchForm.propertyType) {
+        filtered = filtered.filter(pkg => pkg.property_type === searchForm.propertyType);
+      }
+      
+      if (searchForm.propertyStatus) {
+        filtered = filtered.filter(pkg => pkg.property_status === searchForm.propertyStatus);
+      }
+      
+      if (searchForm.buyUnder) {
+        filtered = filtered.filter(pkg => pkg.buy_under === searchForm.buyUnder);
+      }
+      
+      if (searchForm.rateType) {
+        filtered = filtered.filter(pkg => pkg.rate_type === searchForm.rateType);
+      }
+      
+      if (searchForm.lockPeriod) {
+        filtered = filtered.filter(pkg => pkg.lock_period === searchForm.lockPeriod);
+      }
+
+      // Apply bank filter
+      if (selectedBanks.length > 0) {
+        filtered = filtered.filter(pkg => 
+          selectedBanks.some(bank => 
+            pkg.banks?.name === bank || pkg.bank_name === bank
+          )
+        );
+      }
+
+      // Apply feature filters
+      if (selectedFeatures.length > 0) {
+        filtered = filtered.filter(pkg => {
+          return selectedFeatures.some(feature => pkg[feature] === true);
+        });
+      }
+
+      // Sort by interest rate (lowest first)
+      filtered.sort((a, b) => (a.interest_rate || 0) - (b.interest_rate || 0));
+
+      setFilteredPackages(filtered);
+      setShowResults(true);
+      
+      logger.info(`Found ${filtered.length} matching packages`);
+      
+    } catch (error) {
+      logger.error('Error searching packages:', error);
+      alert('Error searching packages. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchForm({
+      propertyType: '',
+      propertyStatus: '',
+      buyUnder: '',
+      loanAmount: '',
+      loanTenure: '',
+      existingInterestRate: '',
+      existingBank: '',
+      rateType: '',
+      lockPeriod: ''
+    });
+    setSelectedBanks([]);
+    setSelectedFeatures([]);
+    setShowResults(false);
+    setFilteredPackages([]);
+    setSelectedPackages(new Set());
+    logger.info('All filters cleared');
+  };
+
+  const togglePackageSelection = (packageId) => {
+    setSelectedPackages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(packageId)) {
+        newSet.delete(packageId);
+      } else {
+        newSet.add(packageId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllPackages = () => {
+    if (selectedPackages.size === filteredPackages.length) {
+      setSelectedPackages(new Set());
+    } else {
+      setSelectedPackages(new Set(filteredPackages.map(pkg => pkg.id)));
+    }
+  };
+
+  const exportCSV = () => {
+    try {
+      const packagesToExport = selectedPackages.size > 0 
+        ? filteredPackages.filter(pkg => selectedPackages.has(pkg.id))
+        : filteredPackages;
+
+      if (packagesToExport.length === 0) {
+        alert('No packages to export. Please select packages or search first.');
+        return;
+      }
+
+      const csvHeaders = [
+        'Bank', 'Package Name', 'Interest Rate (%)', 'Rate Type', 
+        'Lock Period', 'Property Type', 'Cash Rebate (%)', 
+        'Legal Fee Subsidy', 'Valuation Subsidy'
+      ];
+
+      const csvRows = packagesToExport.map(pkg => [
+        hideBankNames ? 'Bank A' : (pkg.banks?.name || pkg.bank_name || ''),
+        pkg.package_name || '',
+        pkg.interest_rate || '',
+        pkg.rate_type || '',
+        pkg.lock_period || '',
+        pkg.property_type || '',
+        pkg.cash_rebate || '',
+        pkg.legal_fee_subsidy ? 'Yes' : 'No',
+        pkg.valuation_subsidy ? 'Yes' : 'No'
+      ]);
+
+      const csvContent = [csvHeaders, ...csvRows]
+        .map(row => row.map(field => `"${field}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `recommended-packages-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      logger.info(`Exported ${packagesToExport.length} packages to CSV`);
+    } catch (error) {
+      logger.error('Error exporting CSV:', error);
+      alert('Error exporting CSV. Please try again.');
+    }
+  };
+
+  const generateProfessionalReport = () => {
+    try {
+      if (filteredPackages.length === 0) {
+        alert('No results to generate report. Please search for packages first.');
+        return;
+      }
+
+      // Import jsPDF dynamically to avoid SSR issues
+      import('jspdf').then(({ jsPDF }) => {
+        import('jspdf-autotable').then(() => {
+          // Get selected packages or default to top 3
+          const packagesToExport = selectedPackages.size > 0 
+            ? filteredPackages.filter(pkg => selectedPackages.has(pkg.id)).slice(0, 3)
+            : filteredPackages.slice(0, 3);
+
+          if (packagesToExport.length === 0) {
+            alert('Please select at least one package for the report.');
+            return;
+          }
+
+          // Create new PDF document
+          const doc = new jsPDF('p', 'mm', 'a4');
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const pageHeight = doc.internal.pageSize.getHeight();
+          
+          // Define colors
+          const primaryBlue = '#1E40AF';
+          const lightBlue = '#EFF6FF';
+          const darkGray = '#374151';
+          const lightGray = '#F3F4F6';
+          
+          let yPosition = 20;
+
+          // Header Section
+          doc.setFillColor(primaryBlue);
+          doc.rect(0, 0, pageWidth, 40, 'F');
+          
+          doc.setTextColor('#FFFFFF');
+          doc.setFontSize(24);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Mortgage Package Analysis', 20, 25);
+          
+          if (clientName) {
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Prepared for: ${clientName}`, 20, 35);
+          }
+          
+          yPosition = 60;
+
+          // Key Information Section
+          doc.setTextColor(darkGray);
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Loan Details', 20, yPosition);
+          yPosition += 10;
+
+          doc.setFillColor(lightGray);
+          doc.rect(20, yPosition, pageWidth - 40, 25, 'F');
+          
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const loanAmount = searchForm.loanAmount ? parseFloat(searchForm.loanAmount).toLocaleString() : 'Not specified';
+          const loanTenure = searchForm.loanTenure || 'Not specified';
+          
+          doc.text(`Loan Amount: SGD ${loanAmount}`, 25, yPosition + 8);
+          doc.text(`Loan Tenure: ${loanTenure} years`, 25, yPosition + 15);
+          doc.text(`Property Type: ${searchForm.propertyType || 'Not specified'}`, 110, yPosition + 8);
+          doc.text(`Loan Type: ${selectedLoanType}`, 110, yPosition + 15);
+          
+          yPosition += 35;
+
+          // Package Comparison Table
+          doc.setTextColor(darkGray);
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Package Comparison', 20, yPosition);
+          yPosition += 10;
+
+          // Prepare table data
+          const tableHeaders = ['Details'];
+          const tableRows = [
+            ['Bank Name'],
+            ['Package Name'],
+            ['Interest Rate'],
+            ['Rate Type'],
+            ['Lock Period'],
+            ['Cash Rebate'],
+            ['Legal Fee Subsidy'],
+            ['Valuation Subsidy']
+          ];
+
+          // Add package columns
+          packagesToExport.forEach((pkg, index) => {
+            const bankName = hideBankNames ? `Bank ${String.fromCharCode(65 + index)}` : (pkg.banks?.name || pkg.bank_name || 'N/A');
+            tableHeaders.push(bankName);
+            
+            tableRows[0].push(bankName);
+            tableRows[1].push(pkg.package_name || 'N/A');
+            tableRows[2].push(pkg.interest_rate ? `${pkg.interest_rate}%` : 'N/A');
+            tableRows[3].push(pkg.rate_type || 'N/A');
+            tableRows[4].push(pkg.lock_period || 'N/A');
+            tableRows[5].push(pkg.cash_rebate ? `${pkg.cash_rebate}%` : 'No');
+            tableRows[6].push(pkg.legal_fee_subsidy ? 'Yes' : 'No');
+            tableRows[7].push(pkg.valuation_subsidy ? 'Yes' : 'No');
+          });
+
+          // Generate table using autoTable
+          doc.autoTable({
+            head: [tableHeaders],
+            body: tableRows.slice(1), // Skip the bank name row as it's in headers
+            startY: yPosition,
+            theme: 'grid',
+            headStyles: {
+              fillColor: primaryBlue,
+              textColor: '#FFFFFF',
+              fontSize: 10,
+              fontStyle: 'bold'
+            },
+            bodyStyles: {
+              fontSize: 9,
+              textColor: darkGray
+            },
+            columnStyles: {
+              0: { fontStyle: 'bold', fillColor: lightBlue }
+            },
+            margin: { left: 20, right: 20 }
+          });
+
+          yPosition = doc.lastAutoTable.finalY + 20;
+
+          // Key Features Section
+          if (yPosition > pageHeight - 60) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Key Features Summary', 20, yPosition);
+          yPosition += 10;
+
+          packagesToExport.forEach((pkg, index) => {
+            if (yPosition > pageHeight - 40) {
+              doc.addPage();
+              yPosition = 20;
+            }
+
+            const bankName = hideBankNames ? `Bank ${String.fromCharCode(65 + index)}` : (pkg.banks?.name || pkg.bank_name || 'N/A');
+            
+            doc.setFillColor(index === 0 ? '#FEF3C7' : lightGray); // Highlight best option
+            doc.rect(20, yPosition, pageWidth - 40, 25, 'F');
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${index + 1}. ${bankName} - ${pkg.package_name || 'Package'}`, 25, yPosition + 8);
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Interest Rate: ${pkg.interest_rate || 'N/A'}% | Lock Period: ${pkg.lock_period || 'N/A'}`, 25, yPosition + 15);
+            
+            let features = [];
+            if (pkg.cash_rebate) features.push(`${pkg.cash_rebate}% Cash Rebate`);
+            if (pkg.legal_fee_subsidy) features.push('Legal Fee Subsidy');
+            if (pkg.valuation_subsidy) features.push('Valuation Subsidy');
+            if (pkg.partial_repayment) features.push('Partial Repayment');
+            
+            if (features.length > 0) {
+              doc.text(`Features: ${features.join(', ')}`, 25, yPosition + 20);
+            }
+            
+            yPosition += 30;
+          });
+
+          // Footer
+          const reportDate = new Date().toLocaleDateString('en-SG', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor('#6B7280');
+          doc.text(`Generated on ${reportDate} | KeyQuest Mortgage`, 20, pageHeight - 10);
+          doc.text('This report is generated for advisory purposes only', pageWidth - 20, pageHeight - 10, { align: 'right' });
+
+          // Save the PDF
+          const fileName = `mortgage-package-analysis-${new Date().toISOString().split('T')[0]}.pdf`;
+          doc.save(fileName);
+          
+          logger.info(`PDF report generated: ${fileName}`);
+        }).catch(error => {
+          logger.error('Error loading jsPDF autotable:', error);
+          alert('Error generating PDF. Please try again.');
+        });
+      }).catch(error => {
+        logger.error('Error loading jsPDF:', error);
+        alert('Error loading PDF generator. Please try again.');
+      });
+      
+    } catch (error) {
+      logger.error('Error generating PDF:', error);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center flex-wrap gap-4">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">Recommended Packages</h1>
+              <p className="text-blue-100">Find the best mortgage packages for your clients</p>
+            </div>
+            <div className="flex items-center gap-4">
+              {user && (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold">
+                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-blue-200">{user.role?.replace('_', ' ').toUpperCase()}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Loan Type Tabs */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-3">
+            {['New Home Loan', 'Refinancing Home Loan', 'Commercial/Industrial'].map((loanType) => (
+              <button
+                key={loanType}
+                onClick={() => handleLoanTypeSelect(loanType)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  selectedLoanType === loanType
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
+                }`}
+              >
+                {loanType === 'New Home Loan' && <Home className="w-5 h-5" />}
+                {loanType === 'Refinancing Home Loan' && <Repeat className="w-5 h-5" />}
+                {loanType === 'Commercial/Industrial' && <Briefcase className="w-5 h-5" />}
+                {loanType}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Search Form */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <form onSubmit={searchPackages} className="space-y-6">
+            {/* Row 1: Basic Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                <select
+                  value={searchForm.propertyType}
+                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Property Type</option>
+                  <option value="Private Property">Private Property</option>
+                  <option value="HDB">HDB</option>
+                  <option value="EC">EC</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="Industrial">Industrial</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Property Status</label>
+                <select
+                  value={searchForm.propertyStatus}
+                  onChange={(e) => handleInputChange('propertyStatus', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Property Status</option>
+                  <option value="Completed">Completed</option>
+                  <option value="BUC">BUC</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Buy Under</label>
+                <select
+                  value={searchForm.buyUnder}
+                  onChange={(e) => handleInputChange('buyUnder', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Buy Under</option>
+                  <option value="Individual Name">Individual Name</option>
+                  <option value="Company Operating">Company Operating</option>
+                  <option value="Company Investment">Company Investment</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Row 2: Financial Parameters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Loan Amount ($)</label>
+                <input
+                  type="number"
+                  value={searchForm.loanAmount}
+                  onChange={(e) => handleInputChange('loanAmount', e.target.value)}
+                  placeholder="500,000"
+                  min="0"
+                  step="1000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Loan Tenure (Years)</label>
+                <input
+                  type="number"
+                  value={searchForm.loanTenure}
+                  onChange={(e) => handleInputChange('loanTenure', e.target.value)}
+                  placeholder="25"
+                  min="1"
+                  max="50"
+                  step="1"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Refinancing Fields (conditional) */}
+            {selectedLoanType === 'Refinancing Home Loan' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-orange-50 rounded-lg">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Interest Rate (%)</label>
+                  <input
+                    type="number"
+                    value={searchForm.existingInterestRate}
+                    onChange={(e) => handleInputChange('existingInterestRate', e.target.value)}
+                    placeholder="3.50"
+                    min="0"
+                    max="20"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Bank</label>
+                  <select
+                    value={searchForm.existingBank}
+                    onChange={(e) => handleInputChange('existingBank', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select Current Bank</option>
+                    {bankOptions.map(bank => (
+                      <option key={bank} value={bank}>{bank}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Row 3: Advanced Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Bank Multi-Select */}
+              <div className="relative" ref={bankDropdownRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Bank (Multiple Selection)</label>
+                <button
+                  type="button"
+                  onClick={() => setShowBankDropdown(!showBankDropdown)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex justify-between items-center bg-white"
+                >
+                  <span className="text-gray-700">
+                    {selectedBanks.length === 0 
+                      ? 'Select Banks' 
+                      : `${selectedBanks.length} selected`
+                    }
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {showBankDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                    <div className="p-2">
+                      <label className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedBanks.length === bankOptions.length}
+                          onChange={toggleAllBanks}
+                          className="rounded"
+                        />
+                        <span className="font-medium">Select All Banks</span>
+                      </label>
+                      {bankOptions.map(bank => (
+                        <label key={bank} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedBanks.includes(bank)}
+                            onChange={(e) => handleBankSelection(bank, e.target.checked)}
+                            className="rounded"
+                          />
+                          <span>{bank}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rate Type</label>
+                <select
+                  value={searchForm.rateType}
+                  onChange={(e) => handleInputChange('rateType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Rate Type</option>
+                  <option value="Fixed">Fixed</option>
+                  <option value="Floating">Floating</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Lock-in Period</label>
+                <select
+                  value={searchForm.lockPeriod}
+                  onChange={(e) => handleInputChange('lockPeriod', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Lock Period</option>
+                  {['0 Year', '1 Year', '2 Years', '3 Years', '4 Years', '5 Years', 
+                    '6 Years', '7 Years', '8 Years', '9 Years', '10 Years'].map(period => (
+                    <option key={period} value={period}>{period}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Row 4: Package Features */}
+            <div className="relative" ref={featuresDropdownRef}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Package Features (Multiple Selection)</label>
+              <button
+                type="button"
+                onClick={() => setShowFeaturesDropdown(!showFeaturesDropdown)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex justify-between items-center bg-white"
+              >
+                <span className="text-gray-700">
+                  {selectedFeatures.length === 0 
+                    ? 'Select Features' 
+                    : `${selectedFeatures.length} selected`
+                  }
+                </span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+
+              {showFeaturesDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                  <div className="p-2">
+                    <label className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedFeatures.length === featureOptions.length}
+                        onChange={toggleAllFeatures}
+                        className="rounded"
+                      />
+                      <span className="font-medium">Select All Features</span>
+                    </label>
+                    {featureOptions.map(feature => (
+                      <label key={feature.value} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedFeatures.includes(feature.value)}
+                          onChange={(e) => handleFeatureSelection(feature.value, e.target.checked)}
+                          className="rounded"
+                        />
+                        <span>{feature.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Search className="w-5 h-5" />
+                )}
+                {loading ? 'Searching...' : 'Search Packages'}
+              </button>
+
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Clear All Filters
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Results Section */}
+        {showResults && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            {/* Results Header */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Recommended Packages
+                </h2>
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  {filteredPackages.length} found
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {/* Report Options */}
+                <div className="flex items-center gap-4">
+                  <div>
+                    <input
+                      type="text"
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
+                      placeholder="Enter client name for report"
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="hideBankNames"
+                      checked={hideBankNames}
+                      onChange={(e) => setHideBankNames(e.target.checked)}
+                      className="rounded"
+                    />
+                    <label htmlFor="hideBankNames" className="text-sm text-gray-700">
+                      Hide Bank Names in Report
+                    </label>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={generateProfessionalReport}
+                    disabled={filteredPackages.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Generate PDF Report
+                  </button>
+                  
+                  <button
+                    onClick={exportCSV}
+                    disabled={filteredPackages.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </button>
+                  
+                  <button
+                    onClick={toggleAllPackages}
+                    disabled={filteredPackages.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                  >
+                    <CheckSquare className="w-4 h-4" />
+                    Toggle All
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Packages List */}
+            {filteredPackages.length === 0 ? (
+              <div className="text-center py-12">
+                <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">No Matching Packages Found</h3>
+                <p className="text-gray-500">Try adjusting your search criteria to find more suitable options.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredPackages.map(pkg => (
+                  <div
+                    key={pkg.id}
+                    className={`border rounded-lg p-6 transition-all duration-200 hover:shadow-md ${
+                      selectedPackages.has(pkg.id) 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-800">
+                          {hideBankNames ? 'Bank A' : (pkg.banks?.name || pkg.bank_name)}
+                        </h3>
+                        <p className="text-blue-600 font-medium">{pkg.package_name}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-green-600">
+                          {pkg.interest_rate}%
+                        </div>
+                        <div className="text-sm text-gray-500">{pkg.rate_type}</div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Lock Period:</span>
+                        <div className="font-medium">{pkg.lock_period || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Property Type:</span>
+                        <div className="font-medium">{pkg.property_type || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Cash Rebate:</span>
+                        <div className="font-medium">{pkg.cash_rebate ? `${pkg.cash_rebate}%` : 'No'}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Legal Fee Subsidy:</span>
+                        <div className="font-medium">{pkg.legal_fee_subsidy ? 'Yes' : 'No'}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex justify-between items-center">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedPackages.has(pkg.id)}
+                          onChange={() => togglePackageSelection(pkg.id)}
+                          className="rounded"
+                        />
+                        <span className="text-sm text-gray-600">Include in report</span>
+                      </label>
+                      
+                      <div className="text-xs text-gray-500">
+                        ID: {pkg.id}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default RecommendedPackages;

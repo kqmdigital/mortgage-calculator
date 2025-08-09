@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Calculator, Download, CheckCircle, XCircle, Info, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Users, Menu, UserPlus, Building2, Factory } from 'lucide-react';
+import { Calculator, Download, CheckCircle, XCircle, LogOut, Home, Building, TrendingUp, DollarSign, BarChart3, Sparkles, Users, Menu, UserPlus, Building2, Factory } from 'lucide-react';
 import { useAuth } from './contexts/EnhancedAuthContext';
 import logger from './utils/logger';
 import useDebounce from './hooks/useDebounce';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
+import RecommendedPackages from './components/RecommendedPackages';
 
 // Import your existing TDSRMSRCalculator component from App.js
 // Main TDSR/MSR Calculator Component
@@ -2717,35 +2718,36 @@ const AuthenticatedApp = () => {
                 </div>
               </div>
             </button>
+            
+            <button
+              onClick={() => setCalculatorType('packages')}
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+                calculatorType === 'packages' 
+                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-600 text-white shadow-xl' 
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-orange-300 shadow-md hover:shadow-lg'
+              }`}
+            >
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <div className={`p-2 rounded-lg ${
+                  calculatorType === 'packages' 
+                    ? 'bg-white/20' 
+                    : 'bg-orange-50'
+                }`}>
+                  <Sparkles className={`w-5 h-5 ${
+                    calculatorType === 'packages' 
+                      ? 'text-white' 
+                      : 'text-orange-600'
+                  }`} />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Recommended Packages</div>
+                  <div className="text-xs opacity-75">Mortgage Package Finder</div>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
 
-        {/* Admin Tools Section - Only visible to admins */}
-        {canPerformAdminActions() && (
-          <div className="mb-6">
-            <div className="text-sm font-semibold text-gray-600 mb-3">Admin Tools</div>
-            <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
-              <button
-                onClick={() => {
-                  const url = `${process.env.PUBLIC_URL}/recommended-packages.html`;
-                  console.log('Opening URL:', url);
-                  window.open(url, '_blank');
-                }}
-                className="flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 bg-white border-gray-200 text-gray-700 hover:border-orange-300 shadow-md hover:shadow-lg"
-              >
-                <div className="flex items-center justify-center lg:justify-start gap-3">
-                  <div className="p-2 rounded-lg bg-orange-50">
-                    <Sparkles className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold">Recommended Packages</div>
-                    <div className="text-xs opacity-75">Package Search & PDF Reports</div>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Calculator Content */}
         <div className="standard-card">
@@ -2753,6 +2755,8 @@ const AuthenticatedApp = () => {
             <TDSRMSRCalculator currentUser={user?.name} onLogout={handleLogout} />
           ) : calculatorType === 'repayment' ? (
             <MonthlyRepaymentCalculator />
+          ) : calculatorType === 'packages' ? (
+            <RecommendedPackages />
           ) : (
             <ProgressivePaymentCalculator />
           )}
