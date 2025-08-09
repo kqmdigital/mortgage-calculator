@@ -189,6 +189,21 @@ const RecommendedPackages = () => {
       if (searchForm.buyUnder) {
         filtered = filtered.filter(pkg => pkg.buy_under === searchForm.buyUnder);
       }
+
+      // CRITICAL: Loan amount filter - exclude packages with minimum loan size higher than user's loan amount
+      const loanAmount = parseFloat(searchForm.loanAmount) || 0;
+      if (loanAmount > 0) {
+        const beforeLoanFilter = filtered.length;
+        filtered = filtered.filter(pkg => {
+          // If package has minimum_loan_size and user's loan amount is less than minimum, exclude it
+          if (pkg.minimum_loan_size && loanAmount < pkg.minimum_loan_size) {
+            logger.info(`Excluding package ${pkg.banks?.name || pkg.bank_name} - ${pkg.package_name}: min loan ${pkg.minimum_loan_size} > user loan ${loanAmount}`);
+            return false;
+          }
+          return true;
+        });
+        logger.info(`Loan amount filter: ${beforeLoanFilter} → ${filtered.length} packages (loan amount: ${loanAmount})`);
+      }
       
       if (searchForm.rateType) {
         filtered = filtered.filter(pkg => pkg.rate_type_category === searchForm.rateType);
@@ -196,6 +211,11 @@ const RecommendedPackages = () => {
       
       if (searchForm.lockPeriod) {
         filtered = filtered.filter(pkg => pkg.lock_period === searchForm.lockPeriod);
+      }
+
+      // NEW: Exclude existing bank for refinancing (from HTML version)
+      if (selectedLoanType === 'Refinancing Home Loan' && searchForm.existingBank) {
+        filtered = filtered.filter(pkg => pkg.bank_name !== searchForm.existingBank);
       }
 
       // Apply bank filter
