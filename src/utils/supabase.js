@@ -557,29 +557,63 @@ export class AuthService {
         throw new Error('Database connection not available');
       }
 
-      let query = supabase
-        .from('rate_packages')
-        .select(`
-          *,
-          banks!inner(name, is_active)
-        `)
-        .eq('banks.is_active', true);
-
-      // Apply filters
-      if (filters.loanType) {
-        query = query.eq('loan_type', filters.loanType);
+      // Try to query the table - start with the simplest possible query
+      let data, error;
+      
+      // Try different possible table names
+      const possibleTableNames = ['rate_packages', 'packages', 'loan_packages', 'mortgage_packages'];
+      let successfulTableName = null;
+      
+      for (const tableName of possibleTableNames) {
+        try {
+          const result = await supabase
+            .from(tableName)
+            .select('*')
+            .limit(1);
+            
+          if (!result.error) {
+            data = result.data;
+            error = null;
+            successfulTableName = tableName;
+            logger.info(`Found table: ${tableName}`);
+            break;
+          }
+        } catch (e) {
+          // Continue to next table name
+          continue;
+        }
       }
-      if (filters.propertyType) {
-        query = query.eq('property_type', filters.propertyType);
+      
+      // If we couldn't find any table, try the original query to get the specific error
+      if (!successfulTableName) {
+        const result = await supabase
+          .from('rate_packages')
+          .select('*')
+          .limit(10);
+        data = result.data;
+        error = result.error;
+      } else {
+        // Re-run the query with the successful table name and proper limit
+        const result = await supabase
+          .from(successfulTableName)
+          .select('*')
+          .limit(50);
+        data = result.data;
+        error = result.error;
       }
-      if (filters.rateType) {
-        query = query.eq('rate_type_category', filters.rateType);
-      }
-
-      const { data, error } = await query.order('year1_value');
 
       if (error) {
         logger.error('Supabase query error:', error);
+        console.error('Full error details:', error);
+        console.log('Error code:', error.code);
+        console.log('Error hint:', error.hint);
+        console.log('Error details:', error.details);
+        
+        // If table doesn't exist, return a helpful message
+        if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          throw new Error('Rate packages table not found in database. Please check table name or create the table.');
+        }
+        
         throw new Error('Failed to fetch rate packages: ' + error.message);
       }
 
