@@ -3,7 +3,6 @@ import {
   Home, 
   Repeat, 
   Briefcase, 
-  Search, 
   RotateCcw, 
   CheckSquare, 
   FileText, 
@@ -67,10 +66,226 @@ const RecommendedPackages = () => {
     { value: 'waiver_due_to_sales', label: 'Waiver Due to Sales' }
   ];
 
-  // Load data on component mount
+  // Load only rate types on component mount (lightweight)
   useEffect(() => {
-    loadData();
+    const loadInitialData = async () => {
+      try {
+        // Only load rate types initially - don't load packages until filters applied
+        if (AuthService.getRateTypes) {
+          const rateTypesResult = await AuthService.getRateTypes();
+          if (rateTypesResult.success) {
+            setRateTypes(rateTypesResult.data || []);
+            logger.info(`Loaded ${rateTypesResult.data?.length || 0} rate types`);
+          }
+        } else {
+          // Fallback rate types
+          setRateTypes([
+            { id: 1, rate_type: 'FIXED', rate_value: 0, name: 'Fixed', description: 'Fixed interest rate' },
+            { id: 2, rate_type: 'SORA', rate_value: 3.29, name: 'SORA', description: 'Singapore Overnight Rate Average' }
+          ]);
+        }
+      } catch (error) {
+        logger.error('Error loading initial data:', error);
+      }
+    };
+    
+    loadInitialData();
   }, []);
+
+  // EXACT calculation functions from recommended-packages-core.js
+  const calculateNumericRate = useCallback((pkg, year) => {
+    let rateType, operator, value;
+    
+    if (year === 'thereafter') {
+      rateType = pkg.thereafter_rate_type;
+      operator = pkg.thereafter_operator;
+      value = pkg.thereafter_value;
+    } else {
+      rateType = pkg[`year${year}_rate_type`];
+      operator = pkg[`year${year}_operator`];
+      value = pkg[`year${year}_value`];
+    }
+    
+    // If no data for this year, use thereafter rate
+    if (!rateType || value === null || value === undefined) {
+      if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+        return calculateNumericRate(pkg, 'thereafter');
+      }
+      return 0;
+    }
+    
+    // Calculate numeric rate
+    if (rateType === 'FIXED') {
+      return parseFloat(value) || 0;
+    } else {
+      // Find the reference rate from global rateTypes
+      const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
+      if (!referenceRate) {
+        logger.warn(`Reference rate type not found: ${rateType}`);
+        return 0;
+      }
+      
+      const referenceRateValue = parseFloat(referenceRate.rate_value) || 0;
+      const spreadValue = parseFloat(value) || 0;
+      
+      return operator === '+' ? 
+        referenceRateValue + spreadValue : 
+        referenceRateValue - spreadValue;
+    }
+  }, [rateTypes]);
+
+  const calculateAverageFirst2Years = useCallback((pkg) => {
+    const year1Rate = calculateNumericRate(pkg, 1);
+    const year2Rate = calculateNumericRate(pkg, 2);
+    
+    if (year1Rate === 0 && year2Rate === 0) return 0;
+    if (year1Rate === 0) return year2Rate;
+    if (year2Rate === 0) return year1Rate;
+    
+    return (year1Rate + year2Rate) / 2;
+  }, [calculateNumericRate]);
+
+  const calculateMonthlyInstallment = useCallback((principal, tenureYears, annualRate) => {
+    if (!principal || !tenureYears || !annualRate) return 0;
+    
+    const monthlyRate = annualRate / 100 / 12;
+    const totalMonths = tenureYears * 12;
+    
+    if (monthlyRate === 0) {
+      return principal / totalMonths;
+    }
+    
+    const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+                         (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    
+    return monthlyPayment;
+  }, []);
+
+  const searchPackages = useCallback(async () => {
+    
+    try {
+      setLoading(true);
+      logger.info('Searching packages with filters:', { 
+        loanType: selectedLoanType, 
+        form: searchForm,
+        banks: selectedBanks,
+        features: selectedFeatures 
+      });
+
+      let filtered = [...allPackages];
+
+      // Apply loan type filter
+      filtered = filtered.filter(pkg => pkg.loan_type === selectedLoanType);
+
+      // Apply form filters
+      if (searchForm.propertyType) {
+        filtered = filtered.filter(pkg => pkg.property_type === searchForm.propertyType);
+      }
+      
+      if (searchForm.propertyStatus) {
+        filtered = filtered.filter(pkg => pkg.property_status === searchForm.propertyStatus);
+      }
+      
+      if (searchForm.buyUnder) {
+        filtered = filtered.filter(pkg => pkg.buy_under === searchForm.buyUnder);
+      }
+      
+      if (searchForm.rateType) {
+        filtered = filtered.filter(pkg => pkg.rate_type_category === searchForm.rateType);
+      }
+      
+      if (searchForm.lockPeriod) {
+        filtered = filtered.filter(pkg => pkg.lock_period === searchForm.lockPeriod);
+      }
+
+      // Apply bank filter
+      if (selectedBanks.length > 0) {
+        filtered = filtered.filter(pkg => 
+          selectedBanks.some(bank => 
+            pkg.banks?.name === bank || pkg.bank_name === bank
+          )
+        );
+      }
+
+      // Apply feature filters
+      if (selectedFeatures.length > 0) {
+        filtered = filtered.filter(pkg => {
+          return selectedFeatures.some(feature => {
+            const featureValue = pkg[feature];
+            return featureValue === 'true' || featureValue === true;
+          });
+        });
+      }
+
+      // Calculate metrics for each package - EXACT same logic as HTML
+      filtered = filtered.map(pkg => {
+        const avgFirst2Years = calculateAverageFirst2Years(pkg);
+        const loanAmount = parseFloat(searchForm.loanAmount) || 500000;
+        const loanTenure = parseInt(searchForm.loanTenure) || 25;
+        const monthlyInstallment = calculateMonthlyInstallment(loanAmount, loanTenure, avgFirst2Years);
+        
+        return {
+          ...pkg,
+          avgFirst2Years,
+          monthlyInstallment
+        };
+      });
+
+      // Sort by average rate (lowest first) - same as HTML
+      filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
+
+      setFilteredPackages(filtered);
+      setShowResults(true);
+      
+      logger.info(`Found ${filtered.length} matching packages`);
+      
+    } catch (error) {
+      logger.error('Error searching packages:', error);
+      alert('Error searching packages. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment]);
+
+  // Auto-search when filters change - load packages on demand
+  useEffect(() => {
+    const hasFilters = 
+      searchForm.propertyType || 
+      searchForm.propertyStatus || 
+      searchForm.buyUnder || 
+      searchForm.loanAmount || 
+      searchForm.loanTenure || 
+      searchForm.rateType || 
+      searchForm.lockPeriod || 
+      selectedBanks.length > 0 || 
+      selectedFeatures.length > 0;
+
+    if (hasFilters) {
+      // Add small delay to prevent too many calls while typing
+      const debounceTimer = setTimeout(async () => {
+        try {
+          setLoading(true);
+          
+          // Load packages on demand if not already loaded
+          if (allPackages.length === 0) {
+            await loadData();
+          }
+          
+          // Then search with current filters
+          searchPackages();
+        } catch (error) {
+          logger.error('Error in auto-search:', error);
+          setLoading(false);
+        }
+      }, 300);
+
+      return () => clearTimeout(debounceTimer);
+    } else {
+      // Clear results if no filters are set
+      setFilteredPackages([]);
+      setShowResults(false);
+    }
+  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, searchPackages]);
 
   // Handle click outside for dropdowns
   useEffect(() => {
@@ -220,75 +435,6 @@ const RecommendedPackages = () => {
     }
   }, []);
 
-  // EXACT calculation functions from recommended-packages-core.js
-  const calculateNumericRate = useCallback((pkg, year) => {
-    let rateType, operator, value;
-    
-    if (year === 'thereafter') {
-      rateType = pkg.thereafter_rate_type;
-      operator = pkg.thereafter_operator;
-      value = pkg.thereafter_value;
-    } else {
-      rateType = pkg[`year${year}_rate_type`];
-      operator = pkg[`year${year}_operator`];
-      value = pkg[`year${year}_value`];
-    }
-    
-    // If no data for this year, use thereafter rate
-    if (!rateType || value === null || value === undefined) {
-      if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
-        return calculateNumericRate(pkg, 'thereafter');
-      }
-      return 0;
-    }
-    
-    // Calculate numeric rate
-    if (rateType === 'FIXED') {
-      return parseFloat(value) || 0;
-    } else {
-      // Find the reference rate from global rateTypes
-      const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
-      if (!referenceRate) {
-        logger.warn(`Reference rate type not found: ${rateType}`);
-        return 0;
-      }
-      
-      const referenceRateValue = parseFloat(referenceRate.rate_value) || 0;
-      const spreadValue = parseFloat(value) || 0;
-      
-      return operator === '+' ? 
-        referenceRateValue + spreadValue : 
-        referenceRateValue - spreadValue;
-    }
-  }, [rateTypes]);
-
-  const calculateAverageFirst2Years = useCallback((pkg) => {
-    const year1Rate = calculateNumericRate(pkg, 1);
-    const year2Rate = calculateNumericRate(pkg, 2);
-    
-    if (year1Rate === 0 && year2Rate === 0) return 0;
-    if (year1Rate === 0) return year2Rate;
-    if (year2Rate === 0) return year1Rate;
-    
-    return (year1Rate + year2Rate) / 2;
-  }, [calculateNumericRate]);
-
-  const calculateMonthlyInstallment = useCallback((principal, tenureYears, annualRate) => {
-    if (!principal || !tenureYears || !annualRate) return 0;
-    
-    const monthlyRate = annualRate / 100 / 12;
-    const totalMonths = tenureYears * 12;
-    
-    if (monthlyRate === 0) {
-      return principal / totalMonths;
-    }
-    
-    const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
-                         (Math.pow(1 + monthlyRate, totalMonths) - 1);
-    
-    return monthlyPayment;
-  }, []);
-
   const formatCurrency = (value) => {
     if (!value || value === 0) return '$0';
     return new Intl.NumberFormat('en-SG', {
@@ -320,93 +466,6 @@ const RecommendedPackages = () => {
       setSelectedFeatures([...allFeatureValues]);
     }
   };
-
-  const searchPackages = useCallback(async (e) => {
-    if (e) e.preventDefault();
-    
-    try {
-      setLoading(true);
-      logger.info('Searching packages with filters:', { 
-        loanType: selectedLoanType, 
-        form: searchForm,
-        banks: selectedBanks,
-        features: selectedFeatures 
-      });
-
-      let filtered = [...allPackages];
-
-      // Apply loan type filter
-      filtered = filtered.filter(pkg => pkg.loan_type === selectedLoanType);
-
-      // Apply form filters
-      if (searchForm.propertyType) {
-        filtered = filtered.filter(pkg => pkg.property_type === searchForm.propertyType);
-      }
-      
-      if (searchForm.propertyStatus) {
-        filtered = filtered.filter(pkg => pkg.property_status === searchForm.propertyStatus);
-      }
-      
-      if (searchForm.buyUnder) {
-        filtered = filtered.filter(pkg => pkg.buy_under === searchForm.buyUnder);
-      }
-      
-      if (searchForm.rateType) {
-        filtered = filtered.filter(pkg => pkg.rate_type_category === searchForm.rateType);
-      }
-      
-      if (searchForm.lockPeriod) {
-        filtered = filtered.filter(pkg => pkg.lock_period === searchForm.lockPeriod);
-      }
-
-      // Apply bank filter
-      if (selectedBanks.length > 0) {
-        filtered = filtered.filter(pkg => 
-          selectedBanks.some(bank => 
-            pkg.banks?.name === bank || pkg.bank_name === bank
-          )
-        );
-      }
-
-      // Apply feature filters
-      if (selectedFeatures.length > 0) {
-        filtered = filtered.filter(pkg => {
-          return selectedFeatures.some(feature => {
-            const featureValue = pkg[feature];
-            return featureValue === 'true' || featureValue === true;
-          });
-        });
-      }
-
-      // Calculate metrics for each package - EXACT same logic as HTML
-      filtered = filtered.map(pkg => {
-        const avgFirst2Years = calculateAverageFirst2Years(pkg);
-        const loanAmount = parseFloat(searchForm.loanAmount) || 500000;
-        const loanTenure = parseInt(searchForm.loanTenure) || 25;
-        const monthlyInstallment = calculateMonthlyInstallment(loanAmount, loanTenure, avgFirst2Years);
-        
-        return {
-          ...pkg,
-          avgFirst2Years,
-          monthlyInstallment
-        };
-      });
-
-      // Sort by average rate (lowest first) - same as HTML
-      filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
-
-      setFilteredPackages(filtered);
-      setShowResults(true);
-      
-      logger.info(`Found ${filtered.length} matching packages`);
-      
-    } catch (error) {
-      logger.error('Error searching packages:', error);
-      alert('Error searching packages. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment]);
 
   const clearAllFilters = () => {
     setSearchForm({
@@ -1108,9 +1167,9 @@ const RecommendedPackages = () => {
           </div>
         </div>
 
-        {/* Search Form */}
+        {/* Filter Form */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <form onSubmit={searchPackages} className="space-y-6">
+          <div className="space-y-6">
             {/* Row 1: Basic Filters */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -1341,31 +1400,31 @@ const RecommendedPackages = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
+            {/* Clear Filters Button */}
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-600">
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    Filtering packages...
+                  </div>
+                ) : showResults ? (
+                  `Found ${filteredPackages.length} matching packages`
                 ) : (
-                  <Search className="w-5 h-5" />
+                  'Select filters above to find suitable packages'
                 )}
-                {loading ? 'Searching...' : 'Search Packages'}
-              </button>
+              </div>
 
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium"
               >
-                <RotateCcw className="w-5 h-5" />
+                <RotateCcw className="w-4 h-4" />
                 Clear All Filters
               </button>
             </div>
-          </form>
+          </div>
         </div>
 
         {/* Results Section */}
@@ -1450,7 +1509,7 @@ const RecommendedPackages = () => {
               </div>
             ) : filteredPackages.length === 0 ? (
               <div className="text-center py-12">
-                <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-600 mb-2">No Matching Packages Found</h3>
                 <p className="text-gray-500">Try adjusting your search criteria to find more suitable options.</p>
               </div>
