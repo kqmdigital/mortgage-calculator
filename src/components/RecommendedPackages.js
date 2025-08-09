@@ -124,7 +124,10 @@ const RecommendedPackages = () => {
 
         if (packagesError) throw packagesError;
 
-        setAllPackages(packagesData || []);
+        const packages = packagesData || [];
+        setAllPackages(packages);
+        setFilteredPackages(packages); // Show all packages initially
+        setShowResults(packages.length > 0); // Show results if we have packages
         
         // Load rate types
         const { data: rateTypesData, error: rateTypesError } = await supabase
@@ -141,7 +144,7 @@ const RecommendedPackages = () => {
           setRateTypes(rateTypesData || []);
         }
 
-        logger.info(`Loaded ${packagesData?.length || 0} packages`);
+        logger.info(`Loaded ${packages.length} packages`);
       } else {
         // Development mode - use mock data
         logger.info('Development mode: Using mock packages data');
@@ -200,6 +203,8 @@ const RecommendedPackages = () => {
         ];
 
         setAllPackages(mockPackages);
+        setFilteredPackages(mockPackages); // Show all packages initially
+        setShowResults(true); // Show results section
         setRateTypes([
           { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
           { id: 2, name: 'Floating', description: 'Variable interest rate' }
@@ -234,6 +239,8 @@ const RecommendedPackages = () => {
       ];
       
       setAllPackages(mockPackages);
+      setFilteredPackages(mockPackages); // Show fallback packages initially
+      setShowResults(true); // Show results section
       setRateTypes([
         { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
         { id: 2, name: 'Floating', description: 'Variable interest rate' }
