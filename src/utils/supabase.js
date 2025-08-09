@@ -464,27 +464,37 @@ export class AuthService {
         throw new Error('Database connection not available');
       }
 
-      // Use the EXACT same query structure as config/supabase.js DatabaseService
-      let query = supabase
-        .from('rate_packages')
-        .select(`
-          *,
-          banks!inner(name, is_active)
-        `)
-        .eq('banks.is_active', true);
-
-      // Apply filters using the same field names as HTML
-      if (filters.loanType) {
-        query = query.eq('loan_type', filters.loanType);
+      // Try with join first, fallback to simple query if foreign key doesn't exist
+      let data, error;
+      
+      try {
+        // First attempt: Try the same query as HTML (with join)
+        const result = await supabase
+          .from('rate_packages')
+          .select(`
+            *,
+            banks!inner(name, is_active)
+          `)
+          .eq('banks.is_active', true)
+          .order('interest_rate');
+          
+        data = result.data;
+        error = result.error;
+      } catch (joinError) {
+        logger.warn('Join query failed, trying simple query:', joinError);
       }
-      if (filters.propertyType) {
-        query = query.eq('property_type', filters.propertyType);
+      
+      // If join failed, try simple query without join
+      if (!data || error) {
+        logger.info('Using simple query without join');
+        const result = await supabase
+          .from('rate_packages')
+          .select('*')
+          .order('interest_rate');
+          
+        data = result.data;
+        error = result.error;
       }
-      if (filters.rateType) {
-        query = query.eq('rate_type', filters.rateType);
-      }
-
-      const { data, error } = await query.order('interest_rate');
 
       if (error) {
         logger.error('Supabase query error:', error);
