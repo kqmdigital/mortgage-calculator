@@ -39,63 +39,54 @@
 
 <body>
     <div class="admin-container">
-        <!-- Top Navigation -->
-        <nav class="top-nav" id="topNav">
-            <div class="nav-container">
-                <div class="nav-left">
-                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                        <i data-lucide="menu"></i>
-                    </button>
-                    <a href="index.html" class="logo">
-                        <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="Company Logo" class="logo-image">
-                        
-                    </a>
-                    <div class="nav-menu" id="navMenu">
-                        <a href="index.html" class="nav-item">
-                            <i data-lucide="layout-dashboard"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="rate-packages.html" class="nav-item">
-                            <i data-lucide="package"></i>
-                            <span>Rate Package</span>
-                        </a>
-                        <a href="rate-types.html" class="nav-item">
-                            <i data-lucide="percent"></i>
-                            <span>Rate Type</span>
-                        </a>
-                        <a href="banks.html" class="nav-item">
-                            <i data-lucide="landmark"></i>
-                            <span>Bank</span>
-                        </a>
-                        <a href="bankers.html" class="nav-item">
-                            <i data-lucide="briefcase"></i>
-                            <span>Bankers</span>
-                        </a>
-                         <a href="admin-users.html" class="nav-item">
-                            <i data-lucide="shield-check"></i>
-                            <span>Staff</span>
-                        </a>
-                        <a href="recommended-packages.html" class="nav-item active">
-                            <i data-lucide="star"></i>
-                            <span>Recommended</span>
-                        </a>
+        <!-- Enhanced Header - Match Main Website -->
+        <div class="header-container">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo-container">
+                        <img 
+                            src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
+                            alt="Keyquest Mortgage" 
+                            class="header-logo"
+                        />
                     </div>
                 </div>
-                <div class="nav-right">
-                    <button class="btn btn-secondary" onclick="confirmSignOut()">
-                        <i data-lucide="log-out"></i>
-                        <span>Sign Out</span>
-                    </button>
-                    <div class="user-profile">
-                        <div class="user-avatar" id="userAvatar">A</div>
-                        <div class="user-info">
-                            <div class="user-name" id="userName">admin</div>
-                            <div class="user-role">Super Admin</div>
+                
+                <!-- User Profile Section -->
+                <div class="header-right">
+                    <div class="user-profile-card">
+                        <div class="user-profile-content">
+                            <div class="user-avatar-container">
+                                <div class="user-avatar" id="userAvatar">S</div>
+                            </div>
+                            <div class="user-info">
+                                <p class="user-name" id="userName">System Administrator</p>
+                                <span class="user-role">SUPER ADMIN</span>
+                            </div>
+                        </div>
+                        
+                        <button class="menu-toggle-btn" onclick="toggleUserMenu()" type="button">
+                            <i data-lucide="menu"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown" id="userDropdown" style="display: none;">
+                        <div class="dropdown-content">
+                            <button onclick="window.location.href='admin-users.html'" class="dropdown-item admin-only">
+                                <i data-lucide="user-plus"></i>
+                                <span>User Management</span>
+                            </button>
+                            
+                            <button onclick="confirmSignOut()" class="dropdown-item logout-btn">
+                                <i data-lucide="log-out"></i>
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </nav>
+        </div>
 
         <!-- Main Content -->
         <div class="main-content">           

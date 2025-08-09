@@ -18,6 +18,28 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ===================================
+// NEW USER MENU FUNCTIONS - MATCH MAIN WEBSITE
+// ===================================
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        const isVisible = dropdown.style.display !== 'none';
+        dropdown.style.display = isVisible ? 'none' : 'block';
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userDropdown');
+    const menuBtn = document.querySelector('.menu-toggle-btn');
+    const userCard = document.querySelector('.user-profile-card');
+    
+    if (dropdown && !userCard.contains(event.target) && !menuBtn.contains(event.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// ===================================
 // AUTHENTICATION CHECK - PRESERVED FROM ORIGINAL
 // ===================================
 async function checkAuthentication() {
@@ -36,10 +58,14 @@ async function checkAuthentication() {
             return;
         }
 
-        // Update user display
+        // Update user display in new header format
         if (user.name) {
             document.getElementById('userName').textContent = user.name;
             document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+        } else {
+            // Fallback to show System Administrator as in main website
+            document.getElementById('userName').textContent = 'System Administrator';
+            document.getElementById('userAvatar').textContent = 'S';
         }
     } catch (error) {
         console.error('💥 Auth check failed:', error);
