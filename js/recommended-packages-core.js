@@ -44,13 +44,16 @@ document.addEventListener('click', function(event) {
 // ===================================
 async function checkAuthentication() {
     try {
+        console.log('🔐 Checking authentication...');
+        
         if (typeof AuthService === 'undefined') {
-            console.error('AuthService not available');
+            console.error('❌ AuthService not available');
             window.location.href = 'login.html';
             return;
         }
 
         const { success, user } = await AuthService.getCurrentUser();
+        console.log('🔍 Auth check result:', { success, user });
         
         if (!success || !user) {
             console.warn('❌ No authenticated user found, redirecting to login');
@@ -58,14 +61,76 @@ async function checkAuthentication() {
             return;
         }
 
-        // Update user display in new header format
-        if (user.name) {
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+        // Update user display in new header format with dynamic data from database
+        if (user) {
+            // Set user name
+            const userName = user.name || 'Unknown User';
+            const userNameElement = document.getElementById('userName');
+            if (userNameElement) {
+                userNameElement.textContent = userName;
+            }
+            
+            // Set user avatar (first letter of name)
+            const avatarLetter = userName.charAt(0).toUpperCase() || 'U';
+            const userAvatarElement = document.getElementById('userAvatar');
+            if (userAvatarElement) {
+                userAvatarElement.textContent = avatarLetter;
+            }
+            
+            // Set user role dynamically from database
+            const userRole = user.role || 'user';
+            const roleElement = document.getElementById('userRole');
+            
+            if (roleElement) {
+                // Format role display based on actual role from database
+                switch (userRole.toLowerCase()) {
+                    case 'super_admin':
+                        roleElement.textContent = 'SUPER ADMIN';
+                        break;
+                    case 'admin':
+                        roleElement.textContent = 'ADMIN';
+                        break;
+                    case 'manager':
+                        roleElement.textContent = 'MANAGER';
+                        break;
+                    case 'user':
+                        roleElement.textContent = 'USER';
+                        break;
+                    default:
+                        roleElement.textContent = userRole.toUpperCase().replace('_', ' ');
+                }
+            }
+            
+            // Show/hide admin menu items based on actual user permissions
+            const adminOnlyItems = document.querySelectorAll('.admin-only');
+            const hasAdminAccess = userRole === 'super_admin' || userRole === 'admin';
+            
+            adminOnlyItems.forEach(item => {
+                if (hasAdminAccess) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            console.log('✅ User profile updated:', { 
+                name: userName, 
+                role: userRole, 
+                hasAdminAccess 
+            });
         } else {
-            // Fallback to show System Administrator as in main website
-            document.getElementById('userName').textContent = 'System Administrator';
-            document.getElementById('userAvatar').textContent = 'S';
+            // Handle case where user data is not available
+            console.warn('⚠️ No user data available, redirecting to login');
+            
+            // Update UI to show error state before redirect
+            const userNameElement = document.getElementById('userName');
+            const userRoleElement = document.getElementById('userRole');
+            if (userNameElement) userNameElement.textContent = 'Authentication Failed';
+            if (userRoleElement) userRoleElement.textContent = 'REDIRECTING...';
+            
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000);
         }
     } catch (error) {
         console.error('💥 Auth check failed:', error);
