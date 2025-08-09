@@ -112,25 +112,47 @@ const RecommendedPackages = () => {
       logger.info('Loading recommended packages data...');
       
       // Use AuthService for compatibility with login system (same Supabase connection)
-      const packagesResult = await AuthService.getRatePackages();
-      
-      if (packagesResult.success) {
-        const packages = packagesResult.data || [];
-        setAllPackages(packages);
-        setFilteredPackages(packages); // Show all packages initially
-        setShowResults(packages.length > 0); // Show results if we have packages
-        logger.info(`Loaded ${packages.length} packages from AuthService`);
+      if (AuthService.getRatePackages) {
+        const packagesResult = await AuthService.getRatePackages();
+        
+        if (packagesResult.success) {
+          const packages = packagesResult.data || [];
+          setAllPackages(packages);
+          setFilteredPackages(packages); // Show all packages initially
+          setShowResults(packages.length > 0); // Show results if we have packages
+          logger.info(`Loaded ${packages.length} packages from AuthService`);
+        } else {
+          logger.error('Failed to load packages:', packagesResult.error);
+          setAllPackages([]);
+          setFilteredPackages([]);
+          setShowResults(false);
+        }
       } else {
-        logger.error('Failed to load packages:', packagesResult.error);
-        setAllPackages([]);
-        setFilteredPackages([]);
-        setShowResults(false);
+        logger.warn('getRatePackages method not available, using fallback data');
+        // Will fall through to the catch block to use mock data
+        throw new Error('getRatePackages method not available');
       }
       
-      // Load rate types using AuthService
-      const rateTypesResult = await AuthService.getRateTypes();
-      if (rateTypesResult.success) {
-        setRateTypes(rateTypesResult.data || []);
+      // Load rate types using AuthService - fallback if method doesn't exist
+      try {
+        if (AuthService.getRateTypes) {
+          const rateTypesResult = await AuthService.getRateTypes();
+          if (rateTypesResult.success) {
+            setRateTypes(rateTypesResult.data || []);
+          }
+        } else {
+          // Fallback rate types if method doesn't exist
+          setRateTypes([
+            { id: 1, rate_type: 'FIXED', rate_value: 0, name: 'Fixed', description: 'Fixed interest rate' },
+            { id: 2, rate_type: 'SORA', rate_value: 3.29, name: 'SORA', description: 'Singapore Overnight Rate Average' }
+          ]);
+        }
+      } catch (rateError) {
+        logger.warn('Failed to load rate types, using fallback:', rateError);
+        setRateTypes([
+          { id: 1, rate_type: 'FIXED', rate_value: 0, name: 'Fixed', description: 'Fixed interest rate' },
+          { id: 2, rate_type: 'SORA', rate_value: 3.29, name: 'SORA', description: 'Singapore Overnight Rate Average' }
+        ]);
       }
       
     } catch (error) {
@@ -473,6 +495,114 @@ const RecommendedPackages = () => {
     }
   };
 
+  // Update package feature in filteredPackages state
+  const updatePackageFeature = (packageIndex, featureName, isChecked) => {
+    setFilteredPackages(prevPackages => {
+      const updated = [...prevPackages];
+      if (updated[packageIndex]) {
+        updated[packageIndex][featureName] = isChecked;
+      }
+      return updated;
+    });
+  };
+
+  // Update package remarks in filteredPackages state
+  const updatePackageRemarks = (packageIndex, newRemarks) => {
+    setFilteredPackages(prevPackages => {
+      const updated = [...prevPackages];
+      if (updated[packageIndex]) {
+        updated[packageIndex].custom_remarks = newRemarks;
+      }
+      return updated;
+    });
+  };
+
+  // EXACT rate calculation functions from HTML version
+  const calculateInterestRate = (pkg, year) => {
+    let rateType, operator, value;
+    
+    if (year === 'thereafter') {
+      rateType = pkg.thereafter_rate_type;
+      operator = pkg.thereafter_operator;
+      value = pkg.thereafter_value;
+    } else {
+      rateType = pkg[`year${year}_rate_type`];
+      operator = pkg[`year${year}_operator`];
+      value = pkg[`year${year}_value`];
+    }
+
+    // If no data for this year, use thereafter rate
+    if (!rateType || value === null || value === undefined) {
+      if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+        return calculateInterestRate(pkg, 'thereafter');
+      }
+      return 0;
+    }
+
+    if (rateType === 'FIXED') {
+      return parseFloat(value) || 0;
+    } else {
+      // Find the reference rate
+      const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
+      if (!referenceRate) {
+        logger.warn(`Reference rate type not found: ${rateType}`);
+        return 0;
+      }
+
+      const baseRate = parseFloat(referenceRate.rate_value) || 0;
+      const adjustment = parseFloat(value) || 0;
+      
+      if (operator === '+') {
+        return baseRate + adjustment;
+      } else if (operator === '-') {
+        return Math.max(0, baseRate - adjustment);
+      } else {
+        return baseRate;
+      }
+    }
+  };
+
+  // Format rate display for rate schedule
+  const formatRateDisplay = (pkg, year) => {
+    let rateType, operator, value;
+    
+    if (year === 'thereafter') {
+      rateType = pkg.thereafter_rate_type;
+      operator = pkg.thereafter_operator;
+      value = pkg.thereafter_value;
+    } else {
+      rateType = pkg[`year${year}_rate_type`];
+      operator = pkg[`year${year}_operator`];
+      value = pkg[`year${year}_value`];
+    }
+
+    // If no data for this year, use thereafter rate
+    if (!rateType || value === null || value === undefined) {
+      if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+        const thereafterType = pkg.thereafter_rate_type;
+        const thereafterOp = pkg.thereafter_operator;
+        const thereafterVal = pkg.thereafter_value;
+        
+        if (thereafterType === 'FIXED') {
+          const rate = parseFloat(thereafterVal) || 0;
+          return `${formatPercentage(rate)} Fixed`;
+        } else {
+          const operatorSymbol = thereafterOp === '+' ? '+' : '-';
+          return `${thereafterType} ${operatorSymbol} ${parseFloat(thereafterVal).toFixed(2)}%`;
+        }
+      }
+      return '-';
+    }
+
+    if (rateType === 'FIXED') {
+      const rate = calculateInterestRate(pkg, year);
+      return `${formatPercentage(rate)} Fixed`;
+    } else {
+      const operatorSymbol = operator === '+' ? '+' : '-';
+      return `${rateType} ${operatorSymbol} ${parseFloat(value).toFixed(2)}%`;
+    }
+  };
+
   const generateProfessionalReport = () => {
     try {
       if (filteredPackages.length === 0) {
@@ -678,6 +808,193 @@ const RecommendedPackages = () => {
       logger.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
     }
+  };
+
+  // PackageCard Component - matches HTML implementation exactly
+  const PackageCard = ({ 
+    pkg, 
+    index, 
+    isSelected, 
+    hideBankNames, 
+    rateTypes,
+    onToggleSelection, 
+    onUpdateFeature, 
+    onUpdateRemarks,
+    formatCurrency,
+    formatPercentage
+  }) => {
+    const rank = index + 1;
+    
+    // Generate rate schedule - exact same logic as HTML
+    const generateRateSchedule = () => {
+      const rates = [];
+      
+      // Always show Years 1-5 (auto-populate empty years with thereafter rate)
+      for (let year = 1; year <= 5; year++) {
+        let rateType, value;
+        
+        // Check if this year has actual data
+        rateType = pkg[`year${year}_rate_type`];
+        value = pkg[`year${year}_value`];
+        
+        // If no data for this year, check if we can use thereafter rate
+        if (!rateType || value === null || value === undefined) {
+          // Use thereafter rate if available
+          if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+            rates.push(
+              <div key={year} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium text-gray-600">Year {year}</span>
+                <span className="text-sm text-blue-600">{formatRateDisplay(pkg, 'thereafter')}</span>
+              </div>
+            );
+          } else {
+            // Only show dash if no thereafter rate exists
+            rates.push(
+              <div key={year} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium text-gray-600">Year {year}</span>
+                <span className="text-sm text-gray-400">-</span>
+              </div>
+            );
+          }
+        } else {
+          // Show actual data for this year
+          rates.push(
+            <div key={year} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+              <span className="text-sm font-medium text-gray-600">Year {year}</span>
+              <span className="text-sm text-blue-600">{formatRateDisplay(pkg, year)}</span>
+            </div>
+          );
+        }
+      }
+
+      // Always show thereafter row
+      const thereafterRate = calculateInterestRate(pkg, 'thereafter');
+      if (thereafterRate > 0) {
+        rates.push(
+          <div key="thereafter" className="flex justify-between items-center py-2 px-3 bg-blue-50 rounded border-l-4 border-blue-500">
+            <span className="text-sm font-medium text-blue-700">Thereafter</span>
+            <span className="text-sm font-bold text-blue-700">{formatRateDisplay(pkg, 'thereafter')}</span>
+          </div>
+        );
+      }
+
+      return rates;
+    };
+
+    return (
+      <div className={`border rounded-xl shadow-lg bg-white overflow-hidden transition-all duration-200 ${
+        isSelected ? 'ring-2 ring-blue-500' : 'hover:shadow-xl'
+      }`}>
+        {/* Package Header */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                {rank}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">
+                  {hideBankNames ? `Bank ${String.fromCharCode(64 + rank)}` : pkg.bank_name}
+                </h3>
+                <p className="text-blue-600 font-medium">{pkg.rate_type_category || 'Rate Package'}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-green-600 mb-1">
+                {formatPercentage(pkg.avgFirst2Years)}
+              </div>
+              <div className="text-blue-600 font-medium">
+                {formatCurrency(pkg.monthlyInstallment)}/mo
+              </div>
+            </div>
+          </div>
+
+          {/* Package Details Row */}
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+            <div>
+              <span className="text-gray-500 font-medium">Property:</span>
+              <div className="text-gray-800 font-semibold">{pkg.property_type}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 font-medium">Status:</span>
+              <div className="text-gray-800 font-semibold">{pkg.property_status}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 font-medium">Buy Under:</span>
+              <div className="text-gray-800 font-semibold">{pkg.buy_under}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 font-medium">Lock:</span>
+              <div className="text-gray-800 font-semibold">{pkg.lock_period || 'No Lock-in'}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 font-medium">Min Loan:</span>
+              <div className="text-gray-800 font-semibold">{formatCurrency(pkg.minimum_loan_size || 0)}</div>
+            </div>
+          </div>
+
+          {/* Selection Checkbox */}
+          <div className="mt-4 flex items-center justify-between">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onToggleSelection}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">Include in report</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Interest Rate Schedule */}
+        <div className="p-6 border-b bg-gray-50">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-5 h-5 text-blue-600" />
+            <h4 className="text-lg font-semibold text-gray-800">Interest Rate Schedule</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {generateRateSchedule()}
+          </div>
+        </div>
+
+        {/* Package Features Editor */}
+        <div className="p-6 border-b">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckSquare className="w-5 h-5 text-green-600" />
+            <h4 className="text-lg font-semibold text-gray-800">Package Features (Editable)</h4>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {featureOptions.map(feature => (
+              <label key={feature.value} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={pkg[feature.value] === 'true' || pkg[feature.value] === true}
+                  onChange={(e) => onUpdateFeature(feature.value, e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">{feature.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Client Remarks Editor */}
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-5 h-5 text-purple-600" />
+            <h4 className="text-lg font-semibold text-gray-800">Client Remarks (Editable)</h4>
+          </div>
+          <textarea
+            value={pkg.custom_remarks || pkg.remarks || ''}
+            onChange={(e) => onUpdateRemarks(e.target.value)}
+            placeholder="Add custom remarks for this package..."
+            rows="3"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+          />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -1073,76 +1390,21 @@ const RecommendedPackages = () => {
                 <p className="text-gray-500">Try adjusting your search criteria to find more suitable options.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredPackages.map(pkg => (
-                  <div
+              <div className="space-y-6">
+                {filteredPackages.map((pkg, index) => (
+                  <PackageCard
                     key={pkg.id}
-                    className={`border rounded-lg p-6 transition-all duration-200 hover:shadow-md ${
-                      selectedPackages.has(pkg.id) 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold text-lg text-gray-800">
-                          {hideBankNames ? 'Bank A' : (pkg.banks?.name || pkg.bank_name)}
-                        </h3>
-                        <p className="text-blue-600 font-medium">{pkg.package_name}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">
-                          {formatPercentage(pkg.avgFirst2Years)}
-                        </div>
-                        <div className="text-sm text-gray-500">{pkg.rate_type_category}</div>
-                        {pkg.monthlyInstallment > 0 && (
-                          <div className="text-sm text-blue-600 font-medium mt-1">
-                            {formatCurrency(pkg.monthlyInstallment)}/mo
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Lock Period:</span>
-                        <div className="font-medium">{pkg.lock_period || 'N/A'}</div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Property Type:</span>
-                        <div className="font-medium">{pkg.property_type || 'N/A'}</div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Cash Rebate:</span>
-                        <div className="font-medium">
-                          {(pkg.cash_rebate === 'true' || pkg.cash_rebate === true) && pkg.cash_rebate_amount ? 
-                            `${pkg.cash_rebate_amount}%` : 'No'}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Legal Fee Subsidy:</span>
-                        <div className="font-medium">
-                          {(pkg.legal_fee_subsidy === 'true' || pkg.legal_fee_subsidy === true) ? 'Yes' : 'No'}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex justify-between items-center">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedPackages.has(pkg.id)}
-                          onChange={() => togglePackageSelection(pkg.id)}
-                          className="rounded"
-                        />
-                        <span className="text-sm text-gray-600">Include in report</span>
-                      </label>
-                      
-                      <div className="text-xs text-gray-500">
-                        ID: {pkg.id}
-                      </div>
-                    </div>
-                  </div>
+                    pkg={pkg}
+                    index={index}
+                    isSelected={selectedPackages.has(pkg.id)}
+                    hideBankNames={hideBankNames}
+                    rateTypes={rateTypes}
+                    onToggleSelection={() => togglePackageSelection(pkg.id)}
+                    onUpdateFeature={(featureName, isChecked) => updatePackageFeature(index, featureName, isChecked)}
+                    onUpdateRemarks={(newRemarks) => updatePackageRemarks(index, newRemarks)}
+                    formatCurrency={formatCurrency}
+                    formatPercentage={formatPercentage}
+                  />
                 ))}
               </div>
             )}
