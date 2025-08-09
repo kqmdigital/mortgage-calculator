@@ -36,7 +36,7 @@ const RecommendedPackages = () => {
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [allPackages, setAllPackages] = useState([]);
   const [filteredPackages, setFilteredPackages] = useState([]);
-  const [, setRateTypes] = useState([]);
+  const [rateTypes, setRateTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [clientName, setClientName] = useState('');
@@ -198,8 +198,8 @@ const RecommendedPackages = () => {
     }
   };
 
-  // Calculation functions from original HTML implementation
-  const calculateInterestRate = (pkg, year, rateTypes) => {
+  // EXACT calculation functions from recommended-packages-core.js
+  const calculateNumericRate = (pkg, year) => {
     let rateType, operator, value;
     
     if (year === 'thereafter') {
@@ -211,20 +211,20 @@ const RecommendedPackages = () => {
       operator = pkg[`year${year}_operator`];
       value = pkg[`year${year}_value`];
     }
-
+    
     // If no data for this year, use thereafter rate
     if (!rateType || value === null || value === undefined) {
       if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
-        return calculateInterestRate(pkg, 'thereafter', rateTypes);
+        return calculateNumericRate(pkg, 'thereafter');
       }
       return 0;
     }
-
+    
     // Calculate numeric rate
     if (rateType === 'FIXED') {
       return parseFloat(value) || 0;
     } else {
-      // Find the reference rate
+      // Find the reference rate from global rateTypes
       const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
       if (!referenceRate) {
         logger.warn(`Reference rate type not found: ${rateType}`);
@@ -240,9 +240,9 @@ const RecommendedPackages = () => {
     }
   };
 
-  const calculateAverageFirst2Years = (pkg, rateTypes) => {
-    const year1Rate = calculateInterestRate(pkg, 1, rateTypes);
-    const year2Rate = calculateInterestRate(pkg, 2, rateTypes);
+  const calculateAverageFirst2Years = (pkg) => {
+    const year1Rate = calculateNumericRate(pkg, 1);
+    const year2Rate = calculateNumericRate(pkg, 2);
     
     if (year1Rate === 0 && year2Rate === 0) return 0;
     if (year1Rate === 0) return year2Rate;
@@ -353,15 +353,9 @@ const RecommendedPackages = () => {
         });
       }
 
-      // Calculate metrics for each package and sort by average rate
-      const rateTypesData = [
-        { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
-        { id: 2, rate_type: 'SORA', rate_value: 3.29 },
-        { id: 3, rate_type: 'SOR', rate_value: 3.50 }
-      ];
-      
+      // Calculate metrics for each package - EXACT same logic as HTML
       filtered = filtered.map(pkg => {
-        const avgFirst2Years = calculateAverageFirst2Years(pkg, rateTypesData);
+        const avgFirst2Years = calculateAverageFirst2Years(pkg);
         const loanAmount = parseFloat(searchForm.loanAmount) || 500000;
         const loanTenure = parseInt(searchForm.loanTenure) || 25;
         const monthlyInstallment = calculateMonthlyInstallment(loanAmount, loanTenure, avgFirst2Years);
@@ -373,7 +367,7 @@ const RecommendedPackages = () => {
         };
       });
 
-      // Sort by average rate (lowest first)
+      // Sort by average rate (lowest first) - same as HTML
       filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
 
       setFilteredPackages(filtered);
