@@ -12,8 +12,179 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../contexts/EnhancedAuthContext';
-import { supabase } from '../utils/supabase';
+import { supabase, isDevelopmentMode } from '../utils/supabase';
 import logger from '../utils/logger';
+
+// Database service that mirrors the HTML pages functionality
+const DatabaseService = {
+  async getRatePackages(filters = {}) {
+    try {
+      if (isDevelopmentMode) {
+        logger.info('Development mode: Using enhanced mock packages data');
+        return {
+          success: true,
+          data: [
+            {
+              id: 1,
+              bank_name: 'OCBC',
+              package_name: 'HomeSecure Fixed Rate Package',
+              loan_type: 'New Home Loan',
+              property_type: 'Private Property',
+              property_status: 'Completed',
+              buy_under: 'Individual Name',
+              rate_type_category: 'Fixed',
+              lock_period: '2 Years',
+              minimum_loan_size: 500000,
+              year1_rate_type: 'FIXED',
+              year1_operator: null,
+              year1_value: 3.25,
+              year2_rate_type: 'FIXED',
+              year2_operator: null,
+              year2_value: 3.25,
+              thereafter_rate_type: 'FIXED',
+              thereafter_operator: null,
+              thereafter_value: 3.50,
+              legal_fee_subsidy: 'true',
+              cash_rebate: 'true',
+              cash_rebate_amount: 0.8,
+              free_package_conversion_12m: 'false',
+              free_package_conversion_24m: 'false',
+              valuation_subsidy: 'true',
+              partial_repayment: 'true',
+              waiver_due_to_sales: 'false'
+            },
+            {
+              id: 2,
+              bank_name: 'DBS',
+              package_name: 'DBS Fixed HomeLoan',
+              loan_type: 'New Home Loan',
+              property_type: 'Private Property',
+              property_status: 'Completed',
+              buy_under: 'Individual Name',
+              rate_type_category: 'Fixed',
+              lock_period: '3 Years',
+              minimum_loan_size: 300000,
+              year1_rate_type: 'FIXED',
+              year1_operator: null,
+              year1_value: 3.15,
+              year2_rate_type: 'FIXED', 
+              year2_operator: null,
+              year2_value: 3.15,
+              thereafter_rate_type: 'FIXED',
+              thereafter_operator: null,
+              thereafter_value: 3.40,
+              legal_fee_subsidy: 'false',
+              cash_rebate: 'true',
+              cash_rebate_amount: 1.0,
+              free_package_conversion_12m: 'false',
+              free_package_conversion_24m: 'false',
+              valuation_subsidy: 'false',
+              partial_repayment: 'true',
+              waiver_due_to_sales: 'false'
+            },
+            {
+              id: 3,
+              bank_name: 'UOB',
+              package_name: 'UOB Variable Home Loan',
+              loan_type: 'New Home Loan',
+              property_type: 'Private Property',
+              property_status: 'Completed',
+              buy_under: 'Individual Name',
+              rate_type_category: 'Floating',
+              lock_period: '1 Year',
+              minimum_loan_size: 400000,
+              year1_rate_type: 'SORA',
+              year1_operator: '+',
+              year1_value: 0.10,
+              year2_rate_type: 'SORA',
+              year2_operator: '+',
+              year2_value: 0.15,
+              thereafter_rate_type: 'SORA',
+              thereafter_operator: '+',
+              thereafter_value: 1.25,
+              legal_fee_subsidy: 'true',
+              cash_rebate: 'true',
+              cash_rebate_amount: 0.5,
+              free_package_conversion_12m: 'false',
+              free_package_conversion_24m: 'false',
+              valuation_subsidy: 'false',
+              partial_repayment: 'true',
+              waiver_due_to_sales: 'true'
+            }
+          ]
+        };
+      }
+
+      if (!supabase) {
+        return { success: false, error: 'Database not available' };
+      }
+
+      let query = supabase
+        .from('rate_packages')
+        .select(`
+          *,
+          banks!inner(name, is_active)
+        `)
+        .eq('banks.is_active', true);
+
+      // Apply filters
+      if (filters.loanType) {
+        query = query.eq('loan_type', filters.loanType);
+      }
+      if (filters.propertyType) {
+        query = query.eq('property_type', filters.propertyType);
+      }
+      if (filters.rateType) {
+        query = query.eq('rate_type_category', filters.rateType);
+      }
+
+      const { data, error } = await query.order('year1_value');
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      logger.error('Database error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async getRateTypes() {
+    try {
+      if (isDevelopmentMode) {
+        return {
+          success: true,
+          data: [
+            { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
+            { id: 2, rate_type: 'SORA', rate_value: 3.29 },
+            { id: 3, rate_type: 'SOR', rate_value: 3.50 }
+          ]
+        };
+      }
+
+      if (!supabase) {
+        return { success: false, error: 'Database not available' };
+      }
+
+      const { data, error } = await supabase
+        .from('rate_types')
+        .select('*');
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      return {
+        success: true,
+        data: [
+          { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
+          { id: 2, rate_type: 'SORA', rate_value: 3.29 },
+          { id: 3, rate_type: 'SOR', rate_value: 3.50 }
+        ]
+      };
+    }
+  }
+};
 
 const RecommendedPackages = () => {
   const { user } = useAuth();
@@ -111,106 +282,26 @@ const RecommendedPackages = () => {
       setLoading(true);
       logger.info('Loading recommended packages data...');
       
-      // Check if supabase is available (not in development mode)
-      if (supabase) {
-        // Load packages from database
-        const { data: packagesData, error: packagesError } = await supabase
-          .from('rate_packages')
-          .select(`
-            *,
-            banks!inner(name, is_active)
-          `)
-          .eq('banks.is_active', true);
-
-        if (packagesError) throw packagesError;
-
-        const packages = packagesData || [];
+      // Use DatabaseService for compatibility with original HTML pages
+      const packagesResult = await DatabaseService.getRatePackages();
+      
+      if (packagesResult.success) {
+        const packages = packagesResult.data || [];
         setAllPackages(packages);
         setFilteredPackages(packages); // Show all packages initially
         setShowResults(packages.length > 0); // Show results if we have packages
-        
-        // Load rate types
-        const { data: rateTypesData, error: rateTypesError } = await supabase
-          .from('rate_types')
-          .select('*');
-
-        if (rateTypesError) {
-          // If rate_types table doesn't exist, use default values
-          setRateTypes([
-            { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
-            { id: 2, name: 'Floating', description: 'Variable interest rate' }
-          ]);
-        } else {
-          setRateTypes(rateTypesData || []);
-        }
-
-        logger.info(`Loaded ${packages.length} packages`);
+        logger.info(`Loaded ${packages.length} packages from DatabaseService`);
       } else {
-        // Development mode - use mock data
-        logger.info('Development mode: Using mock packages data');
-        const mockPackages = [
-          {
-            id: 1,
-            banks: { name: 'OCBC', is_active: true },
-            bank_name: 'OCBC',
-            package_name: 'HomeSecure Fixed Rate Package',
-            interest_rate: 3.25,
-            rate_type: 'Fixed',
-            lock_period: '2 Years',
-            property_type: 'Private Property',
-            property_status: 'Completed',
-            loan_type: 'New Home Loan',
-            cash_rebate: 0.8,
-            legal_fee_subsidy: true,
-            valuation_subsidy: true,
-            partial_repayment: false,
-            buy_under: 'Individual Name'
-          },
-          {
-            id: 2,
-            banks: { name: 'DBS', is_active: true },
-            bank_name: 'DBS',
-            package_name: 'DBS Fixed HomeLoan',
-            interest_rate: 3.15,
-            rate_type: 'Fixed',
-            lock_period: '3 Years',
-            property_type: 'Private Property',
-            property_status: 'Completed',
-            loan_type: 'New Home Loan',
-            cash_rebate: 1.0,
-            legal_fee_subsidy: false,
-            valuation_subsidy: true,
-            partial_repayment: true,
-            buy_under: 'Individual Name'
-          },
-          {
-            id: 3,
-            banks: { name: 'UOB', is_active: true },
-            bank_name: 'UOB',
-            package_name: 'UOB Variable Home Loan',
-            interest_rate: 3.35,
-            rate_type: 'Floating',
-            lock_period: '1 Year',
-            property_type: 'Private Property',
-            property_status: 'Completed',
-            loan_type: 'New Home Loan',
-            cash_rebate: 0.5,
-            legal_fee_subsidy: true,
-            valuation_subsidy: false,
-            partial_repayment: true,
-            buy_under: 'Individual Name'
-          }
-        ];
-
-        setAllPackages(mockPackages);
-        setFilteredPackages(mockPackages); // Show all packages initially
-        setShowResults(true); // Show results section
-        setRateTypes([
-          { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
-          { id: 2, name: 'Floating', description: 'Variable interest rate' }
-        ]);
-
-        logger.info(`Loaded ${mockPackages.length} mock packages for development`);
+        logger.error('Failed to load packages:', packagesResult.error);
+        setAllPackages([]);
+        setFilteredPackages([]);
+        setShowResults(false);
+      }
+      
+      // Load rate types using DatabaseService
+      const rateTypesResult = await DatabaseService.getRateTypes();
+      if (rateTypesResult.success) {
+        setRateTypes(rateTypesResult.data || []);
       }
       
     } catch (error) {
@@ -278,6 +369,90 @@ const RecommendedPackages = () => {
     }
   };
 
+  // Calculation functions from original HTML implementation
+  const calculateInterestRate = (pkg, year, rateTypes) => {
+    let rateType, operator, value;
+    
+    if (year === 'thereafter') {
+      rateType = pkg.thereafter_rate_type;
+      operator = pkg.thereafter_operator;
+      value = pkg.thereafter_value;
+    } else {
+      rateType = pkg[`year${year}_rate_type`];
+      operator = pkg[`year${year}_operator`];
+      value = pkg[`year${year}_value`];
+    }
+
+    // If no data for this year, use thereafter rate
+    if (!rateType || value === null || value === undefined) {
+      if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+        return calculateInterestRate(pkg, 'thereafter', rateTypes);
+      }
+      return 0;
+    }
+
+    // Calculate numeric rate
+    if (rateType === 'FIXED') {
+      return parseFloat(value) || 0;
+    } else {
+      // Find the reference rate
+      const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
+      if (!referenceRate) {
+        logger.warn(`Reference rate type not found: ${rateType}`);
+        return 0;
+      }
+      
+      const referenceRateValue = parseFloat(referenceRate.rate_value) || 0;
+      const spreadValue = parseFloat(value) || 0;
+      
+      return operator === '+' ? 
+        referenceRateValue + spreadValue : 
+        referenceRateValue - spreadValue;
+    }
+  };
+
+  const calculateAverageFirst2Years = (pkg, rateTypes) => {
+    const year1Rate = calculateInterestRate(pkg, 1, rateTypes);
+    const year2Rate = calculateInterestRate(pkg, 2, rateTypes);
+    
+    if (year1Rate === 0 && year2Rate === 0) return 0;
+    if (year1Rate === 0) return year2Rate;
+    if (year2Rate === 0) return year1Rate;
+    
+    return (year1Rate + year2Rate) / 2;
+  };
+
+  const calculateMonthlyInstallment = (principal, tenureYears, annualRate) => {
+    if (!principal || !tenureYears || !annualRate) return 0;
+    
+    const monthlyRate = annualRate / 100 / 12;
+    const totalMonths = tenureYears * 12;
+    
+    if (monthlyRate === 0) {
+      return principal / totalMonths;
+    }
+    
+    const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+                         (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    
+    return monthlyPayment;
+  };
+
+  const formatCurrency = (value) => {
+    if (!value || value === 0) return '$0';
+    return new Intl.NumberFormat('en-SG', {
+      style: 'currency',
+      currency: 'SGD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  const formatPercentage = (value) => {
+    if (value == null || value === 0) return 'N/A';
+    return `${value.toFixed(2)}%`;
+  };
+
   const toggleAllBanks = () => {
     if (selectedBanks.length === bankOptions.length) {
       setSelectedBanks([]);
@@ -326,7 +501,7 @@ const RecommendedPackages = () => {
       }
       
       if (searchForm.rateType) {
-        filtered = filtered.filter(pkg => pkg.rate_type === searchForm.rateType);
+        filtered = filtered.filter(pkg => pkg.rate_type_category === searchForm.rateType);
       }
       
       if (searchForm.lockPeriod) {
@@ -349,8 +524,28 @@ const RecommendedPackages = () => {
         });
       }
 
-      // Sort by interest rate (lowest first)
-      filtered.sort((a, b) => (a.interest_rate || 0) - (b.interest_rate || 0));
+      // Calculate metrics for each package and sort by average rate
+      const rateTypesData = [
+        { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
+        { id: 2, rate_type: 'SORA', rate_value: 3.29 },
+        { id: 3, rate_type: 'SOR', rate_value: 3.50 }
+      ];
+      
+      filtered = filtered.map(pkg => {
+        const avgFirst2Years = calculateAverageFirst2Years(pkg, rateTypesData);
+        const loanAmount = parseFloat(searchForm.loanAmount) || 500000;
+        const loanTenure = parseInt(searchForm.loanTenure) || 25;
+        const monthlyInstallment = calculateMonthlyInstallment(loanAmount, loanTenure, avgFirst2Years);
+        
+        return {
+          ...pkg,
+          avgFirst2Years,
+          monthlyInstallment
+        };
+      });
+
+      // Sort by average rate (lowest first)
+      filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
 
       setFilteredPackages(filtered);
       setShowResults(true);
@@ -1074,9 +1269,14 @@ const RecommendedPackages = () => {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-green-600">
-                          {pkg.interest_rate}%
+                          {formatPercentage(pkg.avgFirst2Years)}
                         </div>
-                        <div className="text-sm text-gray-500">{pkg.rate_type}</div>
+                        <div className="text-sm text-gray-500">{pkg.rate_type_category}</div>
+                        {pkg.monthlyInstallment > 0 && (
+                          <div className="text-sm text-blue-600 font-medium mt-1">
+                            {formatCurrency(pkg.monthlyInstallment)}/mo
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1091,11 +1291,16 @@ const RecommendedPackages = () => {
                       </div>
                       <div>
                         <span className="text-gray-500">Cash Rebate:</span>
-                        <div className="font-medium">{pkg.cash_rebate ? `${pkg.cash_rebate}%` : 'No'}</div>
+                        <div className="font-medium">
+                          {(pkg.cash_rebate === 'true' || pkg.cash_rebate === true) && pkg.cash_rebate_amount ? 
+                            `${pkg.cash_rebate_amount}%` : 'No'}
+                        </div>
                       </div>
                       <div>
                         <span className="text-gray-500">Legal Fee Subsidy:</span>
-                        <div className="font-medium">{pkg.legal_fee_subsidy ? 'Yes' : 'No'}</div>
+                        <div className="font-medium">
+                          {(pkg.legal_fee_subsidy === 'true' || pkg.legal_fee_subsidy === true) ? 'Yes' : 'No'}
+                        </div>
                       </div>
                     </div>
 
