@@ -1,19 +1,54 @@
 // config/supabase.js
 // Browser-compatible Supabase Configuration for HTML pages
 
-// Development configuration - uses fallback values for local development
+// Browser-compatible Supabase Configuration - Mirrors React app pattern
+// This follows the same logic as src/utils/supabase.js but for browser environments
+
+// Same pattern as React app - credentials injected at build time by Render
 const SUPABASE_CONFIG = {
-    // Try to use build-time injected values first, fall back to development values
-    url: '{{RENDER_SUPABASE_URL}}' !== '{{RENDER_SUPABASE_URL}}' ? '{{RENDER_SUPABASE_URL}}' : 
-         'https://your-project.supabase.co', // Replace with actual URL for development
-    anonKey: '{{RENDER_SUPABASE_ANON_KEY}}' !== '{{RENDER_SUPABASE_ANON_KEY}}' ? '{{RENDER_SUPABASE_ANON_KEY}}' : 
-             'your_supabase_anon_key_here' // Replace with actual key for development
+    url: '{{RENDER_SUPABASE_URL}}',
+    anonKey: '{{RENDER_SUPABASE_ANON_KEY}}'
 };
 
-// For development, use dummy/test mode if real credentials not available
-const isDevelopment = SUPABASE_CONFIG.url.includes('your-project') || 
-                      SUPABASE_CONFIG.url.includes('dummy') ||
-                      SUPABASE_CONFIG.anonKey.includes('dummy');
+// Check if placeholders were replaced (same validation as React app)
+let isDevelopment = false;
+let actualUrl = SUPABASE_CONFIG.url;
+let actualAnonKey = SUPABASE_CONFIG.anonKey;
+
+if (SUPABASE_CONFIG.url.includes('{{') || SUPABASE_CONFIG.anonKey.includes('{{')) {
+    console.log('🟡 Build-time injection not detected, checking development fallbacks...');
+    
+    // Development fallback: Check environment variables (same as inject-env.js)
+    // In browser, these would come from window.ENV_CONFIG if set
+    if (typeof window !== 'undefined' && window.ENV_CONFIG) {
+        const envUrl = window.ENV_CONFIG.SUPABASE_URL;
+        const envKey = window.ENV_CONFIG.SUPABASE_ANON_KEY;
+        
+        // Check if ENV_CONFIG has valid credentials (not placeholders or test values)
+        if (envUrl && envKey && 
+            !envUrl.includes('{{') && !envKey.includes('{{') &&
+            !envUrl.includes('test.supabase.co') && !envKey.includes('test-key') &&
+            envUrl.startsWith('https://') && envUrl.includes('.supabase.co')) {
+            
+            actualUrl = envUrl;
+            actualAnonKey = envKey;
+            console.log('✅ Using ENV_CONFIG credentials');
+        } else {
+            isDevelopment = true;
+            console.log('🟡 ENV_CONFIG contains invalid/placeholder credentials, using development mode');
+        }
+    } else {
+        // Final fallback - development mode with mock data
+        isDevelopment = true;
+        console.log('🟡 No ENV_CONFIG found, using development mode');
+    }
+} else {
+    console.log('✅ Build-time injected credentials detected');
+}
+
+// Update config with actual values
+SUPABASE_CONFIG.url = actualUrl;
+SUPABASE_CONFIG.anonKey = actualAnonKey;
 
 if (isDevelopment) {
     console.log('🟡 Running in development mode with limited functionality');

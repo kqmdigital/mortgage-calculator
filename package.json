@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "node scripts/inject-env.js && react-scripts build",
+    "build": "node scripts/inject-env.js && node scripts/inject-html-env.js && react-scripts build",
     "build:local": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
