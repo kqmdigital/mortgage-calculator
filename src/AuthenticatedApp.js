@@ -2469,14 +2469,17 @@ const AuthenticatedApp = () => {
       <style>
         {`
           /* TRANSFORM SCALING APPROACH - Override CSS sizing limitations */
+          .standard-card {
+            padding: 8px 16px !important;
+          }
           .header-logo-container {
-            height: 60px !important;
-            max-height: 60px !important;
-            min-height: 60px !important;
+            height: 40px !important;
+            max-height: 40px !important;
+            min-height: 40px !important;
             overflow: visible !important;
             display: flex !important;
             align-items: center !important;
-            justify-content: center !important;
+            justify-content: flex-start !important;
           }
           
           .header-logo-container div {
@@ -2498,8 +2501,8 @@ const AuthenticatedApp = () => {
             width: auto !important;
             display: block !important;
             object-fit: contain !important;
-            transform: scale(0.5) translateX(-20px) !important;
-            transform-origin: center !important;
+            transform: scale(0.35) translateX(0px) !important;
+            transform-origin: left center !important;
           }
           
           /* Apply scaling to all possible logo selectors */
@@ -2515,8 +2518,8 @@ const AuthenticatedApp = () => {
           html body img[src*="KeyQuest"],
           html body div.relative img[src*="KeyQuest"],
           html body div.flex img[alt*="KeyQuest"] {
-            transform: scale(0.5) translateX(-20px) !important;
-            transform-origin: center !important;
+            transform: scale(0.35) translateX(0px) !important;
+            transform-origin: left center !important;
             height: auto !important;
             width: auto !important;
             max-height: none !important;
@@ -2529,7 +2532,7 @@ const AuthenticatedApp = () => {
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Enhanced Header */}
         <div className="mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-2">
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
               <div className="header-logo-container flex-1 flex justify-center lg:justify-start">
                 <div style={{ 
@@ -2549,8 +2552,8 @@ const AuthenticatedApp = () => {
                       width: 'auto',
                       display: 'block',
                       objectFit: 'contain',
-                      transform: 'scale(0.5) translateX(-20px)',
-                      transformOrigin: 'center'
+                      transform: 'scale(0.35) translateX(0px)',
+                      transformOrigin: 'left center'
                     }}
                   />
                 </div>
@@ -2559,10 +2562,10 @@ const AuthenticatedApp = () => {
               {/* User Menu */}
               <div className="relative" ref={userMenuRef}>
                 <div className="standard-card card-gradient-blue">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">
                           {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </span>
                       </div>
