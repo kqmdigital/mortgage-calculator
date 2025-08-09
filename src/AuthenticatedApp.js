@@ -353,7 +353,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     if (maxMonthlyInstallment <= 0 || parsedInputs.stressTestRate <= 0) {
       return {
         combinedMonthlyIncome,
-        totalCommitmentsTDSR: relevantCommitments,
+        totalCommitmentsTDSR: totalCommitmentsTDSR, // Always include full TDSR commitments
+        relevantCommitments: relevantCommitments, // The commitments used for the limiting calculation
         maxMonthlyInstallment: 0,
         maxLoanAmount: 0,
         maxPropertyPrice75: 0,
@@ -388,7 +389,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
 
     return {
       combinedMonthlyIncome,
-      totalCommitmentsTDSR: relevantCommitments,
+      totalCommitmentsTDSR: totalCommitmentsTDSR, // Always include full TDSR commitments
+      relevantCommitments: relevantCommitments, // The commitments used for the limiting calculation
       maxMonthlyInstallment,
       maxLoanAmount: primaryLoanAmount,
       maxLoanAmount55,
@@ -2007,7 +2009,7 @@ This ensures all content fits properly without being cut off.`);
                     </div>
                     <div className="text-center">
                       <div className="text-sm font-medium text-gray-600 mb-1">Combined Monthly Commitment</div>
-                      <div className="text-xl font-bold text-purple-600">{formatCurrency(memoizedAffordability.totalCommitmentsTDSR || 0)}</div>
+                      <div className="text-xl font-bold text-purple-600">{formatCurrency(memoizedAffordability.relevantCommitments || 0)}</div>
                     </div>
                   </div>
                 </div>
