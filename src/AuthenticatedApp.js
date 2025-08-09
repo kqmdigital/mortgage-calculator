@@ -2505,19 +2505,11 @@ const AuthenticatedApp = () => {
             transform-origin: left center !important;
           }
           
-          /* Apply scaling to all possible logo selectors */
-          html body div.min-h-screen img[src*="KEYQUEST"],
-          html body div.min-h-screen img[src*="KeyQuest"],
-          html body div img[alt*="KeyQuest"],
-          html body .mb-6 img[alt="Keyquest Mortgage"],
-          html body .header-logo-container img,
-          html body div.header-logo-container > img.header-logo,
-          html body img.header-logo,
-          html body .header-logo,
-          html body img[src*="KEYQUEST%20LOGO"],
-          html body img[src*="KeyQuest"],
-          html body div.relative img[src*="KeyQuest"],
-          html body div.flex img[alt*="KeyQuest"] {
+          /* Apply scaling only to header logo selectors - exclude login page */
+          .header-logo-container img,
+          div.header-logo-container > img.header-logo,
+          img.header-logo,
+          .header-logo {
             transform: scale(0.35) translateX(0px) !important;
             transform-origin: left center !important;
             height: auto !important;

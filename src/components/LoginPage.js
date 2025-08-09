@@ -232,7 +232,12 @@ const LoginPage = () => {
                 <img 
                   src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                   alt="KeyQuest Mortgage Logo" 
-                  className="h-12 w-auto rounded-lg object-contain"
+                  className="h-16 w-auto rounded-lg object-contain"
+                  style={{
+                    transform: 'none !important',
+                    height: '64px !important',
+                    width: 'auto !important'
+                  }}
                 />
               </div>
             </div>
