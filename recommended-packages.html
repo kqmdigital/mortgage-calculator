@@ -73,6 +73,11 @@
                     <!-- User Dropdown Menu -->
                     <div class="user-dropdown" id="userDropdown" style="display: none;">
                         <div class="dropdown-content">
+                            <button onclick="window.location.href='/'" class="dropdown-item">
+                                <i data-lucide="home"></i>
+                                <span>Back to Main App</span>
+                            </button>
+                            
                             <button onclick="window.location.href='admin-users.html'" class="dropdown-item admin-only">
                                 <i data-lucide="user-plus"></i>
                                 <span>User Management</span>
@@ -91,6 +96,20 @@
         <!-- Main Content -->
         <div class="main-content">           
             <div class="content-area">
+                
+                <!-- Page Header with Navigation -->
+                <div class="page-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <h1 style="margin: 0 0 8px 0;">Recommended Packages</h1>
+                            <p style="margin: 0;">Find the best mortgage packages for your clients</p>
+                        </div>
+                        <button onclick="window.location.href='/'" class="search-button" style="background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.3); padding: 12px 20px;">
+                            <i data-lucide="arrow-left"></i>
+                            <span>Back to Main App</span>
+                        </button>
+                    </div>
+                </div>
                 
                 <!-- Loan Type Tabs -->
                 <div class="loan-type-tabs">

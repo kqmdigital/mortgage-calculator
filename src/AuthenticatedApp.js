@@ -2593,14 +2593,25 @@ const AuthenticatedApp = () => {
                   <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border z-50">
                     <div className="p-4">
                       {canPerformAdminActions() && (
-                        <button
-                          onClick={handleMenuItemClick(() => setShowAdminManagement(true))}
-                          className="w-full btn-standard btn-primary mb-2"
-                          type="button"
-                        >
-                          <UserPlus className="w-4 h-4" />
-                          <span>User Management</span>
-                        </button>
+                        <>
+                          <button
+                            onClick={handleMenuItemClick(() => setShowAdminManagement(true))}
+                            className="w-full btn-standard btn-primary mb-2"
+                            type="button"
+                          >
+                            <UserPlus className="w-4 h-4" />
+                            <span>User Management</span>
+                          </button>
+                          
+                          <button
+                            onClick={handleMenuItemClick(() => window.open('recommended-packages.html', '_blank'))}
+                            className="w-full btn-standard btn-secondary mb-2"
+                            type="button"
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            <span>Recommended Packages</span>
+                          </button>
+                        </>
                       )}
                       
                       <button
@@ -2704,6 +2715,29 @@ const AuthenticatedApp = () => {
             </button>
           </div>
         </div>
+
+        {/* Admin Tools Section - Only visible to admins */}
+        {canPerformAdminActions() && (
+          <div className="mb-6">
+            <div className="text-sm font-semibold text-gray-600 mb-3">Admin Tools</div>
+            <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
+              <button
+                onClick={() => window.open('recommended-packages.html', '_blank')}
+                className="flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 bg-white border-gray-200 text-gray-700 hover:border-orange-300 shadow-md hover:shadow-lg"
+              >
+                <div className="flex items-center justify-center lg:justify-start gap-3">
+                  <div className="p-2 rounded-lg bg-orange-50">
+                    <Sparkles className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold">Recommended Packages</div>
+                    <div className="text-xs opacity-75">Package Search & PDF Reports</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Calculator Content */}
         <div className="standard-card">
