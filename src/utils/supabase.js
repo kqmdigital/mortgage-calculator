@@ -453,7 +453,7 @@ export class AuthService {
     }
   }
 
-  // Get rate packages with filters - EXACT same query as working HTML files
+  // Get rate packages with filters - matching actual database schema
   static async getRatePackages(filters = {}) {
     try {
       if (isDevelopmentMode) {
@@ -464,37 +464,35 @@ export class AuthService {
         throw new Error('Database connection not available');
       }
 
-      // Try with join first, fallback to simple query if foreign key doesn't exist
-      let data, error;
+      // Query rate_packages using actual database schema
+      logger.info('Querying rate_packages table with actual schema structure...');
       
-      try {
-        // First attempt: Try the same query as HTML (with join)
-        const result = await supabase
-          .from('rate_packages')
-          .select(`
-            *,
-            banks!inner(name, is_active)
-          `)
-          .eq('banks.is_active', true)
-          .order('interest_rate');
-          
-        data = result.data;
-        error = result.error;
-      } catch (joinError) {
-        logger.warn('Join query failed, trying simple query:', joinError);
+      let query = supabase
+        .from('rate_packages')
+        .select('*');
+
+      // Apply filters using the actual field names from provided schema
+      if (filters.loanType) {
+        query = query.eq('loan_type', filters.loanType);
       }
-      
-      // If join failed, try simple query without join
-      if (!data || error) {
-        logger.info('Using simple query without join');
-        const result = await supabase
-          .from('rate_packages')
-          .select('*')
-          .order('interest_rate');
-          
-        data = result.data;
-        error = result.error;
+      if (filters.propertyType) {
+        query = query.eq('property_type', filters.propertyType);
       }
+      if (filters.propertyStatus) {
+        query = query.eq('property_status', filters.propertyStatus);
+      }
+      if (filters.rateType) {
+        query = query.eq('rate_type_category', filters.rateType);
+      }
+      if (filters.lockPeriod) {
+        query = query.eq('lock_period', filters.lockPeriod);
+      }
+      if (filters.buyUnder) {
+        query = query.eq('buy_under', filters.buyUnder);
+      }
+
+      // Order by id since no created_at in schema (fallback to primary key)
+      const { data, error } = await query.order('id', { ascending: false });
 
       if (error) {
         logger.error('Supabase query error:', error);
@@ -502,6 +500,8 @@ export class AuthService {
         throw new Error('Failed to fetch rate packages: ' + error.message);
       }
 
+      logger.info(`✅ Successfully fetched ${data?.length || 0} rate packages`);
+      
       return { success: true, data: data || [] };
 
     } catch (error) {
@@ -510,7 +510,36 @@ export class AuthService {
     }
   }
 
-  // Get rate types - EXACT same query as working HTML files
+  // Get banks - matching actual database schema (no is_active column)
+  static async getBanks() {
+    try {
+      if (isDevelopmentMode) {
+        throw new Error('Development mode not supported - connect to real database');
+      }
+
+      if (!supabase) {
+        throw new Error('Database connection not available');
+      }
+
+      const { data, error } = await supabase
+        .from('banks')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        logger.error('Supabase banks query error:', error);
+        throw new Error('Failed to fetch banks: ' + error.message);
+      }
+
+      return { success: true, data: data || [] };
+
+    } catch (error) {
+      logger.error('Banks fetch error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get rate types - matching actual database schema
   static async getRateTypes() {
     try {
       if (isDevelopmentMode) {
@@ -523,7 +552,8 @@ export class AuthService {
 
       const { data, error } = await supabase
         .from('rate_types')
-        .select('*');
+        .select('*')
+        .order('rate_type', { ascending: true });
 
       if (error) {
         logger.error('Supabase rate_types query error:', error);
