@@ -452,4 +452,193 @@ export class AuthService {
       throw new Error(error.message || 'Failed to delete user');
     }
   }
+
+  // Get rate packages with filters
+  static async getRatePackages(filters = {}) {
+    try {
+      // Development mode mock data
+      if (isDevelopmentMode) {
+        logger.info('Development mode: Using enhanced mock packages data');
+        return {
+          success: true,
+          data: [
+            {
+              id: 1,
+              bank_name: 'OCBC',
+              package_name: 'HomeSecure Fixed Rate Package',
+              loan_type: 'New Home Loan',
+              property_type: 'Private Property',
+              property_status: 'Completed',
+              buy_under: 'Individual Name',
+              rate_type_category: 'Fixed',
+              lock_period: '2 Years',
+              minimum_loan_size: 500000,
+              year1_rate_type: 'FIXED',
+              year1_operator: null,
+              year1_value: 3.25,
+              year2_rate_type: 'FIXED',
+              year2_operator: null,
+              year2_value: 3.25,
+              thereafter_rate_type: 'FIXED',
+              thereafter_operator: null,
+              thereafter_value: 3.50,
+              legal_fee_subsidy: 'true',
+              cash_rebate: 'true',
+              cash_rebate_amount: 0.8,
+              free_package_conversion_12m: 'false',
+              free_package_conversion_24m: 'false',
+              valuation_subsidy: 'true',
+              partial_repayment: 'true',
+              waiver_due_to_sales: 'false'
+            },
+            {
+              id: 2,
+              bank_name: 'DBS',
+              package_name: 'DBS Fixed HomeLoan',
+              loan_type: 'New Home Loan',
+              property_type: 'Private Property',
+              property_status: 'Completed',
+              buy_under: 'Individual Name',
+              rate_type_category: 'Fixed',
+              lock_period: '3 Years',
+              minimum_loan_size: 300000,
+              year1_rate_type: 'FIXED',
+              year1_operator: null,
+              year1_value: 3.15,
+              year2_rate_type: 'FIXED', 
+              year2_operator: null,
+              year2_value: 3.15,
+              thereafter_rate_type: 'FIXED',
+              thereafter_operator: null,
+              thereafter_value: 3.40,
+              legal_fee_subsidy: 'false',
+              cash_rebate: 'true',
+              cash_rebate_amount: 1.0,
+              free_package_conversion_12m: 'false',
+              free_package_conversion_24m: 'false',
+              valuation_subsidy: 'false',
+              partial_repayment: 'true',
+              waiver_due_to_sales: 'false'
+            },
+            {
+              id: 3,
+              bank_name: 'UOB',
+              package_name: 'UOB Variable Home Loan',
+              loan_type: 'New Home Loan',
+              property_type: 'Private Property',
+              property_status: 'Completed',
+              buy_under: 'Individual Name',
+              rate_type_category: 'Floating',
+              lock_period: '1 Year',
+              minimum_loan_size: 400000,
+              year1_rate_type: 'SORA',
+              year1_operator: '+',
+              year1_value: 0.10,
+              year2_rate_type: 'SORA',
+              year2_operator: '+',
+              year2_value: 0.15,
+              thereafter_rate_type: 'SORA',
+              thereafter_operator: '+',
+              thereafter_value: 1.25,
+              legal_fee_subsidy: 'true',
+              cash_rebate: 'true',
+              cash_rebate_amount: 0.5,
+              free_package_conversion_12m: 'false',
+              free_package_conversion_24m: 'false',
+              valuation_subsidy: 'false',
+              partial_repayment: 'true',
+              waiver_due_to_sales: 'true'
+            }
+          ]
+        };
+      }
+
+      if (!supabase) {
+        throw new Error('Database connection not available');
+      }
+
+      let query = supabase
+        .from('rate_packages')
+        .select(`
+          *,
+          banks!inner(name, is_active)
+        `)
+        .eq('banks.is_active', true);
+
+      // Apply filters
+      if (filters.loanType) {
+        query = query.eq('loan_type', filters.loanType);
+      }
+      if (filters.propertyType) {
+        query = query.eq('property_type', filters.propertyType);
+      }
+      if (filters.rateType) {
+        query = query.eq('rate_type_category', filters.rateType);
+      }
+
+      const { data, error } = await query.order('year1_value');
+
+      if (error) {
+        logger.error('Supabase query error:', error);
+        throw new Error('Failed to fetch rate packages: ' + error.message);
+      }
+
+      return { success: true, data: data || [] };
+
+    } catch (error) {
+      logger.error('Rate packages fetch error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get rate types
+  static async getRateTypes() {
+    try {
+      if (isDevelopmentMode) {
+        return {
+          success: true,
+          data: [
+            { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
+            { id: 2, rate_type: 'SORA', rate_value: 3.29 },
+            { id: 3, rate_type: 'SOR', rate_value: 3.50 }
+          ]
+        };
+      }
+
+      if (!supabase) {
+        throw new Error('Database connection not available');
+      }
+
+      const { data, error } = await supabase
+        .from('rate_types')
+        .select('*');
+
+      if (error) {
+        logger.error('Supabase query error:', error);
+        // Return mock data as fallback
+        return {
+          success: true,
+          data: [
+            { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
+            { id: 2, rate_type: 'SORA', rate_value: 3.29 },
+            { id: 3, rate_type: 'SOR', rate_value: 3.50 }
+          ]
+        };
+      }
+
+      return { success: true, data: data || [] };
+
+    } catch (error) {
+      logger.error('Rate types fetch error:', error.message);
+      // Return mock data as fallback
+      return {
+        success: true,
+        data: [
+          { id: 1, rate_type: 'FIXED', rate_value: 3.0 },
+          { id: 2, rate_type: 'SORA', rate_value: 3.29 },
+          { id: 3, rate_type: 'SOR', rate_value: 3.50 }
+        ]
+      };
+    }
+  }
 }
