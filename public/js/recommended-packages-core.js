@@ -398,22 +398,32 @@ async function loadData() {
     try {
         showLoading('Loading packages and rate types...');
         
-        // Load packages and rate types in parallel
-        const [packagesResult, rateTypesResult] = await Promise.all([
-            supabaseClient.from('rate_packages').select('*'),
-            supabaseClient.from('rate_types').select('*')
-        ]);
-
-        if (packagesResult.error) throw packagesResult.error;
-        if (rateTypesResult.error) throw rateTypesResult.error;
-
-        allPackages = packagesResult.data || [];
-        rateTypes = rateTypesResult.data || [];
-
-        console.log(`📦 Loaded ${allPackages.length} packages and ${rateTypes.length} rate types`);
+        // Use DatabaseService for compatibility with development mode
+        if (typeof DatabaseService !== 'undefined') {
+            const packagesResult = await DatabaseService.getRatePackages();
+            
+            if (packagesResult.success) {
+                allPackages = packagesResult.data || [];
+                console.log(`📦 Loaded ${allPackages.length} packages from DatabaseService`);
+            } else {
+                throw new Error(packagesResult.error || 'Failed to load packages');
+            }
+            
+            // For development, create mock rate types
+            if (window.isDevelopmentMode) {
+                rateTypes = [
+                    { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
+                    { id: 2, name: 'Floating', description: 'Variable interest rate' }
+                ];
+                console.log(`📦 Using mock rate types in development mode`);
+            }
+        } else {
+            throw new Error('DatabaseService not available');
+        }
         
     } catch (error) {
         console.error('💥 Error loading data:', error);
+        console.log('[ERROR] Failed to load data:', error.message);
         showNotification('Failed to load data: ' + error.message, 'error');
     } finally {
         hideLoading();

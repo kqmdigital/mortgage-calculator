@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recommended Packages - Keyquest Mortgage Admin</title>
-    <link rel="stylesheet" href="css/admin-styles.css">
+    <link rel="stylesheet" href="./css/admin-styles.css">
     <!-- Print CSS to remove headers and footers -->
     <style>
         @media print {
@@ -22,19 +22,19 @@
     </style>
     <!-- Required Scripts in correct order -->
     <!-- External Scripts in proper order -->
-    <script src="js/lucide.min.js"></script>
+    <script src="./js/lucide.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
     
-    <script src="js/security-utils.js"></script>
-    <script src="config/supabase.js"></script>
-    <script src="js/admin-scripts.js"></script>
+    <script src="./js/security-utils.js"></script>
+    <script src="./config/supabase.js"></script>
+    <script src="./js/admin-scripts.js"></script>
     
     <!-- Core functionality -->
-    <script src="js/recommended-packages-core.js"></script>
+    <script src="./js/recommended-packages-core.js"></script>
     <!-- PDF generation functionality -->
-    <script src="js/recommended-packages-pdf.js"></script>
+    <script src="./js/recommended-packages-pdf.js"></script>
 
-    <link rel="stylesheet" href="css/recommended-packages.css">
+    <link rel="stylesheet" href="./css/recommended-packages.css">
 </head>   
 
 <body>
@@ -73,7 +73,7 @@
                     <!-- User Dropdown Menu -->
                     <div class="user-dropdown" id="userDropdown" style="display: none;">
                         <div class="dropdown-content">
-                            <button onclick="window.location.href='/'" class="dropdown-item">
+                            <button onclick="window.location.href='./'" class="dropdown-item">
                                 <i data-lucide="home"></i>
                                 <span>Back to Main App</span>
                             </button>
@@ -104,7 +104,7 @@
                             <h1 style="margin: 0 0 8px 0;">Recommended Packages</h1>
                             <p style="margin: 0;">Find the best mortgage packages for your clients</p>
                         </div>
-                        <button onclick="window.location.href='/'" class="search-button" style="background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.3); padding: 12px 20px;">
+                        <button onclick="window.location.href='./'" class="search-button" style="background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.3); padding: 12px 20px;">
                             <i data-lucide="arrow-left"></i>
                             <span>Back to Main App</span>
                         </button>

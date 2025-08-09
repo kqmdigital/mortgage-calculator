@@ -2604,7 +2604,11 @@ const AuthenticatedApp = () => {
                           </button>
                           
                           <button
-                            onClick={handleMenuItemClick(() => window.open('/recommended-packages.html', '_blank'))}
+                            onClick={handleMenuItemClick(() => {
+                              const url = `${process.env.PUBLIC_URL}/recommended-packages.html`;
+                              console.log('Opening URL:', url);
+                              window.open(url, '_blank');
+                            })}
                             className="w-full btn-standard btn-secondary mb-2"
                             type="button"
                           >
@@ -2722,7 +2726,11 @@ const AuthenticatedApp = () => {
             <div className="text-sm font-semibold text-gray-600 mb-3">Admin Tools</div>
             <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
               <button
-                onClick={() => window.open('/recommended-packages.html', '_blank')}
+                onClick={() => {
+                  const url = `${process.env.PUBLIC_URL}/recommended-packages.html`;
+                  console.log('Opening URL:', url);
+                  window.open(url, '_blank');
+                }}
                 className="flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 bg-white border-gray-200 text-gray-700 hover:border-orange-300 shadow-md hover:shadow-lg"
               >
                 <div className="flex items-center justify-center lg:justify-start gap-3">
