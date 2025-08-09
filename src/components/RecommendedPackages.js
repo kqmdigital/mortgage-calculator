@@ -205,12 +205,17 @@ const RecommendedPackages = () => {
         logger.info(`Loan amount filter: ${beforeLoanFilter} → ${filtered.length} packages (loan amount: ${loanAmount})`);
       }
       
+      // Rate Type filter (matches HTML: formData.rateTypeFilter)
       if (searchForm.rateType) {
         filtered = filtered.filter(pkg => pkg.rate_type_category === searchForm.rateType);
       }
       
+      // Lock-in Period filter (matches HTML: formData.lockPeriodFilter)
       if (searchForm.lockPeriod) {
-        filtered = filtered.filter(pkg => pkg.lock_period === searchForm.lockPeriod);
+        filtered = filtered.filter(pkg => {
+          const pkgLockPeriod = pkg.lock_period || '0 Year';
+          return pkgLockPeriod === searchForm.lockPeriod;
+        });
       }
 
       // NEW: Exclude existing bank for refinancing (from HTML version)
@@ -218,13 +223,9 @@ const RecommendedPackages = () => {
         filtered = filtered.filter(pkg => pkg.bank_name !== searchForm.existingBank);
       }
 
-      // Apply bank filter
+      // Apply bank filter (matches HTML: uses pkg.bank_name)
       if (selectedBanks.length > 0) {
-        filtered = filtered.filter(pkg => 
-          selectedBanks.some(bank => 
-            pkg.banks?.name === bank || pkg.bank_name === bank
-          )
-        );
+        filtered = filtered.filter(pkg => selectedBanks.includes(pkg.bank_name));
       }
 
       // Apply feature filters
@@ -685,6 +686,7 @@ const RecommendedPackages = () => {
     }
   };
 
+  // Enhanced PDF Generation matching HTML version functionality
   const generateProfessionalReport = () => {
     try {
       if (filteredPackages.length === 0) {
@@ -692,202 +694,461 @@ const RecommendedPackages = () => {
         return;
       }
 
-      // Import jsPDF dynamically to avoid SSR issues
-      import('jspdf').then(({ jsPDF }) => {
-        import('jspdf-autotable').then(() => {
-          // Get selected packages or default to top 3
-          const packagesToExport = selectedPackages.size > 0 
-            ? filteredPackages.filter(pkg => selectedPackages.has(pkg.id)).slice(0, 3)
-            : filteredPackages.slice(0, 3);
+      // Get selected packages or default to top 3
+      const packagesToExport = selectedPackages.size > 0 
+        ? filteredPackages.filter(pkg => selectedPackages.has(pkg.id)).slice(0, 3)
+        : filteredPackages.slice(0, 3);
 
-          if (packagesToExport.length === 0) {
-            alert('Please select at least one package for the report.');
-            return;
+      if (packagesToExport.length === 0) {
+        alert('Please select at least one package for the report.');
+        return;
+      }
+
+      // Helper functions for PDF generation
+      const formatCurrency = (amount) => {
+        if (!amount || amount === 0) return 'SGD 0';
+        return `SGD ${parseFloat(amount).toLocaleString('en-SG', { maximumFractionDigits: 0 })}`;
+      };
+
+      const calculateInterestRate = (pkg, year) => {
+        if (!pkg) return 0;
+        
+        let rateType, operator, value;
+        
+        if (year === 'thereafter') {
+          rateType = pkg.thereafter_rate_type;
+          operator = pkg.thereafter_operator;
+          value = pkg.thereafter_value;
+        } else {
+          rateType = pkg[`year${year}_rate_type`];
+          operator = pkg[`year${year}_operator`];
+          value = pkg[`year${year}_value`];
+        }
+
+        // Auto-populate with thereafter rate if no specific year data
+        if (!rateType || value === null || value === undefined) {
+          if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+            return calculateInterestRate(pkg, 'thereafter');
           }
+          return 0;
+        }
 
-          // Create new PDF document
-          const doc = new jsPDF('p', 'mm', 'a4');
-          const pageWidth = doc.internal.pageSize.getWidth();
-          const pageHeight = doc.internal.pageSize.getHeight();
-          
-          // Define colors
-          const primaryBlue = '#1E40AF';
-          const lightBlue = '#EFF6FF';
-          const darkGray = '#374151';
-          const lightGray = '#F3F4F6';
-          
-          let yPosition = 20;
+        if (rateType === 'FIXED') {
+          return parseFloat(value) || 0;
+        } else {
+          // For floating rates - use reference rate + spread
+          const referenceRateValue = rateType.includes('SORA') ? 3.50 : 3.25; // Default rates
+          const spreadValue = parseFloat(value) || 0;
+          return operator === '+' ? referenceRateValue + spreadValue : referenceRateValue - spreadValue;
+        }
+      };
 
-          // Header Section
-          doc.setFillColor(primaryBlue);
-          doc.rect(0, 0, pageWidth, 40, 'F');
-          
-          doc.setTextColor('#FFFFFF');
-          doc.setFontSize(24);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Mortgage Package Analysis', 20, 25);
-          
-          if (clientName) {
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Prepared for: ${clientName}`, 20, 35);
+      const calculateMonthlyInstallment = (loanAmount, tenureYears, interestRate) => {
+        const monthlyRate = interestRate / 100 / 12;
+        const totalMonths = tenureYears * 12;
+        
+        if (monthlyRate === 0) return loanAmount / totalMonths;
+        
+        return (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+               (Math.pow(1 + monthlyRate, totalMonths) - 1);
+      };
+
+      const calculateMonthlySavings = (loanAmount, tenureYears, currentRate, newRate) => {
+        const currentPayment = calculateMonthlyInstallment(loanAmount, tenureYears, currentRate);
+        const newPayment = calculateMonthlyInstallment(loanAmount, tenureYears, newRate);
+        return currentPayment - newPayment;
+      };
+
+      const calculateTotalSavings = (monthlySavings, lockPeriod) => {
+        const lockYears = lockPeriod ? (lockPeriod.includes('Year') ? parseInt(lockPeriod) : parseInt(lockPeriod)) : 2;
+        return monthlySavings * 12 * lockYears;
+      };
+
+      const calculateAverageFirst2Years = (pkg) => {
+        const year1Rate = calculateInterestRate(pkg, 1);
+        const year2Rate = calculateInterestRate(pkg, 2);
+        return (year1Rate + year2Rate) / 2;
+      };
+
+      const formatDetailedRateDisplay = (pkg, year) => {
+        let rateType, operator, value;
+        
+        if (year === 'thereafter') {
+          rateType = pkg.thereafter_rate_type;
+          operator = pkg.thereafter_operator;
+          value = pkg.thereafter_value;
+        } else {
+          rateType = pkg[`year${year}_rate_type`];
+          operator = pkg[`year${year}_operator`];
+          value = pkg[`year${year}_value`];
+        }
+
+        // Auto-populate with thereafter rate if no specific year data
+        if (!rateType || value === null || value === undefined) {
+          if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+            return formatDetailedRateDisplay(pkg, 'thereafter');
           }
+          return '-';
+        }
+
+        if (rateType === 'FIXED') {
+          const rate = calculateInterestRate(pkg, year);
+          return `${rate.toFixed(2)}%\nFIXED`;
+        } else {
+          const referenceRateValue = rateType.includes('SORA') ? 3.50 : 3.25;
+          const spreadValue = parseFloat(value) || 0;
+          const totalRate = calculateInterestRate(pkg, year);
           
-          yPosition = 60;
+          const operatorSymbol = operator === '+' ? '+' : '-';
+          return `${totalRate.toFixed(2)}%\n${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%`;
+        }
+      };
 
-          // Key Information Section
-          doc.setTextColor(darkGray);
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Loan Details', 20, yPosition);
-          yPosition += 10;
-
-          doc.setFillColor(lightGray);
-          doc.rect(20, yPosition, pageWidth - 40, 25, 'F');
-          
-          doc.setFontSize(10);
-          doc.setFont('helvetica', 'normal');
-          const loanAmount = searchForm.loanAmount ? parseFloat(searchForm.loanAmount).toLocaleString() : 'Not specified';
-          const loanTenure = searchForm.loanTenure || 'Not specified';
-          
-          doc.text(`Loan Amount: SGD ${loanAmount}`, 25, yPosition + 8);
-          doc.text(`Loan Tenure: ${loanTenure} years`, 25, yPosition + 15);
-          doc.text(`Property Type: ${searchForm.propertyType || 'Not specified'}`, 110, yPosition + 8);
-          doc.text(`Loan Type: ${selectedLoanType}`, 110, yPosition + 15);
-          
-          yPosition += 35;
-
-          // Package Comparison Table
-          doc.setTextColor(darkGray);
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Package Comparison', 20, yPosition);
-          yPosition += 10;
-
-          // Prepare table data
-          const tableHeaders = ['Details'];
-          const tableRows = [
-            ['Bank Name'],
-            ['Package Name'],
-            ['Interest Rate'],
-            ['Rate Type'],
-            ['Lock Period'],
-            ['Cash Rebate'],
-            ['Legal Fee Subsidy'],
-            ['Valuation Subsidy']
-          ];
-
-          // Add package columns
-          packagesToExport.forEach((pkg, index) => {
-            const bankName = hideBankNames ? `Bank ${String.fromCharCode(65 + index)}` : (pkg.banks?.name || pkg.bank_name || 'N/A');
-            tableHeaders.push(bankName);
-            
-            tableRows[0].push(bankName);
-            tableRows[1].push(pkg.package_name || 'N/A');
-            tableRows[2].push(pkg.interest_rate ? `${pkg.interest_rate}%` : 'N/A');
-            tableRows[3].push(pkg.rate_type || 'N/A');
-            tableRows[4].push(pkg.lock_period || 'N/A');
-            tableRows[5].push(pkg.cash_rebate ? `${pkg.cash_rebate}%` : 'No');
-            tableRows[6].push(pkg.legal_fee_subsidy ? 'Yes' : 'No');
-            tableRows[7].push(pkg.valuation_subsidy ? 'Yes' : 'No');
-          });
-
-          // Generate table using autoTable
-          doc.autoTable({
-            head: [tableHeaders],
-            body: tableRows.slice(1), // Skip the bank name row as it's in headers
-            startY: yPosition,
-            theme: 'grid',
-            headStyles: {
-              fillColor: primaryBlue,
-              textColor: '#FFFFFF',
-              fontSize: 10,
-              fontStyle: 'bold'
-            },
-            bodyStyles: {
-              fontSize: 9,
-              textColor: darkGray
-            },
-            columnStyles: {
-              0: { fontStyle: 'bold', fillColor: lightBlue }
-            },
-            margin: { left: 20, right: 20 }
-          });
-
-          yPosition = doc.lastAutoTable.finalY + 20;
-
-          // Key Features Section
-          if (yPosition > pageHeight - 60) {
-            doc.addPage();
-            yPosition = 20;
+      // Calculate package data with enhanced metrics
+      const enhancedPackages = packagesToExport.map(pkg => {
+        const avgFirst2Years = calculateAverageFirst2Years(pkg);
+        const loanAmount = searchForm.loanAmount ? parseFloat(searchForm.loanAmount) : 500000;
+        const loanTenure = searchForm.loanTenure ? parseInt(searchForm.loanTenure) : 25;
+        const monthlyInstallment = calculateMonthlyInstallment(loanAmount, loanTenure, avgFirst2Years);
+        
+        let monthlySavings = 0;
+        let totalSavings = 0;
+        
+        // Calculate savings for refinancing
+        if (selectedLoanType === 'Refinancing Home Loan') {
+          const existingRate = searchForm.existingInterestRate ? parseFloat(searchForm.existingInterestRate) : 0;
+          if (existingRate > 0) {
+            monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
+            totalSavings = calculateTotalSavings(monthlySavings, pkg.lock_period);
           }
-
-          doc.setFontSize(16);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Key Features Summary', 20, yPosition);
-          yPosition += 10;
-
-          packagesToExport.forEach((pkg, index) => {
-            if (yPosition > pageHeight - 40) {
-              doc.addPage();
-              yPosition = 20;
-            }
-
-            const bankName = hideBankNames ? `Bank ${String.fromCharCode(65 + index)}` : (pkg.banks?.name || pkg.bank_name || 'N/A');
-            
-            doc.setFillColor(index === 0 ? '#FEF3C7' : lightGray); // Highlight best option
-            doc.rect(20, yPosition, pageWidth - 40, 25, 'F');
-            
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${index + 1}. ${bankName} - ${pkg.package_name || 'Package'}`, 25, yPosition + 8);
-            
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Interest Rate: ${pkg.interest_rate || 'N/A'}% | Lock Period: ${pkg.lock_period || 'N/A'}`, 25, yPosition + 15);
-            
-            let features = [];
-            if (pkg.cash_rebate) features.push(`${pkg.cash_rebate}% Cash Rebate`);
-            if (pkg.legal_fee_subsidy) features.push('Legal Fee Subsidy');
-            if (pkg.valuation_subsidy) features.push('Valuation Subsidy');
-            if (pkg.partial_repayment) features.push('Partial Repayment');
-            
-            if (features.length > 0) {
-              doc.text(`Features: ${features.join(', ')}`, 25, yPosition + 20);
-            }
-            
-            yPosition += 30;
-          });
-
-          // Footer
-          const reportDate = new Date().toLocaleDateString('en-SG', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          });
-
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor('#6B7280');
-          doc.text(`Generated on ${reportDate} | KeyQuest Mortgage`, 20, pageHeight - 10);
-          doc.text('This report is generated for advisory purposes only', pageWidth - 20, pageHeight - 10, { align: 'right' });
-
-          // Save the PDF
-          const fileName = `mortgage-package-analysis-${new Date().toISOString().split('T')[0]}.pdf`;
-          doc.save(fileName);
-          
-          logger.info(`PDF report generated: ${fileName}`);
-        }).catch(error => {
-          logger.error('Error loading jsPDF autotable:', error);
-          alert('Error generating PDF. Please try again.');
-        });
-      }).catch(error => {
-        logger.error('Error loading jsPDF:', error);
-        alert('Error loading PDF generator. Please try again.');
+        }
+        
+        return {
+          ...pkg,
+          avgFirst2Years,
+          monthlyInstallment,
+          monthlySavings,
+          totalSavings
+        };
       });
+
+      // Create comprehensive PDF content matching HTML version
+      const reportDate = new Date().toLocaleDateString('en-SG', {
+        day: 'numeric',
+        month: 'short', 
+        year: 'numeric'
+      });
+
+      const yearsToShow = [1, 2, 3, 4, 5];
+
+      const reportContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>KeyQuest Mortgage Report</title>
+          <meta charset="UTF-8">
+          <style>
+            @page { margin: 0.4in 0.3in; size: A4; }
+            @media print {
+              @page { margin: 0.4in 0.3in; size: A4; }
+              body { margin: 0 !important; padding: 0 !important; }
+              .no-print, header, footer { display: none !important; }
+            }
+            
+            * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; margin: 0; padding: 0; background: white !important; color: #1a1a1a !important; }
+            
+            .pdf-report-container { padding: 20px !important; background: white !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; line-height: 1.4 !important; color: #1f2937 !important; max-width: none !important; margin: 0 auto !important; overflow: visible !important; }
+            
+            .pdf-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin: 0 0 15px 0 !important; padding: 5px 0 10px 0 !important; border-bottom: 2px solid #264A82 !important; height: 85px !important; overflow: visible !important; }
+            .pdf-header .logo-section { height: 85px !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; overflow: visible !important; flex-shrink: 0 !important; margin-left: -10px !important; }
+            .pdf-header .logo-section img { height: 200px !important; width: auto !important; object-fit: contain !important; margin: 0 !important; padding: 0 !important; border: 0 !important; vertical-align: middle !important; display: block !important; max-width: 280px !important; }
+            .pdf-header .title-section { text-align: right !important; flex: 1 !important; margin-left: 30px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: flex-end !important; }
+            .pdf-header h1 { margin: 0 !important; font-size: 24px !important; font-weight: 800 !important; color: #1f2937 !important; letter-spacing: -0.5px !important; line-height: 1.2 !important; }
+            .pdf-header .client-name { font-size: 16px !important; color: #6b7280 !important; margin: 2px 0 !important; font-weight: 500 !important; line-height: 1.2 !important; }
+            
+            .pdf-key-info { background: transparent !important; border: none !important; border-radius: 16px !important; padding: 8px !important; margin-top: 8px !important; margin-bottom: 8px !important; }
+            .pdf-info-grid { display: grid !important; grid-template-columns: repeat(5, 1fr) !important; gap: 12px !important; align-items: stretch !important; padding: 6px !important; }
+            .pdf-info-item { text-align: center !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; min-height: 65px !important; padding: 8px 6px !important; background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; border-radius: 8px !important; box-shadow: 0 2px 8px rgba(38, 74, 130, 0.25) !important; margin: 0 !important; }
+            .pdf-info-label { color: white !important; margin-bottom: 4px !important; font-weight: 600 !important; font-size: 9px !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; line-height: 1.1 !important; }
+            .pdf-info-value { font-size: 12px !important; font-weight: 600 !important; color: white !important; line-height: 1.2 !important; margin: 0 !important; }
+            
+            .pdf-comparison-section { margin-bottom: 25px !important; }
+            .pdf-comparison-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
+            
+            .pdf-comparison-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; }
+            .pdf-comparison-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
+            .pdf-comparison-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-comparison-table th:first-child { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
+            .pdf-comparison-table th:not(:first-child) { width: 25% !important; }
+            .pdf-comparison-table th.recommended { background: #1e40af !important; position: relative !important; }
+            .pdf-comparison-table th.recommended::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
+            
+            .pdf-comparison-table tbody tr:nth-child(even) { background: #f8fafc !important; }
+            .pdf-comparison-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
+            .pdf-comparison-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
+            .pdf-comparison-table td.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
+            .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; white-space: pre-line !important; }
+            .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
+            .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
+            .pdf-comparison-table td.features-cell { text-align: left !important; vertical-align: middle !important; font-size: 11px !important; line-height: 1.3 !important; padding: 8px 4px !important; word-wrap: break-word !important; }
+            .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
+            
+            ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+            .pdf-savings-section { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important; border: 2px solid #264A82 !important; border-radius: 16px !important; padding: 20px !important; margin-bottom: 20px !important; margin-top: 15px !important; position: relative !important; }
+            .pdf-savings-section::before { content: '💰' !important; position: absolute !important; top: 15px !important; left: 15px !important; font-size: 20px !important; }
+            .pdf-savings-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; margin-left: 30px !important; }
+            .pdf-savings-grid { display: flex !important; justify-content: space-between !important; align-items: stretch !important; gap: 30px !important; flex-wrap: wrap !important; padding: 10px 20px !important; }
+            .pdf-savings-item { text-align: center !important; flex: 1 !important; min-width: 140px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; }
+            .pdf-savings-item .label { color: #6b7280 !important; font-size: 12px !important; margin-bottom: 6px !important; }
+            .pdf-savings-item .value { font-size: 18px !important; font-weight: 700 !important; }
+            .pdf-savings-item .value.current { color: #1d4ed8 !important; }
+            .pdf-savings-item .value.new { color: #264A82 !important; }
+            .pdf-savings-item .value.savings { color: #264A82 !important; font-size: 18px !important; font-weight: 800 !important; line-height: 1.3 !important; }
+            .pdf-savings-item .sub-label { font-size: 11px !important; color: #6b7280 !important; margin-top: 4px !important; }
+            ` : ''}
+            
+            .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; }
+            .pdf-disclaimer-title { font-weight: 700 !important; color: #374151 !important; margin-bottom: 6px !important; font-size: 12px !important; }
+            .pdf-disclaimer-text { font-size: 10px !important; color: #6b7280 !important; line-height: 1.5 !important; }
+          </style>
+        </head>
+        <body>
+          <div class="pdf-report-container">
+            <!-- Professional Header -->
+            <div class="pdf-header">
+              <div class="logo-section">
+                <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="KeyQuest Mortgage Logo" onerror="this.style.display='none';" />
+              </div>
+              <div class="title-section">
+                <h1>Mortgage Package Analysis</h1>
+                ${clientName ? `<div class="client-name">Prepared for: ${clientName}</div>` : ''}
+              </div>
+            </div>
+
+            <!-- Key Information Cards -->
+            <div class="pdf-key-info">
+              <div class="pdf-info-grid">
+                <div class="pdf-info-item">
+                  <div class="pdf-info-icon">💰</div>
+                  <div class="pdf-info-label">Loan Amount</div>
+                  <div class="pdf-info-value">${formatCurrency(searchForm.loanAmount || 0)}</div>
+                </div>
+                <div class="pdf-info-item">
+                  <div class="pdf-info-icon">📅</div>
+                  <div class="pdf-info-label">Loan Tenure</div>
+                  <div class="pdf-info-value">${searchForm.loanTenure || 'N/A'} Years</div>
+                </div>
+                <div class="pdf-info-item">
+                  <div class="pdf-info-icon">🏠</div>
+                  <div class="pdf-info-label">Property Type</div>
+                  <div class="pdf-info-value property-type">${searchForm.propertyType || 'Private Property'}</div>
+                </div>
+                <div class="pdf-info-item">
+                  <div class="pdf-info-icon">📋</div>
+                  <div class="pdf-info-label">Property Status</div>
+                  <div class="pdf-info-value property-status">${searchForm.propertyStatus || 'Completed'}</div>
+                </div>
+                ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+                <div class="pdf-info-item">
+                  <div class="pdf-info-icon">📊</div>
+                  <div class="pdf-info-label">Current Rate</div>
+                  <div class="pdf-info-value current-rate">${parseFloat(searchForm.existingInterestRate).toFixed(2)}%</div>
+                </div>
+                ` : `
+                <div class="pdf-info-item">
+                  <div class="pdf-info-icon">⭐</div>
+                  <div class="pdf-info-label">Best Rate</div>
+                  <div class="pdf-info-value best-rate">${enhancedPackages[0]?.avgFirst2Years?.toFixed(2) || 'N/A'}%</div>
+                </div>
+                `}
+              </div>
+            </div>
+
+            <!-- Package Comparison Table -->
+            <div class="pdf-comparison-section">
+              <div class="pdf-comparison-title">Package Comparison</div>
+              
+              <table class="pdf-comparison-table">
+                <thead>
+                  <tr>
+                    <th>Details</th>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <th class="${index === 0 ? 'recommended' : ''}">
+                        ${hideBankNames ? `PKG(${index + 1})` : pkg.bank_name}
+                      </th>
+                    `).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Rate Type</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended' : ''}">
+                        ${pkg.rate_type_category || 'Rate Package'}
+                      </td>
+                    `).join('')}
+                  </tr>
+                  <tr>
+                    <td>Min Loan Amount</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended amount' : 'amount'}">
+                        ${formatCurrency(pkg.minimum_loan_size || 0)}
+                      </td>
+                    `).join('')}
+                  </tr>
+                  
+                  ${yearsToShow.map((year) => `
+                    <tr>
+                      <td>Year ${year}</td>
+                      ${enhancedPackages.map((pkg, index) => {
+                        const rateDisplay = formatDetailedRateDisplay(pkg, year);
+                        return `
+                        <td class="${index === 0 ? 'recommended rate-value' : 'rate-value'}">
+                          ${rateDisplay}
+                        </td>
+                      `;
+                      }).join('')}
+                    </tr>
+                  `).join('')}
+                  
+                  <tr>
+                    <td>Thereafter</td>
+                    ${enhancedPackages.map((pkg, index) => {
+                      const rateDisplay = formatDetailedRateDisplay(pkg, 'thereafter');
+                      return `
+                      <td class="${index === 0 ? 'recommended rate-value' : 'rate-value'}">
+                        ${rateDisplay}
+                      </td>
+                    `;
+                    }).join('')}
+                  </tr>
+                  
+                  <tr>
+                    <td>Lock-in Period</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended period' : 'period'}">
+                        ${parseInt(pkg.lock_period) || 0} Years
+                      </td>
+                    `).join('')}
+                  </tr>
+                  
+                  <tr>
+                    <td>Monthly Installment</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended' : ''}">
+                        ${formatCurrency(pkg.monthlyInstallment || 0)}
+                      </td>
+                    `).join('')}
+                  </tr>
+                  
+                  ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+                  <tr>
+                    <td>Total Savings</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended savings-cell' : 'savings-cell'}">
+                        ${pkg.totalSavings > 0 ? 
+                          `Save ${formatCurrency(Math.abs(pkg.totalSavings))}\nOver ${parseInt(pkg.lock_period) || 2} Year${parseInt(pkg.lock_period) > 1 ? 's' : ''} Lock-in` : 
+                          'No savings'}
+                      </td>
+                    `).join('')}
+                  </tr>
+                  ` : ''}
+                  
+                  <tr>
+                    <td>Package Features</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended features-cell' : 'features-cell'}">
+                        ${pkg.legal_fee_subsidy === 'true' || pkg.legal_fee_subsidy === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Legal Fee Subsidy</div>' : ''}
+                        ${pkg.cash_rebate === 'true' || pkg.cash_rebate === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Cash Rebate</div>' : ''}
+                        ${pkg.free_package_conversion_12m === 'true' || pkg.free_package_conversion_12m === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Free Conversion (12M)</div>' : ''}
+                        ${pkg.free_package_conversion_24m === 'true' || pkg.free_package_conversion_24m === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Free Conversion (24M)</div>' : ''}
+                        ${pkg.valuation_subsidy === 'true' || pkg.valuation_subsidy === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Valuation Subsidy</div>' : ''}
+                        ${pkg.partial_repayment === 'true' || pkg.partial_repayment === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Partial Repayment</div>' : ''}
+                        ${pkg.waiver_due_to_sales === 'true' || pkg.waiver_due_to_sales === true ? 
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Waiver Due to Sales</div>' : ''}
+                        ${(!pkg.legal_fee_subsidy || pkg.legal_fee_subsidy === 'false') && 
+                          (!pkg.cash_rebate || pkg.cash_rebate === 'false') && 
+                          (!pkg.free_package_conversion_12m || pkg.free_package_conversion_12m === 'false') &&
+                          (!pkg.free_package_conversion_24m || pkg.free_package_conversion_24m === 'false') &&
+                          (!pkg.valuation_subsidy || pkg.valuation_subsidy === 'false') &&
+                          (!pkg.partial_repayment || pkg.partial_repayment === 'false') &&
+                          (!pkg.waiver_due_to_sales || pkg.waiver_due_to_sales === 'false') ? 
+                            '<div style="color: #6b7280;">Not Specified</div>' : ''}
+                      </td>
+                    `).join('')}
+                  </tr>
+                  
+                  <tr>
+                    <td>Remarks</td>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <td class="${index === 0 ? 'recommended features-cell' : 'features-cell'}">
+                        ${(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 200)}${(pkg.custom_remarks || pkg.remarks || '').length > 200 ? '...' : ''}
+                      </td>
+                    `).join('')}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+            <!-- Potential Savings Section -->
+            <div class="pdf-savings-section">
+              <div class="pdf-savings-title">Potential Savings with Our Recommended Package</div>
+              <div class="pdf-savings-grid">
+                <div class="pdf-savings-item">
+                  <div class="label">Current Monthly Payment</div>
+                  <div class="value current">${formatCurrency(calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, parseFloat(searchForm.existingInterestRate)))}</div>
+                  <div class="sub-label">at ${parseFloat(searchForm.existingInterestRate).toFixed(2)}%</div>
+                </div>
+                <div class="pdf-savings-item">
+                  <div class="label">New Monthly Payment</div>
+                  <div class="value new">${formatCurrency(enhancedPackages[0]?.monthlyInstallment || 0)}</div>
+                  <div class="sub-label">at ${enhancedPackages[0]?.avgFirst2Years?.toFixed(2) || 'N/A'}%</div>
+                </div>
+                <div class="pdf-savings-item">
+                  <div class="label">Total Savings</div>
+                  <div class="value savings">${enhancedPackages[0]?.totalSavings > 0 ? formatCurrency(enhancedPackages[0].totalSavings) : 'No savings'}</div>
+                </div>
+              </div>
+            </div>
+            ` : ''}
+
+            <!-- Professional Disclaimer -->
+            <div class="pdf-disclaimer">
+              <div class="pdf-disclaimer-title">Disclaimer – Keyquest Ventures Private Limited</div>
+              <div class="pdf-disclaimer-text">
+                This report is for general information and personal reference only. It does not constitute financial, investment, or professional advice, and does not take into account individual goals or financial situations.<br><br>
+                Users should not rely solely on this information when making financial or investment decisions. While we aim to use reliable data, Keyquest Ventures Private Limited does not guarantee its accuracy or completeness.<br><br>
+                Before refinancing, please check with your bank for any penalties, clawbacks, or fees that may apply.<br><br>
+                Use of our reports, consultancy services, or advice—whether by the recipient directly or through our consultants, affiliates, or partners—is undertaken entirely at the user's own risk. Keyquest Ventures Private Limited, including its affiliates and employees, bears no responsibility or liability for any decisions made or actions taken based on the information provided.
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Open PDF in new window for printing
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(reportContent);
+      printWindow.document.close();
+      
+      // Trigger print after content loads
+      setTimeout(() => {
+        printWindow.print();
+      }, 1000);
+      
+      logger.info('Enhanced PDF report generated successfully');
       
     } catch (error) {
-      logger.error('Error generating PDF:', error);
+      logger.error('Error generating enhanced PDF:', error);
       alert('Error generating PDF. Please try again.');
     }
   };
