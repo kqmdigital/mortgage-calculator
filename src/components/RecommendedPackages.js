@@ -118,8 +118,8 @@ const RecommendedPackages = () => {
         if (packagesResult.success) {
           const packages = packagesResult.data || [];
           setAllPackages(packages);
-          setFilteredPackages(packages); // Show all packages initially
-          setShowResults(packages.length > 0); // Show results if we have packages
+          setFilteredPackages([]); // Don't show packages until search
+          setShowResults(false); // Don't show results until search
           logger.info(`Loaded ${packages.length} packages from AuthService`);
         } else {
           logger.error('Failed to load packages:', packagesResult.error);
@@ -181,8 +181,8 @@ const RecommendedPackages = () => {
       ];
       
       setAllPackages(mockPackages);
-      setFilteredPackages(mockPackages); // Show fallback packages initially
-      setShowResults(true); // Show results section
+      setFilteredPackages([]); // Don't show fallback packages until search
+      setShowResults(false); // Don't show results until search
       setRateTypes([
         { id: 1, name: 'Fixed', description: 'Fixed interest rate' },
         { id: 2, name: 'Floating', description: 'Variable interest rate' }
@@ -221,7 +221,7 @@ const RecommendedPackages = () => {
   }, []);
 
   // EXACT calculation functions from recommended-packages-core.js
-  const calculateNumericRate = (pkg, year) => {
+  const calculateNumericRate = useCallback((pkg, year) => {
     let rateType, operator, value;
     
     if (year === 'thereafter') {
@@ -260,9 +260,9 @@ const RecommendedPackages = () => {
         referenceRateValue + spreadValue : 
         referenceRateValue - spreadValue;
     }
-  };
+  }, [rateTypes]);
 
-  const calculateAverageFirst2Years = (pkg) => {
+  const calculateAverageFirst2Years = useCallback((pkg) => {
     const year1Rate = calculateNumericRate(pkg, 1);
     const year2Rate = calculateNumericRate(pkg, 2);
     
@@ -271,9 +271,9 @@ const RecommendedPackages = () => {
     if (year2Rate === 0) return year1Rate;
     
     return (year1Rate + year2Rate) / 2;
-  };
+  }, [calculateNumericRate]);
 
-  const calculateMonthlyInstallment = (principal, tenureYears, annualRate) => {
+  const calculateMonthlyInstallment = useCallback((principal, tenureYears, annualRate) => {
     if (!principal || !tenureYears || !annualRate) return 0;
     
     const monthlyRate = annualRate / 100 / 12;
@@ -287,7 +287,7 @@ const RecommendedPackages = () => {
                          (Math.pow(1 + monthlyRate, totalMonths) - 1);
     
     return monthlyPayment;
-  };
+  }, []);
 
   const formatCurrency = (value) => {
     if (!value || value === 0) return '$0';
@@ -371,7 +371,10 @@ const RecommendedPackages = () => {
       // Apply feature filters
       if (selectedFeatures.length > 0) {
         filtered = filtered.filter(pkg => {
-          return selectedFeatures.some(feature => pkg[feature] === true);
+          return selectedFeatures.some(feature => {
+            const featureValue = pkg[feature];
+            return featureValue === 'true' || featureValue === true;
+          });
         });
       }
 
@@ -879,7 +882,7 @@ const RecommendedPackages = () => {
       }
 
       return rates;
-    }, [pkg, formatRateDisplay, calculateInterestRate]);
+    }, [pkg]);
 
     return (
       <div className={`border border-gray-200 rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-md ${
