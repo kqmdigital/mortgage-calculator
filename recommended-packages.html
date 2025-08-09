@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Packages - Keyquest Mortgage Admin</title>
+    <link rel="stylesheet" href="css/admin-styles.css">
+    <!-- Print CSS to remove headers and footers -->
+    <style>
+        @media print {
+            @page {
+                margin: 0.5in;
+                size: A4;
+            }
+            
+            body {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+    <!-- Required Scripts in correct order -->
+    <!-- External Scripts in proper order -->
+    <script src="js/lucide.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+    
+    <script src="js/security-utils.js"></script>
+    <script src="config/supabase.js"></script>
+    <script src="js/admin-scripts.js"></script>
+    
+    <!-- Core functionality -->
+    <script src="js/recommended-packages-core.js"></script>
+    <!-- PDF generation functionality -->
+    <script src="js/recommended-packages-pdf.js"></script>
+
+    <link rel="stylesheet" href="css/recommended-packages.css">
+</head>   
+
+<body>
+    <div class="admin-container">
+        <!-- Top Navigation -->
+        <nav class="top-nav" id="topNav">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <a href="index.html" class="logo">
+                        <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="Company Logo" class="logo-image">
+                        
+                    </a>
+                    <div class="nav-menu" id="navMenu">
+                        <a href="index.html" class="nav-item">
+                            <i data-lucide="layout-dashboard"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="rate-packages.html" class="nav-item">
+                            <i data-lucide="package"></i>
+                            <span>Rate Package</span>
+                        </a>
+                        <a href="rate-types.html" class="nav-item">
+                            <i data-lucide="percent"></i>
+                            <span>Rate Type</span>
+                        </a>
+                        <a href="banks.html" class="nav-item">
+                            <i data-lucide="landmark"></i>
+                            <span>Bank</span>
+                        </a>
+                        <a href="bankers.html" class="nav-item">
+                            <i data-lucide="briefcase"></i>
+                            <span>Bankers</span>
+                        </a>
+                         <a href="admin-users.html" class="nav-item">
+                            <i data-lucide="shield-check"></i>
+                            <span>Staff</span>
+                        </a>
+                        <a href="recommended-packages.html" class="nav-item active">
+                            <i data-lucide="star"></i>
+                            <span>Recommended</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <button class="btn btn-secondary" onclick="confirmSignOut()">
+                        <i data-lucide="log-out"></i>
+                        <span>Sign Out</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <div class="user-info">
+                            <div class="user-name" id="userName">admin</div>
+                            <div class="user-role">Super Admin</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">           
+            <div class="content-area">
+                
+                <!-- Loan Type Tabs -->
+                <div class="loan-type-tabs">
+                    <button class="loan-tab active" onclick="selectLoanType('New Home Loan')" data-loan-type="New Home Loan">
+                        <i data-lucide="home"></i>
+                        New Home Loan
+                    </button>
+                    <button class="loan-tab" onclick="selectLoanType('Refinancing Home Loan')" data-loan-type="Refinancing Home Loan">
+                        <i data-lucide="repeat"></i>
+                        Refinancing Home Loan
+                    </button>
+                    <button class="loan-tab" onclick="selectLoanType('Commercial/Industrial')" data-loan-type="Commercial/Industrial">
+                        <i data-lucide="briefcase"></i>
+                        Commercial/Industrial
+                    </button>
+                </div>
+
+                
+<!-- Enhanced Search Section with Additional Filters -->
+<div class="search-section">
+    <form class="search-form" id="searchForm" onsubmit="searchPackages(event)">
+        <!-- Row 1: Basic Filters -->
+        <div class="form-group">
+            <label class="form-label">Property Type</label>
+            <select class="form-select" id="propertyType">
+                <option value="">Select Property Type</option>
+                <option value="Private Property">Private Property</option>
+                <option value="HDB">HDB</option>
+                <option value="EC">EC</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Industrial">Industrial</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Property Status</label>
+            <select class="form-select" id="propertyStatus">
+                <option value="">Select Property Status</option>
+                <option value="Completed">Completed</option>
+                <option value="BUC">BUC</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Buy Under</label>
+            <select class="form-select" id="buyUnder">
+                <option value="">Select Buy Under</option>
+                <option value="Individual Name">Individual Name</option>
+                <option value="Company Operating">Company Operating</option>
+                <option value="Company Investment">Company Investment</option>
+            </select>
+        </div>
+        
+        <!-- Row 2: Financial Parameters -->
+        <div class="form-group">
+            <label class="form-label">Loan Amount ($)</label>
+            <input type="number" class="form-input" id="loanAmount" placeholder="500,000" min="0" step="1000">
+        </div>
+        
+        <div class="form-group">
+    <label class="form-label">Loan Tenure (Years)</label>
+    <input type="number" class="form-input" id="loanTenure" placeholder="25" min="1" max="50" step="1">
+</div>
+
+<!-- NEW: Existing Interest Rate for Refinancing -->
+<div class="form-group hidden" id="existingRateGroup">
+    <label class="form-label">Current Interest Rate (%)</label>
+    <input type="number" class="form-input" id="existingInterestRate" placeholder="3.50" min="0" max="20" step="0.01">
+    
+</div>
+        <div class="form-group hidden" id="existingBankGroup">
+    <label class="form-label">Current Bank</label>
+    <select class="form-select" id="existingBank">
+        <option value="">Select Current Bank</option>
+        <option value="CIMB">CIMB</option>
+        <option value="OCBC">OCBC</option>
+        <option value="UOB">UOB</option>
+        <option value="DBS">DBS</option>
+        <option value="MBB">MBB</option>
+        <option value="SCB">SCB</option>
+        <option value="HSBC">HSBC</option>
+        <option value="SBI">SBI</option>
+        <option value="BOC">BOC</option>
+        <option value="HLF">HLF</option>
+        <option value="SF">SF</option>
+        <option value="RHB">RHB</option>
+        <option value="SIF">SIF</option>
+        <option value="Citibank">Citibank</option>
+    </select>
+   </div>
+
+        <!-- Row 3: New Enhanced Filters -->
+       <div class="form-group">
+    <label class="form-label">Bank (Multiple Selection)</label>
+    <div class="multi-select-filter" id="bankMultiSelect">
+        <button type="button" class="filter-select-btn" onclick="toggleMultiSelect('bankMultiSelect')">
+            <span id="bankSelected">Select Banks</span>
+            <i data-lucide="chevron-down"></i>
+        </button>
+        <div class="multi-select-dropdown">
+            <label data-all="true">
+                <input type="checkbox" id="bankAll" onchange="selectAllBanks()">
+                Select All Banks
+            </label>
+            <label><input type="checkbox" value="CIMB"> CIMB</label>
+            <label><input type="checkbox" value="OCBC"> OCBC</label>
+            <label><input type="checkbox" value="UOB"> UOB</label>
+            <label><input type="checkbox" value="DBS"> DBS</label>
+            <label><input type="checkbox" value="MBB"> MBB</label>
+            <label><input type="checkbox" value="SCB"> SCB</label>
+            <label><input type="checkbox" value="HSBC"> HSBC</label>
+            <label><input type="checkbox" value="SBI"> SBI</label>
+            <label><input type="checkbox" value="BOC"> BOC</label>
+            <label><input type="checkbox" value="HLF"> HLF</label>
+            <label><input type="checkbox" value="SF"> SF</label>
+            <label><input type="checkbox" value="RHB"> RHB</label>
+            <label><input type="checkbox" value="SIF"> SIF</label>
+            <label><input type="checkbox" value="Citibank"> Citibank</label>
+        </div>
+    </div>
+</div>
+        
+        <div class="form-group">
+            <label class="form-label">Rate Type</label>
+            <select class="form-select" id="rateTypeFilter">
+                <option value="">Select Rate Type</option>
+                <option value="Fixed">Fixed</option>
+                <option value="Floating">Floating</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Lock-in Period</label>
+            <select class="form-select" id="lockPeriodFilter">
+                <option value="">Select Lock Period</option>
+                <option value="0 Year">0 Year</option>
+                <option value="1 Year">1 Year</option>
+                <option value="2 Years">2 Years</option>
+                <option value="3 Years">3 Years</option>
+                <option value="4 Years">4 Years</option>
+                <option value="5 Years">5 Years</option>
+                <option value="6 Years">6 Years</option>
+                <option value="7 Years">7 Years</option>
+                <option value="8 Years">8 Years</option>
+                <option value="9 Years">9 Years</option>
+                <option value="10 Years">10 Years</option>
+            </select>
+        </div>
+
+        <!-- Row 4: Package Features -->
+        <div class="form-group">
+    <label class="form-label">Package Features (Multiple Selection)</label>
+    <div class="multi-select-filter" id="featuresMultiSelect">
+        <button type="button" class="filter-select-btn" onclick="toggleMultiSelect('featuresMultiSelect')">
+            <span id="featuresSelected">Select Features</span>
+            <i data-lucide="chevron-down"></i>
+        </button>
+        <div class="multi-select-dropdown">
+            <label data-all="true">
+                <input type="checkbox" id="featuresAll" onchange="selectAllFeatures()">
+                Select All Features
+            </label>
+            <label><input type="checkbox" value="legal_fee_subsidy"> Legal Fee Subsidy</label>
+            <label><input type="checkbox" value="cash_rebate"> Cash Rebate</label>
+            <label><input type="checkbox" value="free_package_conversion_12m"> Free Conversion (12M)</label>
+            <label><input type="checkbox" value="free_package_conversion_24m"> Free Conversion (24M)</label>
+            <label><input type="checkbox" value="valuation_subsidy"> Valuation Subsidy</label>
+            <label><input type="checkbox" value="partial_repayment"> Partial Repayment</label>
+            <label><input type="checkbox" value="waiver_due_to_sales"> Waiver Due to Sales</label>
+        </div>
+    </div>
+</div>
+
+        
+        
+        <div class="form-group">
+            <button type="button" class="search-button secondary-button" onclick="clearAllFilters()">
+                <i data-lucide="rotate-ccw"></i>
+                Clear All Filters
+            </button>
+        </div>
+    </form>
+</div>
+
+                <!-- Results Section -->
+              <div class="results-section hidden" id="resultsContainer">
+    <div class="results-header">
+        <div class="results-title">
+            <i data-lucide="trending-up"></i>
+            Recommended Packages
+            <span class="results-count" id="resultsCount">0</span>
+        </div>
+        <div class="results-actions">
+            <!-- Move options to the left -->
+            <div class="report-options">
+                <div class="option-group">
+                    <label for="clientName" class="option-label">Client Name:</label>
+                    <input type="text" id="clientName" class="client-name-input" placeholder="Enter client name for report" />
+                </div>
+                <div class="option-group">
+                    <input type="checkbox" id="hideBankNames" class="option-checkbox">
+                    <label for="hideBankNames" class="option-checkbox-label">Hide Bank Names in Report</label>
+                </div>
+            </div>
+
+            <!-- Buttons aligned to the right -->
+            <div class="action-buttons">
+                <button class="download-btn" onclick="generateProfessionalReport()">
+                    <i data-lucide="file-text"></i>
+                    Generate PDF Report
+                </button>
+                <button class="download-btn csv-export" onclick="exportCSV()">
+                    <i data-lucide="download"></i>
+                    Export CSV
+                </button>
+                <button class="download-btn secondary-button" onclick="toggleAllSelections()">
+                    <i data-lucide="check-square"></i>
+                    Toggle All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+                    
+                    <div class="packages-container" id="packagesContainer">
+                        <!-- Package cards will be dynamically inserted here -->
+                    </div>
+                    
+                    <div class="no-results" id="noResults">
+                        <i data-lucide="search"></i>
+                        <h3>No Matching Packages Found</h3>
+                        <p>Try adjusting your search criteria to find more suitable options.</p>
+                        <button class="btn btn-primary" onclick="clearFilters()">
+                            <i data-lucide="rotate-ccw"></i>
+                            Reset Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <span class="loading-message">Finding the best packages for you...</span>
+    </div>
+</div>
+
+</body>
+</html>
