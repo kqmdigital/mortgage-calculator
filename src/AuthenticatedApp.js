@@ -330,16 +330,18 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     let relevantCommitments;
     
     if (propertyType === 'hdb' || propertyType === 'ec') {
-      // HDB/EC uses the more restrictive of MSR or TDSR
+      // HDB/EC uses the more restrictive of MSR or TDSR for affordability calculation
+      // But for display purposes, always show MSR-relevant commitments (property loans only)
+      // since MSR is the primary regulation for these property types
       if (maxMonthlyMSR < maxMonthlyTDSR) {
         maxMonthlyInstallment = maxMonthlyMSR;
         limitingFactor = 'MSR (30%)';
-        relevantCommitments = totalPropertyLoans; // MSR only includes property loans
       } else {
         maxMonthlyInstallment = maxMonthlyTDSR;
         limitingFactor = 'TDSR (55%)';
-        relevantCommitments = totalCommitmentsTDSR; // TDSR includes all commitments
       }
+      // For HDB/EC, always display MSR-relevant commitments in affordability view
+      relevantCommitments = totalPropertyLoans; // MSR only includes property loans
     } else {
       // Private and Commercial use TDSR only
       maxMonthlyInstallment = maxMonthlyTDSR;
@@ -2008,7 +2010,12 @@ This ensures all content fits properly without being cut off.`);
                       <div className="text-xl font-bold text-indigo-600">{formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-medium text-gray-600 mb-1">Combined Monthly Commitment</div>
+                      <div className="text-sm font-medium text-gray-600 mb-1">
+                        {(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') 
+                          ? 'MSR Commitments (Property Loans)' 
+                          : 'Combined Monthly Commitment'
+                        }
+                      </div>
                       <div className="text-xl font-bold text-purple-600">{formatCurrency(memoizedAffordability.relevantCommitments || 0)}</div>
                     </div>
                   </div>
