@@ -951,8 +951,8 @@ const RecommendedPackages = () => {
               .no-print, header, footer { display: none !important; }
             }
             
-            * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; margin: 0; padding: 0; background: white !important; color: #1a1a1a !important; }
+            * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; font-style: normal !important; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; margin: 0; padding: 0; background: white !important; color: #1a1a1a !important; font-style: normal !important; }
             
             .pdf-report-container { padding: 20px !important; background: white !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; line-height: 1.4 !important; color: #1f2937 !important; max-width: none !important; margin: 0 auto !important; overflow: visible !important; }
             
@@ -1031,13 +1031,24 @@ const RecommendedPackages = () => {
             
             .pdf-monthly-installment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
             .pdf-monthly-installment-table .year-label { background: #f3f4f6 !important; font-weight: 600 !important; color: #374151 !important; text-align: left !important; padding-left: 8px !important; }
-            .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: italic !important; font-size: 9px !important; }
+            .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: normal !important; font-size: 9px !important; }
             .pdf-monthly-installment-table .package-value { color: #1d4ed8 !important; font-weight: 600 !important; }
             .pdf-monthly-installment-table .package-detail { color: #6b7280 !important; font-size: 11px !important; }
-            /* Fix alternating row background colors */
-            .pdf-monthly-installment-table tbody tr:nth-child(odd) { background: #f8fafc !important; }
-            .pdf-monthly-installment-table tbody tr:nth-child(even) { background: white !important; }
-            .pdf-monthly-installment-table td.package-value.recommended, .pdf-monthly-installment-table td.package-detail.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
+            /* Fix alternating row background colors - only apply to detail rows */
+            .pdf-monthly-installment-table tbody tr.detail-row:nth-child(odd) { background: #f8fafc !important; }
+            .pdf-monthly-installment-table tbody tr.detail-row:nth-child(even) { background: white !important; }
+            
+            /* Recommended cell highlighting that respects year grouping */
+            .pdf-monthly-installment-table td.package-value.recommended, 
+            .pdf-monthly-installment-table td.package-detail.recommended { 
+              background: rgba(38, 74, 130, 0.20) !important; font-weight: 600 !important; color: #264A82 !important; 
+            }
+            
+            /* Special highlighting for rate and year rows */
+            .pdf-monthly-installment-table .rate-info-row td.recommended,
+            .pdf-monthly-installment-table .year-row td.recommended { 
+              background: rgba(38, 74, 130, 0.35) !important; font-weight: 700 !important; color: #1a365d !important; 
+            }
             .pdf-monthly-installment-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-monthly-installment-table td:not(:first-child) { width: 25% !important; }
             
@@ -1050,6 +1061,34 @@ const RecommendedPackages = () => {
             .pdf-monthly-installment-table .rate-info-row .detail-label { font-size: 11px !important; }
             .pdf-monthly-installment-table .saving-row td { font-size: 11px !important; }
             .pdf-monthly-installment-table .saving-row .detail-label { font-size: 11px !important; }
+            
+            /* Visual separation between year sections */
+            .pdf-monthly-installment-table .rate-info-row { 
+              border-top: 2px solid #264A82 !important; 
+              background: #e8f2ff !important; 
+            }
+            .pdf-monthly-installment-table .rate-info-row td { 
+              background: #e8f2ff !important; 
+              font-weight: 600 !important; 
+              color: #264A82 !important; 
+            }
+            .pdf-monthly-installment-table .year-row { 
+              background: #f0f7ff !important; 
+            }
+            .pdf-monthly-installment-table .year-row td { 
+              background: #f0f7ff !important; 
+              font-weight: 600 !important; 
+              border-bottom: 1px solid #264A82 !important; 
+            }
+            
+            /* Add spacing after each year section */
+            .pdf-monthly-installment-table .saving-row { 
+              border-bottom: 3px solid #264A82 !important; 
+              margin-bottom: 8px !important; 
+            }
+            .pdf-monthly-installment-table .saving-row td { 
+              border-bottom: 3px solid #264A82 !important; 
+            }
             
             /* Bar Chart Styles - Match HTML Version */
             .pdf-chart-section { margin: 20px 0 !important; page-break-inside: avoid !important; }
