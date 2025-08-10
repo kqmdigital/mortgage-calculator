@@ -862,11 +862,18 @@ const RecommendedPackages = () => {
           if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
             return formatDetailedRateDisplay(pkg, 'thereafter');
           }
-          return '-';
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+            <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">-</div>
+          </div>`;
         }
 
         if (rateType === 'FIXED') {
           const rate = calculateInterestRate(pkg, year);
+          if (!rate || isNaN(rate)) {
+            return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+              <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">N/A</div>
+            </div>`;
+          }
           return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
             <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${rate.toFixed(2)}%</div>
             <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">FIXED</div>
@@ -877,6 +884,12 @@ const RecommendedPackages = () => {
           const referenceRateValue = referenceRate ? parseFloat(referenceRate.rate_value) : (rateType.includes('SORA') ? 1.65 : 3.25);
           const spreadValue = parseFloat(value) || 0;
           const totalRate = calculateInterestRate(pkg, year);
+          
+          if (!totalRate || isNaN(totalRate)) {
+            return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+              <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">N/A</div>
+            </div>`;
+          }
           
           const operatorSymbol = operator === '+' ? '+' : '-';
           return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
@@ -956,10 +969,10 @@ const RecommendedPackages = () => {
             .pdf-info-label { color: white !important; margin-bottom: 4px !important; font-weight: 600 !important; font-size: 9px !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; line-height: 1.1 !important; }
             .pdf-info-value { font-size: 12px !important; font-weight: 600 !important; color: white !important; line-height: 1.2 !important; margin: 0 !important; }
             
-            .pdf-comparison-section { margin-bottom: 25px !important; }
+            .pdf-comparison-section { margin-bottom: 25px !important; page-break-inside: avoid !important; }
             .pdf-comparison-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
             
-            .pdf-comparison-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; }
+            .pdf-comparison-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; }
             .pdf-comparison-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
             .pdf-comparison-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-comparison-table th:first-child { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
@@ -968,14 +981,14 @@ const RecommendedPackages = () => {
             .pdf-comparison-table th.recommended::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             
             .pdf-comparison-table tbody tr:nth-child(even) { background: #f8fafc !important; }
-            .pdf-comparison-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
+            .pdf-comparison-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
             .pdf-comparison-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-comparison-table td.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
             .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; text-align: center !important; vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; position: relative !important; }
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
-            .pdf-comparison-table td.features-cell { text-align: left !important; vertical-align: middle !important; font-size: 11px !important; line-height: 1.3 !important; padding: 8px 4px !important; word-wrap: break-word !important; }
-            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.2 !important; }
+            .pdf-comparison-table td.features-cell { text-align: left !important; vertical-align: top !important; font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
+            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: top !important; max-height: none !important; }
             .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
             .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
             
@@ -1220,7 +1233,7 @@ const RecommendedPackages = () => {
                     <td>Remarks</td>
                     ${enhancedPackages.map((pkg, index) => `
                       <td class="${index === 0 ? 'recommended features-cell remarks-cell' : 'features-cell remarks-cell'}">
-                        ${(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 200)}${(pkg.custom_remarks || pkg.remarks || '').length > 200 ? '...' : ''}
+                        ${(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 300)}${(pkg.custom_remarks || pkg.remarks || '').length > 300 ? '...' : ''}
                       </td>
                     `).join('')}
                   </tr>
