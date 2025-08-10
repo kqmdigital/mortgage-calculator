@@ -908,58 +908,44 @@ const RecommendedPackages = () => {
             .pdf-savings-item .sub-label { font-size: 11px !important; color: #6b7280 !important; margin-top: 4px !important; }
             ` : ''}
             
-            /* Monthly Repayment Comparison Table Styles */
-            .pdf-repayment-section { margin-bottom: 25px !important; page-break-inside: avoid !important; }
-            .pdf-repayment-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
-            .pdf-repayment-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 8px !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; margin-bottom: 15px !important; }
-            .pdf-repayment-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
-            .pdf-repayment-table th { padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 11px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; vertical-align: middle !important; }
-            .pdf-repayment-table th.recommended { background: #1e40af !important; }
+            /* Monthly Installment Comparison Table - Match HTML Version */
+            .pdf-monthly-installment-section { margin: 25px 0 !important; page-break-inside: avoid !important; }
+            .pdf-section-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
             
-            /* Row styling for clean separation */
-            .pdf-repayment-table .year-section { background: #f8fafc !important; }
-            .pdf-repayment-table .mi-row { background: #ffffff !important; }
-            .pdf-repayment-table .breakdown-row { background: #fafbfc !important; border-bottom: 2px solid #e2e8f0 !important; }
+            .pdf-monthly-installment-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; }
+            .pdf-monthly-installment-table th { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-monthly-installment-table .row-header { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
+            .pdf-monthly-installment-table .recommended-package-header { background: #1e40af !important; position: relative !important; width: 25% !important; }
+            .pdf-monthly-installment-table .recommended-package-header::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
+            .pdf-monthly-installment-table .package-header { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; width: 25% !important; }
             
-            .pdf-repayment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #f1f5f9 !important; font-size: 10px !important; line-height: 1.3 !important; vertical-align: middle !important; }
-            .pdf-repayment-table td.year-cell { background: #264A82 !important; color: white !important; font-weight: 700 !important; font-size: 11px !important; writing-mode: horizontal-tb !important; }
-            .pdf-repayment-table td.recommended { background: rgba(38, 74, 130, 0.1) !important; font-weight: 600 !important; color: #264A82 !important; }
-            .pdf-repayment-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; }
-            .pdf-repayment-table td.amount-value { font-weight: 600 !important; color: #059669 !important; }
+            .pdf-monthly-installment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
+            .pdf-monthly-installment-table .year-label { background: #f3f4f6 !important; font-weight: 600 !important; color: #374151 !important; text-align: left !important; padding-left: 8px !important; }
+            .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: italic !important; font-size: 9px !important; }
+            .pdf-monthly-installment-table .package-value { color: #1d4ed8 !important; font-weight: 600 !important; }
+            .pdf-monthly-installment-table .package-detail { color: #6b7280 !important; font-size: 11px !important; }
+            .pdf-monthly-installment-table tbody tr:nth-child(even) { background: #f8fafc !important; }
+            .pdf-monthly-installment-table td.package-value.recommended, .pdf-monthly-installment-table td.package-detail.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
+            .pdf-monthly-installment-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
+            .pdf-monthly-installment-table td:not(:first-child) { width: 25% !important; }
             
-            /* Breakdown cell styling */
-            .pdf-repayment-table td.breakdown-cell { padding: 4px !important; vertical-align: top !important; }
-            .breakdown-cell .principal-line, .breakdown-cell .interest-line { font-size: 8px !important; color: #6b7280 !important; margin: 2px 0 !important; }
-            .breakdown-cell .principal-value { color: #10b981 !important; font-weight: 600 !important; font-size: 9px !important; margin-bottom: 4px !important; }
-            .breakdown-cell .interest-value { color: #f59e0b !important; font-weight: 600 !important; font-size: 9px !important; }
-            
-            /* Monthly Repayment Breakdown Chart Styles */
-            .pdf-chart-section { margin-bottom: 25px !important; page-break-inside: avoid !important; }
-            .pdf-chart-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
-            
-            .chart-bars-container { display: flex !important; justify-content: center !important; align-items: flex-end !important; gap: 40px !important; padding: 20px !important; margin-bottom: 15px !important; }
-            .chart-column { display: flex !important; flex-direction: column !important; align-items: center !important; }
-            .chart-rate-header { font-size: 12px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 10px !important; }
-            
-            .chart-bar-stack { width: 80px !important; height: 200px !important; border-radius: 8px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important; margin-bottom: 10px !important; }
-            
-            .chart-bar-segment { display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; color: white !important; position: relative !important; }
-            .interest-segment { background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%) !important; }
-            .principal-segment { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
-            
-            .chart-segment-label { font-size: 8px !important; font-weight: 600 !important; margin-bottom: 2px !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
-            .chart-segment-value { font-size: 7px !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
-            
-            .chart-package-label { font-size: 11px !important; font-weight: 700 !important; color: #374151 !important; margin-bottom: 2px !important; }
-            .chart-total-value { font-size: 10px !important; font-weight: 700 !important; color: #264A82 !important; }
-            
-            /* Chart Legend Styles */
-            .chart-legend { display: flex !important; justify-content: center !important; align-items: center !important; gap: 30px !important; margin-top: 15px !important; }
-            .legend-item { display: flex !important; align-items: center !important; gap: 8px !important; }
-            .legend-color { width: 16px !important; height: 16px !important; border-radius: 4px !important; }
-            .principal-color { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
-            .interest-color { background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%) !important; }
-            .legend-item span { font-size: 12px !important; font-weight: 600 !important; color: #374151 !important; }
+            /* Bar Chart Styles - Match HTML Version */
+            .pdf-chart-section { margin: 20px 0 !important; page-break-inside: avoid !important; }
+            .pdf-bar-chart { display: flex !important; justify-content: space-around !important; align-items: flex-end !important; height: 280px !important; padding: 20px !important; background: #f8fafc !important; border-radius: 12px !important; margin: 15px 0 !important; border: 1px solid #e2e8f0 !important; }
+            .pdf-bar-item { display: flex !important; flex-direction: column !important; align-items: center !important; position: relative !important; margin: 0 10px !important; }
+            .pdf-bar-rate { font-size: 12px !important; font-weight: 600 !important; color: #264A82 !important; margin-bottom: 8px !important; text-align: center !important; }
+            .pdf-bar-container { height: 200px !important; display: flex !important; align-items: flex-end !important; margin-bottom: 8px !important; }
+            .pdf-bar-stack { width: 80px !important; display: flex !important; flex-direction: column-reverse !important; border-radius: 6px 6px 0 0 !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important; }
+            .pdf-bar-segment.principal { background: #264A82 !important; width: 100% !important; min-height: 40px !important; display: flex !important; align-items: center !important; justify-content: center !important; position: relative !important; }
+            .pdf-bar-segment.interest { background: #93c5fd !important; width: 100% !important; min-height: 30px !important; display: flex !important; align-items: center !important; justify-content: center !important; position: relative !important; }
+            .pdf-bar-label { font-size: 11px !important; font-weight: 600 !important; color: #374151 !important; text-align: center !important; margin-bottom: 4px !important; white-space: nowrap !important; }
+            .pdf-bar-amount { font-size: 12px !important; font-weight: 500 !important; color: #264A82 !important; text-align: center !important; }
+            .pdf-chart-legend { display: flex !important; justify-content: center !important; gap: 20px !important; margin-top: 15px !important; }
+            .pdf-legend-item { display: flex !important; align-items: center !important; gap: 6px !important; font-size: 11px !important; color: #374151 !important; }
+            .pdf-legend-color { width: 16px !important; height: 16px !important; border-radius: 3px !important; }
+            .pdf-legend-color.principal { background: #264A82 !important; }
+            .pdf-legend-color.interest { background: #93c5fd !important; }
+            .pdf-bar-text { font-size: 9px !important; font-weight: 500 !important; color: white !important; text-align: center !important; line-height: 1.2 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; white-space: nowrap !important; display: block !important; }
             
             .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; }
             .pdf-disclaimer-title { font-weight: 700 !important; color: #374151 !important; margin-bottom: 6px !important; font-size: 12px !important; }
@@ -1151,147 +1137,181 @@ const RecommendedPackages = () => {
             </div>
 
             <!-- Monthly Repayment Comparison Section -->
-            <div class="pdf-repayment-section">
-              <div class="pdf-repayment-title">Monthly Repayment Comparison</div>
-              <table class="pdf-repayment-table">
+            <div class="pdf-monthly-installment-section">
+              <div class="pdf-section-title">Monthly Repayment Comparison</div>
+              
+              <table class="pdf-monthly-installment-table">
                 <thead>
                   <tr>
-                    <th style="width: 25%; background: #1e3a6f !important;">RATE</th>
-                    <th class="recommended" style="width: 25% !important;">PKG(1) RECOMMENDED</th>
-                    <th style="width: 25% !important;">PKG(2)</th>
-                    <th style="width: 25% !important;">PKG(3)</th>
+                    <th class="row-header">RATE</th>
+                    <th class="recommended-package-header">PKG(1) RECOMMENDED</th>
+                    <th class="package-header">PKG(2)</th>
+                    <th class="package-header">PKG(3)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${[1, 2, 3, 4, 5].map(year => {
-                    const yearInterestRates = enhancedPackages.map(pkg => calculateInterestRate(pkg, year));
-                    const yearMonthlyPayments = enhancedPackages.map((pkg, pkgIndex) => 
-                      calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, yearInterestRates[pkgIndex])
-                    );
-                    
-                    // Calculate principal and interest for each package
-                    const calculatePrincipalInterest = (monthlyPayment, interestRate, loanAmount, year) => {
-                      const monthlyInterestRate = interestRate / 100 / 12;
-                      const monthsElapsed = (year - 1) * 12;
+                  ${(() => {
+                    // Calculate detailed repayment schedule for each package
+                    const calculateDetailedSchedule = (pkg, loanAmount, tenureYears) => {
+                      const totalMonths = tenureYears * 12;
+                      let balance = loanAmount;
+                      const yearlyData = [];
                       
-                      // Calculate remaining balance at start of year
-                      let remainingBalance = loanAmount;
-                      for (let month = 0; month < monthsElapsed; month++) {
-                        const interestPayment = remainingBalance * monthlyInterestRate;
-                        const principalPayment = monthlyPayment - interestPayment;
-                        remainingBalance = Math.max(0, remainingBalance - principalPayment);
-                      }
-                      
-                      // Calculate annual principal and interest for the year
-                      let annualPrincipal = 0;
-                      let annualInterest = 0;
-                      let currentBalance = remainingBalance;
-                      
-                      for (let month = 0; month < 12 && currentBalance > 0; month++) {
-                        const interestPayment = currentBalance * monthlyInterestRate;
-                        const principalPayment = Math.min(monthlyPayment - interestPayment, currentBalance);
+                      for (let year = 1; year <= Math.min(5, tenureYears); year++) {
+                        const yearStartBalance = balance;
+                        let yearInterestPaid = 0;
+                        let yearPrincipalPaid = 0;
                         
-                        annualPrincipal += principalPayment;
-                        annualInterest += interestPayment;
-                        currentBalance = Math.max(0, currentBalance - principalPayment);
+                        // Get rate for this year
+                        const currentRate = calculateInterestRate(pkg, year <= 5 ? year : 'thereafter');
+                        
+                        // Calculate monthly payment for this rate (using total loan amount and tenure)
+                        const monthlyRate = currentRate / 100 / 12;
+                        const monthlyPayment = monthlyRate === 0 ? loanAmount / totalMonths :
+                          (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+                          (Math.pow(1 + monthlyRate, totalMonths) - 1);
+                        
+                        // Calculate monthly breakdown for this year
+                        for (let month = 1; month <= 12 && balance > 0.01; month++) {
+                          const interestPayment = balance * monthlyRate;
+                          const principalPayment = Math.min(monthlyPayment - interestPayment, balance);
+                          
+                          yearInterestPaid += interestPayment;
+                          yearPrincipalPaid += principalPayment;
+                          balance = Math.max(0, balance - principalPayment);
+                          
+                          if (balance <= 0.01) break;
+                        }
+                        
+                        yearlyData.push({
+                          year,
+                          rate: currentRate,
+                          monthlyInstalment: monthlyPayment,
+                          interestPaid: yearInterestPaid,
+                          principalPaid: yearPrincipalPaid
+                        });
+                        
+                        if (balance <= 0.01) break;
                       }
                       
-                      return { principal: annualPrincipal, interest: annualInterest };
+                      return yearlyData;
                     };
                     
-                    return `
-                      <!-- Year ${year} - MI Row -->
-                      <tr class="year-section">
-                        <td rowspan="3" class="year-cell">Year ${year} - MI</td>
-                        <td class="recommended rate-value">${yearInterestRates[0].toFixed(2)}%</td>
-                        <td class="rate-value">${yearInterestRates[1].toFixed(2)}%</td>
-                        <td class="rate-value">${yearInterestRates[2].toFixed(2)}%</td>
-                      </tr>
+                    // Calculate schedules for all packages
+                    const packageSchedules = enhancedPackages.map(pkg => 
+                      calculateDetailedSchedule(pkg, searchForm.loanAmount || 500000, searchForm.loanTenure || 25)
+                    );
+                    
+                    return [1, 2, 3, 4, 5].map(year => {
+                      const yearData = packageSchedules.map(schedule => 
+                        schedule.find(data => data.year === year)
+                      );
                       
-                      <!-- Monthly Installment Row -->
-                      <tr class="mi-row">
-                        <td class="recommended amount-value">${formatCurrency(yearMonthlyPayments[0])}</td>
-                        <td class="amount-value">${formatCurrency(yearMonthlyPayments[1])}</td>
-                        <td class="amount-value">${formatCurrency(yearMonthlyPayments[2])}</td>
-                      </tr>
-                      
-                      <!-- Principal and Interest Row -->
-                      <tr class="breakdown-row">
-                        ${enhancedPackages.map((pkg, index) => {
-                          const breakdown = calculatePrincipalInterest(
-                            yearMonthlyPayments[index], 
-                            yearInterestRates[index], 
-                            searchForm.loanAmount || 500000, 
-                            year
-                          );
-                          
-                          return `
-                            <td class="${index === 0 ? 'recommended breakdown-cell' : 'breakdown-cell'}">
-                              <div class="principal-line">Total Principal</div>
-                              <div class="principal-value">${formatCurrency(breakdown.principal)}</div>
-                              <div class="interest-line">Total Interest</div>
-                              <div class="interest-value">${formatCurrency(breakdown.interest)}</div>
+                      return `
+                        <tr class="year-row">
+                          <td class="year-label">Year ${year} - MI</td>
+                          ${yearData.map((data, index) => `
+                            <td class="package-value ${index === 0 ? 'recommended' : ''}">
+                              ${data ? formatCurrency(data.monthlyInstalment) : 'N/A'}
                             </td>
-                          `;
-                        }).join('')}
-                      </tr>
-                    `;
-                  }).join('')}
+                          `).join('')}
+                        </tr>
+                        
+                        <tr class="detail-row">
+                          <td class="detail-label">Total Principal</td>
+                          ${yearData.map((data, index) => `
+                            <td class="package-detail ${index === 0 ? 'recommended' : ''}">
+                              ${data ? formatCurrency(data.principalPaid) : 'N/A'}
+                            </td>
+                          `).join('')}
+                        </tr>
+                        
+                        <tr class="detail-row">
+                          <td class="detail-label">Total Interest</td>
+                          ${yearData.map((data, index) => `
+                            <td class="package-detail ${index === 0 ? 'recommended' : ''}">
+                              ${data ? formatCurrency(data.interestPaid) : 'N/A'}
+                            </td>
+                          `).join('')}
+                        </tr>
+                        
+                        ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+                        <tr class="detail-row">
+                          <td class="detail-label">Total Saving</td>
+                          ${yearData.map((data, index) => {
+                            if (!data) return '<td class="package-detail">N/A</td>';
+                            const currentMonthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, parseFloat(searchForm.existingInterestRate));
+                            const packageMonthlyPayment = data.monthlyInstalment;
+                            const monthlySavings = currentMonthlyPayment - packageMonthlyPayment;
+                            const yearSavings = monthlySavings * 12;
+                            return `<td class="package-detail ${index === 0 ? 'recommended' : ''}">${formatCurrency(yearSavings)}</td>`;
+                          }).join('')}
+                        </tr>
+                        ` : ''}
+                      `;
+                    }).join('');
+                  })()}
                 </tbody>
               </table>
             </div>
 
             <!-- Monthly Repayment Breakdown Chart -->
             <div class="pdf-chart-section">
-              <div class="pdf-chart-title">Monthly Repayment Breakdown</div>
+              <div class="pdf-section-title">Monthly Repayment Breakdown</div>
               
-              <div class="chart-bars-container">
+              <div class="pdf-bar-chart">
                 ${enhancedPackages.map((pkg, index) => {
-                  const rate = calculateInterestRate(pkg, 1); // Use Year 1 rate
+                  // Get Year 1 data for each package
+                  const rate = calculateInterestRate(pkg, 1);
                   const monthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, rate);
                   
-                  // Calculate actual principal and interest for first year
-                  const monthlyInterestRate = rate / 100 / 12;
+                  // Calculate monthly principal and interest for Year 1
                   const loanAmount = searchForm.loanAmount || 500000;
+                  const monthlyRate = rate / 100 / 12;
+                  const totalMonths = (searchForm.loanTenure || 25) * 12;
                   
-                  // Simple approximation for monthly breakdown
-                  const avgMonthlyInterest = loanAmount * monthlyInterestRate;
-                  const avgMonthlyPrincipal = monthlyPayment - avgMonthlyInterest;
+                  // First month's interest and principal (as approximation)
+                  const monthlyInterest = loanAmount * monthlyRate;
+                  const monthlyPrincipal = monthlyPayment - monthlyInterest;
                   
-                  // Calculate percentages for bar height
-                  const principalPercent = (avgMonthlyPrincipal / monthlyPayment) * 100;
-                  const interestPercent = (avgMonthlyInterest / monthlyPayment) * 100;
+                  // Calculate bar heights - normalize to 200px max
+                  const allPayments = enhancedPackages.map(p => {
+                    const r = calculateInterestRate(p, 1);
+                    return calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, r);
+                  });
+                  const maxPayment = Math.max(...allPayments);
+                  const barHeight = (monthlyPayment / maxPayment) * 200;
+                  const principalHeight = (monthlyPrincipal / monthlyPayment) * barHeight;
+                  const interestHeight = (monthlyInterest / monthlyPayment) * barHeight;
                   
                   return `
-                    <div class="chart-column">
-                      <div class="chart-rate-header">${rate.toFixed(2)}%</div>
-                      
-                      <div class="chart-bar-stack">
-                        <div class="chart-bar-segment interest-segment" style="height: ${interestPercent}%;">
-                          <div class="chart-segment-label">Interest</div>
-                          <div class="chart-segment-value">${formatCurrency(avgMonthlyInterest)}</div>
-                        </div>
-                        <div class="chart-bar-segment principal-segment" style="height: ${principalPercent}%;">
-                          <div class="chart-segment-label">Principal</div>
-                          <div class="chart-segment-value">${formatCurrency(avgMonthlyPrincipal)}</div>
+                    <div class="pdf-bar-item">
+                      <div class="pdf-bar-rate">${rate.toFixed(2)}%</div>
+                      <div class="pdf-bar-container">
+                        <div class="pdf-bar-stack">
+                          <div class="pdf-bar-segment interest" style="height: ${interestHeight}px;">
+                            <span class="pdf-bar-text">Interest<br>${formatCurrency(monthlyInterest)}</span>
+                          </div>
+                          <div class="pdf-bar-segment principal" style="height: ${principalHeight}px;">
+                            <span class="pdf-bar-text">Principal<br>${formatCurrency(monthlyPrincipal)}</span>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div class="chart-package-label">PKG(${index + 1})</div>
-                      <div class="chart-total-value">${formatCurrency(monthlyPayment)}</div>
+                      <div class="pdf-bar-label">PKG(${index + 1})</div>
+                      <div class="pdf-bar-amount">${formatCurrency(monthlyPayment)}</div>
                     </div>
                   `;
                 }).join('')}
               </div>
               
               <!-- Chart Legend -->
-              <div class="chart-legend">
-                <div class="legend-item">
-                  <div class="legend-color principal-color"></div>
+              <div class="pdf-chart-legend">
+                <div class="pdf-legend-item">
+                  <div class="pdf-legend-color principal"></div>
                   <span>Principal</span>
                 </div>
-                <div class="legend-item">
-                  <div class="legend-color interest-color"></div>
+                <div class="pdf-legend-item">
+                  <div class="pdf-legend-color interest"></div>
                   <span>Interest</span>
                 </div>
               </div>
