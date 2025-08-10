@@ -1571,79 +1571,109 @@ const RecommendedPackages = () => {
         </html>
       `;
 
-      // Create downloadable PDF using html2canvas + jsPDF
-      try {
-        // Import libraries dynamically
-        const html2canvas = (await import('html2canvas')).default;
-        const jsPDF = (await import('jspdf')).jsPDF;
-        
-        // Create a temporary div to render the report
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = reportContent;
-        tempDiv.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 800px;';
-        document.body.appendChild(tempDiv);
-        
-        // Wait a moment for styles to apply
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Convert HTML to canvas
-        const canvas = await html2canvas(tempDiv, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          width: 800,
-          height: tempDiv.scrollHeight
-        });
-        
-        // Clean up temporary div
-        document.body.removeChild(tempDiv);
-        
-        // Create PDF
-        const imgWidth = 210; // A4 width in mm
-        const pageHeight = 297; // A4 height in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        let heightLeft = imgHeight;
-        let position = 0;
-        
-        // Add first page
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
-        // Add additional pages if needed
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-        
-        // Download the PDF
-        const fileName = `mortgage-report-${clientName || 'client'}-${new Date().toISOString().split('T')[0]}.pdf`;
-        pdf.save(fileName);
-        
-        logger.info('PDF downloaded successfully:', fileName);
-        
-      } catch (pdfError) {
-        logger.warn('PDF generation failed, falling back to HTML download:', pdfError);
-        
-        // Fallback: Download as HTML file
-        const blob = new Blob([reportContent], { type: 'text/html' });
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = `mortgage-report-${clientName || 'client'}-${new Date().toISOString().split('T')[0]}.html`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(downloadLink.href);
-      }
-      
-      // Also open in new window as fallback option for printing
+      // Open PDF in new window with enhanced download functionality
       const printWindow = window.open('', '_blank');
       printWindow.document.write(reportContent);
       printWindow.document.close();
+      
+      // Add download and print functionality to the new window
+      setTimeout(() => {
+        // Add enhanced download functionality
+        const addDownloadFeature = () => {
+          // Create control buttons container
+          const controlsDiv = printWindow.document.createElement('div');
+          controlsDiv.id = 'pdf-controls';
+          controlsDiv.style.cssText = `
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 9999; 
+            display: flex; 
+            gap: 10px;
+            font-family: Arial, sans-serif;
+          `;
+          
+          // Download PDF button
+          const downloadBtn = printWindow.document.createElement('button');
+          downloadBtn.innerHTML = '📥 Save as PDF';
+          downloadBtn.style.cssText = `
+            background: #4CAF50; 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+          `;
+          downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
+          downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
+          downloadBtn.onclick = () => {
+            // Set print media styles and trigger print with filename
+            const fileName = \`mortgage-report-\${clientName || 'client'}-\${new Date().toISOString().split('T')[0]}\`;
+            printWindow.document.title = fileName;
+            printWindow.print();
+          };
+          
+          // Quick Print button
+          const printBtn = printWindow.document.createElement('button');
+          printBtn.innerHTML = '🖨️ Print';
+          printBtn.style.cssText = `
+            background: #2196F3; 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+          `;
+          printBtn.onmouseover = () => printBtn.style.background = '#1976D2';
+          printBtn.onmouseout = () => printBtn.style.background = '#2196F3';
+          printBtn.onclick = () => printWindow.print();
+          
+          // Close button
+          const closeBtn = printWindow.document.createElement('button');
+          closeBtn.innerHTML = '✕';
+          closeBtn.style.cssText = `
+            background: #f44336; 
+            color: white; 
+            padding: 12px 16px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+          `;
+          closeBtn.onmouseover = () => closeBtn.style.background = '#d32f2f';
+          closeBtn.onmouseout = () => closeBtn.style.background = '#f44336';
+          closeBtn.onclick = () => printWindow.close();
+          
+          // Add buttons to controls
+          controlsDiv.appendChild(downloadBtn);
+          controlsDiv.appendChild(printBtn);
+          controlsDiv.appendChild(closeBtn);
+          
+          // Add controls to page
+          printWindow.document.body.appendChild(controlsDiv);
+          
+          // Hide controls during printing
+          const style = printWindow.document.createElement('style');
+          style.textContent = '@media print { #pdf-controls { display: none !important; } }';
+          printWindow.document.head.appendChild(style);
+          
+          // Auto-focus for better UX
+          printWindow.focus();
+        };
+        
+        addDownloadFeature();
+      }, 1000);
       
       logger.info('Enhanced PDF report generated successfully');
       
@@ -2246,12 +2276,12 @@ const RecommendedPackages = () => {
                     {isGeneratingPDF ? (
                       <>
                         <div className="w-4 h-4 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-sm sm:text-sm">Generating PDF...</span>
+                        <span className="text-sm sm:text-sm">Generating...</span>
                       </>
                     ) : (
                       <>
                         <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
-                        <span className="text-sm sm:text-sm">Generate PDF Report</span>
+                        <span className="text-sm sm:text-sm">Generate Report</span>
                       </>
                     )}
                   </button>
