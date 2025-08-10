@@ -1606,6 +1606,7 @@ This ensures all content fits properly without being cut off.`);
                 <div className="relative">
                   <input
                     type="text"
+                    inputMode="numeric"
                     value={formatCurrencyInput(inputs.purchasePrice)}
                     onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                     className="standard-input currency-input"
@@ -1675,6 +1676,7 @@ This ensures all content fits properly without being cut off.`);
                     <div className="relative">
                       <input
                         type="text"
+                        inputMode="numeric"
                         value={formatCurrencyInput(inputs.customLoanAmount)}
                         onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                         className="standard-input currency-input"
@@ -1693,6 +1695,7 @@ This ensures all content fits properly without being cut off.`);
                     <input
                       type="number"
                       step="0.01"
+                      inputMode="decimal"
                       value={inputs.stressTestRate}
                       onChange={(e) => handleInputChange('stressTestRate', Number(e.target.value))}
                       className="standard-input bg-red-50 border-red-200 focus:border-red-500"
@@ -1708,6 +1711,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="number"
+                      inputMode="numeric"
                       value={inputs.loanTenor}
                       onChange={(e) => handleInputChange('loanTenor', e.target.value)}
                       max={results ? results.maxLoanTenor : "35"}
@@ -1750,6 +1754,7 @@ This ensures all content fits properly without being cut off.`);
                   <div className="relative">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={formatCurrencyInput(inputs.monthlySalaryA)}
                       onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
                       className="standard-input currency-input"

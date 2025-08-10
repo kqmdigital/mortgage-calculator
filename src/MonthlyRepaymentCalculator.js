@@ -843,6 +843,7 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="relative">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={formatNumberInput(newLoan.loanAmount)}
                       onChange={(e) => handleNewLoanChange('loanAmount', e.target.value)}
                       className="standard-input currency-input"
@@ -859,6 +860,7 @@ const MonthlyRepaymentCalculator = () => {
                       <input
                         type="number"
                         step="0.01"
+                        inputMode="decimal"
                         value={newLoan.interestRate}
                         onChange={(e) => handleNewLoanChange('interestRate', e.target.value)}
                         className="standard-input"
@@ -874,6 +876,7 @@ const MonthlyRepaymentCalculator = () => {
                       <div className="relative">
                         <input
                           type="number"
+                          inputMode="numeric"
                           value={newLoan.loanPeriodYears}
                           onChange={(e) => handleNewLoanChange('loanPeriodYears', e.target.value)}
                           className="standard-input"
@@ -885,6 +888,7 @@ const MonthlyRepaymentCalculator = () => {
                       <div className="relative">
                         <input
                           type="number"
+                          inputMode="numeric"
                           value={newLoan.loanPeriodMonths}
                           onChange={(e) => handleNewLoanChange('loanPeriodMonths', e.target.value)}
                           className="standard-input"
@@ -1201,6 +1205,7 @@ const MonthlyRepaymentCalculator = () => {
                   <div className="relative">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={formatNumberInput(existingLoan.outstandingAmount)}
                       onChange={(e) => handleExistingLoanChange('outstandingAmount', e.target.value)}
                       className="standard-input currency-input"
@@ -1226,6 +1231,7 @@ const MonthlyRepaymentCalculator = () => {
                         <input
                           type="number"
                           step="0.01"
+                          inputMode="decimal"
                           value={existingLoan.currentRate}
                           onChange={(e) => handleExistingLoanChange('currentRate', e.target.value)}
                           className="standard-input"
@@ -1241,6 +1247,7 @@ const MonthlyRepaymentCalculator = () => {
                         <div className="relative">
                           <input
                             type="number"
+                            inputMode="numeric"
                             value={existingLoan.remainingYears}
                             onChange={(e) => handleExistingLoanChange('remainingYears', e.target.value)}
                             className="standard-input"
@@ -1252,6 +1259,7 @@ const MonthlyRepaymentCalculator = () => {
                         <div className="relative">
                           <input
                             type="number"
+                            inputMode="numeric"
                             value={existingLoan.remainingMonths}
                             onChange={(e) => handleExistingLoanChange('remainingMonths', e.target.value)}
                             className="standard-input"
@@ -1281,6 +1289,7 @@ const MonthlyRepaymentCalculator = () => {
                         <input
                           type="number"
                           step="0.01"
+                          inputMode="decimal"
                           value={existingLoan.newRate}
                           onChange={(e) => handleExistingLoanChange('newRate', e.target.value)}
                           className="standard-input"

@@ -905,6 +905,7 @@ const generateProgressivePaymentReport = () => {
               <div className="relative">
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={formatNumberInput(inputs.purchasePrice)}
                   onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
                   className="standard-input currency-input"
@@ -973,6 +974,7 @@ const generateProgressivePaymentReport = () => {
                   <div className="relative">
                     <input
                       type="text"
+                      inputMode="numeric"
                       value={formatNumberInput(inputs.customLoanAmount)}
                       onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
                       className="standard-input currency-input"
@@ -989,6 +991,7 @@ const generateProgressivePaymentReport = () => {
               <div className="relative">
                 <input
                   type="number"
+                  inputMode="numeric"
                   value={inputs.tenure}
                   onChange={(e) => handleInputChange('tenure', e.target.value)}
                   className="standard-input"
@@ -1046,6 +1049,7 @@ const generateProgressivePaymentReport = () => {
                     <input
                       type="number"
                       step="0.01"
+                      inputMode="decimal"
                       value={rate.rate}
                       onChange={(e) => {
                         const newRates = [...inputs.rates];
