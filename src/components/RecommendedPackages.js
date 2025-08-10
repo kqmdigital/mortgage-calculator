@@ -1034,9 +1034,8 @@ const RecommendedPackages = () => {
             .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: normal !important; font-size: 9px !important; }
             .pdf-monthly-installment-table .package-value { color: #1d4ed8 !important; font-weight: 600 !important; }
             .pdf-monthly-installment-table .package-detail { color: #6b7280 !important; font-size: 11px !important; }
-            /* Fix alternating row background colors - only apply to detail rows */
-            .pdf-monthly-installment-table tbody tr.detail-row:nth-child(odd) { background: #f8fafc !important; }
-            .pdf-monthly-installment-table tbody tr.detail-row:nth-child(even) { background: white !important; }
+            /* All detail rows have white background */
+            .pdf-monthly-installment-table tbody tr.detail-row { background: white !important; }
             
             /* Recommended cell highlighting that respects year grouping */
             .pdf-monthly-installment-table td.package-value.recommended, 
@@ -1431,6 +1430,45 @@ const RecommendedPackages = () => {
               <div class="pdf-section-title">Monthly Repayment Breakdown</div>
               
               <div class="pdf-bar-chart">
+                ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+                  <!-- Current Rate Package for Refinancing -->
+                  ${(() => {
+                    const currentRate = parseFloat(searchForm.existingInterestRate);
+                    const currentMonthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, currentRate);
+                    const loanAmount = searchForm.loanAmount || 500000;
+                    const monthlyRate = currentRate / 100 / 12;
+                    const monthlyInterest = loanAmount * monthlyRate;
+                    const monthlyPrincipal = currentMonthlyPayment - monthlyInterest;
+                    
+                    // Calculate bar height - normalize with new packages
+                    const allPayments = [currentMonthlyPayment, ...enhancedPackages.map(p => {
+                      const r = calculateInterestRate(p, 1);
+                      return calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, r);
+                    })];
+                    const maxPayment = Math.max(...allPayments);
+                    const barHeight = (currentMonthlyPayment / maxPayment) * 200;
+                    const principalHeight = (monthlyPrincipal / currentMonthlyPayment) * barHeight;
+                    const interestHeight = (monthlyInterest / currentMonthlyPayment) * barHeight;
+                    
+                    return `
+                      <div class="pdf-bar-item">
+                        <div class="pdf-bar-rate" style="color: #dc2626;">${currentRate.toFixed(2)}%</div>
+                        <div class="pdf-bar-container">
+                          <div class="pdf-bar-stack" style="border: 2px solid #dc2626;">
+                            <div class="pdf-bar-segment interest" style="height: ${interestHeight}px; background: #fca5a5 !important;">
+                              <span class="pdf-bar-text">Interest<br>${formatCurrency(monthlyInterest)}</span>
+                            </div>
+                            <div class="pdf-bar-segment principal" style="height: ${principalHeight}px; background: #dc2626 !important;">
+                              <span class="pdf-bar-text">Principal<br>${formatCurrency(monthlyPrincipal)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="pdf-bar-label" style="color: #dc2626; font-weight: 700;">CURRENT</div>
+                        <div class="pdf-bar-amount" style="color: #dc2626;">${formatCurrency(currentMonthlyPayment)}</div>
+                      </div>
+                    `;
+                  })()}
+                ` : ''}
                 ${enhancedPackages.map((pkg, index) => {
                   // Get Year 1 data for each package
                   const rate = calculateInterestRate(pkg, 1);
@@ -1507,6 +1545,7 @@ const RecommendedPackages = () => {
                 <div class="pdf-savings-item">
                   <div class="label">Total Savings</div>
                   <div class="value savings">${enhancedPackages[0]?.totalSavings > 0 ? formatCurrency(enhancedPackages[0].totalSavings) : 'No savings'}</div>
+                  <div class="sub-label">Over ${parseLockInPeriod(enhancedPackages[0]?.lock_period) || 2} Year${parseLockInPeriod(enhancedPackages[0]?.lock_period) > 1 ? 's' : ''} Lock-in</div>
                 </div>
               </div>
             </div>
