@@ -521,7 +521,7 @@ const RecommendedPackages = () => {
     }
   }, []);
 
-  const formatCurrency = (value) => {
+  const formatCurrency = useCallback((value) => {
     if (!value || value === 0) return '$0';
     return new Intl.NumberFormat('en-SG', {
       style: 'currency',
@@ -529,12 +529,12 @@ const RecommendedPackages = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
-  };
+  }, []);
 
-  const formatPercentage = (value) => {
+  const formatPercentage = useCallback((value) => {
     if (value == null || value === 0) return 'N/A';
     return `${value.toFixed(2)}%`;
-  };
+  }, []);
 
   const toggleAllBanks = () => {
     if (selectedBanks.length === bankOptions.length) {
@@ -666,7 +666,7 @@ const RecommendedPackages = () => {
   }, []);
 
   // EXACT rate calculation functions from HTML version
-  const calculateInterestRate = (pkg, year) => {
+  const calculateInterestRate = useCallback((pkg, year) => {
     let rateType, operator, value;
     
     if (year === 'thereafter') {
@@ -708,10 +708,10 @@ const RecommendedPackages = () => {
         return baseRate;
       }
     }
-  };
+  }, [rateTypes]);
 
   // Format rate display for rate schedule
-  const formatRateDisplay = (pkg, year) => {
+  const formatRateDisplay = useCallback((pkg, year) => {
     let rateType, operator, value;
     
     if (year === 'thereafter') {
@@ -749,7 +749,7 @@ const RecommendedPackages = () => {
       const operatorSymbol = operator === '+' ? '+' : '-';
       return `${rateType} ${operatorSymbol} ${parseFloat(value).toFixed(2)}%`;
     }
-  };
+  }, [calculateInterestRate, formatPercentage]);
 
   // Enhanced PDF Generation matching HTML version functionality
   const generateProfessionalReport = () => {
@@ -1526,7 +1526,7 @@ const RecommendedPackages = () => {
       }
 
       return rates;
-    }, [pkg]);
+    }, [pkg, formatPercentage, formatRateDisplay, calculateInterestRate]);
 
     return (
       <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
@@ -1574,8 +1574,9 @@ const RecommendedPackages = () => {
             </div>
           </div>
           
-          {/* Second Row: Property Details - Between bank name and rate sections */}
-          <div className="flex items-center gap-8 text-sm text-gray-600">
+          {/* Property Details - Positioned between bank info and rate */}
+          <div className="border-t border-gray-200 pt-3 mt-3">
+            <div className="flex items-center gap-6 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
             <div>
               <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
             </div>
@@ -1590,6 +1591,7 @@ const RecommendedPackages = () => {
             </div>
             <div>
               <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
+            </div>
             </div>
           </div>
         </div>
