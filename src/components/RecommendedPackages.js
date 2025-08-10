@@ -1547,8 +1547,8 @@ const RecommendedPackages = () => {
       }`}>
         {/* Package Header - Horizontal Layout */}
         <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            {/* Left: Bank Info */}
+          <div className="flex items-start justify-between">
+            {/* Left: Bank Info and Property Details */}
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                 {rank}
@@ -1564,11 +1564,38 @@ const RecommendedPackages = () => {
                 }`}>
                   {pkg.rate_type_category || 'FLOATING'}
                 </span>
+                
+                {/* Property Details - Between bank name and rate */}
+                <div className="mt-3 flex items-center gap-6 text-sm text-gray-600">
+                  <div>
+                    <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
+                  </div>
+                </div>
               </div>
             </div>
             
-            {/* Right: Rate and Payment */}
+            {/* Right: Rate, Payment and Include checkbox */}
             <div className="text-right">
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={onToggleSelection}
+                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
               <div className="text-3xl font-bold text-blue-600 mb-1">
                 {formatPercentage(pkg.avgFirst2Years)}
               </div>
@@ -1576,38 +1603,6 @@ const RecommendedPackages = () => {
                 {formatCurrency(pkg.monthlyInstallment)}/mo
               </div>
             </div>
-          </div>
-
-          {/* Property Details - Single Row */}
-          <div className="mt-4 flex items-center gap-8 text-sm text-gray-600">
-            <div>
-              <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
-            </div>
-          </div>
-
-          {/* Include in report checkbox */}
-          <div className="mt-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={onToggleSelection}
-                className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700">Include in report</span>
-            </label>
           </div>
         </div>
 
