@@ -1484,26 +1484,38 @@ const RecommendedPackages = () => {
           // Use thereafter rate if available
           if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
             rates.push(
-              <div key={year} className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                <div className="text-xs font-medium text-blue-600 mb-1">Year {year}</div>
-                <div className="text-sm font-semibold text-blue-700">{formatRateDisplay(pkg, 'thereafter')}</div>
+              <div key={year} className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg text-center">
+                <div className="text-xs font-medium text-blue-600 mb-1">YEAR {year}</div>
+                <div className="text-lg font-bold text-blue-700">{formatRateDisplay(pkg, 'thereafter')}</div>
+                <div className="text-xs text-blue-500 mt-1">
+                  {formatRateDisplay(pkg, 'thereafter').includes('SORA') ? 
+                    formatRateDisplay(pkg, 'thereafter').split('SORA')[0] + 'SORA' + formatRateDisplay(pkg, 'thereafter').split('SORA')[1] 
+                    : formatRateDisplay(pkg, 'thereafter')
+                  }
+                </div>
               </div>
             );
           } else {
             // Only show dash if no thereafter rate exists
             rates.push(
-              <div key={year} className="bg-gray-50 border border-gray-100 p-3 rounded-lg">
-                <div className="text-xs font-medium text-gray-500 mb-1">Year {year}</div>
-                <div className="text-sm font-semibold text-gray-400">-</div>
+              <div key={year} className="bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg text-center">
+                <div className="text-xs font-medium text-gray-500 mb-1">YEAR {year}</div>
+                <div className="text-lg font-bold text-gray-400">-</div>
               </div>
             );
           }
         } else {
           // Show actual data for this year
           rates.push(
-            <div key={year} className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
-              <div className="text-xs font-medium text-blue-600 mb-1">Year {year}</div>
-              <div className="text-sm font-semibold text-blue-700">{formatRateDisplay(pkg, year)}</div>
+            <div key={year} className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg text-center">
+              <div className="text-xs font-medium text-blue-600 mb-1">YEAR {year}</div>
+              <div className="text-lg font-bold text-blue-700">{formatRateDisplay(pkg, year)}</div>
+              <div className="text-xs text-blue-500 mt-1">
+                {formatRateDisplay(pkg, year).includes('SORA') ? 
+                  formatRateDisplay(pkg, year).split('SORA')[0] + 'SORA' + formatRateDisplay(pkg, year).split('SORA')[1] 
+                  : formatRateDisplay(pkg, year)
+                }
+              </div>
             </div>
           );
         }
@@ -1513,9 +1525,15 @@ const RecommendedPackages = () => {
       const thereafterRate = calculateInterestRate(pkg, 'thereafter');
       if (thereafterRate > 0) {
         rates.push(
-          <div key="thereafter" className="bg-emerald-50 border border-emerald-200 p-3 rounded-lg ring-2 ring-emerald-100">
-            <div className="text-xs font-medium text-emerald-600 mb-1">Thereafter</div>
-            <div className="text-sm font-bold text-emerald-700">{formatRateDisplay(pkg, 'thereafter')}</div>
+          <div key="thereafter" className="bg-green-50 border border-green-200 px-4 py-3 rounded-lg text-center">
+            <div className="text-xs font-medium text-green-600 mb-1">THEREAFTER</div>
+            <div className="text-lg font-bold text-green-700">{formatRateDisplay(pkg, 'thereafter')}</div>
+            <div className="text-xs text-green-500 mt-1">
+              {formatRateDisplay(pkg, 'thereafter').includes('SORA') ? 
+                formatRateDisplay(pkg, 'thereafter').split('SORA')[0] + 'SORA' + formatRateDisplay(pkg, 'thereafter').split('SORA')[1] 
+                : formatRateDisplay(pkg, 'thereafter')
+              }
+            </div>
           </div>
         );
       }
@@ -1524,118 +1542,103 @@ const RecommendedPackages = () => {
     }, [pkg]);
 
     return (
-      <div className={`border border-gray-200 rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-md ${
-        isSelected ? 'ring-2 ring-blue-500 shadow-md' : ''
+      <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
+        isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
       }`}>
-        {/* Package Header - Cleaner Design */}
+        {/* Package Header - Horizontal Layout */}
         <div className="p-6 border-b border-gray-100">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center justify-between">
+            {/* Left: Bank Info */}
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-sm">
+              <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                 {rank}
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                <h3 className="text-xl font-bold text-gray-900">
                   {hideBankNames ? `Bank ${String.fromCharCode(64 + rank)}` : pkg.bank_name}
                 </h3>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    pkg.rate_type_category === 'Fixed' 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {pkg.rate_type_category || 'Floating'}
-                  </span>
-                </div>
+                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+                  pkg.rate_type_category === 'Fixed' 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {pkg.rate_type_category || 'FLOATING'}
+                </span>
               </div>
             </div>
+            
+            {/* Right: Rate and Payment */}
             <div className="text-right">
-              <div className="text-2xl font-bold text-emerald-600 mb-1">
+              <div className="text-3xl font-bold text-blue-600 mb-1">
                 {formatPercentage(pkg.avgFirst2Years)}
               </div>
-              <div className="text-sm text-gray-600 font-medium">
+              <div className="text-gray-600 font-medium">
                 {formatCurrency(pkg.monthlyInstallment)}/mo
               </div>
             </div>
           </div>
 
-          {/* Package Details Row - Improved Layout */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-500 font-medium mb-1">Property</div>
-              <div className="text-sm font-semibold text-gray-900">{pkg.property_type}</div>
+          {/* Property Details - Single Row */}
+          <div className="mt-4 flex items-center gap-8 text-sm text-gray-600">
+            <div>
+              <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-500 font-medium mb-1">Status</div>
-              <div className="text-sm font-semibold text-gray-900">{pkg.property_status}</div>
+            <div>
+              <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-500 font-medium mb-1">Buy Under</div>
-              <div className="text-sm font-semibold text-gray-900">{pkg.buy_under}</div>
+            <div>
+              <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-500 font-medium mb-1">Lock Period</div>
-              <div className="text-sm font-semibold text-gray-900">{pkg.lock_period || 'No Lock-in'}</div>
+            <div>
+              <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-xs text-gray-500 font-medium mb-1">Min Loan</div>
-              <div className="text-sm font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</div>
+            <div>
+              <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
             </div>
           </div>
 
-          {/* Selection Checkbox - Better Styling */}
-          <div className="mt-4 flex items-center justify-between">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={onToggleSelection}
-                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                />
-                {isSelected && (
-                  <CheckSquare className="w-4 h-4 text-blue-600 absolute top-0 left-0 pointer-events-none" />
-                )}
-              </div>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
-                Include in report
-              </span>
+          {/* Include in report checkbox */}
+          <div className="mt-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onToggleSelection}
+                className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-gray-700">Include in report</span>
             </label>
           </div>
         </div>
 
-        {/* Interest Rate Schedule - Enhanced Design */}
+        {/* Interest Rate Schedule */}
         <div className="p-6 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-blue-600" />
-            </div>
+            <TrendingUp className="w-5 h-5 text-blue-600" />
             <h4 className="text-lg font-semibold text-gray-900">Interest Rate Schedule</h4>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {generateRateSchedule}
           </div>
         </div>
 
-        {/* Package Features Editor - Enhanced */}
+        {/* Package Features */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckSquare className="w-4 h-4 text-green-600" />
-            </div>
+            <CheckSquare className="w-5 h-5 text-green-600" />
             <h4 className="text-lg font-semibold text-gray-900">Package Features</h4>
-            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Editable</span>
+            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">Editable</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {featureOptions.map(feature => (
-              <label key={feature.value} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group">
+              <label key={feature.value} className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={pkg[feature.value] === 'true' || pkg[feature.value] === true}
                   onChange={(e) => onUpdateFeature(feature.value, e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+                <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                   {feature.label}
                 </span>
               </label>
@@ -1643,21 +1646,19 @@ const RecommendedPackages = () => {
           </div>
         </div>
 
-        {/* Client Remarks Editor - Enhanced */}
-        <div className="p-6 bg-gray-50">
+        {/* Client Remarks */}
+        <div className="p-6 bg-blue-50">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-4 h-4 text-purple-600" />
-            </div>
-            <h4 className="text-lg font-semibold text-gray-900">Client Remarks</h4>
-            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Editable</span>
+            <FileText className="w-5 h-5 text-purple-600" />
+            <h4 className="text-lg font-semibold text-gray-900">CLIENT REMARKS</h4>
+            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">EDITABLE</span>
           </div>
           <textarea
             value={pkg.custom_remarks || pkg.remarks || ''}
             onChange={(e) => onUpdateRemarks(e.target.value)}
-            placeholder="Add custom remarks for this package..."
-            rows="3"
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none transition-all duration-200 text-sm"
+            placeholder="Enter remarks for this package..."
+            rows="4"
+            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm text-gray-700"
           />
         </div>
       </div>
@@ -1697,32 +1698,6 @@ const RecommendedPackages = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">Recommended Packages</h1>
-              <p className="text-blue-100">Find the best mortgage packages for your clients</p>
-            </div>
-            <div className="flex items-center gap-4">
-              {user && (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold">
-                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-blue-200">{user.role?.replace('_', ' ').toUpperCase()}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Loan Type Tabs */}

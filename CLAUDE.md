@@ -3,7 +3,45 @@
 ## Project Overview
 **Mortgage Calculator Application** - A comprehensive React-based mortgage package recommendation system with advanced filtering, detailed package analysis, and professional PDF report generation.
 
-## Recent Work Completed (2025-08-09)
+## Recent Work Completed (2025-08-10)
+
+### Critical Package Comparison & Rate Calculation Fixes ✅
+
+#### 1. Resolved Misleading Rate Display Issue 🔥
+- **Issue**: PDF showed "1M SORA(3.50%) + 0.50%" but calculations used database rate of 1.65%
+- **Root Cause**: Two separate rate functions - one for calculations (correct) and one for PDF display (hardcoded)
+- **Impact**: Made correct recommendation logic appear broken when RHB 2.10% was recommended over MBB 2.20%
+- **Solution**: Updated both `calculateInterestRate()` and `formatDetailedRateDisplay()` to use actual database rates
+- **Location**: `src/components/RecommendedPackages.js:805-807, 872-874`
+
+#### 2. Enhanced Package Comparison Table Calculations
+- **Fixed Total Savings Calculation**: Added proper `parseLockInPeriod()` function matching HTML version
+- **Fixed Rate Display Formatting**: Updated to use `<br><small>` tags instead of newlines for HTML consistency
+- **Fixed Lock-in Period Display**: Updated all displays to use `parseLockInPeriod()` instead of `parseInt()`
+- **Location**: `src/components/RecommendedPackages.js:762-791, 1077, 1097`
+
+#### 3. Comprehensive Debug Logging System
+- **Added Rate Calculation Debugging**: Shows FIXED vs FLOATING rate calculations with all values
+- **Added Package Sorting Debugging**: Shows avgFirst2Years values and sorting order
+- **Added Rate Types Loading Debugging**: Shows what reference rates are loaded from database
+- **Purpose**: Enabled identification of calculation vs display inconsistencies
+- **Location**: `src/components/RecommendedPackages.js:120-155, 287-298`
+
+### Database Schema Understanding
+
+#### Database Tables Structure
+- **`rate_packages`**: Contains mortgage packages with year-by-year rate data
+- **`rate_types`**: Contains reference rates (SORA rates: 1M SORA = 1.65%, 3M SORA = 1.94%)
+- **`banks`**: Contains bank information
+
+#### Rate Calculation Flow
+```javascript
+// For floating rates: 1M SORA + 0.50%
+const referenceRate = rateTypes.find(rt => rt.rate_type === "1M SORA"); // finds 1.65%
+const finalRate = 1.65 + 0.50 = 2.15% // Correct calculation
+```
+
+## Previous Work Completed (2025-08-09)
 
 ### Major Enhancements Completed ✅
 
