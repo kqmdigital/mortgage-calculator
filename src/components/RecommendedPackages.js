@@ -867,9 +867,9 @@ const RecommendedPackages = () => {
 
         if (rateType === 'FIXED') {
           const rate = calculateInterestRate(pkg, year);
-          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.1;">${rate.toFixed(2)}%</div>
-            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin-top: 1px;">FIXED</div>
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${rate.toFixed(2)}%</div>
+            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">FIXED</div>
           </div>`;
         } else {
           // Use actual database rate instead of hardcoded value
@@ -879,9 +879,9 @@ const RecommendedPackages = () => {
           const totalRate = calculateInterestRate(pkg, year);
           
           const operatorSymbol = operator === '+' ? '+' : '-';
-          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.1;">${totalRate.toFixed(2)}%</div>
-            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin-top: 1px;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</div>
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${totalRate.toFixed(2)}%</div>
+            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</div>
           </div>`;
         }
       };
@@ -981,8 +981,8 @@ const RecommendedPackages = () => {
             
             /* Specific row height control for rate rows */
             .pdf-comparison-table tr.rate-row { height: auto !important; }
-            .pdf-comparison-table tr.rate-row td { padding: 5px 4px !important; vertical-align: middle !important; }
-            .pdf-comparison-table tr.rate-row td.rate-value { padding: 8px 4px !important; text-align: center !important; vertical-align: middle !important; height: 45px !important; }
+            .pdf-comparison-table tr.rate-row td { padding: 3px 4px !important; vertical-align: middle !important; height: 32px !important; }
+            .pdf-comparison-table tr.rate-row td.rate-value { padding: 3px 4px !important; text-align: center !important; vertical-align: middle !important; height: 32px !important; }
             .pdf-comparison-table small { display: inline-block !important; margin: 0 !important; line-height: 1.0 !important; }
             .pdf-comparison-table .rate-value br { line-height: 0.8 !important; }
             
