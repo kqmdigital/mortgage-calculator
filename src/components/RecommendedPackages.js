@@ -978,7 +978,7 @@ const RecommendedPackages = () => {
             .pdf-comparison-table th:first-child { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
             .pdf-comparison-table th:not(:first-child) { width: 25% !important; }
             .pdf-comparison-table th.recommended { background: #1e40af !important; position: relative !important; }
-            .pdf-comparison-table th.recommended::after { content: '⭐' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 8px !important; padding: 2px 4px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
+            .pdf-comparison-table th.recommended::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             
             .pdf-comparison-table tbody tr:nth-child(even) { background: #f8fafc !important; }
             .pdf-comparison-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
@@ -988,7 +988,7 @@ const RecommendedPackages = () => {
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.features-cell { text-align: center !important; vertical-align: middle !important; font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
-            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: top !important; max-height: none !important; }
+            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: top !important; max-height: none !important; text-align: left !important; }
             .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
             .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
             
@@ -1026,7 +1026,7 @@ const RecommendedPackages = () => {
             .pdf-monthly-installment-table th { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-monthly-installment-table .row-header { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
             .pdf-monthly-installment-table .recommended-package-header { background: #1e40af !important; position: relative !important; width: 25% !important; }
-            .pdf-monthly-installment-table .recommended-package-header::after { content: '⭐' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 8px !important; padding: 2px 4px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
+            .pdf-monthly-installment-table .recommended-package-header::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             .pdf-monthly-installment-table .package-header { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; width: 25% !important; }
             
             .pdf-monthly-installment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
@@ -1254,7 +1254,7 @@ const RecommendedPackages = () => {
                 <thead>
                   <tr>
                     <th class="row-header">RATE</th>
-                    <th class="recommended-package-header">PKG(1)</th>
+                    <th class="recommended-package-header">PKG(1) RECOMMENDED</th>
                     <th class="package-header">PKG(2)</th>
                     <th class="package-header">PKG(3)</th>
                   </tr>
