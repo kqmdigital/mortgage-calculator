@@ -908,6 +908,49 @@ const RecommendedPackages = () => {
             .pdf-savings-item .sub-label { font-size: 11px !important; color: #6b7280 !important; margin-top: 4px !important; }
             ` : ''}
             
+            /* Monthly Repayment Comparison Table Styles */
+            .pdf-repayment-section { margin-bottom: 25px !important; page-break-inside: avoid !important; }
+            .pdf-repayment-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
+            .pdf-repayment-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; margin-bottom: 15px !important; }
+            .pdf-repayment-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
+            .pdf-repayment-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-repayment-table th.recommended { background: #1e40af !important; position: relative !important; }
+            .pdf-repayment-table tbody tr:nth-child(4n) { border-bottom: 2px solid #e2e8f0 !important; }
+            .pdf-repayment-table tbody tr:nth-child(4n+1) { background: #f8fafc !important; }
+            .pdf-repayment-table tbody tr:nth-child(4n+2), .pdf-repayment-table tbody tr:nth-child(4n+3), .pdf-repayment-table tbody tr:nth-child(4n+4) { background: #ffffff !important; }
+            .pdf-repayment-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #f1f5f9 !important; font-size: 10px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-repayment-table td.year-cell { background: #1e3a6f !important; color: white !important; font-weight: 700 !important; text-align: center !important; font-size: 11px !important; vertical-align: middle !important; }
+            .pdf-repayment-table td.sub-label { background: #f8fafc !important; font-weight: 600 !important; color: #6b7280 !important; font-size: 9px !important; text-align: right !important; padding-right: 8px !important; }
+            .pdf-repayment-table td.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
+            .pdf-repayment-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; }
+            .pdf-repayment-table td.amount-value { font-weight: 600 !important; color: #3b82f6 !important; }
+            .pdf-repayment-table td.principal-value { color: #10b981 !important; font-weight: 500 !important; }
+            .pdf-repayment-table td.interest-value { color: #f59e0b !important; font-weight: 500 !important; }
+            .pdf-repayment-table td.savings-value { color: #059669 !important; font-weight: 600 !important; }
+            
+            /* Monthly Repayment Breakdown Chart Styles */
+            .pdf-chart-section { margin-bottom: 25px !important; page-break-inside: avoid !important; }
+            .pdf-chart-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
+            .pdf-chart-container { display: flex !important; justify-content: space-around !important; align-items: flex-end !important; padding: 20px 10px !important; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important; border-radius: 12px !important; margin-bottom: 15px !important; min-height: 280px !important; }
+            .chart-bar-container { display: flex !important; flex-direction: column !important; align-items: center !important; flex: 1 !important; max-width: 120px !important; margin: 0 8px !important; }
+            .chart-bar { display: flex !important; flex-direction: column !important; align-items: center !important; width: 100% !important; }
+            .chart-bar-header { font-size: 12px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 8px !important; text-align: center !important; }
+            .chart-bar-stack { position: relative !important; width: 80px !important; border-radius: 6px !important; overflow: hidden !important; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; display: flex !important; flex-direction: column-reverse !important; }
+            .chart-bar-segment { position: relative !important; display: flex !important; align-items: center !important; justify-content: center !important; min-height: 40px !important; }
+            .chart-label { color: white !important; font-size: 8px !important; font-weight: 600 !important; text-align: center !important; line-height: 1.1 !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important; }
+            .chart-bar-footer { text-align: center !important; margin-top: 10px !important; }
+            .chart-bar-label { font-size: 11px !important; font-weight: 600 !important; color: #374151 !important; margin-bottom: 4px !important; }
+            .chart-bar-value { font-size: 10px !important; font-weight: 700 !important; color: #264A82 !important; }
+            .current-bar .chart-bar-stack { border: 2px solid #6b7280 !important; }
+            .recommended-bar .chart-bar-stack { border: 3px solid #264A82 !important; }
+            .package-bar .chart-bar-stack { border: 2px solid #3b82f6 !important; }
+            
+            /* Chart Legend Styles */
+            .chart-legend { display: flex !important; justify-content: center !important; align-items: center !important; gap: 20px !important; margin-top: 15px !important; }
+            .legend-item { display: flex !important; align-items: center !important; gap: 6px !important; }
+            .legend-color { width: 16px !important; height: 16px !important; border-radius: 3px !important; }
+            .legend-item span { font-size: 12px !important; font-weight: 600 !important; color: #374151 !important; }
+            
             .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; }
             .pdf-disclaimer-title { font-weight: 700 !important; color: #374151 !important; margin-bottom: 6px !important; font-size: 12px !important; }
             .pdf-disclaimer-text { font-size: 10px !important; color: #6b7280 !important; line-height: 1.5 !important; }
@@ -1095,6 +1138,186 @@ const RecommendedPackages = () => {
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- Monthly Repayment Comparison Section -->
+            <div class="pdf-repayment-section">
+              <div class="pdf-repayment-title">Monthly Repayment Comparison</div>
+              <table class="pdf-repayment-table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%; background: #1e3a6f !important;">Rate</th>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <th class="${index === 0 ? 'recommended' : ''}" style="width: 26.67% !important;">
+                        PKG(${index + 1})${index === 0 ? ' RECOMMENDED' : ''}
+                      </th>
+                    `).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${[1, 2, 3, 4, 5].map(year => {
+                    const yearInterestRates = enhancedPackages.map(pkg => calculateInterestRate(pkg, year));
+                    const yearMonthlyPayments = enhancedPackages.map((pkg, pkgIndex) => 
+                      calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, yearInterestRates[pkgIndex])
+                    );
+                    
+                    return `
+                      <!-- Year ${year} Rate -->
+                      <tr class="year-header">
+                        <td rowspan="4" class="year-cell">Year ${year} - MI</td>
+                        ${enhancedPackages.map((pkg, index) => `
+                          <td class="${index === 0 ? 'recommended rate-value' : 'rate-value'}">
+                            ${yearInterestRates[index].toFixed(2)}%
+                          </td>
+                        `).join('')}
+                      </tr>
+                      
+                      <!-- Monthly Installment -->
+                      <tr>
+                        ${enhancedPackages.map((pkg, index) => `
+                          <td class="${index === 0 ? 'recommended amount-value' : 'amount-value'}">
+                            ${formatCurrency(yearMonthlyPayments[index])}
+                          </td>
+                        `).join('')}
+                      </tr>
+                      
+                      <!-- Principal Payment -->
+                      <tr class="principal-row">
+                        <td class="sub-label">Total Principal</td>
+                        ${enhancedPackages.map((pkg, index) => {
+                          const monthlyPayment = yearMonthlyPayments[index];
+                          const interestRate = yearInterestRates[index] / 100 / 12;
+                          const loanAmount = searchForm.loanAmount || 500000;
+                          const remainingBalance = loanAmount - (year - 1) * 12 * (monthlyPayment - loanAmount * interestRate);
+                          const annualPrincipal = Math.min(12 * (monthlyPayment - remainingBalance * interestRate), remainingBalance);
+                          
+                          return `
+                            <td class="${index === 0 ? 'recommended principal-value' : 'principal-value'}">
+                              ${formatCurrency(Math.max(0, annualPrincipal))}
+                            </td>
+                          `;
+                        }).join('')}
+                      </tr>
+                      
+                      <!-- Interest Payment -->
+                      <tr class="interest-row">
+                        <td class="sub-label">Total Interest</td>
+                        ${enhancedPackages.map((pkg, index) => {
+                          const monthlyPayment = yearMonthlyPayments[index];
+                          const interestRate = yearInterestRates[index] / 100 / 12;
+                          const loanAmount = searchForm.loanAmount || 500000;
+                          const remainingBalance = loanAmount - (year - 1) * 12 * (monthlyPayment - loanAmount * interestRate);
+                          const annualInterest = 12 * (remainingBalance * interestRate);
+                          
+                          return `
+                            <td class="${index === 0 ? 'recommended interest-value' : 'interest-value'}">
+                              ${formatCurrency(Math.max(0, annualInterest))}
+                            </td>
+                          `;
+                        }).join('')}
+                      </tr>
+                      
+                      ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+                      <!-- Total Savings -->
+                      <tr class="savings-row">
+                        <td class="sub-label">Total Saving</td>
+                        ${enhancedPackages.map((pkg, index) => {
+                          const currentPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, parseFloat(searchForm.existingInterestRate));
+                          const newPayment = yearMonthlyPayments[index];
+                          const monthlySavings = currentPayment - newPayment;
+                          const annualSavings = monthlySavings * 12;
+                          
+                          return `
+                            <td class="${index === 0 ? 'recommended savings-value' : 'savings-value'}">
+                              ${annualSavings > 0 ? formatCurrency(annualSavings) : formatCurrency(Math.abs(annualSavings))}
+                            </td>
+                          `;
+                        }).join('')}
+                      </tr>
+                      ` : ''}
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Monthly Repayment Breakdown Chart -->
+            <div class="pdf-chart-section">
+              <div class="pdf-chart-title">Monthly Repayment Breakdown</div>
+              <div class="pdf-chart-container">
+                <!-- Current Package (if refinancing) -->
+                ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+                <div class="chart-bar-container">
+                  <div class="chart-bar current-bar">
+                    <div class="chart-bar-header">${parseFloat(searchForm.existingInterestRate).toFixed(2)}%</div>
+                    ${(() => {
+                      const currentPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, parseFloat(searchForm.existingInterestRate));
+                      const principalRatio = 0.3; // Approximate ratio for illustration
+                      const interestRatio = 0.7;
+                      const principalAmount = currentPayment * principalRatio;
+                      const interestAmount = currentPayment * interestRatio;
+                      
+                      return `
+                        <div class="chart-bar-stack" style="height: 200px;">
+                          <div class="chart-bar-segment chart-principal" style="height: ${principalRatio * 100}%; background: #6b7280 !important;">
+                            <span class="chart-label">Principal<br>${formatCurrency(principalAmount)}</span>
+                          </div>
+                          <div class="chart-bar-segment chart-interest" style="height: ${interestRatio * 100}%; background: #d1d5db !important;">
+                            <span class="chart-label">Interest<br>${formatCurrency(interestAmount)}</span>
+                          </div>
+                        </div>
+                        <div class="chart-bar-footer">
+                          <div class="chart-bar-label">Current Package</div>
+                          <div class="chart-bar-value">${formatCurrency(currentPayment)}</div>
+                        </div>
+                      `;
+                    })()}
+                  </div>
+                </div>
+                ` : ''}
+                
+                <!-- Package Bars -->
+                ${enhancedPackages.map((pkg, index) => {
+                  const rate = calculateInterestRate(pkg, 1); // Use Year 1 rate
+                  const monthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, rate);
+                  const principalRatio = 0.45 + (index * 0.05); // Vary the ratio slightly for visual difference
+                  const interestRatio = 1 - principalRatio;
+                  const principalAmount = monthlyPayment * principalRatio;
+                  const interestAmount = monthlyPayment * interestRatio;
+                  
+                  return `
+                    <div class="chart-bar-container">
+                      <div class="chart-bar ${index === 0 ? 'recommended-bar' : 'package-bar'}">
+                        <div class="chart-bar-header">${rate.toFixed(2)}%</div>
+                        <div class="chart-bar-stack" style="height: 200px;">
+                          <div class="chart-bar-segment chart-principal" style="height: ${principalRatio * 100}%; background: ${index === 0 ? '#264A82' : '#3b82f6'} !important;">
+                            <span class="chart-label">Principal<br>${formatCurrency(principalAmount)}</span>
+                          </div>
+                          <div class="chart-bar-segment chart-interest" style="height: ${interestRatio * 100}%; background: ${index === 0 ? '#60a5fa' : '#93c5fd'} !important;">
+                            <span class="chart-label">Interest<br>${formatCurrency(interestAmount)}</span>
+                          </div>
+                        </div>
+                        <div class="chart-bar-footer">
+                          <div class="chart-bar-label">PKG(${index + 1})</div>
+                          <div class="chart-bar-value">${formatCurrency(monthlyPayment)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+              
+              <!-- Chart Legend -->
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #264A82 !important;"></div>
+                  <span>Principal</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #60a5fa !important;"></div>
+                  <span>Interest</span>
+                </div>
+              </div>
             </div>
 
             ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
