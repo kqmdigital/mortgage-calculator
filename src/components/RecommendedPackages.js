@@ -1676,20 +1676,20 @@ const RecommendedPackages = () => {
       <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
         isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
       }`}>
-        {/* Package Header - Horizontal Layout */}
-        <div className="p-6 border-b border-gray-100">
-          {/* Single Row: Bank Info, Property Details, and Rate */}
-          <div className="flex items-center justify-between mb-4">
-            {/* Left: Bank Info */}
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+        {/* Package Header - Mobile-Responsive Layout */}
+        <div className="p-4 sm:p-6 border-b border-gray-100">
+          {/* Mobile: Stacked Layout, Desktop: Horizontal Layout */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 space-y-4 lg:space-y-0">
+            {/* Bank Info */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg sm:text-xl flex-shrink-0">
                 {rank}
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
                   {hideBankNames ? `Bank ${String.fromCharCode(64 + rank)}` : pkg.bank_name}
                 </h3>
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+                <span className={`inline-block px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium mt-1 ${
                   pkg.rate_type_category === 'Fixed' 
                     ? 'bg-green-100 text-green-700' 
                     : 'bg-blue-100 text-blue-700'
@@ -1699,73 +1699,81 @@ const RecommendedPackages = () => {
               </div>
             </div>
             
-            {/* Center: Property Details */}
-            <div className="flex items-center gap-4 text-xs text-gray-600">
-              <div>
-                <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
+            {/* Property Details - Mobile: Grid, Desktop: Horizontal */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+              <div className="truncate">
+                <span className="font-medium text-gray-500 block sm:inline">Property:</span> 
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.property_type}</span>
               </div>
-              <div>
-                <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
+              <div className="truncate">
+                <span className="font-medium text-gray-500 block sm:inline">Status:</span> 
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.property_status}</span>
               </div>
-              <div>
-                <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
+              <div className="truncate">
+                <span className="font-medium text-gray-500 block sm:inline">Buy Under:</span> 
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.buy_under}</span>
               </div>
-              <div>
-                <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
+              <div className="truncate">
+                <span className="font-medium text-gray-500 block sm:inline">Lock:</span> 
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.lock_period || '0 Year'}</span>
               </div>
-              <div>
-                <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
+              <div className="truncate col-span-2 sm:col-span-1">
+                <span className="font-medium text-gray-500 block sm:inline">Min Loan:</span> 
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
               </div>
             </div>
             
-            {/* Right: Rate, Payment and Include checkbox */}
-            <div className="text-right">
-              <div className="flex justify-end items-center gap-2 mb-2">
+            {/* Rate, Payment and Include checkbox - Mobile: Center aligned, Desktop: Right aligned */}
+            <div className="flex flex-col sm:flex-row lg:flex-col items-center lg:items-end justify-center lg:justify-start lg:text-right">
+              <div className="flex items-center gap-2 mb-2 lg:mb-2 order-3 sm:order-1 lg:order-1">
                 <input
                   type="checkbox"
                   checked={isSelected}
                   onChange={onToggleSelection}
-                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 />
+                <span className="text-sm font-medium text-gray-700 sm:hidden">Include in Report</span>
               </div>
-              <div className="text-3xl font-bold text-blue-600 mb-1">
-                {formatPercentage(pkg.avgFirst2Years)}
-              </div>
-              <div className="text-gray-600 font-medium">
-                {formatCurrency(pkg.monthlyInstallment)}/mo
+              <div className="text-center lg:text-right order-1 sm:order-2 lg:order-2 flex-1 sm:ml-4 lg:ml-0">
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+                  {formatPercentage(pkg.avgFirst2Years)}
+                </div>
+                <div className="text-sm sm:text-base text-gray-600 font-medium">
+                  {formatCurrency(pkg.monthlyInstallment)}/mo
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Interest Rate Schedule */}
-        <div className="p-6 border-b border-gray-100 bg-white">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-            <h4 className="text-lg font-semibold text-gray-900">Interest Rate Schedule</h4>
+        <div className="p-4 sm:p-6 border-b border-gray-100 bg-white">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900">Interest Rate Schedule</h4>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
             {generateRateSchedule}
           </div>
         </div>
 
         {/* Package Features */}
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center gap-2 mb-4">
-            <CheckSquare className="w-5 h-5 text-green-600" />
-            <h4 className="text-lg font-semibold text-gray-900">Package Features</h4>
+        <div className="p-4 sm:p-6 border-b border-gray-100">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900">Package Features</h4>
             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">Editable</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {featureOptions.map(feature => (
-              <label key={feature.value} className="flex items-center gap-3 cursor-pointer group">
+              <label key={feature.value} className="flex items-center gap-3 cursor-pointer group min-h-[44px] sm:min-h-[auto] p-2 sm:p-0 rounded-lg hover:bg-gray-50 sm:hover:bg-transparent transition-colors">
                 <input
                   type="checkbox"
                   checked={pkg[feature.value] === 'true' || pkg[feature.value] === true}
                   onChange={(e) => onUpdateFeature(feature.value, e.target.checked)}
-                  className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                 />
-                <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                <span className="text-sm sm:text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                   {feature.label}
                 </span>
               </label>
@@ -1774,10 +1782,10 @@ const RecommendedPackages = () => {
         </div>
 
         {/* Client Remarks */}
-        <div className="p-6 bg-blue-50">
+        <div className="p-4 sm:p-6 bg-blue-50">
           <div className="flex items-center gap-2 mb-3">
-            <FileText className="w-5 h-5 text-purple-600" />
-            <h4 className="text-lg font-semibold text-gray-900">CLIENT REMARKS</h4>
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900">CLIENT REMARKS</h4>
             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">EDITABLE</span>
           </div>
           <textarea
@@ -1793,7 +1801,7 @@ const RecommendedPackages = () => {
             onFocus={() => setIsEditing(true)}
             placeholder="Enter remarks for this package..."
             rows="4"
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm text-gray-700"
+            className="w-full px-3 sm:px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm text-gray-700 min-h-[100px]"
           />
         </div>
       </div>
@@ -1834,40 +1842,40 @@ const RecommendedPackages = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-6">
         {/* Loan Type Tabs */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-3">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {['New Home Loan', 'Refinancing Home Loan', 'Commercial/Industrial'].map((loanType) => (
               <button
                 key={loanType}
                 onClick={() => handleLoanTypeSelect(loanType)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                className={`flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-6 py-3 rounded-lg font-medium transition-all duration-200 min-h-[48px] text-sm sm:text-base ${
                   selectedLoanType === loanType
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
                 }`}
               >
-                {loanType === 'New Home Loan' && <Home className="w-5 h-5" />}
-                {loanType === 'Refinancing Home Loan' && <Repeat className="w-5 h-5" />}
-                {loanType === 'Commercial/Industrial' && <Briefcase className="w-5 h-5" />}
-                {loanType}
+                {loanType === 'New Home Loan' && <Home className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
+                {loanType === 'Refinancing Home Loan' && <Repeat className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
+                {loanType === 'Commercial/Industrial' && <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
+                <span className="truncate">{loanType}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Filter Form */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Row 1: Basic Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
                 <select
                   value={searchForm.propertyType}
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 >
                   <option value="">Select Property Type</option>
                   <option value="Private Property">Private Property</option>
@@ -1883,7 +1891,7 @@ const RecommendedPackages = () => {
                 <select
                   value={searchForm.propertyStatus}
                   onChange={(e) => handleInputChange('propertyStatus', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 >
                   <option value="">Select Property Status</option>
                   <option value="Completed">Completed</option>
@@ -1896,7 +1904,7 @@ const RecommendedPackages = () => {
                 <select
                   value={searchForm.buyUnder}
                   onChange={(e) => handleInputChange('buyUnder', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 >
                   <option value="">Select Buy Under</option>
                   <option value="Individual Name">Individual Name</option>
@@ -1907,7 +1915,7 @@ const RecommendedPackages = () => {
             </div>
 
             {/* Row 2: Financial Parameters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Loan Amount ($)</label>
                 <input
@@ -1917,7 +1925,7 @@ const RecommendedPackages = () => {
                   placeholder="500,000"
                   min="0"
                   step="1000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 />
               </div>
 
@@ -1931,7 +1939,7 @@ const RecommendedPackages = () => {
                   min="1"
                   max="50"
                   step="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 />
               </div>
             </div>
@@ -2158,33 +2166,33 @@ const RecommendedPackages = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
+                {/* Action Buttons - Mobile: Stacked, Desktop: Horizontal */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                   <button
                     onClick={generateProfessionalReport}
                     disabled={filteredPackages.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium min-h-[44px] sm:min-h-[auto] transition-colors"
                   >
-                    <FileText className="w-4 h-4" />
-                    Generate PDF Report
+                    <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
+                    <span className="text-sm sm:text-sm">Generate PDF Report</span>
                   </button>
                   
                   <button
                     onClick={exportCSV}
                     disabled={filteredPackages.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium min-h-[44px] sm:min-h-[auto] transition-colors"
                   >
-                    <Download className="w-4 h-4" />
-                    Export CSV
+                    <Download className="w-4 h-4 sm:w-4 sm:h-4" />
+                    <span className="text-sm sm:text-sm">Export CSV</span>
                   </button>
                   
                   <button
                     onClick={toggleAllPackages}
                     disabled={filteredPackages.length === 0}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                    className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium min-h-[44px] sm:min-h-[auto] transition-colors"
                   >
-                    <CheckSquare className="w-4 h-4" />
-                    Toggle All
+                    <CheckSquare className="w-4 h-4 sm:w-4 sm:h-4" />
+                    <span className="text-sm sm:text-sm">Toggle All</span>
                   </button>
                 </div>
               </div>
