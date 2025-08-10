@@ -1467,6 +1467,17 @@ const RecommendedPackages = () => {
   }) => {
     const rank = index + 1;
     
+    // Local state for remarks to prevent re-render issues
+    const [localRemarks, setLocalRemarks] = React.useState(pkg.custom_remarks || pkg.remarks || '');
+    const [isEditing, setIsEditing] = React.useState(false);
+    
+    // Update local state when pkg changes
+    React.useEffect(() => {
+      if (!isEditing) {
+        setLocalRemarks(pkg.custom_remarks || pkg.remarks || '');
+      }
+    }, [pkg.custom_remarks, pkg.remarks, isEditing]);
+    
     // Generate rate schedule - memoized for performance
     const generateRateSchedule = useMemo(() => {
       const rates = [];
@@ -1637,10 +1648,16 @@ const RecommendedPackages = () => {
             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">EDITABLE</span>
           </div>
           <textarea
-            key={`remarks-${pkg.id}`}
-            defaultValue={pkg.custom_remarks || pkg.remarks || ''}
-            onChange={(e) => onUpdateRemarks(e.target.value)}
-            onBlur={(e) => onUpdateRemarks(e.target.value)}
+            value={localRemarks}
+            onChange={(e) => {
+              setLocalRemarks(e.target.value);
+              setIsEditing(true);
+            }}
+            onBlur={(e) => {
+              setIsEditing(false);
+              onUpdateRemarks(e.target.value);
+            }}
+            onFocus={() => setIsEditing(true)}
             placeholder="Enter remarks for this package..."
             rows="4"
             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm text-gray-700"
