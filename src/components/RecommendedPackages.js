@@ -1637,8 +1637,10 @@ const RecommendedPackages = () => {
             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">EDITABLE</span>
           </div>
           <textarea
-            value={pkg.custom_remarks || pkg.remarks || ''}
+            key={`remarks-${pkg.id}`}
+            defaultValue={pkg.custom_remarks || pkg.remarks || ''}
             onChange={(e) => onUpdateRemarks(e.target.value)}
+            onBlur={(e) => onUpdateRemarks(e.target.value)}
             placeholder="Enter remarks for this package..."
             rows="4"
             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm text-gray-700"
