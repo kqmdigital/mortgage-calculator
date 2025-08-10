@@ -759,9 +759,16 @@ const RecommendedPackages = () => {
         return currentPayment - newPayment;
       };
 
+      const parseLockInPeriod = (lockPeriod) => {
+        if (!lockPeriod) return 0;
+        const match = lockPeriod.match(/(\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      };
+
       const calculateTotalSavings = (monthlySavings, lockPeriod) => {
-        const lockYears = lockPeriod ? (lockPeriod.includes('Year') ? parseInt(lockPeriod) : parseInt(lockPeriod)) : 2;
-        return monthlySavings * 12 * lockYears;
+        if (!monthlySavings || !lockPeriod) return 0;
+        const lockInYears = parseLockInPeriod(lockPeriod);
+        return monthlySavings * lockInYears * 12;
       };
 
       const calculateAverageFirst2Years = (pkg) => {
@@ -793,14 +800,14 @@ const RecommendedPackages = () => {
 
         if (rateType === 'FIXED') {
           const rate = calculateInterestRate(pkg, year);
-          return `${rate.toFixed(2)}%\nFIXED`;
+          return `${rate.toFixed(2)}%<br><small>FIXED</small>`;
         } else {
           const referenceRateValue = rateType.includes('SORA') ? 3.50 : 3.25;
           const spreadValue = parseFloat(value) || 0;
           const totalRate = calculateInterestRate(pkg, year);
           
           const operatorSymbol = operator === '+' ? '+' : '-';
-          return `${totalRate.toFixed(2)}%\n${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%`;
+          return `${totalRate.toFixed(2)}%<br><small>${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</small>`;
         }
       };
 
@@ -833,6 +840,7 @@ const RecommendedPackages = () => {
       });
 
       // Create comprehensive PDF content matching HTML version
+      // eslint-disable-next-line no-unused-vars
       const reportDate = new Date().toLocaleDateString('en-SG', {
         day: 'numeric',
         month: 'short', 
@@ -1067,7 +1075,7 @@ const RecommendedPackages = () => {
                     <td>Lock-in Period</td>
                     ${enhancedPackages.map((pkg, index) => `
                       <td class="${index === 0 ? 'recommended period' : 'period'}">
-                        ${parseInt(pkg.lock_period) || 0} Years
+                        ${parseLockInPeriod(pkg.lock_period) || 0} Years
                       </td>
                     `).join('')}
                   </tr>
@@ -1087,7 +1095,7 @@ const RecommendedPackages = () => {
                     ${enhancedPackages.map((pkg, index) => `
                       <td class="${index === 0 ? 'recommended savings-cell' : 'savings-cell'}">
                         ${pkg.totalSavings > 0 ? 
-                          `Save ${formatCurrency(Math.abs(pkg.totalSavings))}\nOver ${parseInt(pkg.lock_period) || 2} Year${parseInt(pkg.lock_period) > 1 ? 's' : ''} Lock-in` : 
+                          `Save ${formatCurrency(Math.abs(pkg.totalSavings))}<br><small>Over ${parseLockInPeriod(pkg.lock_period) || 2} Year${parseLockInPeriod(pkg.lock_period) > 1 ? 's' : ''} Lock-in</small>` : 
                           'No savings'}
                       </td>
                     `).join('')}
@@ -1158,6 +1166,7 @@ const RecommendedPackages = () => {
                       const yearlyData = [];
                       
                       for (let year = 1; year <= Math.min(5, tenureYears); year++) {
+                        // eslint-disable-next-line no-unused-vars
                         const yearStartBalance = balance;
                         let yearInterestPaid = 0;
                         let yearPrincipalPaid = 0;
@@ -1268,6 +1277,7 @@ const RecommendedPackages = () => {
                   // Calculate monthly principal and interest for Year 1
                   const loanAmount = searchForm.loanAmount || 500000;
                   const monthlyRate = rate / 100 / 12;
+                  // eslint-disable-next-line no-unused-vars
                   const totalMonths = (searchForm.loanTenure || 25) * 12;
                   
                   // First month's interest and principal (as approximation)
