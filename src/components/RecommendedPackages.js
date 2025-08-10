@@ -988,7 +988,7 @@ const RecommendedPackages = () => {
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.features-cell { text-align: center !important; vertical-align: middle !important; font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
-            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: top !important; max-height: none !important; text-align: left !important; }
+            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: middle !important; max-height: none !important; text-align: left !important; }
             .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
             .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
             
@@ -1038,6 +1038,10 @@ const RecommendedPackages = () => {
             .pdf-monthly-installment-table td.package-value.recommended, .pdf-monthly-installment-table td.package-detail.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
             .pdf-monthly-installment-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-monthly-installment-table td:not(:first-child) { width: 25% !important; }
+            
+            /* Reduce font size for Total Principal and Total Interest rows for better hierarchy */
+            .pdf-monthly-installment-table .detail-row td { font-size: 9px !important; }
+            .pdf-monthly-installment-table .detail-row .detail-label { font-size: 8px !important; }
             
             /* Bar Chart Styles - Match HTML Version */
             .pdf-chart-section { margin: 20px 0 !important; page-break-inside: avoid !important; }
@@ -1320,7 +1324,7 @@ const RecommendedPackages = () => {
                       
                       return `
                         <tr class="rate-info-row">
-                          <td class="detail-label">Interest Rate</td>
+                          <td class="detail-label">Year ${year} Rate</td>
                           ${yearData.map((data, index) => `
                             <td class="package-detail ${index === 0 ? 'recommended' : ''}">
                               ${data ? data.rate.toFixed(2) + '%' : 'N/A'}
@@ -1329,7 +1333,7 @@ const RecommendedPackages = () => {
                         </tr>
                         
                         <tr class="year-row">
-                          <td class="year-label">Year ${year} - MI</td>
+                          <td class="year-label">Monthly Installment</td>
                           ${yearData.map((data, index) => `
                             <td class="package-value ${index === 0 ? 'recommended' : ''}">
                               ${data ? formatCurrency(data.monthlyInstalment) : 'N/A'}
