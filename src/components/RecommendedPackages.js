@@ -867,7 +867,7 @@ const RecommendedPackages = () => {
 
         if (rateType === 'FIXED') {
           const rate = calculateInterestRate(pkg, year);
-          return `${rate.toFixed(2)}%<br><small>FIXED</small>`;
+          return `${rate.toFixed(2)}%<br><small style="font-size: 8px; color: #6b7280;">FIXED</small>`;
         } else {
           // Use actual database rate instead of hardcoded value
           const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
@@ -876,7 +876,7 @@ const RecommendedPackages = () => {
           const totalRate = calculateInterestRate(pkg, year);
           
           const operatorSymbol = operator === '+' ? '+' : '-';
-          return `${totalRate.toFixed(2)}%<br><small>${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</small>`;
+          return `${totalRate.toFixed(2)}%<br><small style="font-size: 8px; color: #6b7280;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</small>`;
         }
       };
 
@@ -962,14 +962,16 @@ const RecommendedPackages = () => {
             .pdf-comparison-table th.recommended::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             
             .pdf-comparison-table tbody tr:nth-child(even) { background: #f8fafc !important; }
-            .pdf-comparison-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
+            .pdf-comparison-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
             .pdf-comparison-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-comparison-table td.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
-            .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; white-space: pre-line !important; }
+            .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; white-space: pre-line !important; text-align: center !important; vertical-align: middle !important; }
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.features-cell { text-align: left !important; vertical-align: middle !important; font-size: 11px !important; line-height: 1.3 !important; padding: 8px 4px !important; word-wrap: break-word !important; }
+            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 9px !important; }
             .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
+            .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
             
             ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
             .pdf-savings-section { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important; border: 2px solid #264A82 !important; border-radius: 16px !important; padding: 20px !important; margin-bottom: 20px !important; margin-top: 15px !important; position: relative !important; }
@@ -1164,7 +1166,7 @@ const RecommendedPackages = () => {
                     ${enhancedPackages.map((pkg, index) => `
                       <td class="${index === 0 ? 'recommended savings-cell' : 'savings-cell'}">
                         ${pkg.totalSavings > 0 ? 
-                          `Save ${formatCurrency(Math.abs(pkg.totalSavings))}<br><small>Over ${parseLockInPeriod(pkg.lock_period) || 2} Year${parseLockInPeriod(pkg.lock_period) > 1 ? 's' : ''} Lock-in</small>` : 
+                          `Save ${formatCurrency(Math.abs(pkg.totalSavings))}<br><small style="font-size: 8px; color: #6b7280;">Over ${parseLockInPeriod(pkg.lock_period) || 2} Year${parseLockInPeriod(pkg.lock_period) > 1 ? 's' : ''} Lock-in</small>` : 
                           'No savings'}
                       </td>
                     `).join('')}
@@ -1204,7 +1206,7 @@ const RecommendedPackages = () => {
                   <tr>
                     <td>Remarks</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended features-cell' : 'features-cell'}">
+                      <td class="${index === 0 ? 'recommended features-cell remarks-cell' : 'features-cell remarks-cell'}">
                         ${(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 200)}${(pkg.custom_remarks || pkg.remarks || '').length > 200 ? '...' : ''}
                       </td>
                     `).join('')}
