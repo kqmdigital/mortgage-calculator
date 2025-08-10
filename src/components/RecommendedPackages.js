@@ -1034,7 +1034,9 @@ const RecommendedPackages = () => {
             .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: italic !important; font-size: 9px !important; }
             .pdf-monthly-installment-table .package-value { color: #1d4ed8 !important; font-weight: 600 !important; }
             .pdf-monthly-installment-table .package-detail { color: #6b7280 !important; font-size: 11px !important; }
-            .pdf-monthly-installment-table tbody tr:nth-child(even) { background: #f8fafc !important; }
+            /* Fix alternating row background colors */
+            .pdf-monthly-installment-table tbody tr:nth-child(odd) { background: #f8fafc !important; }
+            .pdf-monthly-installment-table tbody tr:nth-child(even) { background: white !important; }
             .pdf-monthly-installment-table td.package-value.recommended, .pdf-monthly-installment-table td.package-detail.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
             .pdf-monthly-installment-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-monthly-installment-table td:not(:first-child) { width: 25% !important; }
@@ -1042,6 +1044,12 @@ const RecommendedPackages = () => {
             /* Reduce font size for Total Principal and Total Interest rows for better hierarchy */
             .pdf-monthly-installment-table .detail-row td { font-size: 9px !important; }
             .pdf-monthly-installment-table .detail-row .detail-label { font-size: 8px !important; }
+            
+            /* Make Year X Rate and Total Saving same size as Monthly Installment */
+            .pdf-monthly-installment-table .rate-info-row td { font-size: 11px !important; }
+            .pdf-monthly-installment-table .rate-info-row .detail-label { font-size: 11px !important; }
+            .pdf-monthly-installment-table .saving-row td { font-size: 11px !important; }
+            .pdf-monthly-installment-table .saving-row .detail-label { font-size: 11px !important; }
             
             /* Bar Chart Styles - Match HTML Version */
             .pdf-chart-section { margin: 20px 0 !important; page-break-inside: avoid !important; }
@@ -1360,7 +1368,7 @@ const RecommendedPackages = () => {
                         </tr>
                         
                         ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
-                        <tr class="detail-row">
+                        <tr class="detail-row saving-row">
                           <td class="detail-label">Total Saving</td>
                           ${yearData.map((data, index) => {
                             if (!data) return '<td class="package-detail">N/A</td>';
