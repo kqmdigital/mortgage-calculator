@@ -867,7 +867,10 @@ const RecommendedPackages = () => {
 
         if (rateType === 'FIXED') {
           const rate = calculateInterestRate(pkg, year);
-          return `${rate.toFixed(2)}%<br><small style="font-size: 7px; color: #6b7280; line-height: 1.1;">FIXED</small>`;
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.1;">${rate.toFixed(2)}%</div>
+            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin-top: 1px;">FIXED</div>
+          </div>`;
         } else {
           // Use actual database rate instead of hardcoded value
           const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
@@ -876,7 +879,10 @@ const RecommendedPackages = () => {
           const totalRate = calculateInterestRate(pkg, year);
           
           const operatorSymbol = operator === '+' ? '+' : '-';
-          return `${totalRate.toFixed(2)}%<br><small style="font-size: 7px; color: #6b7280; line-height: 1.1;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</small>`;
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.1;">${totalRate.toFixed(2)}%</div>
+            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin-top: 1px;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</div>
+          </div>`;
         }
       };
 
@@ -965,7 +971,7 @@ const RecommendedPackages = () => {
             .pdf-comparison-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
             .pdf-comparison-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-comparison-table td.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
-            .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; white-space: pre-line !important; text-align: center !important; vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; }
+            .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; text-align: center !important; vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; position: relative !important; }
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.features-cell { text-align: left !important; vertical-align: middle !important; font-size: 11px !important; line-height: 1.3 !important; padding: 8px 4px !important; word-wrap: break-word !important; }
@@ -975,8 +981,10 @@ const RecommendedPackages = () => {
             
             /* Specific row height control for rate rows */
             .pdf-comparison-table tr.rate-row { height: auto !important; }
-            .pdf-comparison-table tr.rate-row td { padding: 4px 6px !important; }
-            .pdf-comparison-table small { display: inline-block !important; margin-top: 1px !important; }
+            .pdf-comparison-table tr.rate-row td { padding: 5px 4px !important; vertical-align: middle !important; }
+            .pdf-comparison-table tr.rate-row td.rate-value { padding: 8px 4px !important; text-align: center !important; vertical-align: middle !important; height: 45px !important; }
+            .pdf-comparison-table small { display: inline-block !important; margin: 0 !important; line-height: 1.0 !important; }
+            .pdf-comparison-table .rate-value br { line-height: 0.8 !important; }
             
             ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
             .pdf-savings-section { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important; border: 2px solid #264A82 !important; border-radius: 16px !important; padding: 20px !important; margin-bottom: 20px !important; margin-top: 15px !important; position: relative !important; }
