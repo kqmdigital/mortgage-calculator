@@ -75,6 +75,8 @@ const RecommendedPackages = () => {
           const rateTypesResult = await AuthService.getRateTypes();
           if (rateTypesResult.success) {
             setRateTypes(rateTypesResult.data || []);
+            console.log(`📋 Loaded ${rateTypesResult.data?.length || 0} rate types:`, 
+              rateTypesResult.data?.map(rt => ({ rate_type: rt.rate_type, rate_value: rt.rate_value })));
             logger.info(`Loaded ${rateTypesResult.data?.length || 0} rate types`);
           }
         } else {
@@ -116,27 +118,46 @@ const RecommendedPackages = () => {
     
     // Calculate numeric rate
     if (rateType === 'FIXED') {
-      return parseFloat(value) || 0;
+      const fixedRate = parseFloat(value) || 0;
+      console.log(`🔧 FIXED rate for year ${year}:`, { rateType, value, fixedRate });
+      return fixedRate;
     } else {
       // Find the reference rate from global rateTypes
       const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
       if (!referenceRate) {
+        console.log(`❌ Reference rate type not found: ${rateType}`, { availableTypes: rateTypes.map(rt => rt.rate_type) });
         logger.warn(`Reference rate type not found: ${rateType}`);
         return 0;
       }
       
       const referenceRateValue = parseFloat(referenceRate.rate_value) || 0;
       const spreadValue = parseFloat(value) || 0;
+      const finalRate = operator === '+' ? referenceRateValue + spreadValue : referenceRateValue - spreadValue;
       
-      return operator === '+' ? 
-        referenceRateValue + spreadValue : 
-        referenceRateValue - spreadValue;
+      console.log(`🔧 FLOATING rate for year ${year}:`, { 
+        rateType, 
+        operator, 
+        spreadValue, 
+        referenceRateValue, 
+        finalRate 
+      });
+      
+      return finalRate;
     }
   }, [rateTypes]);
 
   const calculateAverageFirst2Years = useCallback((pkg) => {
     const year1Rate = calculateNumericRate(pkg, 1);
     const year2Rate = calculateNumericRate(pkg, 2);
+    
+    console.log(`📊 Rate calculation for ${pkg.bank_name}:`, {
+      year1Rate,
+      year2Rate,
+      average: year1Rate === 0 && year2Rate === 0 ? 0 : 
+               year1Rate === 0 ? year2Rate :
+               year2Rate === 0 ? year1Rate :
+               (year1Rate + year2Rate) / 2
+    });
     
     if (year1Rate === 0 && year2Rate === 0) return 0;
     if (year1Rate === 0) return year2Rate;
@@ -160,6 +181,24 @@ const RecommendedPackages = () => {
     
     return monthlyPayment;
   }, []);
+
+  const calculateMonthlySavings = useCallback((loanAmount, tenureYears, currentRate, newRate) => {
+    const currentPayment = calculateMonthlyInstallment(loanAmount, tenureYears, currentRate);
+    const newPayment = calculateMonthlyInstallment(loanAmount, tenureYears, newRate);
+    return currentPayment - newPayment;
+  }, [calculateMonthlyInstallment]);
+
+  const parseLockInPeriod = useCallback((lockPeriod) => {
+    if (!lockPeriod) return 0;
+    const match = lockPeriod.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
+  }, []);
+
+  const calculateTotalSavings = useCallback((monthlySavings, lockPeriod) => {
+    if (!monthlySavings || !lockPeriod) return 0;
+    const lockInYears = parseLockInPeriod(lockPeriod);
+    return monthlySavings * lockInYears * 12;
+  }, [parseLockInPeriod]);
 
   const searchPackages = useCallback(async () => {
     
@@ -245,14 +284,40 @@ const RecommendedPackages = () => {
         const loanTenure = parseInt(searchForm.loanTenure) || 25;
         const monthlyInstallment = calculateMonthlyInstallment(loanAmount, loanTenure, avgFirst2Years);
         
+        // Calculate savings for refinancing (needed for proper sorting)
+        let monthlySavings = 0;
+        let totalSavings = 0;
+        if (selectedLoanType === 'Refinancing Home Loan') {
+          const existingRate = searchForm.existingInterestRate ? parseFloat(searchForm.existingInterestRate) : 0;
+          if (existingRate > 0) {
+            monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
+            totalSavings = calculateTotalSavings(monthlySavings, pkg.lock_period);
+          }
+        }
+        
         return {
           ...pkg,
           avgFirst2Years,
-          monthlyInstallment
+          monthlyInstallment,
+          monthlySavings,
+          totalSavings
         };
       });
 
-      // Sort by average rate (lowest first) - same as HTML
+      // Sort by average rate (lowest first) - same as HTML - but let's debug this
+      console.log('🔍 Package rates before sorting:');
+      filtered.forEach((pkg, index) => {
+        console.log(`PKG(${index + 1}):`, {
+          bank: pkg.bank_name,
+          year1_rate_type: pkg.year1_rate_type,
+          year1_value: pkg.year1_value,
+          year2_rate_type: pkg.year2_rate_type, 
+          year2_value: pkg.year2_value,
+          avgFirst2Years: pkg.avgFirst2Years,
+          totalSavings: pkg.totalSavings
+        });
+      });
+      
       filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
 
       setFilteredPackages(filtered);
@@ -266,7 +331,7 @@ const RecommendedPackages = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment]);
+  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment, calculateMonthlySavings, calculateTotalSavings]);
 
   // Auto-search when filters change - load packages on demand
   useEffect(() => {
