@@ -802,7 +802,9 @@ const RecommendedPackages = () => {
           return parseFloat(value) || 0;
         } else {
           // For floating rates - use reference rate + spread
-          const referenceRateValue = rateType.includes('SORA') ? 3.50 : 3.25; // Default rates
+          // Use actual database rate instead of hardcoded value
+          const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
+          const referenceRateValue = referenceRate ? parseFloat(referenceRate.rate_value) : (rateType.includes('SORA') ? 1.65 : 3.25); // Default rates
           const spreadValue = parseFloat(value) || 0;
           return operator === '+' ? referenceRateValue + spreadValue : referenceRateValue - spreadValue;
         }
@@ -867,7 +869,9 @@ const RecommendedPackages = () => {
           const rate = calculateInterestRate(pkg, year);
           return `${rate.toFixed(2)}%<br><small>FIXED</small>`;
         } else {
-          const referenceRateValue = rateType.includes('SORA') ? 3.50 : 3.25;
+          // Use actual database rate instead of hardcoded value
+          const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
+          const referenceRateValue = referenceRate ? parseFloat(referenceRate.rate_value) : (rateType.includes('SORA') ? 1.65 : 3.25);
           const spreadValue = parseFloat(value) || 0;
           const totalRate = calculateInterestRate(pkg, year);
           
