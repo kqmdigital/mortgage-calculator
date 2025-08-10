@@ -978,7 +978,7 @@ const RecommendedPackages = () => {
             .pdf-comparison-table th:first-child { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
             .pdf-comparison-table th:not(:first-child) { width: 25% !important; }
             .pdf-comparison-table th.recommended { background: #1e40af !important; position: relative !important; }
-            .pdf-comparison-table th.recommended::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
+            .pdf-comparison-table th.recommended::after { content: '⭐' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 8px !important; padding: 2px 4px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             
             .pdf-comparison-table tbody tr:nth-child(even) { background: #f8fafc !important; }
             .pdf-comparison-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
@@ -992,11 +992,15 @@ const RecommendedPackages = () => {
             .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
             .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
             
-            /* Specific row height control for rate rows */
-            .pdf-comparison-table tr.rate-row { height: auto !important; }
-            .pdf-comparison-table tr.rate-row td { padding: 3px 4px !important; vertical-align: middle !important; height: 32px !important; }
-            .pdf-comparison-table tr.rate-row td.rate-value { padding: 3px 4px !important; text-align: center !important; vertical-align: middle !important; height: 32px !important; }
-            .pdf-comparison-table small { display: inline-block !important; margin: 0 !important; line-height: 1.0 !important; }
+            /* Specific row height control for rate rows - improved alignment */
+            .pdf-comparison-table tr.rate-row { height: 40px !important; }
+            .pdf-comparison-table tr.rate-row td { padding: 4px !important; vertical-align: middle !important; height: 40px !important; line-height: 1.2 !important; }
+            .pdf-comparison-table tr.rate-row td.rate-value { padding: 4px !important; text-align: center !important; vertical-align: middle !important; height: 40px !important; }
+            .pdf-comparison-table small { display: block !important; margin: 0 !important; line-height: 1.0 !important; }
+            
+            /* Ensure consistent spacing for all table rows */
+            .pdf-comparison-table tbody tr { height: 35px !important; }
+            .pdf-comparison-table tbody tr td { vertical-align: middle !important; padding: 6px 4px !important; }
             .pdf-comparison-table .rate-value br { line-height: 0.8 !important; }
             
             ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
@@ -1021,7 +1025,7 @@ const RecommendedPackages = () => {
             .pdf-monthly-installment-table th { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-monthly-installment-table .row-header { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
             .pdf-monthly-installment-table .recommended-package-header { background: #1e40af !important; position: relative !important; width: 25% !important; }
-            .pdf-monthly-installment-table .recommended-package-header::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
+            .pdf-monthly-installment-table .recommended-package-header::after { content: '⭐' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 8px !important; padding: 2px 4px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             .pdf-monthly-installment-table .package-header { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; width: 25% !important; }
             
             .pdf-monthly-installment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
@@ -1249,7 +1253,7 @@ const RecommendedPackages = () => {
                 <thead>
                   <tr>
                     <th class="row-header">RATE</th>
-                    <th class="recommended-package-header">PKG(1) RECOMMENDED</th>
+                    <th class="recommended-package-header">PKG(1)</th>
                     <th class="package-header">PKG(2)</th>
                     <th class="package-header">PKG(3)</th>
                   </tr>
@@ -1314,6 +1318,15 @@ const RecommendedPackages = () => {
                       );
                       
                       return `
+                        <tr class="rate-info-row">
+                          <td class="detail-label">Interest Rate</td>
+                          ${yearData.map((data, index) => `
+                            <td class="package-detail ${index === 0 ? 'recommended' : ''}">
+                              ${data ? data.rate.toFixed(2) + '%' : 'N/A'}
+                            </td>
+                          `).join('')}
+                        </tr>
+                        
                         <tr class="year-row">
                           <td class="year-label">Year ${year} - MI</td>
                           ${yearData.map((data, index) => `
