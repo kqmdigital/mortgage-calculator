@@ -41,6 +41,7 @@ const RecommendedPackages = () => {
   const [clientName, setClientName] = useState('');
   const [hideBankNames, setHideBankNames] = useState(false);
   const [selectedPackages, setSelectedPackages] = useState(new Set());
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   // Multi-select dropdown states
   const [showBankDropdown, setShowBankDropdown] = useState(false);
@@ -752,10 +753,12 @@ const RecommendedPackages = () => {
   }, [calculateInterestRate, formatPercentage]);
 
   // Enhanced PDF Generation matching HTML version functionality
-  const generateProfessionalReport = () => {
+  const generateProfessionalReport = async () => {
+    setIsGeneratingPDF(true);
     try {
       if (filteredPackages.length === 0) {
         alert('No results to generate report. Please search for packages first.');
+        setIsGeneratingPDF(false);
         return;
       }
 
@@ -766,6 +769,7 @@ const RecommendedPackages = () => {
 
       if (packagesToExport.length === 0) {
         alert('Please select at least one package for the report.');
+        setIsGeneratingPDF(false);
         return;
       }
 
@@ -1567,21 +1571,87 @@ const RecommendedPackages = () => {
         </html>
       `;
 
-      // Open PDF in new window for printing
+      // Create downloadable PDF using html2canvas + jsPDF
+      try {
+        // Import libraries dynamically
+        const html2canvas = (await import('html2canvas')).default;
+        const jsPDF = (await import('jspdf')).jsPDF;
+        
+        // Create a temporary div to render the report
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = reportContent;
+        tempDiv.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 800px;';
+        document.body.appendChild(tempDiv);
+        
+        // Wait a moment for styles to apply
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Convert HTML to canvas
+        const canvas = await html2canvas(tempDiv, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: 800,
+          height: tempDiv.scrollHeight
+        });
+        
+        // Clean up temporary div
+        document.body.removeChild(tempDiv);
+        
+        // Create PDF
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        let heightLeft = imgHeight;
+        let position = 0;
+        
+        // Add first page
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        // Add additional pages if needed
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        
+        // Download the PDF
+        const fileName = `mortgage-report-${clientName || 'client'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(fileName);
+        
+        logger.info('PDF downloaded successfully:', fileName);
+        
+      } catch (pdfError) {
+        logger.warn('PDF generation failed, falling back to HTML download:', pdfError);
+        
+        // Fallback: Download as HTML file
+        const blob = new Blob([reportContent], { type: 'text/html' });
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = `mortgage-report-${clientName || 'client'}-${new Date().toISOString().split('T')[0]}.html`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(downloadLink.href);
+      }
+      
+      // Also open in new window as fallback option for printing
       const printWindow = window.open('', '_blank');
       printWindow.document.write(reportContent);
       printWindow.document.close();
-      
-      // Trigger print after content loads
-      setTimeout(() => {
-        printWindow.print();
-      }, 1000);
       
       logger.info('Enhanced PDF report generated successfully');
       
     } catch (error) {
       logger.error('Error generating enhanced PDF:', error);
       alert('Error generating PDF. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -2170,11 +2240,20 @@ const RecommendedPackages = () => {
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                   <button
                     onClick={generateProfessionalReport}
-                    disabled={filteredPackages.length === 0}
+                    disabled={filteredPackages.length === 0 || isGeneratingPDF}
                     className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium min-h-[44px] sm:min-h-[auto] transition-colors"
                   >
-                    <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
-                    <span className="text-sm sm:text-sm">Generate PDF Report</span>
+                    {isGeneratingPDF ? (
+                      <>
+                        <div className="w-4 h-4 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm sm:text-sm">Generating PDF...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
+                        <span className="text-sm sm:text-sm">Generate PDF Report</span>
+                      </>
+                    )}
                   </button>
                   
                   <button
