@@ -1254,7 +1254,7 @@ const RecommendedPackages = () => {
                 <thead>
                   <tr>
                     <th class="row-header">RATE</th>
-                    <th class="recommended-package-header">PKG(1) RECOMMENDED</th>
+                    <th class="recommended-package-header">PKG(1)</th>
                     <th class="package-header">PKG(2)</th>
                     <th class="package-header">PKG(3)</th>
                   </tr>
