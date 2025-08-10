@@ -862,7 +862,7 @@ const RecommendedPackages = () => {
           if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
             return formatDetailedRateDisplay(pkg, 'thereafter');
           }
-          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
             <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">-</div>
           </div>`;
         }
@@ -870,11 +870,11 @@ const RecommendedPackages = () => {
         if (rateType === 'FIXED') {
           const rate = calculateInterestRate(pkg, year);
           if (!rate || isNaN(rate)) {
-            return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+            return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
               <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">N/A</div>
             </div>`;
           }
-          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
             <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${rate.toFixed(2)}%</div>
             <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">FIXED</div>
           </div>`;
@@ -886,13 +886,13 @@ const RecommendedPackages = () => {
           const totalRate = calculateInterestRate(pkg, year);
           
           if (!totalRate || isNaN(totalRate)) {
-            return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+            return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
               <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">N/A</div>
             </div>`;
           }
           
           const operatorSymbol = operator === '+' ? '+' : '-';
-          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0px;">
+          return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
             <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${totalRate.toFixed(2)}%</div>
             <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</div>
           </div>`;
@@ -987,20 +987,21 @@ const RecommendedPackages = () => {
             .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; text-align: center !important; vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; position: relative !important; }
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
-            .pdf-comparison-table td.features-cell { text-align: left !important; vertical-align: top !important; font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
+            .pdf-comparison-table td.features-cell { text-align: center !important; vertical-align: middle !important; font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
             .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: top !important; max-height: none !important; }
             .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
             .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
             
-            /* Specific row height control for rate rows - improved alignment */
-            .pdf-comparison-table tr.rate-row { height: 40px !important; }
-            .pdf-comparison-table tr.rate-row td { padding: 4px !important; vertical-align: middle !important; height: 40px !important; line-height: 1.2 !important; }
-            .pdf-comparison-table tr.rate-row td.rate-value { padding: 4px !important; text-align: center !important; vertical-align: middle !important; height: 40px !important; }
-            .pdf-comparison-table small { display: block !important; margin: 0 !important; line-height: 1.0 !important; }
-            
-            /* Ensure consistent spacing for all table rows */
+            /* Ensure consistent spacing for ALL table rows - uniform height */
             .pdf-comparison-table tbody tr { height: 35px !important; }
-            .pdf-comparison-table tbody tr td { vertical-align: middle !important; padding: 6px 4px !important; }
+            .pdf-comparison-table tbody tr td { vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; }
+            
+            /* Rate rows use same height as other rows for consistency */
+            .pdf-comparison-table tr.rate-row { height: 35px !important; }
+            .pdf-comparison-table tr.rate-row td { padding: 6px 4px !important; vertical-align: middle !important; height: 35px !important; line-height: 1.2 !important; }
+            .pdf-comparison-table tr.rate-row td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
+            .pdf-comparison-table tr.rate-row td.rate-value { padding: 6px 4px !important; text-align: center !important; vertical-align: middle !important; height: 35px !important; }
+            .pdf-comparison-table small { display: block !important; margin: 0 !important; line-height: 1.0 !important; }
             .pdf-comparison-table .rate-value br { line-height: 0.8 !important; }
             
             ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
