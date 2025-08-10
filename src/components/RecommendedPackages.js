@@ -1095,7 +1095,8 @@ const RecommendedPackages = () => {
             .pdf-bar-item { display: flex !important; flex-direction: column !important; align-items: center !important; position: relative !important; margin: 0 10px !important; }
             .pdf-bar-rate { font-size: 12px !important; font-weight: 600 !important; color: #264A82 !important; margin-bottom: 8px !important; text-align: center !important; }
             .pdf-bar-container { height: 200px !important; display: flex !important; align-items: flex-end !important; margin-bottom: 8px !important; }
-            .pdf-bar-stack { width: 80px !important; display: flex !important; flex-direction: column-reverse !important; border-radius: 6px 6px 0 0 !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important; border: 2px solid #264A82 !important; }
+            .pdf-bar-stack { width: 80px !important; display: flex !important; flex-direction: column-reverse !important; border-radius: 6px 6px 0 0 !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important; }
+            .pdf-bar-stack.new-package { border: 2px solid #264A82 !important; }
             .pdf-bar-segment.principal { background: #264A82 !important; width: 100% !important; min-height: 40px !important; display: flex !important; align-items: center !important; justify-content: center !important; position: relative !important; }
             .pdf-bar-segment.interest { background: #93c5fd !important; width: 100% !important; min-height: 30px !important; display: flex !important; align-items: center !important; justify-content: center !important; position: relative !important; }
             .pdf-bar-label { font-size: 11px !important; font-weight: 600 !important; color: #374151 !important; text-align: center !important; margin-bottom: 4px !important; white-space: nowrap !important; }
@@ -1498,7 +1499,7 @@ const RecommendedPackages = () => {
                     <div class="pdf-bar-item">
                       <div class="pdf-bar-rate">${rate.toFixed(2)}%</div>
                       <div class="pdf-bar-container">
-                        <div class="pdf-bar-stack">
+                        <div class="pdf-bar-stack new-package">
                           <div class="pdf-bar-segment interest" style="height: ${interestHeight}px;">
                             <span class="pdf-bar-text">Interest<br>${formatCurrency(monthlyInterest)}</span>
                           </div>
