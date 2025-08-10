@@ -1534,7 +1534,7 @@ const RecommendedPackages = () => {
       }`}>
         {/* Package Header - Horizontal Layout */}
         <div className="p-6 border-b border-gray-100">
-          {/* First Row: Bank Info and Rate */}
+          {/* Single Row: Bank Info, Property Details, and Rate */}
           <div className="flex items-center justify-between mb-4">
             {/* Left: Bank Info */}
             <div className="flex items-center gap-4">
@@ -1555,6 +1555,25 @@ const RecommendedPackages = () => {
               </div>
             </div>
             
+            {/* Center: Property Details */}
+            <div className="flex items-center gap-4 text-xs text-gray-600">
+              <div>
+                <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
+              </div>
+              <div>
+                <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
+              </div>
+            </div>
+            
             {/* Right: Rate, Payment and Include checkbox */}
             <div className="text-right">
               <div className="flex justify-end items-center gap-2 mb-2">
@@ -1571,27 +1590,6 @@ const RecommendedPackages = () => {
               <div className="text-gray-600 font-medium">
                 {formatCurrency(pkg.monthlyInstallment)}/mo
               </div>
-            </div>
-          </div>
-          
-          {/* Property Details - Positioned between bank info and rate */}
-          <div className="border-t border-gray-200 pt-3 mt-3">
-            <div className="flex items-center gap-6 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
-            <div>
-              <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
-            </div>
             </div>
           </div>
         </div>
