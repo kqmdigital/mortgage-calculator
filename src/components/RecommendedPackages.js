@@ -573,7 +573,7 @@ const RecommendedPackages = () => {
     logger.info('All filters cleared');
   };
 
-  const togglePackageSelection = (packageId) => {
+  const togglePackageSelection = useCallback((packageId) => {
     setSelectedPackages(prev => {
       const newSet = new Set(prev);
       if (newSet.has(packageId)) {
@@ -583,7 +583,7 @@ const RecommendedPackages = () => {
       }
       return newSet;
     });
-  };
+  }, []);
 
   const toggleAllPackages = () => {
     if (selectedPackages.size === filteredPackages.length) {
@@ -644,7 +644,7 @@ const RecommendedPackages = () => {
   };
 
   // Update package feature in filteredPackages state
-  const updatePackageFeature = (packageIndex, featureName, isChecked) => {
+  const updatePackageFeature = useCallback((packageIndex, featureName, isChecked) => {
     setFilteredPackages(prevPackages => {
       const updated = [...prevPackages];
       if (updated[packageIndex]) {
@@ -652,10 +652,10 @@ const RecommendedPackages = () => {
       }
       return updated;
     });
-  };
+  }, []);
 
   // Update package remarks in filteredPackages state
-  const updatePackageRemarks = (packageIndex, newRemarks) => {
+  const updatePackageRemarks = useCallback((packageIndex, newRemarks) => {
     setFilteredPackages(prevPackages => {
       const updated = [...prevPackages];
       if (updated[packageIndex]) {
@@ -663,7 +663,7 @@ const RecommendedPackages = () => {
       }
       return updated;
     });
-  };
+  }, []);
 
   // EXACT rate calculation functions from HTML version
   const calculateInterestRate = (pkg, year) => {
@@ -1483,16 +1483,12 @@ const RecommendedPackages = () => {
         if (!rateType || value === null || value === undefined) {
           // Use thereafter rate if available
           if (pkg.thereafter_rate_type && pkg.thereafter_value !== null && pkg.thereafter_value !== undefined) {
+            const rate = calculateInterestRate(pkg, 'thereafter');
             rates.push(
               <div key={year} className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg text-center">
                 <div className="text-xs font-medium text-blue-600 mb-1">YEAR {year}</div>
-                <div className="text-lg font-bold text-blue-700">{formatRateDisplay(pkg, 'thereafter')}</div>
-                <div className="text-xs text-blue-500 mt-1">
-                  {formatRateDisplay(pkg, 'thereafter').includes('SORA') ? 
-                    formatRateDisplay(pkg, 'thereafter').split('SORA')[0] + 'SORA' + formatRateDisplay(pkg, 'thereafter').split('SORA')[1] 
-                    : formatRateDisplay(pkg, 'thereafter')
-                  }
-                </div>
+                <div className="text-lg font-bold text-blue-700">{formatPercentage(rate)}</div>
+                <div className="text-xs text-blue-500 mt-1">{formatRateDisplay(pkg, 'thereafter')}</div>
               </div>
             );
           } else {
@@ -1506,16 +1502,12 @@ const RecommendedPackages = () => {
           }
         } else {
           // Show actual data for this year
+          const rate = calculateInterestRate(pkg, year);
           rates.push(
             <div key={year} className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-lg text-center">
               <div className="text-xs font-medium text-blue-600 mb-1">YEAR {year}</div>
-              <div className="text-lg font-bold text-blue-700">{formatRateDisplay(pkg, year)}</div>
-              <div className="text-xs text-blue-500 mt-1">
-                {formatRateDisplay(pkg, year).includes('SORA') ? 
-                  formatRateDisplay(pkg, year).split('SORA')[0] + 'SORA' + formatRateDisplay(pkg, year).split('SORA')[1] 
-                  : formatRateDisplay(pkg, year)
-                }
-              </div>
+              <div className="text-lg font-bold text-blue-700">{formatPercentage(rate)}</div>
+              <div className="text-xs text-blue-500 mt-1">{formatRateDisplay(pkg, year)}</div>
             </div>
           );
         }
@@ -1527,13 +1519,8 @@ const RecommendedPackages = () => {
         rates.push(
           <div key="thereafter" className="bg-green-50 border border-green-200 px-4 py-3 rounded-lg text-center">
             <div className="text-xs font-medium text-green-600 mb-1">THEREAFTER</div>
-            <div className="text-lg font-bold text-green-700">{formatRateDisplay(pkg, 'thereafter')}</div>
-            <div className="text-xs text-green-500 mt-1">
-              {formatRateDisplay(pkg, 'thereafter').includes('SORA') ? 
-                formatRateDisplay(pkg, 'thereafter').split('SORA')[0] + 'SORA' + formatRateDisplay(pkg, 'thereafter').split('SORA')[1] 
-                : formatRateDisplay(pkg, 'thereafter')
-              }
-            </div>
+            <div className="text-lg font-bold text-green-700">{formatPercentage(thereafterRate)}</div>
+            <div className="text-xs text-green-500 mt-1">{formatRateDisplay(pkg, 'thereafter')}</div>
           </div>
         );
       }
@@ -1547,8 +1534,9 @@ const RecommendedPackages = () => {
       }`}>
         {/* Package Header - Horizontal Layout */}
         <div className="p-6 border-b border-gray-100">
-          <div className="flex items-start justify-between">
-            {/* Left: Bank Info and Property Details */}
+          {/* First Row: Bank Info and Rate */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Left: Bank Info */}
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                 {rank}
@@ -1564,31 +1552,12 @@ const RecommendedPackages = () => {
                 }`}>
                   {pkg.rate_type_category || 'FLOATING'}
                 </span>
-                
-                {/* Property Details - Between bank name and rate */}
-                <div className="mt-3 flex items-center gap-6 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
-                  </div>
-                </div>
               </div>
             </div>
             
             {/* Right: Rate, Payment and Include checkbox */}
             <div className="text-right">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex justify-end items-center gap-2 mb-2">
                 <input
                   type="checkbox"
                   checked={isSelected}
@@ -1602,6 +1571,25 @@ const RecommendedPackages = () => {
               <div className="text-gray-600 font-medium">
                 {formatCurrency(pkg.monthlyInstallment)}/mo
               </div>
+            </div>
+          </div>
+          
+          {/* Second Row: Property Details - Between bank name and rate sections */}
+          <div className="flex items-center gap-8 text-sm text-gray-600">
+            <div>
+              <span className="font-medium text-gray-500">Property:</span> <span className="font-semibold text-gray-900">{pkg.property_type}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-500">Status:</span> <span className="font-semibold text-gray-900">{pkg.property_status}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-500">Buy Under:</span> <span className="font-semibold text-gray-900">{pkg.buy_under}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-500">Lock:</span> <span className="font-semibold text-gray-900">{pkg.lock_period || '0 Year'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-500">Min Loan:</span> <span className="font-semibold text-gray-900">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
             </div>
           </div>
         </div>
