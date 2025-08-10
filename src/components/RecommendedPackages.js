@@ -1612,7 +1612,7 @@ const RecommendedPackages = () => {
           downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
           downloadBtn.onclick = () => {
             // Set print media styles and trigger print with filename
-            const fileName = \`mortgage-report-\${clientName || 'client'}-\${new Date().toISOString().split('T')[0]}\`;
+            const fileName = `mortgage-report-${clientName || 'client'}-${new Date().toISOString().split('T')[0]}`;
             printWindow.document.title = fileName;
             printWindow.print();
           };
