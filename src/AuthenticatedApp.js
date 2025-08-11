@@ -2727,7 +2727,8 @@ const AuthenticatedApp = () => {
 
         {/* Enhanced Calculator Type Selection */}
         <div className="mb-6">
-          <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
+          {/* Desktop Version - Full buttons with text */}
+          <div className="hidden lg:flex flex-row gap-4">
             <button
               onClick={() => setCalculatorType('tdsr')}
               className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
@@ -2835,6 +2836,63 @@ const AuthenticatedApp = () => {
                 </div>
               </div>
             </button>
+          </div>
+
+          {/* Mobile Version - Single row icon buttons */}
+          <div className="lg:hidden">
+            <div className="flex justify-center gap-2 p-3 bg-gray-50 rounded-xl">
+              <button
+                onClick={() => setCalculatorType('tdsr')}
+                className={`flex-1 p-3 rounded-lg transition-all duration-300 ${
+                  calculatorType === 'tdsr' 
+                    ? 'bg-blue-500 text-white shadow-lg scale-105' 
+                    : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                }`}
+                title="TDSR/MSR Calculator"
+              >
+                <TrendingUp className="w-6 h-6 mx-auto" />
+                <div className="text-xs mt-1 font-medium">TDSR</div>
+              </button>
+              
+              <button
+                onClick={() => setCalculatorType('repayment')}
+                className={`flex-1 p-3 rounded-lg transition-all duration-300 ${
+                  calculatorType === 'repayment' 
+                    ? 'bg-green-500 text-white shadow-lg scale-105' 
+                    : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-600'
+                }`}
+                title="Monthly Repayment Calculator"
+              >
+                <DollarSign className="w-6 h-6 mx-auto" />
+                <div className="text-xs mt-1 font-medium">Repay</div>
+              </button>
+              
+              <button
+                onClick={() => setCalculatorType('progressive')}
+                className={`flex-1 p-3 rounded-lg transition-all duration-300 ${
+                  calculatorType === 'progressive' 
+                    ? 'bg-purple-500 text-white shadow-lg scale-105' 
+                    : 'bg-white text-gray-600 hover:bg-purple-50 hover:text-purple-600'
+                }`}
+                title="Progressive Payment Calculator"
+              >
+                <BarChart3 className="w-6 h-6 mx-auto" />
+                <div className="text-xs mt-1 font-medium">Prog</div>
+              </button>
+              
+              <button
+                onClick={() => setCalculatorType('packages')}
+                className={`flex-1 p-3 rounded-lg transition-all duration-300 ${
+                  calculatorType === 'packages' 
+                    ? 'bg-orange-500 text-white shadow-lg scale-105' 
+                    : 'bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-600'
+                }`}
+                title="Recommended Packages"
+              >
+                <Sparkles className="w-6 h-6 mx-auto" />
+                <div className="text-xs mt-1 font-medium">Packages</div>
+              </button>
+            </div>
           </div>
         </div>
 
