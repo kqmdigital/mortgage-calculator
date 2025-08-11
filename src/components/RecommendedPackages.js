@@ -233,15 +233,10 @@ const RecommendedPackages = ({ currentUser }) => {
     let newBalance = loanAmount;
     let totalNewInterest = 0;
     
-    // Calculate average rate for the new package to determine monthly payment
-    let totalRateYears = 0;
-    let sumRates = 0;
-    for (let year = 1; year <= lockInYears; year++) {
-      sumRates += newPackageRates[year] || newPackageRates.thereafter;
-      totalRateYears++;
-    }
-    const avgNewRate = sumRates / totalRateYears;
-    const newMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, avgNewRate);
+    // Use the year 1 rate to determine monthly payment (most common practice)
+    // This represents what the borrower would actually pay as monthly installment
+    const year1Rate = newPackageRates[1] || newPackageRates.thereafter;
+    const newMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, year1Rate);
     
     for (let month = 1; month <= lockInMonths; month++) {
       // Determine which year we're in to get the correct rate
@@ -352,6 +347,7 @@ const RecommendedPackages = ({ currentUser }) => {
           if (existingRate > 0) {
             monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
             totalSavings = calculateTotalInterestSavings(loanAmount, pkg.lock_period, existingRate, pkg);
+            
           }
         }
         
@@ -920,16 +916,10 @@ const RecommendedPackages = ({ currentUser }) => {
         let newBalance = loanAmount;
         let totalNewInterest = 0;
         
-        // Calculate average rate for the new package to determine monthly payment
-        let totalRateYears = 0;
-        let sumRates = 0;
-        for (let year = 1; year <= lockInYears; year++) {
-          const yearRate = calculateInterestRate(pkg, year);
-          sumRates += yearRate;
-          totalRateYears++;
-        }
-        const avgNewRate = sumRates / totalRateYears;
-        const newMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, avgNewRate);
+        // Use the year 1 rate to determine monthly payment (most common practice)
+        // This represents what the borrower would actually pay as monthly installment
+        const year1Rate = calculateInterestRate(pkg, 1);
+        const newMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, year1Rate);
         
         for (let month = 1; month <= lockInMonths; month++) {
           // Determine which year we're in to get the correct rate
@@ -1025,6 +1015,7 @@ const RecommendedPackages = ({ currentUser }) => {
           if (existingRate > 0) {
             monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
             totalSavings = calculateTotalInterestSavingsPDF(loanAmount, pkg.lock_period, existingRate, pkg);
+            
           }
         }
         
