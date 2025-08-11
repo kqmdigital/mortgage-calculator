@@ -1196,44 +1196,38 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">📊 MAXIMUM AFFORDABILITY ANALYSIS</div>
         <div class="section-content">
-            <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Based on Income & Commitments (Limited by ${memoizedAffordability.limitingFactor})</div>
             <table class="info-table">
+                <tr>
+                    <td class="info-label" style="font-weight: bold; color: #EA580C; background: #FEF3F2;">55% LTV Scenario</td>
+                    <td class="info-value" style="background: #FEF3F2;"></td>
+                    <td class="info-label" style="font-weight: bold; color: #2563EB; background: #EFF6FF;">75% LTV Scenario</td>
+                    <td class="info-value" style="background: #EFF6FF;"></td>
+                </tr>
                 <tr>
                     <td class="info-label">Max Property Price:</td>
-                    <td class="info-value" style="color: #059669; font-weight: bold;">
-                        ${formatCurrency(roundDownToNearestHundred(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75))}
-                    </td>
-                    <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount)}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Max Monthly Payment:</td>
-                    <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
-                    <td class="info-label">Primary Tenure:</td>
-                    <td class="info-value">${roundDownTenor(memoizedAffordability.maxTenureUsed)} years</td>
-                </tr>
-            </table>
-            
-            <div style="font-weight: bold; margin: 20px 0 10px 0; color: #333; font-size: 14px;">Different LTV Scenarios</div>
-            <table class="info-table">
-                <tr>
-                    <td class="info-label">55% LTV (${memoizedAffordability.maxTenure55}yr):</td>
                     <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</td>
-                    <td class="info-label">75% LTV (${memoizedAffordability.maxTenure75}yr):</td>
+                    <td class="info-label">Max Property Price:</td>
                     <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</td>
                 </tr>
                 <tr>
-                    <td class="info-label">80% LTV (${memoizedAffordability.maxTenure80}yr):</td>
-                    <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice80))}</td>
-                    <td class="info-label">Combined Income:</td>
-                    <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
+                    <td class="info-label">Max Loan Amount:</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice55 * 0.55))}</td>
+                    <td class="info-label">Max Loan Amount:</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice75 * 0.75))}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Monthly Payment:</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment55)}</td>
+                    <td class="info-label">Monthly Payment:</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment75)}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Tenure:</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${roundDownTenor(memoizedAffordability.maxTenure55)} years</td>
+                    <td class="info-label">Tenure:</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${roundDownTenor(memoizedAffordability.maxTenure75)} years</td>
                 </tr>
             </table>
-            
-            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
-                <strong>Note:</strong> Calculations use loan percentage-specific maximum tenures based on MAS regulations and applicant age. 
-                Limited by ${memoizedAffordability.limitingFactor} requirements. Does not include stamp duty, legal fees, or other transaction costs.
-            </div>
         </div>
     </div>
     ` : ''}
