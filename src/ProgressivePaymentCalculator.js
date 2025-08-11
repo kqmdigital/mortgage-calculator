@@ -850,26 +850,110 @@ const generateProgressivePaymentReport = () => {
 </html>
   `;
 
-  const newWindow = window.open('', '_blank');
-  newWindow.document.write(htmlContent);
-  newWindow.document.close();
+  // Open PDF in new window with enhanced download functionality
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
   
+  // Add enhanced download functionality matching RecommendedPackages
   setTimeout(() => {
-    newWindow.focus();
-    newWindow.print();
+    // Add download and print functionality to the new window
+    const addDownloadFeature = () => {
+      // Create control buttons container
+      const controlsDiv = printWindow.document.createElement('div');
+      controlsDiv.id = 'pdf-controls';
+      controlsDiv.style.cssText = `
+        position: fixed; 
+        top: 20px; 
+        right: 20px; 
+        z-index: 9999; 
+        display: flex; 
+        gap: 10px;
+        font-family: Arial, sans-serif;
+      `;
+      
+      // Download PDF button
+      const downloadBtn = printWindow.document.createElement('button');
+      downloadBtn.innerHTML = '📥 Save as PDF';
+      downloadBtn.style.cssText = `
+        background: #4CAF50; 
+        color: white; 
+        padding: 12px 20px; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-size: 14px; 
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: background 0.2s;
+      `;
+      downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
+      downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
+      downloadBtn.onclick = () => {
+        // Set print media styles and trigger print with filename
+        const clientName = inputs.clientName ? inputs.clientName.replace(/\s+/g, '-').toLowerCase() : 'client';
+        const fileName = `progressive-payment-schedule-${clientName}-${new Date().toISOString().split('T')[0]}`;
+        printWindow.document.title = fileName;
+        printWindow.print();
+      };
+      
+      // Quick Print button
+      const printBtn = printWindow.document.createElement('button');
+      printBtn.innerHTML = '🖨️ Print';
+      printBtn.style.cssText = `
+        background: #2196F3; 
+        color: white; 
+        padding: 12px 20px; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-size: 14px; 
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: background 0.2s;
+      `;
+      printBtn.onmouseover = () => printBtn.style.background = '#1976D2';
+      printBtn.onmouseout = () => printBtn.style.background = '#2196F3';
+      printBtn.onclick = () => printWindow.print();
+      
+      // Close button
+      const closeBtn = printWindow.document.createElement('button');
+      closeBtn.innerHTML = '✕';
+      closeBtn.style.cssText = `
+        background: #f44336; 
+        color: white; 
+        padding: 12px 16px; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-size: 14px; 
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: background 0.2s;
+      `;
+      closeBtn.onmouseover = () => closeBtn.style.background = '#d32f2f';
+      closeBtn.onmouseout = () => closeBtn.style.background = '#f44336';
+      closeBtn.onclick = () => printWindow.close();
+      
+      // Add buttons to controls
+      controlsDiv.appendChild(downloadBtn);
+      controlsDiv.appendChild(printBtn);
+      controlsDiv.appendChild(closeBtn);
+      
+      // Add controls to page
+      printWindow.document.body.appendChild(controlsDiv);
+      
+      // Hide controls during printing
+      const style = printWindow.document.createElement('style');
+      style.textContent = '@media print { #pdf-controls { display: none !important; } }';
+      printWindow.document.head.appendChild(style);
+      
+      // Auto-focus for better UX
+      printWindow.focus();
+    };
+    
+    addDownloadFeature();
   }, 1000);
-
-  alert(`Progressive payment schedule generated successfully! 
-
-📄 FOR BEST PDF RESULTS:
-• Use Chrome or Edge browser for printing
-• In print dialog, select "More settings"
-• Set margins to "Minimum" or "Custom" (0.4 inch)
-• Choose "A4" paper size
-• Enable "Background graphics"
-• Set scale to "100%" or "Fit to page width"
-• Select "Portrait" orientation
-• Ensure all content fits properly without being cut off`);
 };
 
   return (
