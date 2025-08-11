@@ -753,7 +753,7 @@ const generateProgressivePaymentReport = () => {
 <body>
     <div class="header no-break">
         <div class="logo-section">
-            <img src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" alt="KeyQuest Mortgage Logo">
+            <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" alt="KeyQuest Mortgage Logo">
         </div>
         <div class="property-banner">BUC Property - Progressive Payment Schedule</div>
         <div class="report-info">

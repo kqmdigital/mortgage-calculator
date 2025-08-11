@@ -843,7 +843,7 @@ const htmlContent = `
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682');
+            background-image: url('https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -2637,7 +2637,7 @@ const AuthenticatedApp = () => {
                   transformOrigin: 'center'
                 }}>
                   <img 
-                    src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
+                    src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" 
                     alt="Keyquest Mortgage" 
                     style={{
                       height: 'auto',
