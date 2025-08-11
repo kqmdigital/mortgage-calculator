@@ -1165,14 +1165,13 @@ const htmlContent = `
     </div>
 
     <div class="section no-break">
-        <div class="section-header">💰 FINANCIAL REQUIREMENTS</div>
+        <div class="section-header">💰 DOWNPAYMENT BREAKDOWN</div>
         <div class="section-content">
-            <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Downpayment Breakdown</div>
             <table class="info-table">
                 <tr>
-                    <td class="info-label">Cash Required:</td>
+                    <td class="info-label">Cash Required (${((results.downPayment.cashRequired / results.purchasePrice) * 100).toFixed(1)}%):</td>
                     <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(results.downPayment.cashRequired)}</td>
-                    <td class="info-label">CPF Allowed:</td>
+                    <td class="info-label">CPF Allowed (${inputs.propertyType === 'commercial' ? '0' : ((results.downPayment.cpfAllowed / results.purchasePrice) * 100).toFixed(1)}%):</td>
                     <td class="info-value" style="color: #2563EB; font-weight: bold;">
                         ${inputs.propertyType === 'commercial' ? 'Not Allowed' : formatCurrency(results.downPayment.cpfAllowed)}
                     </td>
