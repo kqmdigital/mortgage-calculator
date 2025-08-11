@@ -1198,10 +1198,10 @@ const htmlContent = `
         <div class="section-content">
             <table class="info-table">
                 <tr>
-                    <td class="info-label" style="font-weight: bold; color: #EA580C; background: #FEF3F2;">55% LTV Scenario</td>
-                    <td class="info-value" style="background: #FEF3F2;"></td>
-                    <td class="info-label" style="font-weight: bold; color: #2563EB; background: #EFF6FF;">75% LTV Scenario</td>
-                    <td class="info-value" style="background: #EFF6FF;"></td>
+                    <td class="info-label" style="font-weight: bold;">55% LTV Scenario</td>
+                    <td class="info-value"></td>
+                    <td class="info-label" style="font-weight: bold;">75% LTV Scenario</td>
+                    <td class="info-value"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Max Property Price:</td>
@@ -1214,12 +1214,6 @@ const htmlContent = `
                     <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice55 * 0.55))}</td>
                     <td class="info-label">Max Loan Amount:</td>
                     <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice75 * 0.75))}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Monthly Payment:</td>
-                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment55)}</td>
-                    <td class="info-label">Monthly Payment:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment75)}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Tenure:</td>
