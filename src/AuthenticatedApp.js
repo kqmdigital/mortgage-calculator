@@ -1094,6 +1094,43 @@ const htmlContent = `
             .assessment-grid, .funding-grid { 
                 grid-template-columns: 1fr 1fr !important; 
             }
+            
+            /* Enhanced Mobile PDF Support */
+            .section,
+            .disclaimer,
+            .footer { 
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+                display: block !important;
+                overflow: visible !important;
+                float: none !important;
+                clear: both !important;
+                width: 100% !important;
+                margin-bottom: 30px !important;
+                padding-bottom: 15px !important;
+            }
+            
+            /* Prevent assessment grids from splitting */
+            .assessment-grid,
+            .funding-grid {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                margin-bottom: 20px !important;
+            }
+            
+            /* Mobile WebKit specific fixes */
+            @supports (-webkit-appearance: none) {
+                .section,
+                .assessment-grid,
+                .funding-grid {
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    orphans: 3 !important;
+                    widows: 3 !important;
+                }
+            }
         }
         
         @media (max-width: 600px) {

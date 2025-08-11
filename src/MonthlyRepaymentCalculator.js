@@ -612,6 +612,45 @@ const MonthlyRepaymentCalculator = () => {
                 display: block !important;
                 margin: 0 auto !important;
             }
+            
+            /* Enhanced Mobile PDF Support */
+            .section,
+            .refinancing-section,
+            .disclaimer,
+            .footer { 
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+                display: block !important;
+                overflow: visible !important;
+                float: none !important;
+                clear: both !important;
+                width: 100% !important;
+                margin-bottom: 30px !important;
+                padding-bottom: 15px !important;
+            }
+            
+            /* Prevent table splitting on mobile */
+            .repayment-table,
+            .monthly-table {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                display: table !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+            }
+            
+            /* Mobile WebKit specific fixes */
+            @supports (-webkit-appearance: none) {
+                .section,
+                .refinancing-section {
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    orphans: 3 !important;
+                    widows: 3 !important;
+                }
+            }
         }
     </style>
 </head>

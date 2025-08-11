@@ -705,6 +705,41 @@ const generateProgressivePaymentReport = () => {
             .payment-table { font-size: 7px !important; }
             .payment-table th, .payment-table td { padding: 3px 2px !important; font-size: 7px !important; }
             .logo-section img { width: 80px !important; height: auto !important; }
+            
+            /* Enhanced Mobile PDF Support */
+            .section,
+            .disclaimer { 
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+                display: block !important;
+                overflow: visible !important;
+                float: none !important;
+                clear: both !important;
+                width: 100% !important;
+                margin-bottom: 30px !important;
+                padding-bottom: 15px !important;
+            }
+            
+            /* Prevent table splitting on mobile */
+            .payment-table {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                display: table !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+            }
+            
+            /* Mobile WebKit specific fixes */
+            @supports (-webkit-appearance: none) {
+                .section {
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    orphans: 3 !important;
+                    widows: 3 !important;
+                }
+            }
         }
     </style>
 </head>

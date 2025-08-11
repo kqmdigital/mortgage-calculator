@@ -973,7 +973,14 @@ const RecommendedPackages = () => {
             .pdf-info-label { color: white !important; margin-bottom: 4px !important; font-weight: 600 !important; font-size: 9px !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; line-height: 1.1 !important; }
             .pdf-info-value { font-size: 12px !important; font-weight: 600 !important; color: white !important; line-height: 1.2 !important; margin: 0 !important; }
             
-            .pdf-comparison-section { margin-bottom: 25px !important; page-break-inside: avoid !important; }
+            .pdf-comparison-section { 
+              margin-bottom: 25px !important; 
+              page-break-inside: avoid !important;
+              -webkit-column-break-inside: avoid !important;
+              break-inside: avoid !important;
+              overflow: visible !important;
+              display: block !important;
+            }
             .pdf-comparison-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
             
             .pdf-comparison-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; }
@@ -1115,6 +1122,54 @@ const RecommendedPackages = () => {
             .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; }
             .pdf-disclaimer-title { font-weight: 700 !important; color: #374151 !important; margin-bottom: 6px !important; font-size: 12px !important; }
             .pdf-disclaimer-text { font-size: 10px !important; color: #6b7280 !important; line-height: 1.5 !important; }
+            
+            /* Enhanced Mobile PDF Support */
+            @media print {
+              /* Mobile-specific page break handling */
+              .pdf-comparison-section, 
+              .pdf-monthly-installment-section, 
+              .pdf-chart-section,
+              .pdf-disclaimer { 
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+                display: block !important;
+                overflow: visible !important;
+                float: none !important;
+                clear: both !important;
+                width: 100% !important;
+                margin-bottom: 30px !important;
+                padding-bottom: 15px !important;
+              }
+              
+              /* Prevent table splitting on mobile */
+              .pdf-comparison-table,
+              .pdf-monthly-installment-table {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                display: table !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+              }
+              
+              /* Force sections to start on new page if needed */
+              .pdf-monthly-installment-section {
+                page-break-before: auto !important;
+                margin-top: 40px !important;
+              }
+              
+              /* Mobile WebKit specific fixes */
+              @supports (-webkit-appearance: none) {
+                .pdf-comparison-section,
+                .pdf-monthly-installment-section {
+                  -webkit-column-break-inside: avoid !important;
+                  -webkit-region-break-inside: avoid !important;
+                  orphans: 3 !important;
+                  widows: 3 !important;
+                }
+              }
+            }
           </style>
         </head>
         <body>
