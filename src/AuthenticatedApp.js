@@ -2586,6 +2586,52 @@ const AuthenticatedApp = () => {
             display: block !important;
             object-fit: contain !important;
           }
+
+          /* Mobile-responsive logo adjustments */
+          @media (max-width: 1024px) {
+            .header-logo-container {
+              justify-content: center !important;
+            }
+            
+            .header-logo-container div img,
+            .header-logo-container img,
+            .header-logo {
+              transform: scale(0.4) translateX(0px) !important;
+              transform-origin: center !important;
+            }
+          }
+
+          @media (max-width: 768px) {
+            .header-logo-container {
+              justify-content: center !important;
+              height: 35px !important;
+              max-height: 35px !important;
+              min-height: 35px !important;
+            }
+            
+            .header-logo-container div img,
+            .header-logo-container img,
+            .header-logo {
+              transform: scale(0.45) translateX(0px) !important;
+              transform-origin: center !important;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .header-logo-container {
+              justify-content: center !important;
+              height: 32px !important;
+              max-height: 32px !important;
+              min-height: 32px !important;
+            }
+            
+            .header-logo-container div img,
+            .header-logo-container img,
+            .header-logo {
+              transform: scale(0.5) translateX(0px) !important;
+              transform-origin: center !important;
+            }
+          }
         `}
       </style>
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
@@ -2606,13 +2652,12 @@ const AuthenticatedApp = () => {
                   <img 
                     src="https://ik.imagekit.io/hst9jooux/KEYQUEST%20LOGO%20(Black%20Text%20Horizontal).png?updatedAt=1753262438682" 
                     alt="Keyquest Mortgage" 
+                    className="header-logo"
                     style={{
                       height: 'auto',
                       width: 'auto',
                       display: 'block',
-                      objectFit: 'contain',
-                      transform: 'scale(0.35) translateX(0px)',
-                      transformOrigin: 'left center'
+                      objectFit: 'contain'
                     }}
                   />
                 </div>
