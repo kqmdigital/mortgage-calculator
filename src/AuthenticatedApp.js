@@ -2661,17 +2661,6 @@ const AuthenticatedApp = () => {
                             <span>User Management</span>
                           </button>
                           
-                          <button
-                            onClick={handleMenuItemClick(() => {
-                              const url = `${process.env.PUBLIC_URL}/recommended-packages.html`;
-                              window.open(url, '_blank');
-                            })}
-                            className="w-full btn-standard btn-secondary mb-2"
-                            type="button"
-                          >
-                            <Sparkles className="w-4 h-4" />
-                            <span>Recommended Packages</span>
-                          </button>
                         </>
                       )}
                       
