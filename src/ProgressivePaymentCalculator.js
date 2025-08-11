@@ -597,9 +597,25 @@ const generateProgressivePaymentReport = () => {
             size: A4; 
             margin: 0.4in;
             @top-left { content: ""; }
+            @top-center { content: ""; }
             @top-right { content: ""; }  
             @bottom-left { content: ""; }
+            @bottom-center { content: ""; }
             @bottom-right { content: counter(page) "/" counter(pages); }
+        }
+        @media print {
+            @page { 
+                size: A4; 
+                margin: 0.4in;
+                @top-left { content: ""; }
+                @top-center { content: ""; }
+                @top-right { content: ""; }  
+                @bottom-left { content: ""; }
+                @bottom-center { content: ""; }
+                @bottom-right { content: counter(page) "/" counter(pages); }
+            }
+            html { margin: 0 !important; padding: 0 !important; }
+            body { margin: 0 !important; padding: 0 !important; }
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {

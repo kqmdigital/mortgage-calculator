@@ -360,9 +360,25 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             size: A4; 
             margin: 0.5in;
             @top-left { content: ""; }
+            @top-center { content: ""; }
             @top-right { content: ""; }  
             @bottom-left { content: ""; }
+            @bottom-center { content: ""; }
             @bottom-right { content: counter(page) "/" counter(pages); }
+        }
+        @media print {
+            @page { 
+                size: A4; 
+                margin: 0.5in;
+                @top-left { content: ""; }
+                @top-center { content: ""; }
+                @top-right { content: ""; }  
+                @bottom-left { content: ""; }
+                @bottom-center { content: ""; }
+                @bottom-right { content: counter(page) "/" counter(pages); }
+            }
+            html { margin: 0 !important; padding: 0 !important; }
+            body { margin: 0 !important; padding: 0 !important; }
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -376,53 +392,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             position: relative;
         }
 
-        /* Watermark styling */
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 250px;
-            height: 250px;
-            opacity: 0.15;
-            transform: translate(-50%, -50%) rotate(-15deg);
-            z-index: 0;
-            pointer-events: none;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
-        }
-        
-        .watermark::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
-        }
-        
-        @media print {
-            .watermark {
-                position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                width: 200px !important;
-                height: 200px !important;
-                opacity: 0.2 !important;
-                print-color-adjust: exact !important;
-                -webkit-print-color-adjust: exact !important;
-            }
-            
-            .watermark::before {
-                print-color-adjust: exact !important;
-                -webkit-print-color-adjust: exact !important;
-            }
-        }
 
         .header {
             text-align: center;
@@ -662,7 +631,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     </style>
 </head>
 <body>
-    <div class="watermark"></div>
     <div class="header no-page-break">
         <div class="logo-section">
             <img src="https://ik.imagekit.io/hst9jooux/KeyQuest%20Logo1.JPG?updatedAt=1753157996192" alt="KeyQuest Mortgage Logo">

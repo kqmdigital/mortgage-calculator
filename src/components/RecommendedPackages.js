@@ -952,8 +952,10 @@ const RecommendedPackages = ({ currentUser }) => {
               margin: 0.4in 0.3in; 
               size: A4;
               @top-left { content: ""; }
+              @top-center { content: ""; }
               @top-right { content: ""; }  
               @bottom-left { content: ""; }
+              @bottom-center { content: ""; }
               @bottom-right { content: counter(page) "/" counter(pages); }
             }
             @media print {
@@ -961,12 +963,15 @@ const RecommendedPackages = ({ currentUser }) => {
                 margin: 0.4in 0.3in; 
                 size: A4;
                 @top-left { content: ""; }
+                @top-center { content: ""; }
                 @top-right { content: ""; }  
                 @bottom-left { content: ""; }
+                @bottom-center { content: ""; }
                 @bottom-right { content: counter(page) "/" counter(pages); }
               }
               body { margin: 0 !important; padding: 0 !important; }
               .no-print, header, footer { display: none !important; }
+              html { margin: 0 !important; padding: 0 !important; }
             }
             
             * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; font-style: normal !important; }
