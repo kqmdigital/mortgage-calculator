@@ -775,6 +775,10 @@ const htmlContent = `
         @page {
             size: A4;
             margin: 0.5in;
+            @top-left { content: ""; }
+            @top-right { content: ""; }  
+            @bottom-left { content: ""; }
+            @bottom-right { content: counter(page) "/" counter(pages); }
         }
         
         @media print {

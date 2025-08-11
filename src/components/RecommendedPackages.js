@@ -948,9 +948,23 @@ const RecommendedPackages = ({ currentUser }) => {
           <title>KeyQuest Mortgage Report</title>
           <meta charset="UTF-8">
           <style>
-            @page { margin: 0.4in 0.3in; size: A4; }
+            @page { 
+              margin: 0.4in 0.3in; 
+              size: A4;
+              @top-left { content: ""; }
+              @top-right { content: ""; }  
+              @bottom-left { content: ""; }
+              @bottom-right { content: counter(page) "/" counter(pages); }
+            }
             @media print {
-              @page { margin: 0.4in 0.3in; size: A4; }
+              @page { 
+                margin: 0.4in 0.3in; 
+                size: A4;
+                @top-left { content: ""; }
+                @top-right { content: ""; }  
+                @bottom-left { content: ""; }
+                @bottom-right { content: counter(page) "/" counter(pages); }
+              }
               body { margin: 0 !important; padding: 0 !important; }
               .no-print, header, footer { display: none !important; }
             }

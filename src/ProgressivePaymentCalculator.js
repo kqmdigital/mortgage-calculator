@@ -593,7 +593,14 @@ const generateProgressivePaymentReport = () => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Progressive Payment Schedule - BUC Property</title>
     <style>
-        @page { size: A4; margin: 0.4in; }
+        @page { 
+            size: A4; 
+            margin: 0.4in;
+            @top-left { content: ""; }
+            @top-right { content: ""; }  
+            @bottom-left { content: ""; }
+            @bottom-right { content: counter(page) "/" counter(pages); }
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
