@@ -1586,11 +1586,23 @@ const RecommendedPackages = ({ currentUser }) => {
                           <td class="detail-label">Total Saving</td>
                           ${yearData.map((data, index) => {
                             if (!data) return '<td class="package-detail">N/A</td>';
-                            const currentMonthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, parseFloat(searchForm.existingInterestRate));
-                            const packageMonthlyPayment = data.monthlyInstalment;
-                            const monthlySavings = currentMonthlyPayment - packageMonthlyPayment;
-                            const yearSavings = monthlySavings * 12;
-                            return `<td class="package-detail ${index === 0 ? 'recommended' : ''}">${formatCurrency(yearSavings)}</td>`;
+                            
+                            // Calculate interest savings for this specific year
+                            const loanAmount = searchForm.loanAmount || 500000;
+                            const existingRate = parseFloat(searchForm.existingInterestRate);
+                            const newRate = data.rate;
+                            
+                            // Calculate what the interest would be with existing rate on same principal
+                            // Use the average principal balance during this year from the new package data
+                            const avgPrincipalBalance = data.principalPaid; // This represents the principal amount for this year
+                            const avgBalance = loanAmount - data.principalPaid * (data.year - 0.5); // Approximate mid-year balance
+                            
+                            // Calculate annual interest for both scenarios using the same balance
+                            const existingYearInterest = Math.abs(avgBalance) * (existingRate / 100);
+                            const newYearInterest = Math.abs(avgBalance) * (newRate / 100);
+                            const yearInterestSavings = existingYearInterest - newYearInterest;
+                            
+                            return `<td class="package-detail ${index === 0 ? 'recommended' : ''}">${formatCurrency(Math.max(0, yearInterestSavings))}</td>`;
                           }).join('')}
                         </tr>
                         ` : ''}
