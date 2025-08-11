@@ -1549,7 +1549,7 @@ const htmlContent = `
         addDownloadFeature();
       }, 1000);
 
-      console.log('Enhanced TDSR/MSR analysis PDF report generated successfully');
+      logger.info('Enhanced TDSR/MSR analysis PDF report generated successfully');
 
     } catch (error) {
       logger.error('Error generating report:', error);
@@ -2664,7 +2664,6 @@ const AuthenticatedApp = () => {
                           <button
                             onClick={handleMenuItemClick(() => {
                               const url = `${process.env.PUBLIC_URL}/recommended-packages.html`;
-                              console.log('Opening URL:', url);
                               window.open(url, '_blank');
                             })}
                             className="w-full btn-standard btn-secondary mb-2"

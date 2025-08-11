@@ -10,12 +10,10 @@ import {
   TrendingUp,
   ChevronDown
 } from 'lucide-react';
-import { useAuth } from '../contexts/EnhancedAuthContext';
 import { AuthService } from '../utils/supabase';
 import logger from '../utils/logger';
 
 const RecommendedPackages = ({ currentUser }) => {
-  // const { user } = useAuth(); // Unused for now
   
   // State management for all functionality
   const [selectedLoanType, setSelectedLoanType] = useState('New Home Loan');
@@ -76,8 +74,6 @@ const RecommendedPackages = ({ currentUser }) => {
           const rateTypesResult = await AuthService.getRateTypes();
           if (rateTypesResult.success) {
             setRateTypes(rateTypesResult.data || []);
-            console.log(`📋 Loaded ${rateTypesResult.data?.length || 0} rate types:`, 
-              rateTypesResult.data?.map(rt => ({ rate_type: rt.rate_type, rate_value: rt.rate_value })));
             logger.info(`Loaded ${rateTypesResult.data?.length || 0} rate types`);
           }
         } else {
@@ -120,14 +116,12 @@ const RecommendedPackages = ({ currentUser }) => {
     // Calculate numeric rate
     if (rateType === 'FIXED') {
       const fixedRate = parseFloat(value) || 0;
-      console.log(`🔧 FIXED rate for year ${year}:`, { rateType, value, fixedRate });
       return fixedRate;
     } else {
       // Find the reference rate from global rateTypes
       const referenceRate = rateTypes.find(rt => rt.rate_type === rateType);
       if (!referenceRate) {
-        console.log(`❌ Reference rate type not found: ${rateType}`, { availableTypes: rateTypes.map(rt => rt.rate_type) });
-        logger.warn(`Reference rate type not found: ${rateType}`);
+        logger.warn(`Reference rate type not found: ${rateType}`, { availableTypes: rateTypes.map(rt => rt.rate_type) });
         return 0;
       }
       
@@ -135,13 +129,6 @@ const RecommendedPackages = ({ currentUser }) => {
       const spreadValue = parseFloat(value) || 0;
       const finalRate = operator === '+' ? referenceRateValue + spreadValue : referenceRateValue - spreadValue;
       
-      console.log(`🔧 FLOATING rate for year ${year}:`, { 
-        rateType, 
-        operator, 
-        spreadValue, 
-        referenceRateValue, 
-        finalRate 
-      });
       
       return finalRate;
     }
@@ -151,14 +138,6 @@ const RecommendedPackages = ({ currentUser }) => {
     const year1Rate = calculateNumericRate(pkg, 1);
     const year2Rate = calculateNumericRate(pkg, 2);
     
-    console.log(`📊 Rate calculation for ${pkg.bank_name}:`, {
-      year1Rate,
-      year2Rate,
-      average: year1Rate === 0 && year2Rate === 0 ? 0 : 
-               year1Rate === 0 ? year2Rate :
-               year2Rate === 0 ? year1Rate :
-               (year1Rate + year2Rate) / 2
-    });
     
     if (year1Rate === 0 && year2Rate === 0) return 0;
     if (year1Rate === 0) return year2Rate;
@@ -344,18 +323,6 @@ const RecommendedPackages = ({ currentUser }) => {
       });
 
       // Sort by average rate (lowest first) - same as HTML - but let's debug this
-      console.log('🔍 Package rates before sorting:');
-      filtered.forEach((pkg, index) => {
-        console.log(`PKG(${index + 1}):`, {
-          bank: pkg.bank_name,
-          year1_rate_type: pkg.year1_rate_type,
-          year1_value: pkg.year1_value,
-          year2_rate_type: pkg.year2_rate_type, 
-          year2_value: pkg.year2_value,
-          avgFirst2Years: pkg.avgFirst2Years,
-          totalSavings: pkg.totalSavings
-        });
-      });
       
       filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
 

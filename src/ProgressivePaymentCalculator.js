@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, Info, ChevronDown, ChevronUp, Home, Building2 } from 'lucide-react';
+import { Download, BarChart3, Calendar, TrendingUp, DollarSign, Building, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
 import useDebounce from './hooks/useDebounce';
 
 // Progressive Payment Calculator - Enhanced UI Version

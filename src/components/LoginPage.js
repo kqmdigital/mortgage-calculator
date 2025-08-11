@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Eye, EyeOff, LogIn, Mail, User, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Settings } from 'lucide-react';
+import { Shield, Eye, EyeOff, Mail, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/EnhancedAuthContext';
 import { validatePassword, validateEmail } from '../utils/auth';
 import { AuthService } from '../utils/supabase';

@@ -86,10 +86,6 @@ export const generateSecurePassword = (length = 12) => {
 window.hashPasswordForDB = async (password) => {
   try {
     const hash = await hashPassword(password);
-    console.log('Password:', password);
-    console.log('Hashed (bcrypt):', hash);
-    console.log('SQL Insert Example:');
-    console.log(`INSERT INTO admin_users (email, name, role, password_hash) VALUES ('user@example.com', 'User Name', 'admin', '${hash}');`);
     return hash;
   } catch (error) {
     console.error('Hashing failed:', error);
@@ -143,19 +139,7 @@ export const initializeDefaultUsers = async () => {
   const users = getDefaultUsers();
   const sql = await generateBulkUserSQL(users);
   
-  console.log('=== DEFAULT USERS SQL ===');
-  console.log('Copy and run this in your Supabase SQL editor:');
-  console.log('');
-  console.log(sql);
-  console.log('');
-  console.log('=== USER CREDENTIALS ===');
-  users.forEach(user => {
-    console.log(`Email: ${user.email}`);
-    console.log(`Password: ${user.password}`);
-    console.log(`Role: ${user.role}`);
-    console.log('---');
-  });
-  console.log('⚠️  IMPORTANT: Change these passwords after first login!');
+  // User setup completed - check console for development credentials if needed
   
   return { sql, users };
 };
@@ -221,14 +205,7 @@ if (typeof window !== 'undefined') {
     
     // Quick setup helper
     quickSetup: async () => {
-      console.log('🔐 KeyQuest Password Utility');
-      console.log('Use these functions to manage passwords:');
-      console.log('');
-      console.log('• hashPasswordForDB("yourpassword") - Hash a password for DB');
-      console.log('• keyquestPasswordUtils.generateSecurePassword() - Generate random password');
-      console.log('• keyquestPasswordUtils.initializeDefaultUsers() - Setup default users');
-      console.log('• keyquestPasswordUtils.validatePasswordStrength("password") - Check strength');
-      console.log('');
+      // Password utilities initialized
       
       // Auto-generate default users
       await initializeDefaultUsers();
@@ -237,6 +214,6 @@ if (typeof window !== 'undefined') {
   
   // Auto-run on load in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('🔐 KeyQuest Password Utils loaded. Run keyquestPasswordUtils.quickSetup() to get started.');
+    // Password utilities loaded for development
   }
 }
