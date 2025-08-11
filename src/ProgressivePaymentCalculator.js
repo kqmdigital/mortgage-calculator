@@ -873,13 +873,7 @@ const generateProgressivePaymentReport = () => {
     </div>
 
     <div class="footer no-break">
-        <div style="margin-bottom: 6px;">
-            📧 kenneth@keyquestmortgage.com.sg | 📞 +65 9795 2338 
-        </div>
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 6px; margin-top: 6px;">
-            <p style="margin: 0; font-size: 7px;">This report is confidential and intended for loan assessment purposes.</p>
-        </div>
-        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 8px; color: #6b7280;">
+        <div style="font-size: 8px; color: #6b7280;">
             ${currentUser?.name || 'User'} | ${currentUser?.email || 'email@example.com'} | contactus@keyquestmortgage.com.sg<br>
             <strong style="color: #264A82; margin-top: 3px; display: block;">Your Trusted Mortgage Advisory Partner</strong>
         </div>
