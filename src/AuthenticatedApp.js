@@ -1206,28 +1206,28 @@ const htmlContent = `
         <div class="section-content">
             <table class="info-table">
                 <tr>
-                    <td class="info-label" style="font-weight: bold;">55% LTV Scenario</td>
-                    <td class="info-value"></td>
                     <td class="info-label" style="font-weight: bold;">75% LTV Scenario</td>
                     <td class="info-value"></td>
+                    <td class="info-label" style="font-weight: bold;">55% LTV Scenario</td>
+                    <td class="info-value"></td>
                 </tr>
                 <tr>
                     <td class="info-label">Max Property Price:</td>
-                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</td>
                     <td class="info-label">Max Property Price:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice55 * 0.55))}</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice75 * 0.75))}</td>
                     <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice75 * 0.75))}</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice55 * 0.55))}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Tenure:</td>
-                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${roundDownTenor(memoizedAffordability.maxTenure55)} years</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${roundDownTenor(memoizedAffordability.maxTenure75)} years</td>
                     <td class="info-label">Tenure:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${roundDownTenor(memoizedAffordability.maxTenure75)} years</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${roundDownTenor(memoizedAffordability.maxTenure55)} years</td>
                 </tr>
             </table>
         </div>

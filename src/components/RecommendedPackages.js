@@ -15,7 +15,7 @@ import { AuthService } from '../utils/supabase';
 import logger from '../utils/logger';
 
 const RecommendedPackages = ({ currentUser }) => {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Unused for now
   
   // State management for all functionality
   const [selectedLoanType, setSelectedLoanType] = useState('New Home Loan');
@@ -195,11 +195,70 @@ const RecommendedPackages = ({ currentUser }) => {
     return match ? parseInt(match[1]) : 0;
   }, []);
 
-  const calculateTotalSavings = useCallback((monthlySavings, lockPeriod) => {
-    if (!monthlySavings || !lockPeriod) return 0;
+  const getPackageRatesByYear = useCallback((pkg, maxYears = 5) => {
+    const rates = {};
+    for (let year = 1; year <= maxYears; year++) {
+      rates[year] = calculateNumericRate(pkg, year);
+    }
+    // Add thereafter rate for beyond max years
+    rates.thereafter = calculateNumericRate(pkg, 'thereafter');
+    return rates;
+  }, [calculateNumericRate]);
+
+  const calculateTotalInterestSavings = useCallback((loanAmount, lockPeriod, existingRate, newPackage) => {
+    if (!loanAmount || !lockPeriod || !existingRate || !newPackage) return 0;
+    
     const lockInYears = parseLockInPeriod(lockPeriod);
-    return monthlySavings * lockInYears * 12;
-  }, [parseLockInPeriod]);
+    const lockInMonths = lockInYears * 12;
+    const loanTenureYears = 30; // Standard assumption
+    
+    // Get package rates by year
+    const newPackageRates = getPackageRatesByYear(newPackage, lockInYears);
+    
+    // Calculate total interest paid with existing loan over lock-in period
+    const existingMonthlyRate = existingRate / 100 / 12;
+    const existingMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, existingRate);
+    let existingBalance = loanAmount;
+    let totalExistingInterest = 0;
+    
+    for (let month = 1; month <= lockInMonths; month++) {
+      const interestPayment = existingBalance * existingMonthlyRate;
+      totalExistingInterest += interestPayment;
+      
+      const principalPayment = existingMonthlyPayment - interestPayment;
+      existingBalance = Math.max(0, existingBalance - principalPayment);
+    }
+    
+    // Calculate total interest paid with new package over lock-in period
+    let newBalance = loanAmount;
+    let totalNewInterest = 0;
+    
+    // Calculate average rate for the new package to determine monthly payment
+    let totalRateYears = 0;
+    let sumRates = 0;
+    for (let year = 1; year <= lockInYears; year++) {
+      sumRates += newPackageRates[year] || newPackageRates.thereafter;
+      totalRateYears++;
+    }
+    const avgNewRate = sumRates / totalRateYears;
+    const newMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, avgNewRate);
+    
+    for (let month = 1; month <= lockInMonths; month++) {
+      // Determine which year we're in to get the correct rate
+      const currentYear = Math.ceil(month / 12);
+      const yearRate = newPackageRates[currentYear] || newPackageRates.thereafter;
+      
+      const newMonthlyRate = yearRate / 100 / 12;
+      const interestPayment = newBalance * newMonthlyRate;
+      totalNewInterest += interestPayment;
+      
+      const principalPayment = newMonthlyPayment - interestPayment;
+      newBalance = Math.max(0, newBalance - principalPayment);
+    }
+    
+    // Return the interest savings (existing interest - new interest)
+    return totalExistingInterest - totalNewInterest;
+  }, [parseLockInPeriod, calculateMonthlyInstallment, getPackageRatesByYear]);
 
   const searchPackages = useCallback(async () => {
     
@@ -292,7 +351,7 @@ const RecommendedPackages = ({ currentUser }) => {
           const existingRate = searchForm.existingInterestRate ? parseFloat(searchForm.existingInterestRate) : 0;
           if (existingRate > 0) {
             monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
-            totalSavings = calculateTotalSavings(monthlySavings, pkg.lock_period);
+            totalSavings = calculateTotalInterestSavings(loanAmount, pkg.lock_period, existingRate, pkg);
           }
         }
         
@@ -332,7 +391,7 @@ const RecommendedPackages = ({ currentUser }) => {
     } finally {
       setLoading(false);
     }
-  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment, calculateMonthlySavings, calculateTotalSavings]);
+  }, [selectedLoanType, searchForm, selectedBanks, selectedFeatures, allPackages, calculateAverageFirst2Years, calculateMonthlyInstallment, calculateMonthlySavings, calculateTotalInterestSavings]);
 
   // Auto-search when filters change - load packages on demand
   useEffect(() => {
@@ -836,10 +895,57 @@ const RecommendedPackages = ({ currentUser }) => {
         return match ? parseInt(match[1]) : 0;
       };
 
-      const calculateTotalSavings = (monthlySavings, lockPeriod) => {
-        if (!monthlySavings || !lockPeriod) return 0;
+      const calculateTotalInterestSavingsPDF = (loanAmount, lockPeriod, existingRate, pkg) => {
+        if (!loanAmount || !lockPeriod || !existingRate || !pkg) return 0;
+        
         const lockInYears = parseLockInPeriod(lockPeriod);
-        return monthlySavings * lockInYears * 12;
+        const lockInMonths = lockInYears * 12;
+        const loanTenureYears = 30; // Standard assumption
+        
+        // Calculate total interest paid with existing loan over lock-in period
+        const existingMonthlyRate = existingRate / 100 / 12;
+        const existingMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, existingRate);
+        let existingBalance = loanAmount;
+        let totalExistingInterest = 0;
+        
+        for (let month = 1; month <= lockInMonths; month++) {
+          const interestPayment = existingBalance * existingMonthlyRate;
+          totalExistingInterest += interestPayment;
+          
+          const principalPayment = existingMonthlyPayment - interestPayment;
+          existingBalance = Math.max(0, existingBalance - principalPayment);
+        }
+        
+        // Calculate total interest paid with new package over lock-in period
+        let newBalance = loanAmount;
+        let totalNewInterest = 0;
+        
+        // Calculate average rate for the new package to determine monthly payment
+        let totalRateYears = 0;
+        let sumRates = 0;
+        for (let year = 1; year <= lockInYears; year++) {
+          const yearRate = calculateInterestRate(pkg, year);
+          sumRates += yearRate;
+          totalRateYears++;
+        }
+        const avgNewRate = sumRates / totalRateYears;
+        const newMonthlyPayment = calculateMonthlyInstallment(loanAmount, loanTenureYears, avgNewRate);
+        
+        for (let month = 1; month <= lockInMonths; month++) {
+          // Determine which year we're in to get the correct rate
+          const currentYear = Math.ceil(month / 12);
+          const yearRate = calculateInterestRate(pkg, currentYear);
+          
+          const newMonthlyRate = yearRate / 100 / 12;
+          const interestPayment = newBalance * newMonthlyRate;
+          totalNewInterest += interestPayment;
+          
+          const principalPayment = newMonthlyPayment - interestPayment;
+          newBalance = Math.max(0, newBalance - principalPayment);
+        }
+        
+        // Return the interest savings (existing interest - new interest)
+        return totalExistingInterest - totalNewInterest;
       };
 
       const calculateAverageFirst2Years = (pkg) => {
@@ -918,7 +1024,7 @@ const RecommendedPackages = ({ currentUser }) => {
           const existingRate = searchForm.existingInterestRate ? parseFloat(searchForm.existingInterestRate) : 0;
           if (existingRate > 0) {
             monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
-            totalSavings = calculateTotalSavings(monthlySavings, pkg.lock_period);
+            totalSavings = calculateTotalInterestSavingsPDF(loanAmount, pkg.lock_period, existingRate, pkg);
           }
         }
         
