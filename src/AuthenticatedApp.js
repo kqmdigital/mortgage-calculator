@@ -1167,51 +1167,40 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">💰 FINANCIAL REQUIREMENTS</div>
         <div class="section-content">
-            <div style="margin-bottom: 20px;">
-                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Downpayment Breakdown</div>
-                <table class="info-table">
-                    <tr>
-                        <td class="info-label">Cash Required:</td>
-                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(results.downPayment.cashRequired)}</td>
-                        <td class="info-label">CPF Allowed:</td>
-                        <td class="info-value" style="color: #2563EB; font-weight: bold;">
-                            ${inputs.propertyType === 'commercial' ? 'Not Allowed' : formatCurrency(results.downPayment.cpfAllowed)}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="info-label">Total Downpayment:</td>
-                        <td class="info-value" style="color: #059669; font-weight: bold;">${formatCurrency(results.downPayment.totalDownPayment)}</td>
-                        <td class="info-label">% of Purchase Price:</td>
-                        <td class="info-value">${(((results.downPayment.totalDownPayment) / results.purchasePrice) * 100).toFixed(1)}%</td>
-                    </tr>
-                </table>
-                
-                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
-                    <strong>Requirements:</strong> 
-                    ${inputs.propertyType === 'commercial' 
-                        ? 'Commercial properties require 20% cash downpayment (no CPF allowed)'
-                        : inputs.loanPercentage <= 55 
-                            ? 'Residential: 10% cash + 35% CPF/Cash allowed'
-                            : 'Residential: 5% cash + 20% CPF/Cash allowed'
-                    }
-                </div>
-            </div>
+            <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Downpayment Breakdown</div>
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Cash Required:</td>
+                    <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(results.downPayment.cashRequired)}</td>
+                    <td class="info-label">CPF Allowed:</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">
+                        ${inputs.propertyType === 'commercial' ? 'Not Allowed' : formatCurrency(results.downPayment.cpfAllowed)}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="info-label">Total Downpayment:</td>
+                    <td class="info-value" style="color: #059669; font-weight: bold;">${formatCurrency(results.downPayment.totalDownPayment)}</td>
+                    <td class="info-label">% of Purchase Price:</td>
+                    <td class="info-value">${(((results.downPayment.totalDownPayment) / results.purchasePrice) * 100).toFixed(1)}%</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Buyer's Stamp Duty (BSD):</td>
+                    <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(results.stampDuty)}</td>
+                    <td class="info-label">Effective Rate:</td>
+                    <td class="info-value">${((results.stampDuty / results.purchasePrice) * 100).toFixed(3)}%</td>
+                </tr>
+            </table>
             
-            <div>
-                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Stamp Duty</div>
-                <table class="info-table">
-                    <tr>
-                        <td class="info-label">Buyer's Stamp Duty (BSD):</td>
-                        <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(results.stampDuty)}</td>
-                        <td class="info-label">Effective Rate:</td>
-                        <td class="info-value">${((results.stampDuty / results.purchasePrice) * 100).toFixed(3)}%</td>
-                    </tr>
-                </table>
-                
-                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
-                    <strong>Note:</strong> Additional stamp duties (ABSD, etc.) and legal fees not included. 
-                    ${inputs.propertyType === 'commercial' ? 'Commercial/Industrial rates applied.' : 'Residential rates applied.'}
-                </div>
+            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                <strong>Requirements:</strong> 
+                ${inputs.propertyType === 'commercial' 
+                    ? 'Commercial properties require 20% cash downpayment (no CPF allowed)'
+                    : inputs.loanPercentage <= 55 
+                        ? 'Residential: 10% cash + 35% CPF/Cash allowed'
+                        : 'Residential: 5% cash + 20% CPF/Cash allowed'
+                }
+                <br><strong>Note:</strong> Additional stamp duties (ABSD, etc.) and legal fees not included. 
+                ${inputs.propertyType === 'commercial' ? 'Commercial/Industrial rates applied.' : 'Residential rates applied.'}
             </div>
         </div>
     </div>
@@ -1220,47 +1209,43 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">📊 MAXIMUM AFFORDABILITY ANALYSIS</div>
         <div class="section-content">
-            <div style="margin-bottom: 20px;">
-                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Based on Income & Commitments (Limited by ${memoizedAffordability.limitingFactor})</div>
-                <table class="info-table">
-                    <tr>
-                        <td class="info-label">Max Property Price:</td>
-                        <td class="info-value" style="color: #059669; font-weight: bold;">
-                            ${formatCurrency(roundDownToNearestHundred(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75))}
-                        </td>
-                        <td class="info-label">Max Loan Amount:</td>
-                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount)}</td>
-                    </tr>
-                    <tr>
-                        <td class="info-label">Max Monthly Payment:</td>
-                        <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
-                        <td class="info-label">Primary Tenure:</td>
-                        <td class="info-value">${roundDownTenor(memoizedAffordability.maxTenureUsed)} years</td>
-                    </tr>
-                </table>
-            </div>
+            <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Based on Income & Commitments (Limited by ${memoizedAffordability.limitingFactor})</div>
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Max Property Price:</td>
+                    <td class="info-value" style="color: #059669; font-weight: bold;">
+                        ${formatCurrency(roundDownToNearestHundred(inputs.propertyType === 'commercial' ? memoizedAffordability.maxPropertyPrice80 : memoizedAffordability.maxPropertyPrice75))}
+                    </td>
+                    <td class="info-label">Max Loan Amount:</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount)}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Max Monthly Payment:</td>
+                    <td class="info-value" style="color: #7C3AED; font-weight: bold;">${formatCurrency(memoizedAffordability.maxMonthlyInstallment)}</td>
+                    <td class="info-label">Primary Tenure:</td>
+                    <td class="info-value">${roundDownTenor(memoizedAffordability.maxTenureUsed)} years</td>
+                </tr>
+            </table>
             
-            <div>
-                <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 14px;">Different LTV Scenarios</div>
-                <table class="info-table">
-                    <tr>
-                        <td class="info-label">55% LTV (${memoizedAffordability.maxTenure55}yr):</td>
-                        <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</td>
-                        <td class="info-label">75% LTV (${memoizedAffordability.maxTenure75}yr):</td>
-                        <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</td>
-                    </tr>
-                    <tr>
-                        <td class="info-label">80% LTV (${memoizedAffordability.maxTenure80}yr):</td>
-                        <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice80))}</td>
-                        <td class="info-label">Combined Income:</td>
-                        <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
-                    </tr>
-                </table>
-                
-                <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
-                    <strong>Note:</strong> Calculations use loan percentage-specific maximum tenures based on MAS regulations and applicant age. 
-                    Limited by ${memoizedAffordability.limitingFactor} requirements. Does not include stamp duty, legal fees, or other transaction costs.
-                </div>
+            <div style="font-weight: bold; margin: 20px 0 10px 0; color: #333; font-size: 14px;">Different LTV Scenarios</div>
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">55% LTV (${memoizedAffordability.maxTenure55}yr):</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</td>
+                    <td class="info-label">75% LTV (${memoizedAffordability.maxTenure75}yr):</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">80% LTV (${memoizedAffordability.maxTenure80}yr):</td>
+                    <td class="info-value" style="color: #DC2626; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice80))}</td>
+                    <td class="info-label">Combined Income:</td>
+                    <td class="info-value">${formatCurrency(memoizedAffordability.combinedMonthlyIncome)}</td>
+                </tr>
+            </table>
+            
+            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
+                <strong>Note:</strong> Calculations use loan percentage-specific maximum tenures based on MAS regulations and applicant age. 
+                Limited by ${memoizedAffordability.limitingFactor} requirements. Does not include stamp duty, legal fees, or other transaction costs.
             </div>
         </div>
     </div>
