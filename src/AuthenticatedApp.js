@@ -2596,7 +2596,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.4) translateX(0px) !important;
+              transform: scale(0.25) translateX(0px) !important;
               transform-origin: center !important;
             }
           }
@@ -2604,15 +2604,15 @@ const AuthenticatedApp = () => {
           @media (max-width: 768px) {
             .header-logo-container {
               justify-content: center !important;
-              height: 35px !important;
-              max-height: 35px !important;
-              min-height: 35px !important;
+              height: 30px !important;
+              max-height: 30px !important;
+              min-height: 30px !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.45) translateX(0px) !important;
+              transform: scale(0.22) translateX(0px) !important;
               transform-origin: center !important;
             }
           }
@@ -2620,15 +2620,15 @@ const AuthenticatedApp = () => {
           @media (max-width: 640px) {
             .header-logo-container {
               justify-content: center !important;
-              height: 32px !important;
-              max-height: 32px !important;
-              min-height: 32px !important;
+              height: 25px !important;
+              max-height: 25px !important;
+              min-height: 25px !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.5) translateX(0px) !important;
+              transform: scale(0.2) translateX(0px) !important;
               transform-origin: center !important;
             }
           }
