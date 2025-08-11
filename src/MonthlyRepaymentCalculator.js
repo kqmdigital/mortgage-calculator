@@ -3,7 +3,7 @@ import { Download, Home, Calculator, DollarSign, TrendingUp, BarChart3, Clock, B
 import logger from './utils/logger';
 
 // Enhanced Monthly Repayment Calculator Component
-const MonthlyRepaymentCalculator = () => {
+const MonthlyRepaymentCalculator = ({ currentUser }) => {
   const [activeTab, setActiveTab] = useState('new'); // 'new' or 'existing'
 
   // New Loan State
@@ -798,6 +798,10 @@ const MonthlyRepaymentCalculator = () => {
     <div class="footer no-page-break">        
         <div style="margin-bottom: 8px;">
             www.keyquestmortgage.com.sg
+        </div>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #6b7280;">
+            ${currentUser?.name || 'User'} | ${currentUser?.email || 'email@example.com'} | contactus@keyquestmortgage.com.sg<br>
+            <strong style="color: #264A82; margin-top: 5px; display: block;">Your Trusted Mortgage Advisory Partner</strong>
         </div>
     </div>
 </body>

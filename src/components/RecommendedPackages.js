@@ -14,7 +14,7 @@ import { useAuth } from '../contexts/EnhancedAuthContext';
 import { AuthService } from '../utils/supabase';
 import logger from '../utils/logger';
 
-const RecommendedPackages = () => {
+const RecommendedPackages = ({ currentUser }) => {
   const { user } = useAuth();
   
   // State management for all functionality
@@ -1620,6 +1620,12 @@ const RecommendedPackages = () => {
                 Before refinancing, please check with your bank for any penalties, clawbacks, or fees that may apply.<br><br>
                 Use of our reports, consultancy services, or advice—whether by the recipient directly or through our consultants, affiliates, or partners—is undertaken entirely at the user's own risk. Keyquest Ventures Private Limited, including its affiliates and employees, bears no responsibility or liability for any decisions made or actions taken based on the information provided.
               </div>
+            </div>
+            
+            <!-- User Details Footer -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 10px; color: #6b7280;">
+              ${currentUser?.name || 'User'} | ${currentUser?.email || 'email@example.com'} | contactus@keyquestmortgage.com.sg<br>
+              <strong style="color: #264A82; margin-top: 5px; display: block;">Your Trusted Mortgage Advisory Partner</strong>
             </div>
           </div>
         </body>

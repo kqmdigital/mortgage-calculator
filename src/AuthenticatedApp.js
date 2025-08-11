@@ -1465,7 +1465,11 @@ const htmlContent = `
     <div class="footer no-break" style="text-align: center; margin-top: 30px; padding: 15px; color: #264A82; border-top: 1px solid #E5E7EB;">
         <div style="margin-bottom: 5px;">📧 info@keyquestmortgage.sg | 📞 +65 XXXX XXXX | 🌐 www.keyquestmortgage.sg</div>
         <div style="margin-top: 10px; font-size: 10px; color: #666;">
-            This report is confidential and intended for the named applicant(s). <strong>Your Trusted Mortgage Advisory Partner</strong>
+            This report is confidential and intended for the named applicant(s).
+        </div>
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #6b7280;">
+            ${currentUser?.name || 'User'} | ${currentUser?.email || 'email@example.com'} | contactus@keyquestmortgage.com.sg<br>
+            <strong style="color: #264A82; margin-top: 5px; display: block;">Your Trusted Mortgage Advisory Partner</strong>
         </div>
     </div>
 
@@ -2838,13 +2842,13 @@ const AuthenticatedApp = () => {
         {/* Calculator Content */}
         <div className="standard-card">
           {calculatorType === 'tdsr' ? (
-            <TDSRMSRCalculator currentUser={user?.name} onLogout={handleLogout} />
+            <TDSRMSRCalculator currentUser={user} onLogout={handleLogout} />
           ) : calculatorType === 'repayment' ? (
-            <MonthlyRepaymentCalculator />
+            <MonthlyRepaymentCalculator currentUser={user} />
           ) : calculatorType === 'packages' ? (
-            <RecommendedPackages />
+            <RecommendedPackages currentUser={user} />
           ) : (
-            <ProgressivePaymentCalculator />
+            <ProgressivePaymentCalculator currentUser={user} />
           )}
         </div>
 
