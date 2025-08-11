@@ -1189,18 +1189,6 @@ const htmlContent = `
                     <td class="info-value">${((results.stampDuty / results.purchasePrice) * 100).toFixed(3)}%</td>
                 </tr>
             </table>
-            
-            <div style="margin-top: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 10px; color: #666;">
-                <strong>Requirements:</strong> 
-                ${inputs.propertyType === 'commercial' 
-                    ? 'Commercial properties require 20% cash downpayment (no CPF allowed)'
-                    : inputs.loanPercentage <= 55 
-                        ? 'Residential: 10% cash + 35% CPF/Cash allowed'
-                        : 'Residential: 5% cash + 20% CPF/Cash allowed'
-                }
-                <br><strong>Note:</strong> Additional stamp duties (ABSD, etc.) and legal fees not included. 
-                ${inputs.propertyType === 'commercial' ? 'Commercial/Industrial rates applied.' : 'Residential rates applied.'}
-            </div>
         </div>
     </div>
 
