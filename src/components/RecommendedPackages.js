@@ -218,11 +218,11 @@ const RecommendedPackages = ({ currentUser }) => {
     return existingYearInterest - newYearInterest;
   }, []);
 
-  const calculateTotalInterestSavings = useCallback((loanAmount, lockPeriod, existingRate, newPackage) => {
+  const calculateTotalInterestSavings = useCallback((loanAmount, lockPeriod, existingRate, newPackage, loanTenure) => {
     if (!loanAmount || !lockPeriod || !existingRate || !newPackage) return 0;
     
     const lockInYears = parseLockInPeriod(lockPeriod);
-    const loanTenureYears = 30; // Standard assumption
+    const loanTenureYears = loanTenure || 25; // Use actual tenure from form
     
     // Get package rates by year
     const newPackageRates = getPackageRatesByYear(newPackage, lockInYears);
@@ -329,7 +329,7 @@ const RecommendedPackages = ({ currentUser }) => {
           const existingRate = searchForm.existingInterestRate ? parseFloat(searchForm.existingInterestRate) : 0;
           if (existingRate > 0) {
             monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
-            totalSavings = calculateTotalInterestSavings(loanAmount, pkg.lock_period, existingRate, pkg);
+            totalSavings = calculateTotalInterestSavings(loanAmount, pkg.lock_period, existingRate, pkg, loanTenure);
             
           }
         }
@@ -887,11 +887,11 @@ const RecommendedPackages = ({ currentUser }) => {
         return existingYearInterest - newYearInterest;
       };
 
-      const calculateTotalInterestSavingsPDF = (loanAmount, lockPeriod, existingRate, pkg) => {
+      const calculateTotalInterestSavingsPDF = (loanAmount, lockPeriod, existingRate, pkg, loanTenure) => {
         if (!loanAmount || !lockPeriod || !existingRate || !pkg) return 0;
         
         const lockInYears = parseLockInPeriod(lockPeriod);
-        const loanTenureYears = 30; // Standard assumption
+        const loanTenureYears = loanTenure || 25; // Use actual tenure from form
         
         // Sum up yearly interest savings over the lock-in period
         let totalSavings = 0;
@@ -980,7 +980,7 @@ const RecommendedPackages = ({ currentUser }) => {
           const existingRate = searchForm.existingInterestRate ? parseFloat(searchForm.existingInterestRate) : 0;
           if (existingRate > 0) {
             monthlySavings = calculateMonthlySavings(loanAmount, loanTenure, existingRate, avgFirst2Years);
-            totalSavings = calculateTotalInterestSavingsPDF(loanAmount, pkg.lock_period, existingRate, pkg);
+            totalSavings = calculateTotalInterestSavingsPDF(loanAmount, pkg.lock_period, existingRate, pkg, loanTenure);
             
           }
         }
@@ -1601,8 +1601,8 @@ const RecommendedPackages = ({ currentUser }) => {
                   <!-- Current Rate Package for Refinancing -->
                   ${(() => {
                     const currentRate = parseFloat(searchForm.existingInterestRate);
-                    const currentMonthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, currentRate);
-                    const loanAmount = searchForm.loanAmount || 500000;
+                    const currentMonthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount, searchForm.loanTenure, currentRate);
+                    const loanAmount = searchForm.loanAmount;
                     const monthlyRate = currentRate / 100 / 12;
                     const monthlyInterest = loanAmount * monthlyRate;
                     const monthlyPrincipal = currentMonthlyPayment - monthlyInterest;
@@ -1610,7 +1610,7 @@ const RecommendedPackages = ({ currentUser }) => {
                     // Calculate bar height - normalize with new packages
                     const allPayments = [currentMonthlyPayment, ...enhancedPackages.map(p => {
                       const r = calculateInterestRate(p, 1);
-                      return calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, r);
+                      return calculateMonthlyInstallment(searchForm.loanAmount, searchForm.loanTenure, r);
                     })];
                     const maxPayment = Math.max(...allPayments);
                     const barHeight = (currentMonthlyPayment / maxPayment) * 200;
@@ -1639,13 +1639,13 @@ const RecommendedPackages = ({ currentUser }) => {
                 ${enhancedPackages.map((pkg, index) => {
                   // Get Year 1 data for each package
                   const rate = calculateInterestRate(pkg, 1);
-                  const monthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, rate);
+                  const monthlyPayment = calculateMonthlyInstallment(searchForm.loanAmount, searchForm.loanTenure, rate);
                   
                   // Calculate monthly principal and interest for Year 1
-                  const loanAmount = searchForm.loanAmount || 500000;
+                  const loanAmount = searchForm.loanAmount;
                   const monthlyRate = rate / 100 / 12;
                   // eslint-disable-next-line no-unused-vars
-                  const totalMonths = (searchForm.loanTenure || 25) * 12;
+                  const totalMonths = searchForm.loanTenure * 12;
                   
                   // First month's interest and principal (as approximation)
                   const monthlyInterest = loanAmount * monthlyRate;
@@ -1654,7 +1654,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   // Calculate bar heights - normalize to 200px max
                   const allPayments = enhancedPackages.map(p => {
                     const r = calculateInterestRate(p, 1);
-                    return calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, r);
+                    return calculateMonthlyInstallment(searchForm.loanAmount, searchForm.loanTenure, r);
                   });
                   const maxPayment = Math.max(...allPayments);
                   const barHeight = (monthlyPayment / maxPayment) * 200;
@@ -1701,7 +1701,7 @@ const RecommendedPackages = ({ currentUser }) => {
               <div class="pdf-savings-grid">
                 <div class="pdf-savings-item">
                   <div class="label">Current Monthly Payment</div>
-                  <div class="value current">${formatCurrency(calculateMonthlyInstallment(searchForm.loanAmount || 500000, searchForm.loanTenure || 25, parseFloat(searchForm.existingInterestRate)))}</div>
+                  <div class="value current">${formatCurrency(calculateMonthlyInstallment(searchForm.loanAmount, searchForm.loanTenure, parseFloat(searchForm.existingInterestRate)))}</div>
                   <div class="sub-label">at ${parseFloat(searchForm.existingInterestRate).toFixed(2)}%</div>
                 </div>
                 <div class="pdf-savings-item">
