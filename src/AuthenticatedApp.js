@@ -2619,7 +2619,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(1.7) translateX(-70px) !important;
+              transform: scale(1.5) translateX(-60px) !important;
               transform-origin: left center !important;
             }
             
@@ -2729,7 +2729,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(1.3) translateX(-50px) !important;
+              transform: scale(1.5) translateX(-60px) !important;
               transform-origin: left center !important;
             }
             
