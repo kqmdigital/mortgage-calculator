@@ -2841,7 +2841,7 @@ const AuthenticatedApp = () => {
         </div>
 
         {/* Enhanced Calculator Type Selection */}
-        <div className="mb-1 mt-1">
+        <div className="mb-1 mt-0">
           {/* Desktop Version - Full buttons with text */}
           <div className="hidden lg:flex flex-row gap-4">
             <button
