@@ -76,9 +76,9 @@ input[type="number"] {
 /* ===== STANDARDIZED CARD STYLES ===== */
 .standard-card {
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #3b82f6 !important;
   border-radius: 16px;
-  padding: 32px;
+  padding: 40px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -206,7 +206,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 28px;
+  margin-bottom: 28px !important;
 }
 
 .section-header .icon-container {
@@ -297,7 +297,7 @@ input[type="number"] {
   }
   
   .standard-card {
-    padding: 28px;
+    padding: 28px !important;
   }
   
   .section-header {
@@ -326,7 +326,7 @@ input[type="number"] {
 
 @media (max-width: 640px) {
   .standard-card {
-    padding: 24px;
+    padding: 24px !important;
   }
   
   .grid-responsive {
