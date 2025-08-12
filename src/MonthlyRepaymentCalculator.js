@@ -617,37 +617,10 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             widows: 2;
         }
         @media print {
-            @page {
-                margin: 0.5in 0.5in 0.5in 0.5in !important;
-                size: A4 portrait !important;
-                /* Completely remove browser headers/footers */
-                @top-left { content: "" !important; }
-                @top-center { content: "" !important; }
-                @top-right { content: "" !important; }
-                @bottom-left { content: "" !important; }
-                @bottom-center { content: "" !important; }
-                @bottom-right { content: "" !important; }
-                /* Additional page info removal */
-                @top-left-corner { content: "" !important; }
-                @top-right-corner { content: "" !important; }
-                @bottom-left-corner { content: "" !important; }
-                @bottom-right-corner { content: "" !important; }
-            }
-            
             body { 
                 font-size: 10px !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                /* Remove any browser-generated content */
-                counter-reset: page !important;
-            }
-            
-            /* Hide browser-generated page info */
-            * {
-                -webkit-box-decoration-break: clone !important;
-                box-decoration-break: clone !important;
             }
             .logo-section img {
                 width: 80px !important;
@@ -703,11 +676,11 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 }
             }
             
-            /* Proper table pagination */
+            /* Better table pagination */
             .repayment-table,
             .monthly-table {
-                page-break-inside: auto !important;
-                break-inside: auto !important;
+                page-break-inside: auto;
+                break-inside: auto;
                 display: table !important;
                 width: 100% !important;
                 margin-bottom: 20px !important;
@@ -717,26 +690,14 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             /* Repeat table headers on each page */
             .repayment-table thead,
             .monthly-table thead {
-                display: table-header-group !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
-            
-            /* Allow table body to break across pages */
-            .repayment-table tbody,
-            .monthly-table tbody {
-                display: table-row-group !important;
-                page-break-inside: auto !important;
-                break-inside: auto !important;
+                display: table-header-group;
             }
             
             /* Prevent single rows from breaking */
             .repayment-table tbody tr,
             .monthly-table tbody tr {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                orphans: 2 !important;
-                widows: 2 !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             
             /* Ensure table containers don't create scrolling */
@@ -800,42 +761,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             }
             
             /* iOS/iPhone specific fixes for PDF generation */
-            @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px),
-                   screen and (-webkit-min-device-pixel-ratio: 3) and (max-device-width: 1024px) {
-                
-                /* Override iPhone Safari print margins */
-                @page {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    size: A4 !important;
-                }
-                
-                html, body {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }
-                
-                /* Hide Safari print headers/footers */
-                body::before,
-                body::after,
-                html::before,
-                html::after {
-                    display: none !important;
-                    content: "" !important;
-                }
-                
-                /* Force content to fill page */
-                .header,
-                .section,
-                .yearly-schedule-section,
-                .disclaimer,
-                .footer {
-                    margin-top: 0 !important;
-                    margin-bottom: 10px !important;
-                    padding-top: 0 !important;
-                }
+            @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
                 .yearly-schedule-section {
                     margin-top: 5px !important;
                     margin-bottom: 15px !important;
@@ -1027,65 +953,12 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
       // Create a new window with the HTML content
       const printWindow = window.open('', '_blank');
       
-      // Detect iPhone/iOS for special handling
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      
-      if (isIOS || isSafari) {
-        // Add viewport meta tag and aggressive print CSS for iPhone Safari
-        const iosSpecificCSS = `
-          <style>
-            @media print {
-              * { margin: 0 !important; padding: 0 !important; }
-              html, body { 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                height: auto !important;
-                overflow: visible !important;
-              }
-              @page { 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                size: A4 portrait !important;
-              }
-              .header { margin-top: 0.5in !important; }
-              .footer { margin-bottom: 0.5in !important; }
-            }
-          </style>
-        `;
-        
-        const modifiedHtml = htmlContent.replace(
-          '<head>',
-          '<head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">' + iosSpecificCSS
-        );
-        printWindow.document.write(modifiedHtml);
-      } else {
-        printWindow.document.write(htmlContent);
-      }
+      printWindow.document.write(htmlContent);
       
       printWindow.document.close();
       
-      // Add iPhone Safari specific handling
+      // Add enhanced download functionality matching RecommendedPackages
       setTimeout(() => {
-        if (isIOS || isSafari) {
-          // Inject additional CSS to override Safari print margins
-          const additionalCSS = printWindow.document.createElement('style');
-          additionalCSS.innerHTML = `
-            @media print {
-              html { margin: 0 !important; padding: 0 !important; }
-              body { margin: 0 !important; padding: 0 !important; }
-              * { box-sizing: border-box !important; }
-              @page { margin: 0 !important; size: A4 !important; }
-            }
-          `;
-          printWindow.document.head.appendChild(additionalCSS);
-          
-          // Override Safari's default print behavior
-          printWindow.document.body.style.setProperty('margin', '0', 'important');
-          printWindow.document.body.style.setProperty('padding', '0', 'important');
-          printWindow.document.documentElement.style.setProperty('margin', '0', 'important');
-          printWindow.document.documentElement.style.setProperty('padding', '0', 'important');
-        }
         
         // Add download and print functionality to the new window
         const addDownloadFeature = () => {
