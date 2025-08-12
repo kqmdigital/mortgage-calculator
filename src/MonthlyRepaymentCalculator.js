@@ -584,39 +584,34 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             z-index: 1;
         }
         
-        /* Yearly schedule section - split approach */
+        /* Yearly schedule section - unified table approach */
         .yearly-schedule-section {
             display: block;
             overflow: visible;
             margin-bottom: 20px;
         }
         
-        .title-header-group {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            -webkit-column-break-inside: avoid !important;
-            -webkit-region-break-inside: avoid !important;
-            margin-bottom: 0;
+        .yearly-schedule-section h2 {
+            page-break-after: avoid;
+            break-after: avoid;
+            orphans: 3;
+            widows: 3;
         }
         
-        .title-header-group h2 {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-            margin-bottom: 5px;
+        .yearly-table {
+            /* Allow table to break, but with intelligent rules */
         }
         
-        .title-header-group .repayment-table {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
+        .yearly-table thead {
+            page-break-after: avoid;
+            break-after: avoid;
         }
         
-        .table-body-section {
-            /* Allow natural page flow - no break restrictions */
-        }
-        
-        .table-body-section .repayment-table {
-            border-collapse: collapse;
-            width: 100%;
+        .yearly-table tbody tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            orphans: 2;
+            widows: 2;
         }
         @media print {
             body { 
@@ -683,60 +678,60 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     widows: 3 !important;
                 }
                 
-                /* iPhone Safari specific fixes for table titles */
-                .title-header-group {
+                /* iPhone Safari specific fixes for unified table */
+                .yearly-schedule-section h2 {
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
+                    orphans: 3 !important;
+                    widows: 3 !important;
+                }
+                
+                .yearly-table thead {
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
+                }
+                
+                .yearly-table tbody tr {
                     -webkit-column-break-inside: avoid !important;
                     -webkit-region-break-inside: avoid !important;
                     page-break-inside: avoid !important;
                     break-inside: avoid !important;
-                }
-                
-                .title-header-group h2 {
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
-                    page-break-after: avoid !important;
-                    break-after: avoid !important;
-                }
-                
-                .title-header-group .repayment-table {
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
-                    page-break-after: avoid !important;
-                    break-after: avoid !important;
-                }
-                
-                .table-body-section {
-                    /* Natural flow - no break restrictions for WebKit */
+                    orphans: 2 !important;
+                    widows: 2 !important;
                 }
             }
             
             /* iOS/iPhone specific fixes for PDF generation */
             @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
-                .title-header-group {
+                .yearly-schedule-section h2 {
+                    page-break-after: avoid !important;
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    margin-bottom: 10px !important;
+                    orphans: 3 !important;
+                    widows: 3 !important;
+                }
+                
+                .yearly-table {
+                    page-break-before: avoid !important;
+                    -webkit-column-break-before: avoid !important;
+                    -webkit-region-break-before: avoid !important;
+                }
+                
+                .yearly-table thead {
+                    page-break-after: avoid !important;
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                }
+                
+                .yearly-table tbody tr {
                     page-break-inside: avoid !important;
                     -webkit-column-break-inside: avoid !important;
                     -webkit-region-break-inside: avoid !important;
-                    position: relative !important;
-                }
-                
-                .title-header-group h2 {
-                    page-break-after: avoid !important;
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
-                    margin-bottom: 5px !important;
-                }
-                
-                .title-header-group .repayment-table {
-                    page-break-after: avoid !important;
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
-                }
-                
-                .table-body-section {
-                    /* Natural flow for iOS - no restrictions */
-                }
-                
-                .table-body-section .repayment-table tbody tr {
                     orphans: 2 !important;
                     widows: 2 !important;
                 }
@@ -809,11 +804,10 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     ` : ''}
 
     <div class="yearly-schedule-section">
-        <!-- Title and header must stay together -->
-        <div class="title-header-group" style="page-break-inside: avoid !important; break-inside: avoid !important; -webkit-column-break-inside: avoid !important; margin-bottom: 0;">
-            <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 5px 0; text-align: left; page-break-after: avoid !important; break-after: avoid !important;">Yearly Repayment Schedule</h2>
-            
-            <table class="repayment-table" style="margin-top: 0;">
+        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Yearly Repayment Schedule</h2>
+        
+        <div class="table-container">
+            <table class="repayment-table yearly-table">
                 <thead>
                     <tr>
                         <th>Year</th>
@@ -825,12 +819,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                         <th>Ending Principal</th>
                     </tr>
                 </thead>
-            </table>
-        </div>
-        
-        <!-- Table body can break across pages -->
-        <div class="table-body-section" style="margin-top: 0;">
-            <table class="repayment-table" style="margin-top: -1px; border-top: none;">
                 <tbody>
                     ${results.yearlyData.map(year => `
                     <tr>
