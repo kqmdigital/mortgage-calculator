@@ -15,6 +15,8 @@ const LoginPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [localError, setLocalError] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [loginAttempting, setLoginAttempting] = useState(false);
   
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -37,6 +39,7 @@ const LoginPage = () => {
   useEffect(() => {
     clearError();
     setLocalError('');
+    setSuccessMessage('');
     setChangePasswordForm(prev => ({ ...prev, message: '', isSuccess: false }));
   }, [activeView, clearError]);
 
@@ -45,6 +48,8 @@ const LoginPage = () => {
     e.preventDefault();
     clearError();
     setLocalError('');
+    setSuccessMessage('');
+    setLoginAttempting(true);
 
     const email = loginForm.email.trim();
     const password = loginForm.password;
@@ -77,18 +82,21 @@ const LoginPage = () => {
     if (validationErrors.length > 0) {
       logger.debug('Setting local error:', validationErrors.join('. '));
       setLocalError(validationErrors.join('. '));
+      setLoginAttempting(false);
       return;
     }
 
     // Rate limiting check
     if (!loginRateLimiter(email)) {
       setLocalError('Too many login attempts. Please try again in 15 minutes.');
+      setLoginAttempting(false);
       return;
     }
 
     // Check if authentication service is available
     if (typeof AuthService === 'undefined') {
       setLocalError('Authentication service not available. Please check your internet connection and try again.');
+      setLoginAttempting(false);
       return;
     }
 
@@ -98,7 +106,12 @@ const LoginPage = () => {
       
       const result = await login(email, password);
       
-      if (!result.success) {
+      if (result.success) {
+        // Show success message briefly before the context redirects
+        setSuccessMessage('Login successful! Redirecting...');
+        setLocalError('');
+        // Don't set loginAttempting to false here, let the redirect happen
+      } else {
         let errorMessage = 'Login failed';
         
         if (result.error) {
@@ -120,11 +133,13 @@ const LoginPage = () => {
         }
         
         setLocalError(errorMessage);
+        setLoginAttempting(false);
       }
     } catch (error) {
       logger.error('Login error:', error);
       const sanitizedMessage = SecurityUtils.escapeHTML(error.message || 'Please try again.');
       setLocalError(`An unexpected error occurred: ${sanitizedMessage}`);
+      setLoginAttempting(false);
     } finally {
       setLocalLoading(false);
     }
@@ -213,8 +228,8 @@ const LoginPage = () => {
     }
   };
 
-  // Get the current error to display (prefer context error, fall back to local error)
-  const displayError = error || localError;
+  // Get the current error to display (prefer local error, fall back to context error)
+  const displayError = localError || error;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -314,6 +329,16 @@ const LoginPage = () => {
                 </div>
               )}
 
+              {/* Success Message */}
+              {successMessage && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <p className="text-green-700 text-sm font-medium">{successMessage}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Login Error - Enhanced Error Display */}
               {displayError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -326,10 +351,22 @@ const LoginPage = () => {
 
               <button
                 type="submit"
-                disabled={isLoading || localLoading || (rateLimitInfo && !rateLimitInfo.allowed)}
+                disabled={isLoading || localLoading || loginAttempting || (rateLimitInfo && !rateLimitInfo.allowed)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading || localLoading ? 'Signing In...' : 'Sign In'}
+                {successMessage ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Success!</span>
+                  </div>
+                ) : isLoading || localLoading || loginAttempting ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
               </button>
 
               {/* Change Password Link */}
