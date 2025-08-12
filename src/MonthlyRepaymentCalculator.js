@@ -696,10 +696,8 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
     <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Yearly Repayment Schedule</h2>
     
-    <div class="section no-page-break">
-        <div class="section-content">
-            <div class="table-container">
-                <table class="repayment-table">
+    <div class="table-container">
+        <table class="repayment-table">
                     <thead>
                         <tr>
                             <th>Year</th>
@@ -724,18 +722,13 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                         </tr>
                         `).join('')}
                     </tbody>
-                </table>
-            </div>
-        </div>
+        </table>
     </div>
 
-    <div class="page-break">
-        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
-        
-        <div class="section">
-            <div class="section-content">
-                <div class="table-container">
-                    <table class="monthly-table">
+    <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 30px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
+    
+    <div class="table-container">
+        <table class="monthly-table">
                         <thead>
                             <tr>
                                 <th>Year</th>
@@ -758,10 +751,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                             </tr>
                             `).join('')}
                         </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        </table>
     </div>
 
     <div class="disclaimer no-page-break">
