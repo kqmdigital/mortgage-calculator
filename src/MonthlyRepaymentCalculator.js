@@ -582,27 +582,32 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             z-index: 1;
         }
         
-        /* Yearly schedule section - unified table approach */
+        /* Yearly schedule section - table caption approach */
         .yearly-schedule-section {
             display: block;
             overflow: visible;
             margin-bottom: 20px;
         }
         
-        .yearly-schedule-section h2 {
-            page-break-after: avoid;
-            break-after: avoid;
-            orphans: 3;
-            widows: 3;
+        .yearly-table {
+            page-break-inside: auto;
+            break-inside: auto;
+            margin-top: 0;
         }
         
-        .yearly-table {
-            /* Allow table to break, but with intelligent rules */
+        .yearly-table caption {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            orphans: 3;
+            widows: 3;
+            margin-bottom: 10px;
+            display: table-caption;
+            caption-side: top;
         }
         
         .yearly-table thead {
-            page-break-after: avoid;
-            break-after: avoid;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
         }
         
         .yearly-table tbody tr {
@@ -651,6 +656,26 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 padding-bottom: 10px !important;
             }
             
+            /* iPhone Safari aggressive spacing optimization */
+            @media screen and (-webkit-min-device-pixel-ratio: 2) {
+                .section,
+                .refinancing-section {
+                    margin-bottom: 10px !important;
+                    padding-bottom: 5px !important;
+                }
+                
+                .yearly-schedule-section {
+                    margin-top: 0 !important;
+                    padding-top: 0 !important;
+                }
+                
+                .yearly-table caption {
+                    margin-top: 10px !important;
+                    margin-bottom: 5px !important;
+                    padding: 0 !important;
+                }
+            }
+            
             /* Prevent table splitting and fix layout */
             .repayment-table,
             .monthly-table {
@@ -686,14 +711,24 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     widows: 3 !important;
                 }
                 
-                /* iPhone Safari specific fixes for unified table */
-                .yearly-schedule-section h2 {
+                /* iPhone Safari specific fixes for table caption */
+                .yearly-table {
+                    -webkit-column-break-inside: auto !important;
+                    -webkit-region-break-inside: auto !important;
+                    page-break-inside: auto !important;
+                    break-inside: auto !important;
+                    margin-top: 0 !important;
+                }
+                
+                .yearly-table caption {
                     -webkit-column-break-after: avoid !important;
                     -webkit-region-break-after: avoid !important;
                     page-break-after: avoid !important;
                     break-after: avoid !important;
                     orphans: 3 !important;
                     widows: 3 !important;
+                    display: table-caption !important;
+                    caption-side: top !important;
                 }
                 
                 .yearly-table thead {
@@ -715,19 +750,30 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             
             /* iOS/iPhone specific fixes for PDF generation */
             @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
-                .yearly-schedule-section h2 {
-                    page-break-after: avoid !important;
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
-                    margin-bottom: 10px !important;
-                    orphans: 3 !important;
-                    widows: 3 !important;
+                .yearly-schedule-section {
+                    margin-top: 5px !important;
+                    margin-bottom: 15px !important;
                 }
                 
                 .yearly-table {
                     page-break-before: avoid !important;
                     -webkit-column-break-before: avoid !important;
                     -webkit-region-break-before: avoid !important;
+                    page-break-inside: auto !important;
+                    -webkit-column-break-inside: auto !important;
+                    -webkit-region-break-inside: auto !important;
+                    margin-top: 0 !important;
+                }
+                
+                .yearly-table caption {
+                    page-break-after: avoid !important;
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    margin-bottom: 5px !important;
+                    orphans: 3 !important;
+                    widows: 3 !important;
+                    display: table-caption !important;
+                    caption-side: top !important;
                 }
                 
                 .yearly-table thead {
@@ -812,10 +858,9 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     ` : ''}
 
     <div class="yearly-schedule-section">
-        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Yearly Repayment Schedule</h2>
-        
         <div class="table-container">
             <table class="repayment-table yearly-table">
+                <caption style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left; caption-side: top;">Yearly Repayment Schedule</caption>
                 <thead>
                     <tr>
                         <th>Year</th>
