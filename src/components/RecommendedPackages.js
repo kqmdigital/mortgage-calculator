@@ -1627,6 +1627,79 @@ const RecommendedPackages = ({ currentUser }) => {
               </table>
             </div>
 
+            ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
+            <!-- Interest Savings Breakdown Section -->
+            <div class="pdf-breakdown-section">
+              <div class="pdf-breakdown-title">Interest Savings Breakdown Over Lock-in Period</div>
+              <div class="pdf-breakdown-content">
+                
+                <table class="pdf-breakdown-table">
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Balance</th>
+                      <th>Existing Interest<br><small>(${parseFloat(searchForm.existingInterestRate).toFixed(2)}%)</small></th>
+                      <th>New Interest<br><small>(${(() => {
+                        const year1Rate = calculateInterestRate(enhancedPackages[0], 1);
+                        return year1Rate.toFixed(2);
+                      })()}%)</small></th>
+                      <th>Monthly Savings</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${(() => {
+                      const loanAmount = searchForm.loanAmount || 500000;
+                      const loanTenure = searchForm.loanTenure || 25;
+                      const existingRate = parseFloat(searchForm.existingInterestRate);
+                      const lockInYears = parseLockInPeriod(enhancedPackages[0]?.lock_period) || 2;
+                      const totalLockInMonths = lockInYears * 12;
+                      let totalBreakdownSavings = 0;
+                      
+                      // Calculate amortization schedules for both rates
+                      const existingAmortization = calculateMonthlyAmortization(loanAmount, existingRate, loanTenure * 12);
+                      
+                      return Array.from({length: totalLockInMonths}, (_, i) => {
+                        const month = i + 1;
+                        const currentYear = Math.ceil(month / 12);
+                        
+                        // Get the rate for this month's year
+                        const currentYearRate = calculateInterestRate(enhancedPackages[0], currentYear);
+                        const newAmortization = calculateMonthlyAmortization(loanAmount, currentYearRate, loanTenure * 12);
+                        
+                        // Get month-specific data
+                        const existingMonthData = existingAmortization.schedule[month - 1];
+                        const newMonthData = newAmortization.schedule[month - 1];
+                        
+                        if (!existingMonthData || !newMonthData) return '';
+                        
+                        const monthlyInterestSavings = existingMonthData.interest - newMonthData.interest;
+                        totalBreakdownSavings += monthlyInterestSavings;
+                        
+                        return `
+                          <tr>
+                            <td style="text-align: center; font-weight: 600;">${month}</td>
+                            <td style="text-align: right;">${formatCurrency(existingMonthData.balance)}</td>
+                            <td style="text-align: right; color: #dc2626;">${formatCurrency(existingMonthData.interest)}</td>
+                            <td style="text-align: right; color: #059669;">${formatCurrency(newMonthData.interest)}</td>
+                            <td style="text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(monthlyInterestSavings)}</td>
+                          </tr>
+                        `;
+                      }).join('') + `
+                        <tr style="border-top: 2px solid #264A82; background: #f1f5f9;">
+                          <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL</td>
+                          <td style="text-align: right; font-weight: 700;">-</td>
+                          <td style="text-align: right; font-weight: 700; color: #dc2626;">-</td>
+                          <td style="text-align: right; font-weight: 700; color: #059669;">-</td>
+                          <td style="text-align: right; font-weight: 700; color: #264A82; font-size: 14px;">${formatCurrency(totalBreakdownSavings)}</td>
+                        </tr>
+                      `;
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            ` : ''}
+
             <!-- Monthly Repayment Breakdown Chart -->
             <div class="pdf-chart-section">
               <div class="pdf-section-title">Monthly Repayment Breakdown</div>
@@ -1729,82 +1802,6 @@ const RecommendedPackages = ({ currentUser }) => {
               </div>
             </div>
 
-            ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
-            <!-- Interest Savings Breakdown Section -->
-            <div class="pdf-breakdown-section">
-              <div class="pdf-breakdown-title">Interest Savings Breakdown Over Lock-in Period</div>
-              <div class="pdf-breakdown-content">
-                
-                <table class="pdf-breakdown-table">
-                  <thead>
-                    <tr>
-                      <th>Month</th>
-                      <th>Balance</th>
-                      <th>Existing Interest<br><small>(${parseFloat(searchForm.existingInterestRate).toFixed(2)}%)</small></th>
-                      <th>New Interest<br><small>(${(() => {
-                        const year1Rate = calculateInterestRate(enhancedPackages[0], 1);
-                        return year1Rate.toFixed(2);
-                      })()}%)</small></th>
-                      <th>Monthly Savings</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${(() => {
-                      const loanAmount = searchForm.loanAmount || 500000;
-                      const loanTenure = searchForm.loanTenure || 25;
-                      const existingRate = parseFloat(searchForm.existingInterestRate);
-                      const lockInYears = parseLockInPeriod(enhancedPackages[0]?.lock_period) || 2;
-                      const totalLockInMonths = lockInYears * 12;
-                      let totalBreakdownSavings = 0;
-                      
-                      // Calculate amortization schedules for both rates
-                      const existingAmortization = calculateMonthlyAmortization(loanAmount, existingRate, loanTenure * 12);
-                      
-                      return Array.from({length: totalLockInMonths}, (_, i) => {
-                        const month = i + 1;
-                        const currentYear = Math.ceil(month / 12);
-                        
-                        // Get the rate for this month's year
-                        const currentYearRate = calculateInterestRate(enhancedPackages[0], currentYear);
-                        const newAmortization = calculateMonthlyAmortization(loanAmount, currentYearRate, loanTenure * 12);
-                        
-                        // Get month-specific data
-                        const existingMonthData = existingAmortization.schedule[month - 1];
-                        const newMonthData = newAmortization.schedule[month - 1];
-                        
-                        if (!existingMonthData || !newMonthData) return '';
-                        
-                        const monthlyInterestSavings = existingMonthData.interest - newMonthData.interest;
-                        totalBreakdownSavings += monthlyInterestSavings;
-                        
-                        return `
-                          <tr>
-                            <td style="text-align: center; font-weight: 600;">Month ${month}</td>
-                            <td style="text-align: right;">${formatCurrency(existingMonthData.balance)}</td>
-                            <td style="text-align: right; color: #dc2626;">${formatCurrency(existingMonthData.interest)}</td>
-                            <td style="text-align: right; color: #059669;">${formatCurrency(newMonthData.interest)}</td>
-                            <td style="text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(monthlyInterestSavings)}</td>
-                          </tr>
-                        `;
-                      }).join('') + `
-                        <tr style="border-top: 2px solid #264A82; background: #f1f5f9;">
-                          <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL</td>
-                          <td style="text-align: right; font-weight: 700;">-</td>
-                          <td style="text-align: right; font-weight: 700; color: #dc2626;">-</td>
-                          <td style="text-align: right; font-weight: 700; color: #059669;">-</td>
-                          <td style="text-align: right; font-weight: 700; color: #264A82; font-size: 14px;">${formatCurrency(totalBreakdownSavings)}</td>
-                        </tr>
-                      `;
-                    })()}
-                  </tbody>
-                </table>
-                
-                <div class="pdf-breakdown-note">
-                  <strong>Note:</strong> This calculation uses the <strong>reducing balance method</strong> with monthly compounding. Interest is calculated monthly on the actual outstanding balance, providing the most accurate savings estimate possible.
-                </div>
-              </div>
-            </div>
-            ` : ''}
 
             <!-- Professional Disclaimer -->
             <div class="pdf-disclaimer">
