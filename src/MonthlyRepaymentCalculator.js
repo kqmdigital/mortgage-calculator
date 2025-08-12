@@ -738,10 +738,11 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         </table>
     </div>
 
-    <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 30px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
-    
-    <div class="table-container">
-        <table class="monthly-table">
+    <div style="page-break-before: always; break-before: page;">
+        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
+        
+        <div class="table-container">
+            <table class="monthly-table">
                         <thead>
                             <tr>
                                 <th>Year</th>
@@ -764,7 +765,8 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                             </tr>
                             `).join('')}
                         </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 
     <div class="disclaimer no-page-break">
