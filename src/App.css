@@ -78,7 +78,7 @@ input[type="number"] {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 24px;
+  padding: 32px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -206,7 +206,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .section-header .icon-container {
@@ -255,7 +255,7 @@ input[type="number"] {
 /* ===== RESPONSIVE GRID SYSTEM ===== */
 .grid-responsive {
   display: grid;
-  gap: 24px;
+  gap: 28px;
 }
 
 .grid-responsive.cols-1 {
@@ -297,7 +297,7 @@ input[type="number"] {
   }
   
   .standard-card {
-    padding: 20px;
+    padding: 28px;
   }
   
   .section-header {
@@ -326,7 +326,7 @@ input[type="number"] {
 
 @media (max-width: 640px) {
   .standard-card {
-    padding: 16px;
+    padding: 24px;
   }
   
   .grid-responsive {
@@ -887,6 +887,23 @@ input[type="number"] {
 
 .rounded { border-radius: 8px; }
 .rounded-lg { border-radius: 12px; }
+
+/* Enhanced card content spacing */
+.standard-card .space-y-6 > * + * {
+  margin-top: 1.75rem !important;
+}
+
+.standard-card .space-y-4 > * + * {
+  margin-top: 1.25rem !important;
+}
+
+.standard-card .space-y-3 > * + * {
+  margin-top: 1rem !important;
+}
+
+.standard-card .space-y-2 > * + * {
+  margin-top: 0.75rem !important;
+}
 .rounded-xl { border-radius: 16px; }
 
 .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }

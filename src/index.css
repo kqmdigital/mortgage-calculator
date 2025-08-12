@@ -132,10 +132,10 @@ html, body {
   
   /* Better spacing for TDSR forms */
   .standard-card .space-y-6 > * + * {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
   }
   
   .standard-card .space-y-4 > * + * {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 }
