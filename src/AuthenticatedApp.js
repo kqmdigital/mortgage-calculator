@@ -2619,13 +2619,14 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(2.0) translateX(-50px) !important;
+              transform: scale(1.7) translateX(-70px) !important;
               transform-origin: left center !important;
             }
             
             /* Single row layout - user card styling takes 1/4 space */
             .relative {
               flex: 1 !important;
+              margin-left: auto !important;
             }
             
             .relative .standard-card.card-gradient-blue {
@@ -2660,6 +2661,7 @@ const AuthenticatedApp = () => {
             
             .relative {
               flex: 1 !important;
+              margin-left: auto !important;
             }
             
             .header-logo-container div {
@@ -2673,7 +2675,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(1.8) translateX(-40px) !important;
+              transform: scale(1.5) translateX(-60px) !important;
               transform-origin: left center !important;
             }
             
@@ -2713,6 +2715,7 @@ const AuthenticatedApp = () => {
             
             .relative {
               flex: 1 !important;
+              margin-left: auto !important;
             }
             
             .header-logo-container div {
@@ -2726,7 +2729,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(1.6) translateX(-30px) !important;
+              transform: scale(1.3) translateX(-50px) !important;
               transform-origin: left center !important;
             }
             
