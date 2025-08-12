@@ -2539,57 +2539,53 @@ const AuthenticatedApp = () => {
           .standard-card {
             padding: 8px 16px !important;
           }
-          .header-logo-container {
-            height: 50px !important;
-            max-height: 50px !important;
-            min-height: 50px !important;
-            overflow: visible !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: flex-start !important;
-          }
-          
-          .header-logo-container div {
-            height: auto !important;
-            max-height: none !important;
-            min-height: auto !important;
-            width: auto !important;
-            overflow: visible !important;
-            display: flex !important;
-            align-items: center !important;
-            transform-origin: center !important;
-          }
-          
-          .header-logo-container div img,
-          .header-logo-container img {
-            height: auto !important;
-            max-height: none !important;
-            min-height: auto !important;
-            width: auto !important;
-            display: block !important;
-            object-fit: contain !important;
-            transform: scale(0.35) translateX(0px) !important;
-            transform-origin: left center !important;
-          }
-          
-          /* Apply scaling only to header logo selectors - exclude login page */
-          .header-logo-container img,
-          div.header-logo-container > img.header-logo,
-          img.header-logo,
-          .header-logo {
-            transform: scale(0.35) translateX(0px) !important;
-            transform-origin: left center !important;
-            height: auto !important;
-            width: auto !important;
-            max-height: none !important;
-            max-width: none !important;
-            display: block !important;
-            object-fit: contain !important;
+          /* Desktop (1024px+) - Improved alignment and larger logo */
+          @media (min-width: 1024px) {
+            .header-logo-container {
+              height: 65px !important;
+              max-height: 65px !important;
+              min-height: 65px !important;
+              overflow: visible !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: flex-start !important;
+            }
+            
+            .header-logo-container div {
+              height: auto !important;
+              max-height: none !important;
+              min-height: auto !important;
+              width: auto !important;
+              overflow: visible !important;
+              display: flex !important;
+              align-items: center !important;
+              transform-origin: left center !important;
+            }
+            
+            .header-logo-container div img,
+            .header-logo-container img,
+            img.header-logo,
+            .header-logo {
+              height: auto !important;
+              max-height: none !important;
+              min-height: auto !important;
+              width: auto !important;
+              display: block !important;
+              object-fit: contain !important;
+              transform: scale(0.5) translateX(-80px) !important;
+              transform-origin: left center !important;
+            }
           }
 
-          /* Mobile-responsive logo adjustments */
-          @media (max-width: 1024px) {
+          /* Tablet (769px-1023px) */
+          @media (min-width: 769px) and (max-width: 1023px) {
             .header-logo-container {
+              height: 40px !important;
+              max-height: 40px !important;
+              min-height: 40px !important;
+              overflow: visible !important;
+              display: flex !important;
+              align-items: center !important;
               justify-content: center !important;
             }
             
@@ -2601,7 +2597,32 @@ const AuthenticatedApp = () => {
             }
           }
 
+          /* Mobile optimizations (768px and below) */
           @media (max-width: 768px) {
+            .header-logo-container {
+              justify-content: center !important;
+              height: 35px !important;
+              max-height: 35px !important;
+              min-height: 35px !important;
+              margin-bottom: 0 !important;
+            }
+            
+            .header-logo-container div img,
+            .header-logo-container img,
+            .header-logo {
+              transform: scale(0.25) translateX(0px) !important;
+              transform-origin: center !important;
+            }
+            
+            /* Stack vertically on mobile for better space usage */
+            .standard-card.card-gradient-blue {
+              width: 100% !important;
+              max-width: 280px !important;
+              margin: 0 auto !important;
+            }
+          }
+
+          @media (max-width: 640px) {
             .header-logo-container {
               justify-content: center !important;
               height: 30px !important;
@@ -2615,11 +2636,20 @@ const AuthenticatedApp = () => {
               transform: scale(0.22) translateX(0px) !important;
               transform-origin: center !important;
             }
+            
+            /* Compact user card for small screens */
+            .standard-card.card-gradient-blue {
+              padding: 6px 12px !important;
+            }
+            
+            .standard-card.card-gradient-blue .flex.items-center.gap-2 {
+              gap: 0.375rem !important;
+            }
           }
-
-          @media (max-width: 640px) {
+          
+          /* Extra small screens */
+          @media (max-width: 480px) {
             .header-logo-container {
-              justify-content: center !important;
               height: 25px !important;
               max-height: 25px !important;
               min-height: 25px !important;
@@ -2629,7 +2659,21 @@ const AuthenticatedApp = () => {
             .header-logo-container img,
             .header-logo {
               transform: scale(0.2) translateX(0px) !important;
-              transform-origin: center !important;
+            }
+            
+            /* Very compact layout */
+            .standard-card.card-gradient-blue {
+              padding: 4px 8px !important;
+              max-width: 250px !important;
+            }
+            
+            .standard-card.card-gradient-blue p {
+              font-size: 0.75rem !important;
+            }
+            
+            .standard-card.card-gradient-blue span {
+              font-size: 0.625rem !important;
+              padding: 1px 4px !important;
             }
           }
         `}
@@ -2637,8 +2681,8 @@ const AuthenticatedApp = () => {
       <div className="max-w-7xl mx-auto p-4 lg:p-6">
         {/* Enhanced Header */}
         <div className="mb-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-4">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-4 lg:px-6 py-3 lg:py-4">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-0">
               <div className="header-logo-container">
                 <div style={{ 
                   height: 'auto', 
