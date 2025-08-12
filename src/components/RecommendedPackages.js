@@ -1637,7 +1637,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <thead>
                     <tr>
                       <th>Month</th>
-                      <th>Balance</th>
+                      <th>Balance<br><small>Year 1</small></th>
                       <th>Existing Interest<br><small>(${parseFloat(searchForm.existingInterestRate).toFixed(2)}%)</small></th>
                       <th>New Interest<br><small>(${(() => {
                         const year1Rate = calculateInterestRate(enhancedPackages[0], 1);
@@ -1670,7 +1670,7 @@ const RecommendedPackages = ({ currentUser }) => {
                           tableRows += `
                             <tr class="year-header-row" style="background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important;">
                               <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Month</th>
-                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Balance</th>
+                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Balance<br><small style="font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important;">Year ${currentYear}</small></th>
                               <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Existing Interest<br><small style="font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important;">(${existingRate.toFixed(2)}%)</small></th>
                               <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">New Interest<br><small style="font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important;">(${yearRate.toFixed(2)}%)</small></th>
                               <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Monthly Savings</th>
@@ -1704,7 +1704,7 @@ const RecommendedPackages = ({ currentUser }) => {
                       
                       return tableRows + `
                         <tr style="border-top: 2px solid #264A82; background: #f1f5f9;">
-                          <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL</td>
+                          <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL SAVING</td>
                           <td style="text-align: right; font-weight: 700;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #dc2626;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #059669;">-</td>
