@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider } from './contexts/EnhancedAuthContext';
 import AuthenticatedApp from './AuthenticatedApp';
 import LoginPage from './components/LoginPage';
@@ -11,9 +11,22 @@ initializeMonitoring();
 
 // Main App Wrapper Component
 const AppWrapper = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Mark as initialized once loading completes for the first time
+  useEffect(() => {
+    if (!isLoading && !hasInitialized) {
+      setHasInitialized(true);
+    }
+  }, [isLoading, hasInitialized]);
+  
+  // Show initializing screen only:
+  // 1. During initial app load (before first initialization)
+  // 2. When successfully authenticated and loading the main app
+  const showInitializing = (!hasInitialized && isLoading) || (isAuthenticated && user && isLoading);
 
-  if (isLoading) {
+  if (showInitializing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
         <div className="standard-card text-center">
