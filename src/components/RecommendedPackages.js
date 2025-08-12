@@ -2438,39 +2438,41 @@ const RecommendedPackages = ({ currentUser }) => {
         {/* Results Section */}
         {showResults && (
           <div className="bg-white rounded-xl shadow-lg p-6">
-            {/* Results Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-800">
+            {/* Results Header - Mobile Responsive */}
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 lg:gap-6 mb-6">
+              {/* Title and Count - Mobile: Full width, Desktop: Left side */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
                   Recommended Packages
                 </h2>
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                   {filteredPackages.length} found
                 </span>
               </div>
 
-              <div className="flex items-center gap-4">
-                {/* Report Options */}
-                <div className="flex items-center gap-4">
-                  <div>
+              {/* Controls Section - Mobile: Stacked, Desktop: Horizontal */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                {/* Report Options - Mobile: Stacked, Desktop: Horizontal */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                  <div className="min-w-0">
                     <input
                       type="text"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
                       placeholder="Enter client name for report"
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="w-full px-3 py-2 sm:py-2 border border-gray-300 rounded-lg text-sm min-h-[44px] sm:min-h-[auto] focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-h-[44px] sm:min-h-[auto] px-2 sm:px-0">
                     <input
                       type="checkbox"
                       id="hideBankNames"
                       checked={hideBankNames}
                       onChange={(e) => setHideBankNames(e.target.checked)}
-                      className="rounded"
+                      className="w-4 h-4 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                     />
-                    <label htmlFor="hideBankNames" className="text-sm text-gray-700">
+                    <label htmlFor="hideBankNames" className="text-sm text-gray-700 cursor-pointer">
                       Hide Bank Names in Report
                     </label>
                   </div>
