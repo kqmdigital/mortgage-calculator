@@ -584,28 +584,40 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             z-index: 1;
         }
         
-        /* Yearly schedule section - intelligent page breaks */
+        /* Yearly schedule section - split approach */
         .yearly-schedule-section {
             display: block;
             overflow: visible;
             margin-bottom: 20px;
         }
         
-        .title-with-table {
+        .title-header-group {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             -webkit-column-break-inside: avoid !important;
             -webkit-region-break-inside: avoid !important;
-            display: table !important;
-            width: 100% !important;
-            table-layout: fixed !important;
+            margin-bottom: 0;
         }
         
-        .title-with-table h2 {
-            display: table-caption !important;
-            caption-side: top !important;
+        .title-header-group h2 {
             page-break-after: avoid !important;
             break-after: avoid !important;
+            margin-bottom: 5px;
+        }
+        
+        .title-header-group .repayment-table {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+        }
+        
+        .table-body-section {
+            page-break-before: avoid !important;
+            break-before: avoid !important;
+        }
+        
+        .table-body-section .repayment-table {
+            border-collapse: collapse;
+            width: 100%;
         }
         @media print {
             body { 
@@ -673,30 +685,28 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 }
                 
                 /* iPhone Safari specific fixes for table titles */
-                .title-with-table {
+                .title-header-group {
                     -webkit-column-break-inside: avoid !important;
                     -webkit-region-break-inside: avoid !important;
                     page-break-inside: avoid !important;
                     break-inside: avoid !important;
-                    display: table !important;
-                    width: 100% !important;
-                    table-layout: fixed !important;
                 }
                 
-                .title-with-table h2 {
-                    display: table-caption !important;
-                    caption-side: top !important;
+                .title-header-group h2 {
                     -webkit-column-break-after: avoid !important;
                     -webkit-region-break-after: avoid !important;
                     page-break-after: avoid !important;
                     break-after: avoid !important;
                 }
                 
-                .title-with-table .table-container {
-                    display: table-row-group !important;
+                .title-header-group .repayment-table {
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
                 }
                 
-                .title-with-table .repayment-table {
+                .table-body-section {
                     -webkit-column-break-before: avoid !important;
                     -webkit-region-break-before: avoid !important;
                     page-break-before: avoid !important;
@@ -706,34 +716,35 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             
             /* iOS/iPhone specific fixes for PDF generation */
             @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
-                .title-with-table {
+                .title-header-group {
                     page-break-inside: avoid !important;
                     -webkit-column-break-inside: avoid !important;
                     -webkit-region-break-inside: avoid !important;
-                    display: table !important;
-                    width: 100% !important;
-                    table-layout: fixed !important;
                     position: relative !important;
                 }
                 
-                .title-with-table h2 {
-                    display: table-caption !important;
-                    caption-side: top !important;
+                .title-header-group h2 {
                     page-break-after: avoid !important;
                     -webkit-column-break-after: avoid !important;
                     -webkit-region-break-after: avoid !important;
-                    margin-bottom: 0 !important;
+                    margin-bottom: 5px !important;
                 }
                 
-                .title-with-table .table-container {
-                    display: table-row-group !important;
+                .title-header-group .repayment-table {
+                    page-break-after: avoid !important;
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
                 }
                 
-                .title-with-table .repayment-table {
+                .table-body-section {
                     page-break-before: avoid !important;
                     -webkit-column-break-before: avoid !important;
                     -webkit-region-break-before: avoid !important;
-                    margin-top: 0 !important;
+                }
+                
+                .table-body-section .repayment-table tbody tr {
+                    orphans: 2 !important;
+                    widows: 2 !important;
                 }
             }
         }
@@ -804,37 +815,42 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     ` : ''}
 
     <div class="yearly-schedule-section">
-        <div class="title-with-table" style="page-break-inside: avoid !important; break-inside: avoid !important; -webkit-column-break-inside: avoid !important; -webkit-region-break-inside: avoid !important; display: table; width: 100%; margin-bottom: 0;">
-            <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 5px 0; text-align: left; display: table-caption; caption-side: top;">Yearly Repayment Schedule</h2>
+        <!-- Title and header must stay together -->
+        <div class="title-header-group" style="page-break-inside: avoid !important; break-inside: avoid !important; -webkit-column-break-inside: avoid !important; margin-bottom: 0;">
+            <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 5px 0; text-align: left; page-break-after: avoid !important; break-after: avoid !important;">Yearly Repayment Schedule</h2>
             
-            <div class="table-container" style="display: table-row-group;">
-                <table class="repayment-table" style="page-break-before: avoid !important;">
-                        <thead>
-                            <tr>
-                                <th>Year</th>
-                                <th>Interest Rate</th>
-                                <th>Beginning Principal</th>
-                                <th>Monthly Installment</th>
-                                <th>Interest Paid</th>
-                                <th>Principal Paid</th>
-                                <th>Ending Principal</th>
-                            </tr>
-                        </thead>
-                    <tbody>
-                        ${results.yearlyData.map(year => `
-                        <tr>
-                            <td>${year.yearNumber}</td>
-                            <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
-                            <td>${formatCurrency(year.beginningPrincipal)}</td>
-                            <td>${formatCurrency(year.monthlyInstalment)}</td>
-                            <td>${formatCurrency(year.interestPaid)}</td>
-                            <td>${formatCurrency(year.principalPaid)}</td>
-                            <td>${formatCurrency(year.endingPrincipal)}</td>
-                        </tr>
-                        `).join('')}
-                    </tbody>
-        </table>
-            </div>
+            <table class="repayment-table" style="margin-top: 0;">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Interest Rate</th>
+                        <th>Beginning Principal</th>
+                        <th>Monthly Installment</th>
+                        <th>Interest Paid</th>
+                        <th>Principal Paid</th>
+                        <th>Ending Principal</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        
+        <!-- Table body can break across pages -->
+        <div class="table-body-section">
+            <table class="repayment-table" style="margin-top: -1px; border-top: none;">
+                <tbody>
+                    ${results.yearlyData.map(year => `
+                    <tr>
+                        <td>${year.yearNumber}</td>
+                        <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
+                        <td>${formatCurrency(year.beginningPrincipal)}</td>
+                        <td>${formatCurrency(year.monthlyInstalment)}</td>
+                        <td>${formatCurrency(year.interestPaid)}</td>
+                        <td>${formatCurrency(year.principalPaid)}</td>
+                        <td>${formatCurrency(year.endingPrincipal)}</td>
+                    </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         </div>
     </div>
 
