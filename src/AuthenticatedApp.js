@@ -2603,7 +2603,7 @@ const AuthenticatedApp = () => {
               min-height: 80px !important;
               margin-bottom: 0 !important;
               width: auto !important;
-              flex: 1 !important;
+              flex: 3 !important;
               display: flex !important;
               align-items: center !important;
             }
@@ -2623,7 +2623,11 @@ const AuthenticatedApp = () => {
               transform-origin: left center !important;
             }
             
-            /* Single row layout - user card styling */
+            /* Single row layout - user card styling takes 1/4 space */
+            .relative {
+              flex: 1 !important;
+            }
+            
             .relative .standard-card.card-gradient-blue {
               width: auto !important;
               max-width: none !important;
@@ -2642,9 +2646,13 @@ const AuthenticatedApp = () => {
               max-height: 70px !important;
               min-height: 70px !important;
               width: auto !important;
-              flex: 1 !important;
+              flex: 3 !important;
               display: flex !important;
               align-items: center !important;
+            }
+            
+            .relative {
+              flex: 1 !important;
             }
             
             .header-logo-container div {
@@ -2683,10 +2691,14 @@ const AuthenticatedApp = () => {
               max-height: 60px !important;
               min-height: 60px !important;
               width: auto !important;
-              flex: 1 !important;
+              flex: 3 !important;
               display: flex !important;
               align-items: center !important;
               justify-content: flex-start !important;
+            }
+            
+            .relative {
+              flex: 1 !important;
             }
             
             .header-logo-container div {
@@ -2817,7 +2829,7 @@ const AuthenticatedApp = () => {
         </div>
 
         {/* Enhanced Calculator Type Selection */}
-        <div className="mb-6">
+        <div className="mb-3">
           {/* Desktop Version - Full buttons with text */}
           <div className="hidden lg:flex flex-row gap-4">
             <button
