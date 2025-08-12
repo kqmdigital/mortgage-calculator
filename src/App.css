@@ -407,14 +407,34 @@ input[type="number"] {
   
   /* Touch-friendly expandable buttons */
   .expandable-header button {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   
   /* Improve tab navigation for mobile */
   .tab-button {
     min-height: 48px;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* General mobile button improvements */
+  button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Improve all interactive elements on mobile */
+  .btn-standard,
+  .btn-primary,
+  .btn-secondary,
+  .btn-success {
+    min-height: 48px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
   
   /* Better mobile typography */
@@ -476,16 +496,21 @@ input[type="number"] {
   .tab-navigation {
     width: 100%;
     justify-content: space-between;
-    padding: 6px;
+    padding: 8px;
+    gap: 6px;
   }
   
   .tab-button {
     flex: 1;
-    padding: 14px 12px;
+    padding: 16px 12px;
     min-width: auto;
     font-size: 13px;
-    min-height: 48px;
-    border-radius: 10px;
+    min-height: 56px;
+    border-radius: 12px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    z-index: 1;
   }
   
   .tab-button .tab-text {
@@ -493,26 +518,46 @@ input[type="number"] {
   }
   
   .tab-button svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Ensure better touch feedback */
+  .tab-button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
   }
 }
 
 @media (max-width: 480px) {
   .tab-navigation {
-    padding: 4px;
-    gap: 2px;
+    padding: 8px;
+    gap: 8px;
   }
   
   .tab-button {
-    padding: 12px 8px;
+    padding: 18px 10px;
     font-size: 12px;
-    min-height: 44px;
+    min-height: 60px;
+    border-radius: 14px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   
   .tab-button svg {
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
+  }
+  
+  /* Larger touch targets for very small screens */
+  .tab-button::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    z-index: -1;
   }
 }
 

@@ -2958,56 +2958,80 @@ const AuthenticatedApp = () => {
 
           {/* Mobile Version - Single row icon buttons */}
           <div className="lg:hidden">
-            <div className="flex justify-center gap-3 p-4 bg-gray-50 rounded-xl">
+            <div className="flex justify-center gap-4 p-4 bg-gray-50 rounded-xl">
               <button
                 onClick={() => setCalculatorType('tdsr')}
-                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[60px] touch-manipulation ${
+                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
                   calculatorType === 'tdsr' 
                     ? 'bg-blue-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600'
                 }`}
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  position: 'relative',
+                  zIndex: 1
+                }}
                 title="TDSR/MSR Calculator"
               >
-                <TrendingUp className="w-7 h-7 mx-auto" />
+                <TrendingUp className="w-8 h-8 mx-auto" />
                 <div className="text-xs mt-2 font-medium">TDSR</div>
               </button>
               
               <button
                 onClick={() => setCalculatorType('repayment')}
-                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[60px] touch-manipulation ${
+                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
                   calculatorType === 'repayment' 
                     ? 'bg-green-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-600'
                 }`}
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  position: 'relative',
+                  zIndex: 1
+                }}
                 title="Monthly Repayment Calculator"
               >
-                <DollarSign className="w-7 h-7 mx-auto" />
+                <DollarSign className="w-8 h-8 mx-auto" />
                 <div className="text-xs mt-2 font-medium">Repay</div>
               </button>
               
               <button
                 onClick={() => setCalculatorType('progressive')}
-                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[60px] touch-manipulation ${
+                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
                   calculatorType === 'progressive' 
                     ? 'bg-purple-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-purple-50 hover:text-purple-600'
                 }`}
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  position: 'relative',
+                  zIndex: 1
+                }}
                 title="Progressive Payment Calculator"
               >
-                <BarChart3 className="w-7 h-7 mx-auto" />
+                <BarChart3 className="w-8 h-8 mx-auto" />
                 <div className="text-xs mt-2 font-medium">Prog</div>
               </button>
               
               <button
                 onClick={() => setCalculatorType('packages')}
-                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[60px] touch-manipulation ${
+                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
                   calculatorType === 'packages' 
                     ? 'bg-orange-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-600'
                 }`}
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  position: 'relative',
+                  zIndex: 1
+                }}
                 title="Recommended Packages"
               >
-                <Sparkles className="w-7 h-7 mx-auto" />
+                <Sparkles className="w-8 h-8 mx-auto" />
                 <div className="text-xs mt-2 font-medium">Packages</div>
               </button>
             </div>
