@@ -78,7 +78,7 @@ input[type="number"] {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 28px !important;
+  padding: 20px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -91,31 +91,31 @@ input[type="number"] {
 .standard-card.card-gradient-blue {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   border-color: #3b82f6;
-  padding: 28px !important;
+  padding: 20px !important;
 }
 
 .standard-card.card-gradient-green {
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border-color: #22c55e;
-  padding: 28px !important;
+  padding: 20px !important;
 }
 
 .standard-card.card-gradient-purple {
   background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
   border-color: #8b5cf6;
-  padding: 28px !important;
+  padding: 20px !important;
 }
 
 .standard-card.card-gradient-red {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border-color: #ef4444;
-  padding: 28px !important;
+  padding: 20px !important;
 }
 
 .standard-card.card-gradient-yellow {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
   border-color: #f59e0b;
-  padding: 28px !important;
+  padding: 20px !important;
 }
 
 /* ===== STANDARDIZED BUTTON STYLES ===== */
@@ -211,7 +211,7 @@ input[type="number"] {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 28px !important;
+  margin-bottom: 20px !important;
 }
 
 .section-header .icon-container {
@@ -302,11 +302,11 @@ input[type="number"] {
   }
   
   .standard-card {
-    padding: 24px !important;
+    padding: 18px !important;
   }
   
   .section-header {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   
   .section-header .icon-container {
@@ -331,7 +331,7 @@ input[type="number"] {
 
 @media (max-width: 640px) {
   .standard-card {
-    padding: 20px !important;
+    padding: 16px !important;
   }
   
   .grid-responsive {
@@ -339,7 +339,7 @@ input[type="number"] {
   }
   
   .section-header {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   
   .btn-standard {
@@ -641,7 +641,7 @@ input[type="number"] {
 .result-card {
   background: white;
   border-radius: 16px;
-  padding: 28px !important;
+  padding: 20px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
