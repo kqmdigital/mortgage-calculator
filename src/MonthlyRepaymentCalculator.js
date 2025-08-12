@@ -467,7 +467,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             font-weight: bold;
             color: #374151;
         }
-        .table-container { width: 100%; overflow-x: auto; }
+        .table-container { width: 100%; }
         .repayment-table {
             width: 100%;
             border-collapse: collapse;
@@ -546,7 +546,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             padding: 2px 0;
             font-size: 8px;
         }
-        .page-break { page-break-before: always; break-before: page; }
         .no-page-break { page-break-inside: avoid; break-inside: avoid; }
         .disclaimer {
             background: #F9FAFB;
@@ -606,7 +605,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 padding-bottom: 15px !important;
             }
             
-            /* Prevent table splitting on mobile */
+            /* Prevent table splitting and fix layout */
             .repayment-table,
             .monthly-table {
                 page-break-inside: avoid !important;
@@ -615,6 +614,20 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 display: table !important;
                 width: 100% !important;
                 margin-bottom: 20px !important;
+                table-layout: fixed !important;
+            }
+            
+            /* Ensure table containers don't create scrolling */
+            .table-container {
+                width: 100% !important;
+                overflow: visible !important;
+                margin-bottom: 20px !important;
+            }
+            
+            /* Better spacing for titles */
+            h2 {
+                page-break-after: avoid !important;
+                margin-bottom: 10px !important;
             }
             
             /* Mobile WebKit specific fixes */
