@@ -643,7 +643,7 @@ input[type="number"] {
   border-radius: 16px;
   padding: 28px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 2px solid #ef4444;
+  border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
 }
 

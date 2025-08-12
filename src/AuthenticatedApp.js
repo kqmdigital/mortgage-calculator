@@ -2170,7 +2170,7 @@ const htmlContent = `
         <div className="space-y-8">
           <div className="space-y-6">
             {/* Financial Requirements section */}
-            <div className="standard-card">
+            <div className="standard-card card-gradient-green">
               <div className="section-header">
                 <div className="icon-container green">
                   <Home className="w-6 h-6 text-white" />
