@@ -617,10 +617,37 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             widows: 2;
         }
         @media print {
+            @page {
+                margin: 0.5in 0.5in 0.5in 0.5in !important;
+                size: A4 portrait !important;
+                /* Completely remove browser headers/footers */
+                @top-left { content: "" !important; }
+                @top-center { content: "" !important; }
+                @top-right { content: "" !important; }
+                @bottom-left { content: "" !important; }
+                @bottom-center { content: "" !important; }
+                @bottom-right { content: "" !important; }
+                /* Additional page info removal */
+                @top-left-corner { content: "" !important; }
+                @top-right-corner { content: "" !important; }
+                @bottom-left-corner { content: "" !important; }
+                @bottom-right-corner { content: "" !important; }
+            }
+            
             body { 
                 font-size: 10px !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                /* Remove any browser-generated content */
+                counter-reset: page !important;
+            }
+            
+            /* Hide browser-generated page info */
+            * {
+                -webkit-box-decoration-break: clone !important;
+                box-decoration-break: clone !important;
             }
             .logo-section img {
                 width: 80px !important;
@@ -676,16 +703,40 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 }
             }
             
-            /* Prevent table splitting and fix layout */
+            /* Proper table pagination */
             .repayment-table,
             .monthly-table {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                -webkit-column-break-inside: avoid !important;
+                page-break-inside: auto !important;
+                break-inside: auto !important;
                 display: table !important;
                 width: 100% !important;
                 margin-bottom: 20px !important;
                 table-layout: fixed !important;
+            }
+            
+            /* Repeat table headers on each page */
+            .repayment-table thead,
+            .monthly-table thead {
+                display: table-header-group !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            /* Allow table body to break across pages */
+            .repayment-table tbody,
+            .monthly-table tbody {
+                display: table-row-group !important;
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+            }
+            
+            /* Prevent single rows from breaking */
+            .repayment-table tbody tr,
+            .monthly-table tbody tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 2 !important;
+                widows: 2 !important;
             }
             
             /* Ensure table containers don't create scrolling */
