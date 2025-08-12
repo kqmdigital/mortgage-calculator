@@ -437,8 +437,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         }
         .section {
             margin: 20px 0;
-            page-break-inside: avoid;
-            break-inside: avoid;
             position: relative;
             z-index: 1;
         }
@@ -626,9 +624,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 margin: 0 auto !important;
             }
             
-            /* Enhanced Mobile PDF Support */
-            .section,
-            .refinancing-section,
+            /* Enhanced Mobile PDF Support - selective protection */
             .disclaimer,
             .footer { 
                 page-break-inside: avoid !important;
@@ -641,6 +637,18 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 width: 100% !important;
                 margin-bottom: 30px !important;
                 padding-bottom: 15px !important;
+            }
+            
+            /* Allow flexible breaking for content sections */
+            .section,
+            .refinancing-section {
+                display: block !important;
+                overflow: visible !important;
+                float: none !important;
+                clear: both !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+                padding-bottom: 10px !important;
             }
             
             /* Prevent table splitting and fix layout */
@@ -754,7 +762,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         </div>
     </div>
 
-    <div class="section no-page-break">
+    <div class="section">
         <div class="section-header">Loan Details</div>
         <div class="section-content">
             <div class="loan-details-header">
@@ -764,7 +772,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     </div>
 
     ${loanType === 'refinancing' && refinancingResults ? `
-    <div class="refinancing-section no-page-break">
+    <div class="refinancing-section">
         <div class="section-title">💰 REFINANCING COMPARISON</div>
         <div class="refinancing-grid">
             <div class="refinancing-card">
