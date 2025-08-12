@@ -2605,13 +2605,24 @@ const AuthenticatedApp = () => {
               max-height: 35px !important;
               min-height: 35px !important;
               margin-bottom: 0 !important;
+              width: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+            
+            .header-logo-container div {
+              justify-content: center !important;
+              display: flex !important;
+              align-items: center !important;
+              width: 100% !important;
+              transform-origin: center !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
               transform: scale(0.25) translateX(0px) !important;
-              transform-origin: center !important;
+              transform-origin: center center !important;
             }
             
             /* Stack vertically on mobile for better space usage */
@@ -2628,13 +2639,24 @@ const AuthenticatedApp = () => {
               height: 30px !important;
               max-height: 30px !important;
               min-height: 30px !important;
+              width: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+            
+            .header-logo-container div {
+              justify-content: center !important;
+              display: flex !important;
+              align-items: center !important;
+              width: 100% !important;
+              transform-origin: center !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
               transform: scale(0.22) translateX(0px) !important;
-              transform-origin: center !important;
+              transform-origin: center center !important;
             }
             
             /* Compact user card for small screens */
@@ -2653,12 +2675,25 @@ const AuthenticatedApp = () => {
               height: 25px !important;
               max-height: 25px !important;
               min-height: 25px !important;
+              width: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            
+            .header-logo-container div {
+              justify-content: center !important;
+              display: flex !important;
+              align-items: center !important;
+              width: 100% !important;
+              transform-origin: center !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
               transform: scale(0.2) translateX(0px) !important;
+              transform-origin: center center !important;
             }
             
             /* Very compact layout */
