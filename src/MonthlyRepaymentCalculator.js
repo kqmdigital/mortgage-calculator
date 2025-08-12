@@ -654,40 +654,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         </div>
     </div>
 
-    <div class="section no-page-break">
-        <div class="section-header">YEARLY REPAYMENT SCHEDULE</div>
-        <div class="section-content">
-            <div class="table-container">
-                <table class="repayment-table">
-                    <thead>
-                        <tr>
-                            <th>Year</th>
-                            <th>Interest Rate</th>
-                            <th>Beginning Principal</th>
-                            <th>Monthly Installment</th>
-                            <th>Interest Paid</th>
-                            <th>Principal Paid</th>
-                            <th>Ending Principal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${results.yearlyData.map(year => `
-                        <tr>
-                            <td>${year.yearNumber}</td>
-                            <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
-                            <td>${formatCurrency(year.beginningPrincipal)}</td>
-                            <td>${formatCurrency(year.monthlyInstalment)}</td>
-                            <td>${formatCurrency(year.interestPaid)}</td>
-                            <td>${formatCurrency(year.principalPaid)}</td>
-                            <td>${formatCurrency(year.endingPrincipal)}</td>
-                        </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     ${loanType === 'refinancing' && refinancingResults ? `
     <div class="refinancing-section no-page-break">
         <div class="section-title">💰 REFINANCING COMPARISON</div>
@@ -728,9 +694,43 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     </div>
     ` : ''}
 
+    <div class="section no-page-break">
+        <div class="section-header">Yearly Repayment Schedule</div>
+        <div class="section-content">
+            <div class="table-container">
+                <table class="repayment-table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Interest Rate</th>
+                            <th>Beginning Principal</th>
+                            <th>Monthly Installment</th>
+                            <th>Interest Paid</th>
+                            <th>Principal Paid</th>
+                            <th>Ending Principal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.yearlyData.map(year => `
+                        <tr>
+                            <td>${year.yearNumber}</td>
+                            <td>${typeof year.rate === 'string' ? year.rate : year.rate.toFixed(2) + '%'}</td>
+                            <td>${formatCurrency(year.beginningPrincipal)}</td>
+                            <td>${formatCurrency(year.monthlyInstalment)}</td>
+                            <td>${formatCurrency(year.interestPaid)}</td>
+                            <td>${formatCurrency(year.principalPaid)}</td>
+                            <td>${formatCurrency(year.endingPrincipal)}</td>
+                        </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div class="page-break">
         <div class="section">
-            <div class="section-header">MONTHLY REPAYMENT BREAKDOWN (First 5 Years)</div>
+            <div class="section-header">Monthly Repayment Breakdown (First 5 Years)</div>
             <div class="section-content">
                 <div class="table-container">
                     <table class="monthly-table">
