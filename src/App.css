@@ -75,10 +75,10 @@ input[type="number"] {
 
 /* ===== STANDARDIZED CARD STYLES ===== */
 .standard-card {
-  background: #f0f9ff !important;
-  border: 2px solid #3b82f6 !important;
+  background: white;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 40px !important;
+  padding: 36px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
@@ -91,26 +91,31 @@ input[type="number"] {
 .standard-card.card-gradient-blue {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   border-color: #3b82f6;
+  padding: 36px !important;
 }
 
 .standard-card.card-gradient-green {
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border-color: #22c55e;
+  padding: 36px !important;
 }
 
 .standard-card.card-gradient-purple {
   background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
   border-color: #8b5cf6;
+  padding: 36px !important;
 }
 
 .standard-card.card-gradient-red {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border-color: #ef4444;
+  padding: 36px !important;
 }
 
 .standard-card.card-gradient-yellow {
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
   border-color: #f59e0b;
+  padding: 36px !important;
 }
 
 /* ===== STANDARDIZED BUTTON STYLES ===== */
@@ -297,7 +302,7 @@ input[type="number"] {
   }
   
   .standard-card {
-    padding: 28px !important;
+    padding: 32px !important;
   }
   
   .section-header {
@@ -636,7 +641,7 @@ input[type="number"] {
 .result-card {
   background: white;
   border-radius: 16px;
-  padding: 24px;
+  padding: 36px !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
