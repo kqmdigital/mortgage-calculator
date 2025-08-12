@@ -2535,10 +2535,7 @@ const AuthenticatedApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <style>
         {`
-          /* TRANSFORM SCALING APPROACH - Override CSS sizing limitations */
-          .standard-card {
-            padding: 8px 16px !important;
-          }
+          /* HEADER LOGO STYLING ONLY - No global overrides */
           /* Desktop (1024px+) - Improved alignment and larger logo */
           @media (min-width: 1024px) {
             .header-logo-container {
