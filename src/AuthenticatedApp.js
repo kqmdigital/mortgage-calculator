@@ -2622,8 +2622,8 @@ const AuthenticatedApp = () => {
               transform-origin: center center !important;
             }
             
-            /* Stack vertically on mobile for better space usage */
-            .standard-card.card-gradient-blue {
+            /* Stack vertically on mobile for better space usage - HEADER USER CARD ONLY */
+            .relative .standard-card.card-gradient-blue {
               width: 100% !important;
               max-width: 280px !important;
               margin: 0 auto !important;
@@ -2656,12 +2656,12 @@ const AuthenticatedApp = () => {
               transform-origin: center center !important;
             }
             
-            /* Compact user card for small screens */
-            .standard-card.card-gradient-blue {
+            /* Compact user card for small screens - HEADER USER CARD ONLY */
+            .relative .standard-card.card-gradient-blue {
               padding: 6px 12px !important;
             }
             
-            .standard-card.card-gradient-blue .flex.items-center.gap-2 {
+            .relative .standard-card.card-gradient-blue .flex.items-center.gap-2 {
               gap: 0.375rem !important;
             }
           }
@@ -2693,17 +2693,17 @@ const AuthenticatedApp = () => {
               transform-origin: center center !important;
             }
             
-            /* Very compact layout */
-            .standard-card.card-gradient-blue {
+            /* Very compact layout - HEADER USER CARD ONLY */
+            .relative .standard-card.card-gradient-blue {
               padding: 4px 8px !important;
               max-width: 250px !important;
             }
             
-            .standard-card.card-gradient-blue p {
+            .relative .standard-card.card-gradient-blue p {
               font-size: 0.75rem !important;
             }
             
-            .standard-card.card-gradient-blue span {
+            .relative .standard-card.card-gradient-blue span {
               font-size: 0.625rem !important;
               padding: 1px 4px !important;
             }
