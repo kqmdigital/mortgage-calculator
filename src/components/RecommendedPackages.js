@@ -1154,12 +1154,13 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-breakdown-content { }
             .pdf-breakdown-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; margin-bottom: 15px !important; }
             .pdf-breakdown-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
-            .pdf-breakdown-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 10px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-breakdown-table th { padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-breakdown-table th:first-child { background: #1e3a6f !important; text-align: center !important; }
+            .pdf-breakdown-table th small { font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important; }
             .pdf-breakdown-table tbody tr:nth-child(even) { background: #f8fafc !important; }
-            .pdf-breakdown-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 9px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-breakdown-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-breakdown-table td:first-child { font-weight: 600 !important; color: #374151 !important; }
-            .pdf-breakdown-table tbody tr:last-child td { border-top: 2px solid #264A82 !important; background: #f1f5f9 !important; font-weight: 700 !important; color: #264A82 !important; }
+            .pdf-breakdown-table tbody tr:last-child td { border-top: 2px solid #264A82 !important; background: #f1f5f9 !important; font-weight: 700 !important; color: #264A82 !important; font-size: 12px !important; }
             .pdf-breakdown-note { font-size: 10px !important; color: #6b7280 !important; line-height: 1.4 !important; font-style: italic !important; text-align: center !important; margin-top: 10px !important; }
             ` : ''}
             
@@ -1737,13 +1738,14 @@ const RecommendedPackages = ({ currentUser }) => {
                 <table class="pdf-breakdown-table">
                   <thead>
                     <tr>
-                      <th>Year</th>
-                      <th>Avg. Balance</th>
-                      <th>Current Rate (${parseFloat(searchForm.existingInterestRate).toFixed(2)}%)</th>
-                      <th>New Package Rate</th>
-                      <th>Existing Interest</th>
-                      <th>New Interest</th>
-                      <th>Annual Savings</th>
+                      <th>Month</th>
+                      <th>Balance</th>
+                      <th>Existing Interest<br><small>(${parseFloat(searchForm.existingInterestRate).toFixed(2)}%)</small></th>
+                      <th>New Interest<br><small>(${(() => {
+                        const year1Rate = calculateInterestRate(enhancedPackages[0], 1);
+                        return year1Rate.toFixed(2);
+                      })()}%)</small></th>
+                      <th>Monthly Savings</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1752,54 +1754,42 @@ const RecommendedPackages = ({ currentUser }) => {
                       const loanTenure = searchForm.loanTenure || 25;
                       const existingRate = parseFloat(searchForm.existingInterestRate);
                       const lockInYears = parseLockInPeriod(enhancedPackages[0]?.lock_period) || 2;
+                      const totalLockInMonths = lockInYears * 12;
                       let totalBreakdownSavings = 0;
                       
-                      return Array.from({length: lockInYears}, (_, i) => {
-                        const year = i + 1;
-                        const yearRate = calculateInterestRate(enhancedPackages[0], year);
+                      // Calculate amortization schedules for both rates
+                      const existingAmortization = calculateMonthlyAmortization(loanAmount, existingRate, loanTenure * 12);
+                      
+                      return Array.from({length: totalLockInMonths}, (_, i) => {
+                        const month = i + 1;
+                        const currentYear = Math.ceil(month / 12);
                         
-                        // Use reducing balance method for precise calculations
-                        const yearInterestSavings = calculateYearlyInterestSavingsPDF(loanAmount, loanTenure, existingRate, yearRate, year);
-                        const avgYearBalance = calculateYearlyAverageBalance(loanAmount, loanTenure, yearRate, year);
+                        // Get the rate for this month's year
+                        const currentYearRate = calculateInterestRate(enhancedPackages[0], currentYear);
+                        const newAmortization = calculateMonthlyAmortization(loanAmount, currentYearRate, loanTenure * 12);
                         
-                        // Calculate actual interest amounts using reducing balance
-                        const existingAmortization = calculateMonthlyAmortization(loanAmount, existingRate, loanTenure * 12);
-                        const newAmortization = calculateMonthlyAmortization(loanAmount, yearRate, loanTenure * 12);
+                        // Get month-specific data
+                        const existingMonthData = existingAmortization.schedule[month - 1];
+                        const newMonthData = newAmortization.schedule[month - 1];
                         
-                        const startMonth = (year - 1) * 12 + 1;
-                        const endMonth = Math.min(year * 12, loanTenure * 12);
+                        if (!existingMonthData || !newMonthData) return '';
                         
-                        let existingYearInterest = 0;
-                        let newYearInterest = 0;
-                        
-                        for (let month = startMonth; month <= endMonth; month++) {
-                          if (existingAmortization.schedule[month - 1]) {
-                            existingYearInterest += existingAmortization.schedule[month - 1].interest;
-                          }
-                          if (newAmortization.schedule[month - 1]) {
-                            newYearInterest += newAmortization.schedule[month - 1].interest;
-                          }
-                        }
-                        
-                        totalBreakdownSavings += yearInterestSavings;
+                        const monthlyInterestSavings = existingMonthData.interest - newMonthData.interest;
+                        totalBreakdownSavings += monthlyInterestSavings;
                         
                         return `
                           <tr>
-                            <td style="text-align: center; font-weight: 600;">Year ${year}</td>
-                            <td style="text-align: right;">${formatCurrency(avgYearBalance)}</td>
-                            <td style="text-align: center; font-weight: 600; color: #dc2626;">${existingRate.toFixed(2)}%</td>
-                            <td style="text-align: center; font-weight: 600; color: #059669;">${yearRate.toFixed(2)}%</td>
-                            <td style="text-align: right; color: #dc2626;">${formatCurrency(existingYearInterest)}</td>
-                            <td style="text-align: right; color: #059669;">${formatCurrency(newYearInterest)}</td>
-                            <td style="text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(yearInterestSavings)}</td>
+                            <td style="text-align: center; font-weight: 600;">Month ${month}</td>
+                            <td style="text-align: right;">${formatCurrency(existingMonthData.balance)}</td>
+                            <td style="text-align: right; color: #dc2626;">${formatCurrency(existingMonthData.interest)}</td>
+                            <td style="text-align: right; color: #059669;">${formatCurrency(newMonthData.interest)}</td>
+                            <td style="text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(monthlyInterestSavings)}</td>
                           </tr>
                         `;
                       }).join('') + `
                         <tr style="border-top: 2px solid #264A82; background: #f1f5f9;">
                           <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL</td>
                           <td style="text-align: right; font-weight: 700;">-</td>
-                          <td style="text-align: center; font-weight: 700;">-</td>
-                          <td style="text-align: center; font-weight: 700;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #dc2626;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #059669;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #264A82; font-size: 14px;">${formatCurrency(totalBreakdownSavings)}</td>
