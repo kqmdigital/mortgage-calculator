@@ -1014,7 +1014,7 @@ const generateProgressivePaymentReport = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
       {/* Input Sections - Side by Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid-responsive cols-2">
         {/* Property Information Card */}
         <div className="standard-card card-gradient-red">
           <div className="section-header">
