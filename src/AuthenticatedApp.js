@@ -2619,7 +2619,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(1.0) translateX(0px) !important;
+              transform: scale(3.0) translateX(0px) !important;
               transform-origin: left center !important;
             }
             
@@ -2638,9 +2638,10 @@ const AuthenticatedApp = () => {
               align-items: center !important;
             }
             
-            /* Hide text in profile card on mobile */
+            /* Hide text and avatar circle in profile card on mobile */
             .relative .standard-card.card-gradient-blue p,
-            .relative .standard-card.card-gradient-blue span {
+            .relative .standard-card.card-gradient-blue span,
+            .relative .standard-card.card-gradient-blue .w-8.h-8 {
               display: none !important;
             }
           }
@@ -2672,7 +2673,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.9) translateX(0px) !important;
+              transform: scale(2.7) translateX(0px) !important;
               transform-origin: left center !important;
             }
             
@@ -2689,9 +2690,10 @@ const AuthenticatedApp = () => {
               gap: 0.375rem !important;
             }
             
-            /* Hide text in profile card on mobile */
+            /* Hide text and avatar circle in profile card on mobile */
             .relative .standard-card.card-gradient-blue p,
-            .relative .standard-card.card-gradient-blue span {
+            .relative .standard-card.card-gradient-blue span,
+            .relative .standard-card.card-gradient-blue .w-8.h-8 {
               display: none !important;
             }
           }
@@ -2724,7 +2726,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.8) translateX(0px) !important;
+              transform: scale(2.4) translateX(0px) !important;
               transform-origin: left center !important;
             }
             
@@ -2738,9 +2740,10 @@ const AuthenticatedApp = () => {
               align-items: center !important;
             }
             
-            /* Hide text in profile card on mobile */
+            /* Hide text and avatar circle in profile card on mobile */
             .relative .standard-card.card-gradient-blue p,
-            .relative .standard-card.card-gradient-blue span {
+            .relative .standard-card.card-gradient-blue span,
+            .relative .standard-card.card-gradient-blue .w-8.h-8 {
               display: none !important;
             }
           }
