@@ -575,6 +575,16 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             position: relative;
             z-index: 1;
         }
+        
+        /* Yearly schedule section to keep title and table together */
+        .yearly-schedule-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            -webkit-column-break-inside: avoid !important;
+            display: block;
+            overflow: visible;
+            margin-bottom: 20px;
+        }
         @media print {
             body { 
                 font-size: 10px !important;
@@ -638,6 +648,69 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     -webkit-region-break-inside: avoid !important;
                     orphans: 3 !important;
                     widows: 3 !important;
+                }
+                
+                /* iPhone Safari specific fixes for table titles */
+                .yearly-schedule-section {
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                    display: block !important;
+                    overflow: visible !important;
+                }
+                
+                .yearly-schedule-section h2 {
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    page-break-after: avoid !important;
+                    break-after: avoid !important;
+                    margin-bottom: 5px !important;
+                }
+                
+                .yearly-schedule-section .table-container {
+                    -webkit-column-break-before: avoid !important;
+                    -webkit-region-break-before: avoid !important;
+                    page-break-before: avoid !important;
+                    break-before: avoid !important;
+                    margin-top: 0 !important;
+                }
+            }
+            
+            /* iOS/iPhone specific fixes for PDF generation */
+            @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
+                .yearly-schedule-section {
+                    page-break-inside: avoid !important;
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    display: block !important;
+                    position: relative !important;
+                    overflow: visible !important;
+                    margin-bottom: 30px !important;
+                }
+                
+                .yearly-schedule-section h2 {
+                    page-break-after: avoid !important;
+                    -webkit-column-break-after: avoid !important;
+                    -webkit-region-break-after: avoid !important;
+                    margin-bottom: 5px !important;
+                    position: relative !important;
+                }
+                
+                .yearly-schedule-section .table-container {
+                    page-break-before: avoid !important;
+                    -webkit-column-break-before: avoid !important;
+                    -webkit-region-break-before: avoid !important;
+                    margin-top: 0 !important;
+                    position: relative !important;
+                }
+                
+                .yearly-schedule-section .repayment-table {
+                    page-break-before: avoid !important;
+                    -webkit-column-break-before: avoid !important;
+                    -webkit-region-break-before: avoid !important;
+                    margin-top: 0 !important;
+                    position: relative !important;
                 }
             }
         }
@@ -707,10 +780,11 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     </div>
     ` : ''}
 
-    <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Yearly Repayment Schedule</h2>
-    
-    <div class="table-container">
-        <table class="repayment-table">
+    <div class="yearly-schedule-section" style="page-break-inside: avoid !important; break-inside: avoid !important; -webkit-column-break-inside: avoid !important;">
+        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left; page-break-after: avoid !important; break-after: avoid !important;">Yearly Repayment Schedule</h2>
+        
+        <div class="table-container">
+            <table class="repayment-table">
                     <thead>
                         <tr>
                             <th>Year</th>
@@ -736,6 +810,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                         `).join('')}
                     </tbody>
         </table>
+        </div>
     </div>
 
     <div style="page-break-before: always; break-before: page;">
