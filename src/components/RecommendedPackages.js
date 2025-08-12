@@ -2035,8 +2035,12 @@ const RecommendedPackages = ({ currentUser }) => {
                 <input
                   type="checkbox"
                   checked={isSelected}
-                  onChange={onToggleSelection}
-                  className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    onToggleSelection(e);
+                  }}
+                  onFocus={(e) => e.target.blur()} 
+                  className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-0 focus:ring-transparent cursor-pointer"
                 />
                 <span className="text-sm font-medium text-gray-700 sm:hidden">Include in Report</span>
               </div>
