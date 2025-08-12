@@ -841,17 +841,88 @@ const RecommendedPackages = ({ currentUser }) => {
         return match ? parseInt(match[1]) : 0;
       };
 
-      const calculateYearlyInterestSavingsPDF = (loanAmount, loanTenure, existingRate, newRate, year) => {
-        // Calculate the average balance for this specific year
-        const annualPrincipalReduction = loanAmount / loanTenure;
-        const yearStartBalance = loanAmount - (annualPrincipalReduction * (year - 1));
-        const yearEndBalance = loanAmount - (annualPrincipalReduction * year);
-        const avgYearBalance = (yearStartBalance + yearEndBalance) / 2;
+      // Reducing balance method - more accurate calculation
+      const calculateMonthlyAmortization = (principal, annualRate, totalMonths) => {
+        const monthlyRate = annualRate / 100 / 12;
+        if (monthlyRate === 0) {
+          return {
+            monthlyPayment: principal / totalMonths,
+            schedule: Array.from({length: totalMonths}, (_, i) => ({
+              month: i + 1,
+              payment: principal / totalMonths,
+              principal: principal / totalMonths,
+              interest: 0,
+              balance: principal - ((i + 1) * principal / totalMonths)
+            }))
+          };
+        }
         
-        // Calculate annual interest for both scenarios
-        const existingYearInterest = Math.max(0, avgYearBalance) * (existingRate / 100);
-        const newYearInterest = Math.max(0, avgYearBalance) * (newRate / 100);
+        const monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+                              (Math.pow(1 + monthlyRate, totalMonths) - 1);
+        
+        const schedule = [];
+        let remainingBalance = principal;
+        
+        for (let month = 1; month <= totalMonths; month++) {
+          const interestPayment = remainingBalance * monthlyRate;
+          const principalPayment = monthlyPayment - interestPayment;
+          remainingBalance -= principalPayment;
+          
+          schedule.push({
+            month,
+            payment: monthlyPayment,
+            principal: principalPayment,
+            interest: interestPayment,
+            balance: Math.max(0, remainingBalance)
+          });
+        }
+        
+        return { monthlyPayment, schedule };
+      };
+
+      const calculateYearlyInterestSavingsPDF = (loanAmount, loanTenure, existingRate, newRate, year) => {
+        const totalMonths = loanTenure * 12;
+        
+        // Calculate amortization schedules for both rates
+        const existingSchedule = calculateMonthlyAmortization(loanAmount, existingRate, totalMonths);
+        const newSchedule = calculateMonthlyAmortization(loanAmount, newRate, totalMonths);
+        
+        // Sum interest payments for the specific year
+        const startMonth = (year - 1) * 12 + 1;
+        const endMonth = Math.min(year * 12, totalMonths);
+        
+        let existingYearInterest = 0;
+        let newYearInterest = 0;
+        
+        for (let month = startMonth; month <= endMonth; month++) {
+          if (existingSchedule.schedule[month - 1]) {
+            existingYearInterest += existingSchedule.schedule[month - 1].interest;
+          }
+          if (newSchedule.schedule[month - 1]) {
+            newYearInterest += newSchedule.schedule[month - 1].interest;
+          }
+        }
+        
         return existingYearInterest - newYearInterest;
+      };
+
+      // Helper function to get average balance for display purposes
+      const calculateYearlyAverageBalance = (loanAmount, loanTenure, annualRate, year) => {
+        const schedule = calculateMonthlyAmortization(loanAmount, annualRate, loanTenure * 12);
+        const startMonth = (year - 1) * 12 + 1;
+        const endMonth = Math.min(year * 12, loanTenure * 12);
+        
+        let totalBalance = 0;
+        let monthCount = 0;
+        
+        for (let month = startMonth; month <= endMonth; month++) {
+          if (schedule.schedule[month - 1]) {
+            totalBalance += schedule.schedule[month - 1].balance;
+            monthCount++;
+          }
+        }
+        
+        return monthCount > 0 ? totalBalance / monthCount : 0;
       };
 
       const calculateTotalInterestSavingsPDF = (loanAmount, lockPeriod, existingRate, pkg, loanTenure) => {
@@ -1081,9 +1152,9 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-breakdown-section { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 20px !important; margin-bottom: 20px !important; margin-top: 15px !important; }
             .pdf-breakdown-title { font-size: 16px !important; font-weight: 700 !important; color: #1e293b !important; margin-bottom: 15px !important; text-align: center !important; }
             .pdf-breakdown-explanation { font-size: 12px !important; color: #475569 !important; margin-bottom: 15px !important; line-height: 1.5 !important; text-align: center !important; padding: 0 20px !important; }
-            .pdf-breakdown-table { width: 100% !important; border-collapse: collapse !important; margin-bottom: 15px !important; }
-            .pdf-breakdown-table th { background: #264A82 !important; color: white !important; padding: 10px 8px !important; font-size: 11px !important; font-weight: 600 !important; text-align: center !important; border: 1px solid #1e3a5f !important; }
-            .pdf-breakdown-table td { padding: 8px !important; font-size: 10px !important; border: 1px solid #e2e8f0 !important; background: white !important; }
+            .pdf-breakdown-table { width: 100% !important; border-collapse: collapse !important; margin-bottom: 15px !important; font-size: 9px !important; }
+            .pdf-breakdown-table th { background: #264A82 !important; color: white !important; padding: 8px 6px !important; font-size: 10px !important; font-weight: 600 !important; text-align: center !important; border: 1px solid #1e3a5f !important; }
+            .pdf-breakdown-table td { padding: 6px 4px !important; font-size: 9px !important; border: 1px solid #e2e8f0 !important; background: white !important; }
             .pdf-breakdown-table tbody tr:nth-child(even) td { background: #f8fafc !important; }
             .pdf-breakdown-note { font-size: 10px !important; color: #6b7280 !important; line-height: 1.4 !important; font-style: italic !important; text-align: center !important; }
             ` : ''}
@@ -1689,7 +1760,7 @@ const RecommendedPackages = ({ currentUser }) => {
               <div class="pdf-breakdown-title">Interest Savings Breakdown Over Lock-in Period</div>
               <div class="pdf-breakdown-content">
                 <div class="pdf-breakdown-explanation">
-                  This breakdown shows how your interest savings are calculated year by year, based on the declining loan balance and the difference between your existing rate (${parseFloat(searchForm.existingInterestRate).toFixed(2)}%) and our recommended package rates.
+                  This breakdown shows how your interest savings are calculated year by year using the <strong>reducing balance method</strong> - the same method banks use. Interest is calculated monthly based on the actual outstanding balance, providing precise savings calculations.
                 </div>
                 
                 <table class="pdf-breakdown-table">
@@ -1697,9 +1768,11 @@ const RecommendedPackages = ({ currentUser }) => {
                     <tr>
                       <th>Year</th>
                       <th>Avg. Balance</th>
-                      <th>Existing Rate Interest</th>
-                      <th>New Package Interest</th>
-                      <th>Annual Interest Savings</th>
+                      <th>Current Rate (${parseFloat(searchForm.existingInterestRate).toFixed(2)}%)</th>
+                      <th>New Package Rate</th>
+                      <th>Existing Interest</th>
+                      <th>New Interest</th>
+                      <th>Annual Savings</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1714,16 +1787,28 @@ const RecommendedPackages = ({ currentUser }) => {
                         const year = i + 1;
                         const yearRate = calculateInterestRate(enhancedPackages[0], year);
                         
-                        // Calculate average balance for this year
-                        const annualPrincipalReduction = loanAmount / loanTenure;
-                        const yearStartBalance = loanAmount - (annualPrincipalReduction * (year - 1));
-                        const yearEndBalance = loanAmount - (annualPrincipalReduction * year);
-                        const avgYearBalance = (yearStartBalance + yearEndBalance) / 2;
+                        // Use reducing balance method for precise calculations
+                        const yearInterestSavings = calculateYearlyInterestSavingsPDF(loanAmount, loanTenure, existingRate, yearRate, year);
+                        const avgYearBalance = calculateYearlyAverageBalance(loanAmount, loanTenure, yearRate, year);
                         
-                        // Calculate annual interest for both scenarios
-                        const existingYearInterest = Math.max(0, avgYearBalance) * (existingRate / 100);
-                        const newYearInterest = Math.max(0, avgYearBalance) * (yearRate / 100);
-                        const yearInterestSavings = existingYearInterest - newYearInterest;
+                        // Calculate actual interest amounts using reducing balance
+                        const existingAmortization = calculateMonthlyAmortization(loanAmount, existingRate, loanTenure * 12);
+                        const newAmortization = calculateMonthlyAmortization(loanAmount, yearRate, loanTenure * 12);
+                        
+                        const startMonth = (year - 1) * 12 + 1;
+                        const endMonth = Math.min(year * 12, loanTenure * 12);
+                        
+                        let existingYearInterest = 0;
+                        let newYearInterest = 0;
+                        
+                        for (let month = startMonth; month <= endMonth; month++) {
+                          if (existingAmortization.schedule[month - 1]) {
+                            existingYearInterest += existingAmortization.schedule[month - 1].interest;
+                          }
+                          if (newAmortization.schedule[month - 1]) {
+                            newYearInterest += newAmortization.schedule[month - 1].interest;
+                          }
+                        }
                         
                         totalBreakdownSavings += yearInterestSavings;
                         
@@ -1731,6 +1816,8 @@ const RecommendedPackages = ({ currentUser }) => {
                           <tr>
                             <td style="text-align: center; font-weight: 600;">Year ${year}</td>
                             <td style="text-align: right;">${formatCurrency(avgYearBalance)}</td>
+                            <td style="text-align: center; font-weight: 600; color: #dc2626;">${existingRate.toFixed(2)}%</td>
+                            <td style="text-align: center; font-weight: 600; color: #059669;">${yearRate.toFixed(2)}%</td>
                             <td style="text-align: right; color: #dc2626;">${formatCurrency(existingYearInterest)}</td>
                             <td style="text-align: right; color: #059669;">${formatCurrency(newYearInterest)}</td>
                             <td style="text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(yearInterestSavings)}</td>
@@ -1740,6 +1827,8 @@ const RecommendedPackages = ({ currentUser }) => {
                         <tr style="border-top: 2px solid #264A82; background: #f1f5f9;">
                           <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL</td>
                           <td style="text-align: right; font-weight: 700;">-</td>
+                          <td style="text-align: center; font-weight: 700;">-</td>
+                          <td style="text-align: center; font-weight: 700;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #dc2626;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #059669;">-</td>
                           <td style="text-align: right; font-weight: 700; color: #264A82; font-size: 14px;">${formatCurrency(totalBreakdownSavings)}</td>
@@ -1750,7 +1839,7 @@ const RecommendedPackages = ({ currentUser }) => {
                 </table>
                 
                 <div class="pdf-breakdown-note">
-                  <strong>Note:</strong> This calculation is based on simplified annual principal reduction. Actual savings may vary slightly based on the specific payment schedule and compounding effects. The average balance represents the mid-point balance during each year.
+                  <strong>Note:</strong> This calculation uses the <strong>reducing balance method</strong> with monthly compounding - the same method used by banks for mortgage calculations. Interest is calculated monthly on the actual outstanding balance, providing the most accurate savings estimate possible.
                 </div>
               </div>
             </div>
