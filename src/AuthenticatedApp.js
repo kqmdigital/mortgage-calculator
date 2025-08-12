@@ -2619,7 +2619,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.8) translateX(0px) !important;
+              transform: scale(1.0) translateX(0px) !important;
               transform-origin: left center !important;
             }
             
@@ -2636,6 +2636,12 @@ const AuthenticatedApp = () => {
               min-height: 80px !important;
               display: flex !important;
               align-items: center !important;
+            }
+            
+            /* Hide text in profile card on mobile */
+            .relative .standard-card.card-gradient-blue p,
+            .relative .standard-card.card-gradient-blue span {
+              display: none !important;
             }
           }
 
@@ -2666,7 +2672,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.7) translateX(0px) !important;
+              transform: scale(0.9) translateX(0px) !important;
               transform-origin: left center !important;
             }
             
@@ -2681,6 +2687,12 @@ const AuthenticatedApp = () => {
             
             .relative .standard-card.card-gradient-blue .flex.items-center.gap-2 {
               gap: 0.375rem !important;
+            }
+            
+            /* Hide text in profile card on mobile */
+            .relative .standard-card.card-gradient-blue p,
+            .relative .standard-card.card-gradient-blue span {
+              display: none !important;
             }
           }
           
@@ -2712,7 +2724,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.6) translateX(0px) !important;
+              transform: scale(0.8) translateX(0px) !important;
               transform-origin: left center !important;
             }
             
@@ -2726,13 +2738,10 @@ const AuthenticatedApp = () => {
               align-items: center !important;
             }
             
-            .relative .standard-card.card-gradient-blue p {
-              font-size: 0.75rem !important;
-            }
-            
+            /* Hide text in profile card on mobile */
+            .relative .standard-card.card-gradient-blue p,
             .relative .standard-card.card-gradient-blue span {
-              font-size: 0.625rem !important;
-              padding: 1px 4px !important;
+              display: none !important;
             }
           }
         `}
@@ -2829,7 +2838,7 @@ const AuthenticatedApp = () => {
         </div>
 
         {/* Enhanced Calculator Type Selection */}
-        <div className="mb-3">
+        <div className="mb-1 mt-1">
           {/* Desktop Version - Full buttons with text */}
           <div className="hidden lg:flex flex-row gap-4">
             <button
