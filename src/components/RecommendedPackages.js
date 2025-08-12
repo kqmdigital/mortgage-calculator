@@ -1658,9 +1658,25 @@ const RecommendedPackages = ({ currentUser }) => {
                       // Calculate amortization schedules for both rates
                       const existingAmortization = calculateMonthlyAmortization(loanAmount, existingRate, loanTenure * 12);
                       
-                      return Array.from({length: totalLockInMonths}, (_, i) => {
+                      let tableRows = '';
+                      
+                      for (let i = 0; i < totalLockInMonths; i++) {
                         const month = i + 1;
                         const currentYear = Math.ceil(month / 12);
+                        
+                        // Add header row at the start of each new year (after month 12, 24, 36, etc.)
+                        if (month > 1 && (month - 1) % 12 === 0) {
+                          const yearRate = calculateInterestRate(enhancedPackages[0], currentYear);
+                          tableRows += `
+                            <tr class="year-header-row" style="background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important;">
+                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Month</th>
+                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Balance</th>
+                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Existing Interest<br><small style="font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important;">(${existingRate.toFixed(2)}%)</small></th>
+                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">New Interest<br><small style="font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important;">(${yearRate.toFixed(2)}%)</small></th>
+                              <th style="padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important;">Monthly Savings</th>
+                            </tr>
+                          `;
+                        }
                         
                         // Get the rate for this month's year
                         const currentYearRate = calculateInterestRate(enhancedPackages[0], currentYear);
@@ -1670,12 +1686,12 @@ const RecommendedPackages = ({ currentUser }) => {
                         const existingMonthData = existingAmortization.schedule[month - 1];
                         const newMonthData = newAmortization.schedule[month - 1];
                         
-                        if (!existingMonthData || !newMonthData) return '';
+                        if (!existingMonthData || !newMonthData) continue;
                         
                         const monthlyInterestSavings = existingMonthData.interest - newMonthData.interest;
                         totalBreakdownSavings += monthlyInterestSavings;
                         
-                        return `
+                        tableRows += `
                           <tr>
                             <td style="text-align: center; font-weight: 600;">${month}</td>
                             <td style="text-align: right;">${formatCurrency(existingMonthData.balance)}</td>
@@ -1684,7 +1700,9 @@ const RecommendedPackages = ({ currentUser }) => {
                             <td style="text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(monthlyInterestSavings)}</td>
                           </tr>
                         `;
-                      }).join('') + `
+                      }
+                      
+                      return tableRows + `
                         <tr style="border-top: 2px solid #264A82; background: #f1f5f9;">
                           <td style="text-align: center; font-weight: 700; color: #264A82;">TOTAL</td>
                           <td style="text-align: right; font-weight: 700;">-</td>
