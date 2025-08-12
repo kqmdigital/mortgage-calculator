@@ -1148,15 +1148,19 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-savings-item .value.savings { color: #264A82 !important; font-size: 18px !important; font-weight: 800 !important; line-height: 1.3 !important; }
             .pdf-savings-item .sub-label { font-size: 11px !important; color: #6b7280 !important; margin-top: 4px !important; }
             
-            /* Interest Savings Breakdown Section */
-            .pdf-breakdown-section { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 20px !important; margin-bottom: 20px !important; margin-top: 15px !important; }
-            .pdf-breakdown-title { font-size: 16px !important; font-weight: 700 !important; color: #1e293b !important; margin-bottom: 15px !important; text-align: center !important; }
-            .pdf-breakdown-explanation { font-size: 12px !important; color: #475569 !important; margin-bottom: 15px !important; line-height: 1.5 !important; text-align: center !important; padding: 0 20px !important; }
-            .pdf-breakdown-table { width: 100% !important; border-collapse: collapse !important; margin-bottom: 15px !important; font-size: 9px !important; }
-            .pdf-breakdown-table th { background: #264A82 !important; color: white !important; padding: 8px 6px !important; font-size: 10px !important; font-weight: 600 !important; text-align: center !important; border: 1px solid #1e3a5f !important; }
-            .pdf-breakdown-table td { padding: 6px 4px !important; font-size: 9px !important; border: 1px solid #e2e8f0 !important; background: white !important; }
-            .pdf-breakdown-table tbody tr:nth-child(even) td { background: #f8fafc !important; }
-            .pdf-breakdown-note { font-size: 10px !important; color: #6b7280 !important; line-height: 1.4 !important; font-style: italic !important; text-align: center !important; }
+            /* Interest Savings Breakdown Section - Match Package Comparison Design */
+            .pdf-breakdown-section { margin: 25px 0 !important; page-break-inside: avoid !important; }
+            .pdf-breakdown-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
+            .pdf-breakdown-content { }
+            .pdf-breakdown-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; margin-bottom: 15px !important; }
+            .pdf-breakdown-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
+            .pdf-breakdown-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 10px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-breakdown-table th:first-child { background: #1e3a6f !important; text-align: center !important; }
+            .pdf-breakdown-table tbody tr:nth-child(even) { background: #f8fafc !important; }
+            .pdf-breakdown-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 9px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-breakdown-table td:first-child { font-weight: 600 !important; color: #374151 !important; }
+            .pdf-breakdown-table tbody tr:last-child td { border-top: 2px solid #264A82 !important; background: #f1f5f9 !important; font-weight: 700 !important; color: #264A82 !important; }
+            .pdf-breakdown-note { font-size: 10px !important; color: #6b7280 !important; line-height: 1.4 !important; font-style: italic !important; text-align: center !important; margin-top: 10px !important; }
             ` : ''}
             
             /* Monthly Installment Comparison Table - Match HTML Version */
@@ -1725,35 +1729,10 @@ const RecommendedPackages = ({ currentUser }) => {
             </div>
 
             ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
-            <!-- Potential Savings Section -->
-            <div class="pdf-savings-section">
-              <div class="pdf-savings-title">Potential Savings with Our Recommended Package</div>
-              <div class="pdf-savings-grid">
-                <div class="pdf-savings-item">
-                  <div class="label">Current Monthly Payment</div>
-                  <div class="value current">${formatCurrency(calculateMonthlyInstallment(searchForm.loanAmount, searchForm.loanTenure, parseFloat(searchForm.existingInterestRate)))}</div>
-                  <div class="sub-label">at ${parseFloat(searchForm.existingInterestRate).toFixed(2)}%</div>
-                </div>
-                <div class="pdf-savings-item">
-                  <div class="label">New Monthly Payment</div>
-                  <div class="value new">${formatCurrency(enhancedPackages[0]?.monthlyInstallment || 0)}</div>
-                  <div class="sub-label">at ${enhancedPackages[0]?.avgFirst2Years?.toFixed(2) || 'N/A'}%</div>
-                </div>
-                <div class="pdf-savings-item">
-                  <div class="label">Total Savings</div>
-                  <div class="value savings">${enhancedPackages[0]?.totalSavings > 0 ? formatCurrency(enhancedPackages[0].totalSavings) : 'No savings'}</div>
-                  <div class="sub-label">Over ${parseLockInPeriod(enhancedPackages[0]?.lock_period) || 2} Year${parseLockInPeriod(enhancedPackages[0]?.lock_period) > 1 ? 's' : ''} Lock-in</div>
-                </div>
-              </div>
-            </div>
-
             <!-- Interest Savings Breakdown Section -->
             <div class="pdf-breakdown-section">
               <div class="pdf-breakdown-title">Interest Savings Breakdown Over Lock-in Period</div>
               <div class="pdf-breakdown-content">
-                <div class="pdf-breakdown-explanation">
-                  This breakdown shows how your interest savings are calculated year by year using the <strong>reducing balance method</strong> - the same method banks use. Interest is calculated monthly based on the actual outstanding balance, providing precise savings calculations.
-                </div>
                 
                 <table class="pdf-breakdown-table">
                   <thead>
@@ -1831,7 +1810,7 @@ const RecommendedPackages = ({ currentUser }) => {
                 </table>
                 
                 <div class="pdf-breakdown-note">
-                  <strong>Note:</strong> This calculation uses the <strong>reducing balance method</strong> with monthly compounding - the same method used by banks for mortgage calculations. Interest is calculated monthly on the actual outstanding balance, providing the most accurate savings estimate possible.
+                  <strong>Note:</strong> This calculation uses the <strong>reducing balance method</strong> with monthly compounding. Interest is calculated monthly on the actual outstanding balance, providing the most accurate savings estimate possible.
                 </div>
               </div>
             </div>
