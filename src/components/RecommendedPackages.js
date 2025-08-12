@@ -1601,23 +1601,15 @@ const RecommendedPackages = ({ currentUser }) => {
                           ${yearData.map((data, index) => {
                             if (!data) return '<td class="package-detail">N/A</td>';
                             
-                            // Calculate interest savings for this specific year using the same method as overall calculation
+                            // Calculate interest savings for this specific year using reducing balance method
                             const loanAmount = searchForm.loanAmount || 500000;
                             const loanTenure = searchForm.loanTenure || 25;
                             const existingRate = parseFloat(searchForm.existingInterestRate);
                             const newRate = data.rate;
                             const currentYear = data.year;
                             
-                            // Use the same calculation method as the helper function
-                            const annualPrincipalReduction = loanAmount / loanTenure;
-                            const yearStartBalance = loanAmount - (annualPrincipalReduction * (currentYear - 1));
-                            const yearEndBalance = loanAmount - (annualPrincipalReduction * currentYear);
-                            const avgYearBalance = (yearStartBalance + yearEndBalance) / 2;
-                            
-                            // Calculate annual interest for both scenarios
-                            const existingYearInterest = Math.max(0, avgYearBalance) * (existingRate / 100);
-                            const newYearInterest = Math.max(0, avgYearBalance) * (newRate / 100);
-                            const yearInterestSavings = existingYearInterest - newYearInterest;
+                            // Use the new reducing balance method
+                            const yearInterestSavings = calculateYearlyInterestSavingsPDF(loanAmount, loanTenure, existingRate, newRate, currentYear);
                             
                             return `<td class="package-detail ${index === 0 ? 'recommended' : ''}">${formatCurrency(Math.max(0, yearInterestSavings))}</td>`;
                           }).join('')}
