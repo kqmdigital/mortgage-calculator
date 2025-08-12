@@ -2594,71 +2594,81 @@ const AuthenticatedApp = () => {
             }
           }
 
-          /* Mobile optimizations (768px and below) */
+          /* Mobile optimizations (768px and below) - Single row layout */
           @media (max-width: 768px) {
             .header-logo-container {
-              justify-content: center !important;
-              height: 100px !important;
-              max-height: 100px !important;
-              min-height: 100px !important;
+              justify-content: flex-start !important;
+              height: 80px !important;
+              max-height: 80px !important;
+              min-height: 80px !important;
               margin-bottom: 0 !important;
-              width: 100% !important;
+              width: auto !important;
+              flex: 1 !important;
               display: flex !important;
               align-items: center !important;
             }
             
             .header-logo-container div {
-              justify-content: center !important;
+              justify-content: flex-start !important;
               display: flex !important;
               align-items: center !important;
-              width: 100% !important;
-              transform-origin: center !important;
+              width: auto !important;
+              transform-origin: left center !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(1.0) translateX(0px) !important;
-              transform-origin: center center !important;
+              transform: scale(0.8) translateX(0px) !important;
+              transform-origin: left center !important;
             }
             
-            /* Stack vertically on mobile for better space usage - HEADER USER CARD ONLY */
+            /* Single row layout - user card styling */
             .relative .standard-card.card-gradient-blue {
-              width: 100% !important;
-              max-width: 280px !important;
-              margin: 0 auto !important;
+              width: auto !important;
+              max-width: none !important;
+              margin: 0 !important;
+              height: 80px !important;
+              min-height: 80px !important;
+              display: flex !important;
+              align-items: center !important;
             }
           }
 
           @media (max-width: 640px) {
             .header-logo-container {
-              justify-content: center !important;
-              height: 90px !important;
-              max-height: 90px !important;
-              min-height: 90px !important;
-              width: 100% !important;
+              justify-content: flex-start !important;
+              height: 70px !important;
+              max-height: 70px !important;
+              min-height: 70px !important;
+              width: auto !important;
+              flex: 1 !important;
               display: flex !important;
               align-items: center !important;
             }
             
             .header-logo-container div {
-              justify-content: center !important;
+              justify-content: flex-start !important;
               display: flex !important;
               align-items: center !important;
-              width: 100% !important;
-              transform-origin: center !important;
+              width: auto !important;
+              transform-origin: left center !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.88) translateX(0px) !important;
-              transform-origin: center center !important;
+              transform: scale(0.7) translateX(0px) !important;
+              transform-origin: left center !important;
             }
             
-            /* Compact user card for small screens - HEADER USER CARD ONLY */
+            /* Compact user card for small screens - single row */
             .relative .standard-card.card-gradient-blue {
               padding: 6px 12px !important;
+              height: 70px !important;
+              min-height: 70px !important;
+              display: flex !important;
+              align-items: center !important;
             }
             
             .relative .standard-card.card-gradient-blue .flex.items-center.gap-2 {
@@ -2669,34 +2679,39 @@ const AuthenticatedApp = () => {
           /* Extra small screens */
           @media (max-width: 480px) {
             .header-logo-container {
-              height: 80px !important;
-              max-height: 80px !important;
-              min-height: 80px !important;
-              width: 100% !important;
+              height: 60px !important;
+              max-height: 60px !important;
+              min-height: 60px !important;
+              width: auto !important;
+              flex: 1 !important;
               display: flex !important;
               align-items: center !important;
-              justify-content: center !important;
+              justify-content: flex-start !important;
             }
             
             .header-logo-container div {
-              justify-content: center !important;
+              justify-content: flex-start !important;
               display: flex !important;
               align-items: center !important;
-              width: 100% !important;
-              transform-origin: center !important;
+              width: auto !important;
+              transform-origin: left center !important;
             }
             
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.8) translateX(0px) !important;
-              transform-origin: center center !important;
+              transform: scale(0.6) translateX(0px) !important;
+              transform-origin: left center !important;
             }
             
-            /* Very compact layout - HEADER USER CARD ONLY */
+            /* Very compact layout - single row */
             .relative .standard-card.card-gradient-blue {
               padding: 4px 8px !important;
-              max-width: 250px !important;
+              max-width: none !important;
+              height: 60px !important;
+              min-height: 60px !important;
+              display: flex !important;
+              align-items: center !important;
             }
             
             .relative .standard-card.card-gradient-blue p {
@@ -2714,7 +2729,7 @@ const AuthenticatedApp = () => {
         {/* Enhanced Header */}
         <div className="mb-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-4 lg:px-6 py-3 lg:py-4">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-3 lg:gap-0">
+            <div className="flex items-center justify-between gap-3">
               <div className="header-logo-container">
                 <div style={{ 
                   height: 'auto', 
