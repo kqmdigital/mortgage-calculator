@@ -901,7 +901,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         </div>
     </div>
 
-    <div style="page-break-before: always; break-before: page;">
+    <div style="margin-top: 30px;">
         <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
         
         <div class="table-container">
