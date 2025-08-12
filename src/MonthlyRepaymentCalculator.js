@@ -611,8 +611,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         }
         
         .table-body-section {
-            page-break-before: avoid !important;
-            break-before: avoid !important;
+            /* Allow natural page flow - no break restrictions */
         }
         
         .table-body-section .repayment-table {
@@ -707,10 +706,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 }
                 
                 .table-body-section {
-                    -webkit-column-break-before: avoid !important;
-                    -webkit-region-break-before: avoid !important;
-                    page-break-before: avoid !important;
-                    break-before: avoid !important;
+                    /* Natural flow - no break restrictions for WebKit */
                 }
             }
             
@@ -737,9 +733,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 }
                 
                 .table-body-section {
-                    page-break-before: avoid !important;
-                    -webkit-column-break-before: avoid !important;
-                    -webkit-region-break-before: avoid !important;
+                    /* Natural flow for iOS - no restrictions */
                 }
                 
                 .table-body-section .repayment-table tbody tr {
@@ -835,7 +829,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         </div>
         
         <!-- Table body can break across pages -->
-        <div class="table-body-section">
+        <div class="table-body-section" style="margin-top: 0;">
             <table class="repayment-table" style="margin-top: -1px; border-top: none;">
                 <tbody>
                     ${results.yearlyData.map(year => `
