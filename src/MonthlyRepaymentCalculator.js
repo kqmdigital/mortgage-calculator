@@ -589,13 +589,23 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             display: block;
             overflow: visible;
             margin-bottom: 20px;
-            orphans: 3;
-            widows: 3;
         }
         
-        .yearly-schedule-section h2 {
-            orphans: 3;
-            widows: 3;
+        .title-with-table {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            -webkit-column-break-inside: avoid !important;
+            -webkit-region-break-inside: avoid !important;
+            display: table !important;
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+        
+        .title-with-table h2 {
+            display: table-caption !important;
+            caption-side: top !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
         }
         @media print {
             body { 
@@ -663,48 +673,67 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 }
                 
                 /* iPhone Safari specific fixes for table titles */
-                .yearly-schedule-section h2 {
+                .title-with-table {
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                    display: table !important;
+                    width: 100% !important;
+                    table-layout: fixed !important;
+                }
+                
+                .title-with-table h2 {
+                    display: table-caption !important;
+                    caption-side: top !important;
                     -webkit-column-break-after: avoid !important;
                     -webkit-region-break-after: avoid !important;
                     page-break-after: avoid !important;
                     break-after: avoid !important;
-                    margin-bottom: 5px !important;
-                    orphans: 3 !important;
-                    widows: 3 !important;
                 }
                 
-                .yearly-schedule-section .table-container {
-                    margin-top: 0 !important;
+                .title-with-table .table-container {
+                    display: table-row-group !important;
                 }
                 
-                .yearly-schedule-section .repayment-table thead {
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
-                    page-break-after: avoid !important;
-                    break-after: avoid !important;
+                .title-with-table .repayment-table {
+                    -webkit-column-break-before: avoid !important;
+                    -webkit-region-break-before: avoid !important;
+                    page-break-before: avoid !important;
+                    break-before: avoid !important;
                 }
             }
             
             /* iOS/iPhone specific fixes for PDF generation */
             @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
-                .yearly-schedule-section h2 {
+                .title-with-table {
+                    page-break-inside: avoid !important;
+                    -webkit-column-break-inside: avoid !important;
+                    -webkit-region-break-inside: avoid !important;
+                    display: table !important;
+                    width: 100% !important;
+                    table-layout: fixed !important;
+                    position: relative !important;
+                }
+                
+                .title-with-table h2 {
+                    display: table-caption !important;
+                    caption-side: top !important;
                     page-break-after: avoid !important;
                     -webkit-column-break-after: avoid !important;
                     -webkit-region-break-after: avoid !important;
-                    margin-bottom: 5px !important;
-                    orphans: 3 !important;
-                    widows: 3 !important;
+                    margin-bottom: 0 !important;
                 }
                 
-                .yearly-schedule-section .repayment-table thead {
-                    page-break-after: avoid !important;
-                    -webkit-column-break-after: avoid !important;
-                    -webkit-region-break-after: avoid !important;
+                .title-with-table .table-container {
+                    display: table-row-group !important;
                 }
                 
-                .yearly-schedule-section .repayment-table tbody tr {
-                    orphans: 2 !important;
-                    widows: 2 !important;
+                .title-with-table .repayment-table {
+                    page-break-before: avoid !important;
+                    -webkit-column-break-before: avoid !important;
+                    -webkit-region-break-before: avoid !important;
+                    margin-top: 0 !important;
                 }
             }
         }
@@ -775,21 +804,22 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     ` : ''}
 
     <div class="yearly-schedule-section">
-        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left; page-break-after: avoid !important; break-after: avoid !important; orphans: 3; widows: 3;">Yearly Repayment Schedule</h2>
-        
-        <div class="table-container">
-            <table class="repayment-table">
-                    <thead>
-                        <tr>
-                            <th>Year</th>
-                            <th>Interest Rate</th>
-                            <th>Beginning Principal</th>
-                            <th>Monthly Installment</th>
-                            <th>Interest Paid</th>
-                            <th>Principal Paid</th>
-                            <th>Ending Principal</th>
-                        </tr>
-                    </thead>
+        <div class="title-with-table" style="page-break-inside: avoid !important; break-inside: avoid !important; -webkit-column-break-inside: avoid !important; -webkit-region-break-inside: avoid !important; display: table; width: 100%; margin-bottom: 0;">
+            <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 5px 0; text-align: left; display: table-caption; caption-side: top;">Yearly Repayment Schedule</h2>
+            
+            <div class="table-container" style="display: table-row-group;">
+                <table class="repayment-table" style="page-break-before: avoid !important;">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Interest Rate</th>
+                                <th>Beginning Principal</th>
+                                <th>Monthly Installment</th>
+                                <th>Interest Paid</th>
+                                <th>Principal Paid</th>
+                                <th>Ending Principal</th>
+                            </tr>
+                        </thead>
                     <tbody>
                         ${results.yearlyData.map(year => `
                         <tr>
@@ -804,6 +834,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                         `).join('')}
                     </tbody>
         </table>
+            </div>
         </div>
     </div>
 
