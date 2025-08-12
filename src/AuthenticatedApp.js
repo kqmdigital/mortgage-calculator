@@ -2598,9 +2598,9 @@ const AuthenticatedApp = () => {
           @media (max-width: 768px) {
             .header-logo-container {
               justify-content: center !important;
-              height: 60px !important;
-              max-height: 60px !important;
-              min-height: 60px !important;
+              height: 100px !important;
+              max-height: 100px !important;
+              min-height: 100px !important;
               margin-bottom: 0 !important;
               width: 100% !important;
               display: flex !important;
@@ -2618,7 +2618,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.5) translateX(0px) !important;
+              transform: scale(1.0) translateX(0px) !important;
               transform-origin: center center !important;
             }
             
@@ -2633,9 +2633,9 @@ const AuthenticatedApp = () => {
           @media (max-width: 640px) {
             .header-logo-container {
               justify-content: center !important;
-              height: 50px !important;
-              max-height: 50px !important;
-              min-height: 50px !important;
+              height: 90px !important;
+              max-height: 90px !important;
+              min-height: 90px !important;
               width: 100% !important;
               display: flex !important;
               align-items: center !important;
@@ -2652,7 +2652,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.44) translateX(0px) !important;
+              transform: scale(0.88) translateX(0px) !important;
               transform-origin: center center !important;
             }
             
@@ -2669,9 +2669,9 @@ const AuthenticatedApp = () => {
           /* Extra small screens */
           @media (max-width: 480px) {
             .header-logo-container {
-              height: 45px !important;
-              max-height: 45px !important;
-              min-height: 45px !important;
+              height: 80px !important;
+              max-height: 80px !important;
+              min-height: 80px !important;
               width: 100% !important;
               display: flex !important;
               align-items: center !important;
@@ -2689,7 +2689,7 @@ const AuthenticatedApp = () => {
             .header-logo-container div img,
             .header-logo-container img,
             .header-logo {
-              transform: scale(0.4) translateX(0px) !important;
+              transform: scale(0.8) translateX(0px) !important;
               transform-origin: center center !important;
             }
             
