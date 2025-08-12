@@ -1577,7 +1577,7 @@ const htmlContent = `
               </div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <label className="radio-card">
                 <input
                   type="radio"
@@ -1652,7 +1652,7 @@ const htmlContent = `
               </div>
             </div>
             
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">

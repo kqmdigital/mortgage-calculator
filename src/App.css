@@ -75,7 +75,7 @@ input[type="number"] {
 
 /* ===== STANDARDIZED CARD STYLES ===== */
 .standard-card {
-  background: white;
+  background: #f0f9ff !important;
   border: 2px solid #3b82f6 !important;
   border-radius: 16px;
   padding: 40px !important;
