@@ -2961,7 +2961,7 @@ const AuthenticatedApp = () => {
             <div className="flex justify-center gap-4 p-4 bg-gray-50 rounded-xl">
               <button
                 onClick={() => setCalculatorType('tdsr')}
-                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
+                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'tdsr' 
                     ? 'bg-blue-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600'
@@ -2974,13 +2974,13 @@ const AuthenticatedApp = () => {
                 }}
                 title="TDSR/MSR Calculator"
               >
-                <TrendingUp className="w-8 h-8 mx-auto" />
-                <div className="text-xs mt-2 font-medium">TDSR</div>
+                <TrendingUp className="w-6 h-6 mx-auto mb-1" />
+                <div className="text-xs font-medium text-center">TDSR</div>
               </button>
               
               <button
                 onClick={() => setCalculatorType('repayment')}
-                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
+                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'repayment' 
                     ? 'bg-green-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-600'
@@ -2993,13 +2993,13 @@ const AuthenticatedApp = () => {
                 }}
                 title="Monthly Repayment Calculator"
               >
-                <DollarSign className="w-8 h-8 mx-auto" />
-                <div className="text-xs mt-2 font-medium">Repay</div>
+                <DollarSign className="w-6 h-6 mx-auto mb-1" />
+                <div className="text-xs font-medium text-center">Repay</div>
               </button>
               
               <button
                 onClick={() => setCalculatorType('progressive')}
-                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
+                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'progressive' 
                     ? 'bg-purple-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-purple-50 hover:text-purple-600'
@@ -3012,13 +3012,13 @@ const AuthenticatedApp = () => {
                 }}
                 title="Progressive Payment Calculator"
               >
-                <BarChart3 className="w-8 h-8 mx-auto" />
-                <div className="text-xs mt-2 font-medium">Prog</div>
+                <BarChart3 className="w-6 h-6 mx-auto mb-1" />
+                <div className="text-xs font-medium text-center">Prog</div>
               </button>
               
               <button
                 onClick={() => setCalculatorType('packages')}
-                className={`flex-1 p-5 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 ${
+                className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'packages' 
                     ? 'bg-orange-500 text-white shadow-lg scale-105' 
                     : 'bg-white text-gray-600 hover:bg-orange-50 hover:text-orange-600'
@@ -3031,8 +3031,8 @@ const AuthenticatedApp = () => {
                 }}
                 title="Recommended Packages"
               >
-                <Sparkles className="w-8 h-8 mx-auto" />
-                <div className="text-xs mt-2 font-medium">Packages</div>
+                <Sparkles className="w-6 h-6 mx-auto mb-1" />
+                <div className="text-xs font-medium text-center">Packages</div>
               </button>
             </div>
           </div>
