@@ -1570,15 +1570,19 @@ const htmlContent = `
     </div>
 
     <script>
-        // iPhone Safari PDF Generation Optimizations
+        // Cross-Platform PDF Generation Optimizations
         (function() {
-            // Detect iPhone Safari
-            const isIPhone = /iPhone/.test(navigator.userAgent);
-            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-            const isIPhoneSafari = isIPhone && isSafari;
+            // Enhanced device detection
+            const userAgent = navigator.userAgent || '';
+            const isIPhone = /iPhone/.test(userAgent);
+            const isAndroid = /Android/.test(userAgent);
+            const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+            const isChrome = /Chrome/.test(userAgent);
+            const isFirefox = /Firefox/.test(userAgent);
+            const isMobile = isIPhone || isAndroid || /Mobile|Tablet/.test(userAgent);
             
-            // Apply iPhone Safari specific fixes
-            if (isIPhoneSafari) {
+            // Device-specific optimizations
+            if (isIPhone && isSafari) {
                 console.log('iPhone Safari detected - applying PDF optimizations');
                 
                 // Force text size adjustment
@@ -1680,23 +1684,156 @@ const htmlContent = `
                 }, 100);
             }
             
-            // Print optimization for all mobile devices
-            window.addEventListener('beforeprint', function() {
-                // Add print-optimized class
-                document.body.classList.add('printing');
+            // Android Chrome/Browser specific optimizations
+            if (isAndroid) {
+                console.log('Android device detected - applying PDF optimizations');
                 
-                // Force consistent rendering
-                const elements = document.querySelectorAll('.section, .section-content, .assessment-grid, .funding-grid');
-                elements.forEach(el => {
-                    el.style.pageBreakInside = 'avoid';
-                    el.style.breakInside = 'avoid';
-                    el.style.webkitColumnBreakInside = 'avoid';
-                });
-            });
+                // Force text size adjustment for Android
+                document.documentElement.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
+                document.body.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
+                
+                // Add Android-specific class for targeted styling
+                document.body.classList.add('android-browser');
+                
+                // Android-specific CSS optimizations
+                const androidStyle = document.createElement('style');
+                androidStyle.textContent = \`
+                    .android-browser {
+                        -webkit-font-smoothing: antialiased !important;
+                        -webkit-tap-highlight-color: transparent !important;
+                    }
+                    
+                    .android-browser .section {
+                        margin: 8px 0 !important;
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                    
+                    .android-browser .info-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        font-size: 11px !important;
+                    }
+                    
+                    .android-browser .info-table th,
+                    .android-browser .info-table td {
+                        padding: 6px 8px !important;
+                        border: 1px solid #E5E7EB !important;
+                        font-size: 10px !important;
+                    }
+                    
+                    @media print {
+                        .android-browser {
+                            font-size: 11px !important;
+                            line-height: 1.3 !important;
+                        }
+                        
+                        .android-browser .section {
+                            margin: 6px 0 !important;
+                            padding: 0 !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                        
+                        .android-browser .section-header {
+                            font-size: 12px !important;
+                            padding: 6px 12px !important;
+                        }
+                        
+                        .android-browser .section-content {
+                            padding: 6px !important;
+                        }
+                        
+                        .android-browser .info-table {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                    }
+                \`;
+                document.head.appendChild(androidStyle);
+                
+                // Fix viewport for Android browsers
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover');
+                }
+            }
             
-            window.addEventListener('afterprint', function() {
-                document.body.classList.remove('printing');
-            });
+            // General mobile optimizations
+            if (isMobile) {
+                document.body.classList.add('mobile-browser');
+                
+                // Force consistent font rendering across mobile browsers
+                const mobileStyle = document.createElement('style');
+                mobileStyle.textContent = \`
+                    .mobile-browser .info-table {
+                        border-collapse: collapse !important;
+                        width: 100% !important;
+                    }
+                    
+                    .mobile-browser .info-table th,
+                    .mobile-browser .info-table td {
+                        border: 1px solid #E5E7EB !important;
+                        padding: 6px 8px !important;
+                        font-size: 10px !important;
+                        word-wrap: break-word !important;
+                    }
+                    
+                    @media print {
+                        .mobile-browser .info-table {
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                        }
+                    }
+                \`;
+                document.head.appendChild(mobileStyle);
+            }
+            
+            // Enhanced print optimization for all devices
+            const setupPrintOptimizations = () => {
+                window.addEventListener('beforeprint', function() {
+                    console.log('Print started - applying optimizations');
+                    
+                    // Add print-optimized class
+                    document.body.classList.add('printing');
+                    
+                    // Force consistent rendering across all elements
+                    const elements = document.querySelectorAll('.section, .section-content, .assessment-grid, .funding-grid, .info-table');
+                    elements.forEach(el => {
+                        el.style.pageBreakInside = 'avoid';
+                        el.style.breakInside = 'avoid';
+                        el.style.webkitColumnBreakInside = 'avoid';
+                        
+                        // Android Chrome specific fixes
+                        if (isAndroid && isChrome) {
+                            el.style.webkitTransform = 'translateZ(0)';
+                            el.style.backfaceVisibility = 'hidden';
+                        }
+                    });
+                    
+                    // Force layout recalculation for Android
+                    if (isAndroid) {
+                        setTimeout(() => {
+                            const body = document.body;
+                            body.style.visibility = 'hidden';
+                            body.offsetHeight; // Trigger reflow
+                            body.style.visibility = 'visible';
+                        }, 50);
+                    }
+                });
+                
+                window.addEventListener('afterprint', function() {
+                    console.log('Print completed - cleaning up');
+                    document.body.classList.remove('printing');
+                });
+            };
+            
+            // Initialize print optimizations
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupPrintOptimizations);
+            } else {
+                setupPrintOptimizations();
+            }
         })();
     </script>
 
@@ -1744,19 +1881,40 @@ const htmlContent = `
           downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
           downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
           downloadBtn.onclick = () => {
-            // Set print media styles and trigger print with standardized filename
-            const currentDate = new Date();
-            const dateStr = currentDate.getFullYear() + '-' + 
-                          String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                          String(currentDate.getDate()).padStart(2, '0');
-            const timeStr = String(currentDate.getHours()).padStart(2, '0') + 
-                          String(currentDate.getMinutes()).padStart(2, '0');
-            const propertyType = propertyTypeText.toLowerCase().replace(/\s+/g, '-');
-            const reportId = results.reportId || Date.now();
-            
-            const fileName = `KeyQuest-${propertyType}-TDSR-MSR-Analysis-${dateStr}-${timeStr}-${reportId}`;
-            printWindow.document.title = fileName;
-            printWindow.print();
+            try {
+              // Set print media styles and trigger print with standardized filename
+              const currentDate = new Date();
+              const dateStr = currentDate.getFullYear() + '-' + 
+                            String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(currentDate.getDate()).padStart(2, '0');
+              const timeStr = String(currentDate.getHours()).padStart(2, '0') + 
+                            String(currentDate.getMinutes()).padStart(2, '0');
+              const propertyType = propertyTypeText.toLowerCase().replace(/\s+/g, '-');
+              const reportId = results.reportId || Date.now();
+              
+              const fileName = \`KeyQuest-\${propertyType}-TDSR-MSR-Analysis-\${dateStr}-\${timeStr}-\${reportId}\`;
+              
+              // Cross-platform print handling
+              printWindow.document.title = fileName;
+              
+              // Android Chrome specific handling
+              if (/Android/.test(navigator.userAgent) && /Chrome/.test(navigator.userAgent)) {
+                console.log('Android Chrome detected - applying specific print handling');
+                
+                // Force layout stabilization before print
+                setTimeout(() => {
+                  printWindow.focus();
+                  printWindow.print();
+                }, 500);
+              } else {
+                // Standard print for other browsers
+                printWindow.focus();
+                printWindow.print();
+              }
+            } catch (error) {
+              console.error('Print error:', error);
+              alert('Unable to generate PDF. Please try refreshing the page and generating the report again.');
+            }
           };
           
           // Quick Print button
