@@ -769,7 +769,10 @@ const htmlContent = `
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>TDSR/MSR Analysis Report - ${propertyTypeText}</title>
     <style>
         @page {
@@ -1102,6 +1105,141 @@ const htmlContent = `
                     orphans: 3 !important;
                     widows: 3 !important;
                 }
+            }
+        }
+        
+        /* iPhone Safari PDF Generation Optimizations */
+        @media screen and (-webkit-min-device-pixel-ratio: 1) and (max-width: 600px) {
+            html, body {
+                -webkit-text-size-adjust: 100% !important;
+                -webkit-font-smoothing: antialiased !important;
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+            }
+            
+            .section {
+                margin: 8px 0 !important;
+                padding: 0 !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            .section-header {
+                font-size: 13px !important;
+                padding: 6px 12px !important;
+                line-height: 1.2 !important;
+            }
+            
+            .section-content {
+                padding: 6px !important;
+            }
+            
+            .info-table td {
+                padding: 4px 8px !important;
+                font-size: 10px !important;
+            }
+            
+            .assessment-grid, .funding-grid { 
+                grid-template-columns: 1fr !important;
+                margin: 5px 0 !important;
+                gap: 0 !important;
+            }
+            
+            .assessment-card, .funding-card {
+                border-right: none !important;
+                border-bottom: 1px solid #E5E7EB !important;
+                padding: 8px !important;
+                font-size: 10px !important;
+            }
+            
+            .assessment-card:last-child, .funding-card:last-child {
+                border-bottom: none !important;
+            }
+            
+            .funding-amount {
+                font-size: 14px !important;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr !important;
+                gap: 5px !important;
+                padding: 6px !important;
+            }
+            
+            .info-row {
+                padding: 3px 0 !important;
+                font-size: 10px !important;
+            }
+            
+            .disclaimer {
+                margin: 8px 0 !important;
+                padding: 6px !important;
+                font-size: 9px !important;
+            }
+        }
+        
+        /* iPhone Safari Print Specific Optimizations */
+        @media print and (-webkit-min-device-pixel-ratio: 1) {
+            html {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                font-size: 11px !important;
+            }
+            
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 11px !important;
+                line-height: 1.3 !important;
+                -webkit-font-smoothing: antialiased !important;
+            }
+            
+            @page {
+                size: A4 !important;
+                margin: 0.4in !important;
+            }
+            
+            .section {
+                margin: 6px 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+                orphans: 3 !important;
+                widows: 3 !important;
+            }
+            
+            .section-header {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                page-break-after: avoid !important;
+            }
+            
+            .section-content {
+                padding: 6px !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .assessment-grid,
+            .funding-grid {
+                page-break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin: 6px 0 !important;
+            }
+            
+            .disclaimer,
+            .footer {
+                margin: 6px 0 !important;
+                padding: 6px !important;
+                page-break-inside: avoid !important;
+            }
+            
+            /* Force consistent rendering across WebKit engines */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-sizing: border-box !important;
             }
         }
         
@@ -1440,6 +1578,132 @@ const htmlContent = `
         </div>
     </div>
 
+    <script>
+        // iPhone Safari PDF Generation Optimizations
+        (function() {
+            // Detect iPhone Safari
+            const isIPhone = /iPhone/.test(navigator.userAgent);
+            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            const isIPhoneSafari = isIPhone && isSafari;
+            
+            // Apply iPhone Safari specific fixes
+            if (isIPhoneSafari) {
+                console.log('iPhone Safari detected - applying PDF optimizations');
+                
+                // Force text size adjustment
+                document.documentElement.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
+                document.body.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
+                
+                // Add iPhone-specific class for targeted styling
+                document.body.classList.add('iphone-safari');
+                
+                // Force consistent font rendering
+                const style = document.createElement('style');
+                style.textContent = `
+                    .iphone-safari {
+                        -webkit-font-smoothing: antialiased !important;
+                        -moz-osx-font-smoothing: grayscale !important;
+                    }
+                    
+                    .iphone-safari .section {
+                        margin: 6px 0 !important;
+                        page-break-inside: avoid !important;
+                        -webkit-column-break-inside: avoid !important;
+                    }
+                    
+                    .iphone-safari .section-content {
+                        padding: 6px !important;
+                    }
+                    
+                    .iphone-safari .two-column {
+                        display: block !important;
+                        padding: 6px !important;
+                    }
+                    
+                    .iphone-safari .two-column > div {
+                        margin-bottom: 10px !important;
+                    }
+                    
+                    .iphone-safari .info-row {
+                        padding: 2px 0 !important;
+                        font-size: 10px !important;
+                    }
+                    
+                    .iphone-safari .funding-grid,
+                    .iphone-safari .assessment-grid {
+                        display: block !important;
+                        margin: 6px 0 !important;
+                    }
+                    
+                    .iphone-safari .funding-card,
+                    .iphone-safari .assessment-card {
+                        display: block !important;
+                        margin-bottom: 8px !important;
+                        border: 1px solid #E5E7EB !important;
+                        border-radius: 4px !important;
+                    }
+                    
+                    @media print {
+                        .iphone-safari {
+                            font-size: 10px !important;
+                            line-height: 1.2 !important;
+                        }
+                        
+                        .iphone-safari @page {
+                            margin: 0.3in !important;
+                            size: A4 !important;
+                        }
+                        
+                        .iphone-safari .section {
+                            margin: 4px 0 !important;
+                            padding: 0 !important;
+                        }
+                        
+                        .iphone-safari .section-header {
+                            font-size: 11px !important;
+                            padding: 4px 8px !important;
+                        }
+                        
+                        .iphone-safari .section-content {
+                            padding: 4px !important;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Fix viewport issues for PDF generation
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+                }
+                
+                // Force layout recalculation
+                setTimeout(() => {
+                    document.body.style.display = 'none';
+                    document.body.offsetHeight; // Trigger reflow
+                    document.body.style.display = '';
+                }, 100);
+            }
+            
+            // Print optimization for all mobile devices
+            window.addEventListener('beforeprint', function() {
+                // Add print-optimized class
+                document.body.classList.add('printing');
+                
+                // Force consistent rendering
+                const elements = document.querySelectorAll('.section, .section-content, .assessment-grid, .funding-grid');
+                elements.forEach(el => {
+                    el.style.pageBreakInside = 'avoid';
+                    el.style.breakInside = 'avoid';
+                    el.style.webkitColumnBreakInside = 'avoid';
+                });
+            });
+            
+            window.addEventListener('afterprint', function() {
+                document.body.classList.remove('printing');
+            });
+        })();
+    </script>
 
 </body>
 </html>
