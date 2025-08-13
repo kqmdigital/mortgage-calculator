@@ -1524,15 +1524,15 @@ const htmlContent = `
         <div class="section-header">📊 MONTHLY COMMITMENTS</div>
         <div class="section-content">
             ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
-            <div style="padding: 8px;">
-                <div style="margin-bottom: 15px;">
-                    <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">MSR Commitments: ${formatCurrency(results.totalCommitments || 0)}</h4>
-                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments || 0)}). Car loans and personal loans are excluded from MSR.</p>
+            <div style="padding: 4px;">
+                <div style="margin-bottom: 8px;">
+                    <h4 style="color: #DC2626; margin-bottom: 5px; font-size: 14px;">MSR Commitments: ${formatCurrency(results.totalCommitments || 0)}</h4>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 5px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments || 0)}). Car loans and personal loans are excluded from MSR.</p>
                 </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
-                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} TDSR Calculation:</strong> Includes all commitments:</p>
+                <div style="margin-bottom: 8px;">
+                    <h4 style="color: #DC2626; margin-bottom: 5px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 5px;"><strong>${propertyTypeText} TDSR Calculation:</strong> Includes all commitments:</p>
                     <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
                         <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
                         <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
@@ -1541,10 +1541,10 @@ const htmlContent = `
                 </div>
             </div>
             ` : `
-            <div style="padding: 8px;">
-                <div style="margin-bottom: 15px;">
-                    <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
-                    <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>Private Property TDSR Calculation:</strong> Includes all commitments:</p>
+            <div style="padding: 4px;">
+                <div style="margin-bottom: 8px;">
+                    <h4 style="color: #DC2626; margin-bottom: 5px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 5px;"><strong>Private Property TDSR Calculation:</strong> Includes all commitments:</p>
                     <ul style="font-size: 11px; color: #666; margin: 0; padding-left: 20px;">
                         <li>Car loans: ${formatCurrency((parseNumberInput(inputs.carLoanA) || 0) + (parseNumberInput(inputs.carLoanB) || 0))}</li>
                         <li>Personal loans: ${formatCurrency((parseNumberInput(inputs.personalLoanA) || 0) + (parseNumberInput(inputs.personalLoanB) || 0))}</li>
