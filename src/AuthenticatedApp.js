@@ -1892,7 +1892,7 @@ const htmlContent = `
               const propertyType = propertyTypeText.toLowerCase().replace(/\s+/g, '-');
               const reportId = results.reportId || Date.now();
               
-              const fileName = \`KeyQuest-\${propertyType}-TDSR-MSR-Analysis-\${dateStr}-\${timeStr}-\${reportId}\`;
+              const fileName = `KeyQuest-${propertyType}-TDSR-MSR-Analysis-${dateStr}-${timeStr}-${reportId}`;
               
               // Cross-platform print handling
               printWindow.document.title = fileName;
