@@ -1754,7 +1754,7 @@ const htmlContent = `
             const propertyType = propertyTypeText.toLowerCase().replace(/\s+/g, '-');
             const reportId = results.reportId || Date.now();
             
-            const fileName = \`KeyQuest-\${propertyType}-TDSR-MSR-Analysis-\${dateStr}-\${timeStr}-\${reportId}\`;
+            const fileName = `KeyQuest-${propertyType}-TDSR-MSR-Analysis-${dateStr}-${timeStr}-${reportId}`;
             printWindow.document.title = fileName;
             printWindow.print();
           };
