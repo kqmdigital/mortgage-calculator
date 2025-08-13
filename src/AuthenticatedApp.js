@@ -893,7 +893,7 @@ const htmlContent = `
         }
         
         .section {
-            margin: 20px 0;
+            margin: 10px 0;
             page-break-inside: avoid;
             break-inside: avoid;
             position: relative;
@@ -1079,8 +1079,8 @@ const htmlContent = `
                 float: none !important;
                 clear: both !important;
                 width: 100% !important;
-                margin-bottom: 30px !important;
-                padding-bottom: 15px !important;
+                margin-bottom: 15px !important;
+                padding-bottom: 8px !important;
             }
             
             /* Prevent assessment grids from splitting */
@@ -1089,7 +1089,7 @@ const htmlContent = `
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 -webkit-column-break-inside: avoid !important;
-                margin-bottom: 20px !important;
+                margin-bottom: 10px !important;
             }
             
             /* Mobile WebKit specific fixes */
@@ -1254,7 +1254,7 @@ const htmlContent = `
     ${!results.hdbPass ? `
     <div class="section no-break">
         <div class="section-header">💡 MSR FUNDING SOLUTIONS</div>
-        <div class="section-content" style="padding: 15px; text-align: center;">
+        <div class="section-content" style="padding: 8px; text-align: center;">
             <p style="margin-bottom: 15px; font-size: 11px;">To meet the MSR requirements, you need one of the following:</p>
             
             <div class="funding-grid">
@@ -1277,7 +1277,7 @@ const htmlContent = `
     ${!results.tdsrPass ? `
     <div class="section no-break">
         <div class="section-header">💡 TDSR FUNDING SOLUTIONS</div>
-        <div class="section-content" style="padding: 15px; text-align: center;">
+        <div class="section-content" style="padding: 8px; text-align: center;">
             <p style="margin-bottom: 15px; font-size: 11px;">To meet the TDSR requirements, you need one of the following:</p>
             
             <div class="funding-grid">
@@ -1299,7 +1299,7 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">👥 APPLICANT DETAILS</div>
         <div class="section-content">
-            <div class="two-column" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 15px;">
+            <div class="two-column" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 8px;">
                 <div>
                     <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Primary Applicant</h4>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
@@ -1346,9 +1346,9 @@ const htmlContent = `
             
             
             ${results.averageAge > 0 ? `
-            <div style="margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 6px;">
+            <div style="margin-top: 20px; padding: 8px; background: #F9FAFB; border-radius: 6px;">
                 <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Age & Tenor Information</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
                         <span class="info-label" style="font-weight: 600; color: #374151;">Average Age:</span>
                         <span class="info-value" style="font-weight: bold; color: #111827;">${results.averageAge.toFixed(1)} years</span>
@@ -1362,9 +1362,9 @@ const htmlContent = `
             ` : ''}
             
             ${(parseNumberInput(inputs.showFundAmount) > 0 || parseNumberInput(inputs.pledgeAmount) > 0) ? `
-            <div style="margin-top: 20px; padding: 15px; background: #F9FAFB; border-radius: 6px;">
+            <div style="margin-top: 20px; padding: 8px; background: #F9FAFB; border-radius: 6px;">
                 <h4 style="color: #264A82; margin-bottom: 15px; font-size: 14px; text-align: center;">Additional Funding Options</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     ${parseNumberInput(inputs.showFundAmount) > 0 ? `
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #E5E7EB;">
                         <span class="info-label" style="font-weight: 600; color: #374151;">Show Fund Amount:</span>
@@ -1387,7 +1387,7 @@ const htmlContent = `
         <div class="section-header">📊 MONTHLY COMMITMENTS</div>
         <div class="section-content">
             ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
-            <div style="padding: 15px;">
+            <div style="padding: 8px;">
                 <div style="margin-bottom: 15px;">
                     <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">MSR Commitments: ${formatCurrency(results.totalCommitments || 0)}</h4>
                     <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>${propertyTypeText} MSR Calculation:</strong> Includes property loans only (${formatCurrency(results.totalCommitments || 0)}). Car loans and personal loans are excluded from MSR.</p>
@@ -1404,7 +1404,7 @@ const htmlContent = `
                 </div>
             </div>
             ` : `
-            <div style="padding: 15px;">
+            <div style="padding: 8px;">
                 <div style="margin-bottom: 15px;">
                     <h4 style="color: #DC2626; margin-bottom: 10px; font-size: 14px;">TDSR Commitments: ${formatCurrency(results.totalCommitmentsTDSR || 0)}</h4>
                     <p style="font-size: 11px; color: #666; margin-bottom: 10px;"><strong>Private Property TDSR Calculation:</strong> Includes all commitments:</p>
@@ -1422,7 +1422,7 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">Important Notes</div>
         <div class="section-content">
-            <div style="padding: 15px; font-size: 11px; color: #555; line-height: 1.5;">
+            <div style="padding: 8px; font-size: 11px; color: #555; line-height: 1.5;">
                 <p style="margin: 6px 0;">• This analysis is for preliminary evaluation and does not constitute loan approval.</p>
                 <p style="margin: 6px 0;">• Actual terms are subject to lender assessment and market conditions.</p>
                 <p style="margin: 6px 0;">• Maximum loan tenor is based on borrower age and loan-to-value ratio as per prevailing regulations.</p>
