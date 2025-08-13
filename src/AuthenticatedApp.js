@@ -1591,7 +1591,7 @@ const htmlContent = `
             
             // Device-specific optimizations
             if (isIPhone && isSafari) {
-                console.log('iPhone Safari detected - applying PDF optimizations');
+                logger.debug('iPhone Safari detected - applying PDF optimizations');
                 
                 // Force text size adjustment
                 document.documentElement.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
@@ -1692,7 +1692,7 @@ const htmlContent = `
             
             // Android Chrome/Browser specific optimizations
             if (isAndroid) {
-                console.log('Android device detected - applying PDF optimizations');
+                logger.debug('Android device detected - applying PDF optimizations');
                 
                 // Force text size adjustment for Android
                 document.documentElement.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
@@ -1798,7 +1798,7 @@ const htmlContent = `
             // Enhanced print optimization for all devices
             const setupPrintOptimizations = () => {
                 window.addEventListener('beforeprint', function() {
-                    console.log('Print started - applying optimizations');
+                    logger.debug('Print started - applying optimizations');
                     
                     // Add print-optimized class
                     document.body.classList.add('printing');
@@ -1829,7 +1829,7 @@ const htmlContent = `
                 });
                 
                 window.addEventListener('afterprint', function() {
-                    console.log('Print completed - cleaning up');
+                    logger.debug('Print completed - cleaning up');
                     document.body.classList.remove('printing');
                 });
             };
@@ -1905,7 +1905,7 @@ const htmlContent = `
               
               // Android Chrome specific handling
               if (/Android/.test(navigator.userAgent) && /Chrome/.test(navigator.userAgent)) {
-                console.log('Android Chrome detected - applying specific print handling');
+                logger.debug('Android Chrome detected - applying specific print handling');
                 
                 // Force layout stabilization before print
                 setTimeout(() => {
@@ -1918,7 +1918,7 @@ const htmlContent = `
                 printWindow.print();
               }
             } catch (error) {
-              console.error('Print error:', error);
+              logger.error('Print error:', error);
               alert('Unable to generate PDF. Please try refreshing the page and generating the report again.');
             }
           };

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { AuthService } from '../utils/supabase';
+import logger from '../utils/logger';
 import { 
   generateSessionToken, 
   setUserSession, 
@@ -210,7 +211,7 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     } catch (error) {
-      console.error('Auth initialization error:', error);
+      logger.error('Auth initialization error:', error);
       AuditLogger.log('AUTH_INIT_ERROR', null, { error: error.message });
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
     }
@@ -276,7 +277,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       const errorMessage = error.message || 'Login failed. Please check your email and password.';
       
-      console.log('🔴 Login Error Occurred:', errorMessage);
+      logger.error('Login Error Occurred:', errorMessage);
       
       // Record failed attempt for rate limiting
       const identifier = getUserIdentifier();
@@ -292,7 +293,7 @@ export const AuthProvider = ({ children }) => {
       // IMPORTANT: Ensure error is set in context state
       dispatch({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: errorMessage });
       
-      console.log('🔴 Error dispatched to context:', errorMessage);
+      logger.error('Error dispatched to context:', errorMessage);
       
       // Return error info for additional handling if needed
       return { success: false, error: errorMessage };
@@ -316,7 +317,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
       
     } catch (error) {
-      console.error('Logout error:', error);
+      logger.error('Logout error:', error);
       // Even if there's an error, still clear the session
       clearUserSession();
       dispatch({ type: AUTH_ACTIONS.LOGOUT });

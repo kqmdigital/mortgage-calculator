@@ -496,7 +496,7 @@ export class AuthService {
 
       if (error) {
         logger.error('Supabase query error:', error);
-        console.error('Full error details:', error);
+        logger.error('Full error details:', error);
         throw new Error('Failed to fetch rate packages: ' + error.message);
       }
 
