@@ -1599,7 +1599,7 @@ const htmlContent = `
                 
                 // Force consistent font rendering
                 const style = document.createElement('style');
-                style.textContent = `
+                style.textContent = \`
                     .iphone-safari {
                         -webkit-font-smoothing: antialiased !important;
                         -moz-osx-font-smoothing: grayscale !important;
@@ -1668,7 +1668,7 @@ const htmlContent = `
                             padding: 4px !important;
                         }
                     }
-                `;
+                \`;
                 document.head.appendChild(style);
                 
                 // Fix viewport issues for PDF generation
