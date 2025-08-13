@@ -1975,7 +1975,7 @@ const htmlContent = `
         };
         
         addDownloadFeature();
-      }, 1000);
+      }, 5000);
 
       logger.info('Enhanced TDSR/MSR analysis PDF report generated successfully');
 
