@@ -1108,8 +1108,31 @@ const htmlContent = `
             }
         }
         
-        /* iPhone Safari PDF Generation Optimizations */
-        @media screen and (-webkit-min-device-pixel-ratio: 1) and (max-width: 600px) {
+        /* Android PDF Generation Optimizations - Android Only */
+        @media screen and (-webkit-min-device-pixel-ratio: 1) and (max-width: 600px) and (orientation: portrait) {
+            body:not(.ios-device) {
+                font-size: 13px !important;
+                line-height: 1.5 !important;
+            }
+            
+            body:not(.ios-device) .section-content {
+                padding: 8px !important;
+            }
+            
+            body:not(.ios-device) .info-table td {
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+            }
+            
+            body:not(.ios-device) .assessment-grid, 
+            body:not(.ios-device) .funding-grid { 
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+        }
+        
+        /* iPhone Safari PDF Generation Optimizations - iPhone Only */
+        @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) and (-webkit-touch-callout: default) {
             html, body {
                 -webkit-text-size-adjust: 100% !important;
                 -webkit-font-smoothing: antialiased !important;
@@ -1178,8 +1201,8 @@ const htmlContent = `
             }
         }
         
-        /* iPhone Safari Print Specific Optimizations */
-        @media print and (-webkit-min-device-pixel-ratio: 1) {
+        /* iPhone Safari Print Specific Optimizations - iPhone Only */
+        @media print and (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 812px) {
             html {
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
@@ -1589,6 +1612,13 @@ const htmlContent = `
             const isFirefox = /Firefox/.test(userAgent);
             const isMobile = isIPhone || isAndroid || /Mobile|Tablet/.test(userAgent);
             
+            // Add device-specific CSS classes to prevent conflicts
+            if (isIPhone) {
+                document.body.classList.add('ios-device');
+            } else if (isAndroid) {
+                document.body.classList.add('android-device');
+            }
+            
             // Device-specific optimizations
             if (isIPhone && isSafari) {
                 logger.debug('iPhone Safari detected - applying PDF optimizations');
@@ -1975,7 +2005,7 @@ const htmlContent = `
         };
         
         addDownloadFeature();
-      }, 5000);
+      }, 1000);
 
       logger.info('Enhanced TDSR/MSR analysis PDF report generated successfully');
 
