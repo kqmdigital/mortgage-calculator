@@ -1392,21 +1392,25 @@ const htmlContent = `
     ${!results.hdbPass ? `
     <div class="section no-break">
         <div class="section-header">💡 MSR FUNDING SOLUTIONS</div>
-        <div class="section-content" style="padding: 8px; text-align: center;">
-            <p style="margin-bottom: 15px; font-size: 11px;">To meet the MSR requirements, you need one of the following:</p>
+        <div class="section-content" style="padding: 8px;">
+            <p style="margin-bottom: 15px; font-size: 11px; text-align: center;">To meet the MSR requirements, you need one of the following:</p>
             
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
-                    <div class="funding-amount">${formatCurrency(results.cashShowHDB || 0)}</div>
-                </div>
-                <div class="funding-card">
-                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
-                    <div class="funding-amount">${formatCurrency(results.cashPledgeHDB || 0)}</div>
-                </div>
-            </div>
+            <table class="info-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead style="background: #F9FAFB;">
+                    <tr>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #264A82; text-align: center; font-size: 11px; width: 50%;">Show Fund Option</th>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #264A82; text-align: center; font-size: 11px; width: 50%;">Pledge Option</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #E5E7EB; text-align: center; font-size: 16px; font-weight: bold; color: #DC2626;">${formatCurrency(results.cashShowHDB || 0)}</td>
+                        <td style="padding: 12px; border: 1px solid #E5E7EB; text-align: center; font-size: 16px; font-weight: bold; color: #DC2626;">${formatCurrency(results.cashPledgeHDB || 0)}</td>
+                    </tr>
+                </tbody>
+            </table>
             
-            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
+            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0; text-align: center;">Choose either Show Fund OR Pledge option, not both</p>
         </div>
     </div>
     ` : ''}
@@ -1415,21 +1419,25 @@ const htmlContent = `
     ${!results.tdsrPass ? `
     <div class="section no-break">
         <div class="section-header">💡 TDSR FUNDING SOLUTIONS</div>
-        <div class="section-content" style="padding: 8px; text-align: center;">
-            <p style="margin-bottom: 15px; font-size: 11px;">To meet the TDSR requirements, you need one of the following:</p>
+        <div class="section-content" style="padding: 8px;">
+            <p style="margin-bottom: 15px; font-size: 11px; text-align: center;">To meet the TDSR requirements, you need one of the following:</p>
             
-            <div class="funding-grid">
-                <div class="funding-card">
-                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Show Fund Option</div>
-                    <div class="funding-amount">${formatCurrency(results.cashShowTDSR)}</div>
-                </div>
-                <div class="funding-card">
-                    <div style="margin: 0 0 5px 0; color: #666; font-weight: bold;">Pledge Option</div>
-                    <div class="funding-amount">${formatCurrency(results.cashPledgeTDSR)}</div>
-                </div>
-            </div>
+            <table class="info-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead style="background: #F9FAFB;">
+                    <tr>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #264A82; text-align: center; font-size: 11px; width: 50%;">Show Fund Option</th>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #264A82; text-align: center; font-size: 11px; width: 50%;">Pledge Option</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #E5E7EB; text-align: center; font-size: 16px; font-weight: bold; color: #DC2626;">${formatCurrency(results.cashShowTDSR)}</td>
+                        <td style="padding: 12px; border: 1px solid #E5E7EB; text-align: center; font-size: 16px; font-weight: bold; color: #DC2626;">${formatCurrency(results.cashPledgeTDSR)}</td>
+                    </tr>
+                </tbody>
+            </table>
             
-            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0;">Choose either Show Fund OR Pledge option, not both</p>
+            <p style="font-style: italic; color: #666; font-size: 10px; margin: 10px 0; text-align: center;">Choose either Show Fund OR Pledge option, not both</p>
         </div>
     </div>
     ` : ''}
@@ -1628,13 +1636,11 @@ const htmlContent = `
                         font-size: 10px !important;
                     }
                     
-                    .iphone-safari .funding-grid,
                     .iphone-safari .assessment-grid {
                         display: block !important;
                         margin: 6px 0 !important;
                     }
                     
-                    .iphone-safari .funding-card,
                     .iphone-safari .assessment-card {
                         display: block !important;
                         margin-bottom: 8px !important;
