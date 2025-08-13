@@ -1890,15 +1890,11 @@ const htmlContent = `
             try {
               // Set print media styles and trigger print with standardized filename
               const currentDate = new Date();
-              const dateStr = currentDate.getFullYear() + '-' + 
-                            String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+              const dateStr = currentDate.getFullYear() + 
+                            String(currentDate.getMonth() + 1).padStart(2, '0') + 
                             String(currentDate.getDate()).padStart(2, '0');
-              const timeStr = String(currentDate.getHours()).padStart(2, '0') + 
-                            String(currentDate.getMinutes()).padStart(2, '0');
-              const propertyType = propertyTypeText.toLowerCase().replace(/\s+/g, '-');
-              const reportId = results.reportId || Date.now();
               
-              const fileName = `KeyQuest-${propertyType}-TDSR-MSR-Analysis-${dateStr}-${timeStr}-${reportId}`;
+              const fileName = `KeyQuest-TDSR-MSR-Report-${dateStr}`;
               
               // Cross-platform print handling
               printWindow.document.title = fileName;

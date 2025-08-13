@@ -945,9 +945,12 @@ const generateProgressivePaymentReport = () => {
       downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
       downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
       downloadBtn.onclick = () => {
-        // Set print media styles and trigger print with filename
-        const clientName = inputs.clientName ? inputs.clientName.replace(/\s+/g, '-').toLowerCase() : 'client';
-        const fileName = `progressive-payment-schedule-${clientName}-${new Date().toISOString().split('T')[0]}`;
+        // Set print media styles and trigger print with standardized filename
+        const currentDate = new Date();
+        const dateStr = currentDate.getFullYear() + 
+                      String(currentDate.getMonth() + 1).padStart(2, '0') + 
+                      String(currentDate.getDate()).padStart(2, '0');
+        const fileName = `KeyQuest-Progressive-Report-${dateStr}`;
         printWindow.document.title = fileName;
         printWindow.print();
       };

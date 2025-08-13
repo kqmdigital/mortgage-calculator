@@ -993,8 +993,12 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
           downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
           downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
           downloadBtn.onclick = () => {
-            // Set print media styles and trigger print with filename
-            const fileName = `repayment-schedule-${loanDetails.type.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}`;
+            // Set print media styles and trigger print with standardized filename
+            const currentDate = new Date();
+            const dateStr = currentDate.getFullYear() + 
+                          String(currentDate.getMonth() + 1).padStart(2, '0') + 
+                          String(currentDate.getDate()).padStart(2, '0');
+            const fileName = `KeyQuest-Repayment-Report-${dateStr}`;
             printWindow.document.title = fileName;
             printWindow.print();
           };
