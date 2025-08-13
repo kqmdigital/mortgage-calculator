@@ -1437,46 +1437,37 @@ const htmlContent = `
     <div class="section no-break">
         <div class="section-header">👥 APPLICANT DETAILS</div>
         <div class="section-content">
-            <div class="two-column" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 8px;">
-                <div>
-                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Primary Applicant</h4>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Monthly Salary:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</span>
-                    </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Annual Salary:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</span>
-                    </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Age:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${parseNumberInput(inputs.applicantAgeA) || 0} years</span>
-                    </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Total Income:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(results.totalMonthlyIncomeA || 0)}</span>
-                    </div>
-                </div>
-                <div>
-                    <h4 style="margin-bottom: 10px; color: #264A82; font-size: 14px;">Co-Applicant</h4>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Monthly Salary:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</span>
-                    </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Annual Salary:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</span>
-                    </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #E5E7EB;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Age:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${parseNumberInput(inputs.applicantAgeB) || 0} years</span>
-                    </div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 6px 0;">
-                        <span class="info-label" style="font-weight: 600; color: #374151;">Total Income:</span>
-                        <span class="info-value" style="font-weight: bold; color: #111827;">${formatCurrency(results.totalMonthlyIncomeB || 0)}</span>
-                    </div>
-                </div>
-            </div>
+            <table class="info-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead style="background: #F9FAFB;">
+                    <tr>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #374151; text-align: left; font-size: 11px; width: 25%;">Field</th>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #264A82; text-align: center; font-size: 11px; width: 37.5%;">Primary Applicant</th>
+                        <th style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #264A82; text-align: center; font-size: 11px; width: 37.5%;">Co-Applicant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #374151; font-size: 11px;">Monthly Salary:</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${formatCurrency(parseNumberInput(inputs.monthlySalaryA) || 0)}</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${formatCurrency(parseNumberInput(inputs.monthlySalaryB) || 0)}</td>
+                    </tr>
+                    <tr style="background: #F9FAFB;">
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #374151; font-size: 11px;">Annual Salary:</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${formatCurrency(parseNumberInput(inputs.annualSalaryA) || 0)}</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${formatCurrency(parseNumberInput(inputs.annualSalaryB) || 0)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #374151; font-size: 11px;">Age:</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${parseNumberInput(inputs.applicantAgeA) || 0} years</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${parseNumberInput(inputs.applicantAgeB) || 0} years</td>
+                    </tr>
+                    <tr style="background: #F9FAFB;">
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: 600; color: #374151; font-size: 11px;">Total Income:</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${formatCurrency(results.totalMonthlyIncomeA || 0)}</td>
+                        <td style="padding: 8px 12px; border: 1px solid #E5E7EB; font-weight: bold; color: #111827; text-align: right; font-size: 11px;">${formatCurrency(results.totalMonthlyIncomeB || 0)}</td>
+                    </tr>
+                </tbody>
+            </table>
             <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #E5E7EB;">
                 <h4 style="color: #264A82; margin-bottom: 5px; font-size: 16px;">Combined Household Income</h4>
                 <div style="font-size: 20px; font-weight: bold; color: #264A82;">${formatCurrency(results.combinedMonthlyIncome || 0)}</div>
@@ -1615,13 +1606,17 @@ const htmlContent = `
                         padding: 6px !important;
                     }
                     
-                    .iphone-safari .two-column {
-                        display: block !important;
-                        padding: 6px !important;
+                    .iphone-safari .info-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        font-size: 10px !important;
                     }
                     
-                    .iphone-safari .two-column > div {
-                        margin-bottom: 10px !important;
+                    .iphone-safari .info-table th,
+                    .iphone-safari .info-table td {
+                        padding: 4px 6px !important;
+                        border: 1px solid #E5E7EB !important;
+                        font-size: 9px !important;
                     }
                     
                     .iphone-safari .info-row {
@@ -1749,8 +1744,17 @@ const htmlContent = `
           downloadBtn.onmouseover = () => downloadBtn.style.background = '#45a049';
           downloadBtn.onmouseout = () => downloadBtn.style.background = '#4CAF50';
           downloadBtn.onclick = () => {
-            // Set print media styles and trigger print with filename
-            const fileName = `tdsr-msr-analysis-${propertyTypeText.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}`;
+            // Set print media styles and trigger print with standardized filename
+            const currentDate = new Date();
+            const dateStr = currentDate.getFullYear() + '-' + 
+                          String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(currentDate.getDate()).padStart(2, '0');
+            const timeStr = String(currentDate.getHours()).padStart(2, '0') + 
+                          String(currentDate.getMinutes()).padStart(2, '0');
+            const propertyType = propertyTypeText.toLowerCase().replace(/\s+/g, '-');
+            const reportId = results.reportId || Date.now();
+            
+            const fileName = \`KeyQuest-\${propertyType}-TDSR-MSR-Analysis-\${dateStr}-\${timeStr}-\${reportId}\`;
             printWindow.document.title = fileName;
             printWindow.print();
           };
