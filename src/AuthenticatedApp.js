@@ -1522,7 +1522,7 @@ const htmlContent = `
 
     <div class="section no-break">
         <div class="section-header">📊 MONTHLY COMMITMENTS</div>
-        <div class="section-content">
+        <div class="section-content" style="padding-top: 3px !important;">
             ${(inputs.propertyType === 'hdb' || inputs.propertyType === 'ec') ? `
             <div style="padding: 4px;">
                 <div style="margin-bottom: 8px;">
