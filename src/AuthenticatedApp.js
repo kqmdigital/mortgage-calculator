@@ -1579,12 +1579,16 @@ const htmlContent = `
         </div>
     </div>
 
-    <div class="disclaimer no-page-break">
-        <h4>Disclaimer – Keyquest Ventures Private Limited</h4>
-        <p style="margin: 4px 0; line-height: 1.4;">This report is for general information and personal reference only. It does not constitute financial, investment, or professional advice, and does not take into account individual goals or financial situations.</p>
-        <p style="margin: 4px 0; line-height: 1.4;">Users should not rely solely on this information when making financial or investment decisions. While we aim to use reliable data, Keyquest Ventures Private Limited does not guarantee its accuracy or completeness.</p>
-        <p style="margin: 4px 0; line-height: 1.4;">Use of our reports, consultancy services, or advice—whether by the recipient directly or through our consultants, affiliates, or partners—is undertaken entirely at the user's own risk.</p>
-        <p style="margin: 4px 0; line-height: 1.4;">Keyquest Ventures Private Limited, including its affiliates and employees, bears no responsibility or liability for any decisions made or actions taken based on the information provided.</p>
+    <div class="section no-break">
+        <div class="section-header">⚠️ DISCLAIMER – KEYQUEST VENTURES PRIVATE LIMITED</div>
+        <div class="section-content">
+            <div style="padding: 12px; font-size: 10px; color: #555; line-height: 1.6;">
+                <p style="margin: 8px 0;">This report is for general information and personal reference only. It does not constitute financial, investment, or professional advice, and does not take into account individual goals or financial situations.</p>
+                <p style="margin: 8px 0;">Users should not rely solely on this information when making financial or investment decisions. While we aim to use reliable data, Keyquest Ventures Private Limited does not guarantee its accuracy or completeness.</p>
+                <p style="margin: 8px 0;">Use of our reports, consultancy services, or advice—whether by the recipient directly or through our consultants, affiliates, or partners—is undertaken entirely at the user's own risk.</p>
+                <p style="margin: 8px 0;">Keyquest Ventures Private Limited, including its affiliates and employees, bears no responsibility or liability for any decisions made or actions taken based on the information provided.</p>
+            </div>
+        </div>
     </div>
 
     <div class="footer no-break" style="text-align: center; margin-top: 30px; padding: 15px; color: #264A82; border-top: 1px solid #E5E7EB;">
