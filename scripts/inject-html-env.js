@@ -10,6 +10,14 @@ const TARGET_FILE = path.join(__dirname, '..', 'public', 'config', 'env.js');
 
 console.log('🔧 Starting HTML environment variable injection...');
 
+// Check if the target file exists (admin config files were removed)
+if (!fs.existsSync(TARGET_FILE)) {
+    console.log('ℹ️ Admin config file not found - skipping HTML environment injection');
+    console.log('📁 This is expected after admin files cleanup');
+    console.log('✅ React app uses src/utils/supabase.js instead');
+    return;
+}
+
 // Read the file
 let fileContent = fs.readFileSync(TARGET_FILE, 'utf8');
 
