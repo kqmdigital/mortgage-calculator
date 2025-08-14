@@ -930,24 +930,6 @@ const RecommendedPackages = ({ currentUser }) => {
         return existingYearInterest - newYearInterest;
       };
 
-      // Helper function to get average balance for display purposes
-      const calculateYearlyAverageBalance = (loanAmount, loanTenure, annualRate, year) => {
-        const schedule = calculateMonthlyAmortization(loanAmount, annualRate, loanTenure * 12);
-        const startMonth = (year - 1) * 12 + 1;
-        const endMonth = Math.min(year * 12, loanTenure * 12);
-        
-        let totalBalance = 0;
-        let monthCount = 0;
-        
-        for (let month = startMonth; month <= endMonth; month++) {
-          if (schedule.schedule[month - 1]) {
-            totalBalance += schedule.schedule[month - 1].balance;
-            monthCount++;
-          }
-        }
-        
-        return monthCount > 0 ? totalBalance / monthCount : 0;
-      };
 
       const calculateTotalInterestSavingsPDF = (loanAmount, lockPeriod, existingRate, pkg, loanTenure) => {
         if (!loanAmount || !lockPeriod || !existingRate || !pkg) return 0;
@@ -2069,7 +2051,8 @@ const RecommendedPackages = ({ currentUser }) => {
       }
 
       return rates;
-    }, [pkg, formatPercentage, formatRateDisplay, calculateInterestRate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pkg, formatPercentage]);
 
     return (
       <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${

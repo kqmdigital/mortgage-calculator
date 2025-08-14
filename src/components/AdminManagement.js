@@ -11,7 +11,6 @@ const AdminManagement = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showCreateUser, setShowCreateUser] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
 
   // Create user form state
   const [createUserForm, setCreateUserForm] = useState({
@@ -31,6 +30,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
     if (isOpen && canPerformAdminActions()) {
       loadUsers();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const loadUsers = async () => {

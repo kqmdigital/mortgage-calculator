@@ -51,13 +51,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
   // State for showing monthly breakdown
   const [showMonthlyBreakdown, setShowMonthlyBreakdown] = useState({});
 
-  // PMT function
-  const calculatePMT = (rate, periods, principal) => {
-    if (rate === 0 || !rate) return principal / periods;
-    const monthlyRate = rate / 100 / 12;
-    const denominator = Math.pow(1 + monthlyRate, periods) - 1;
-    return (principal * monthlyRate * Math.pow(1 + monthlyRate, periods)) / denominator;
-  };
 
   // Calculate repayment schedule with proper handling of rate changes
   const calculateRepaymentSchedule = (principal, rates, years, months, startDate = new Date()) => {

@@ -32,22 +32,6 @@ const ProgressivePaymentCalculator = ({ currentUser }) => {
   // ✅ OPTIMIZED: Debounce inputs to prevent excessive recalculations
   const debouncedInputs = useDebounce(inputs, 300); // Wait 300ms after user stops typing
 
-  // Calculate monthly installment for a given loan amount
-  const calculateMonthlyInstallment = (loanAmount, rates, tenure) => {
-    if (!loanAmount || loanAmount <= 0) return 0;
-    
-    // Use the first year rate for installment calculation
-    const firstYearRate = rates[0]?.rate || 3.0;
-    const monthlyRate = firstYearRate / 100 / 12;
-    const numberOfPayments = tenure * 12;
-    
-    if (monthlyRate === 0) {
-      return loanAmount / numberOfPayments;
-    }
-    
-    const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-    return monthlyPayment;
-  };
 
   // Time calculation chain
   const calculateExcelTimeChain = (otpDate, topDate) => {
@@ -552,9 +536,13 @@ const ProgressivePaymentCalculator = ({ currentUser }) => {
     }
   };
 
+  // Extract complex expression for dependency array
+  const ratesStringified = JSON.stringify(debouncedInputs.rates);
+  
   // ✅ OPTIMIZED: Memoize expensive calculations with debounced inputs
   const memoizedResults = useMemo(() => {
     return calculateProgressivePayments(debouncedInputs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     debouncedInputs.purchasePrice,
     debouncedInputs.loanPercentage, 
@@ -563,7 +551,7 @@ const ProgressivePaymentCalculator = ({ currentUser }) => {
     debouncedInputs.tenure,
     debouncedInputs.otpDate,
     debouncedInputs.topDate,
-    JSON.stringify(debouncedInputs.rates), // For deep comparison of rates array
+    ratesStringified, // For deep comparison of rates array
     debouncedInputs.currentSora
   ]);
 

@@ -5,8 +5,7 @@ import {
   generateSessionToken, 
   setUserSession, 
   getUserSession, 
-  clearUserSession,
-  checkSessionTimeout 
+  clearUserSession 
 } from '../utils/auth';
 import { 
   authRateLimiter, 
@@ -168,6 +167,7 @@ export const AuthProvider = ({ children }) => {
 
       return () => clearInterval(interval);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isAuthenticated]);
 
   // Security checks on mount

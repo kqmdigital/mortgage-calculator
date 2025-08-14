@@ -558,16 +558,16 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   }, [inputs, calculateAverageAge, calculateMaxLoanTenor]);
 
   // ✅ OPTIMIZED: Debounce inputs and memoize calculations
-  const debouncedInputs = useDebounce(inputs, 300);
+  useDebounce(inputs, 300);
   
   const memoizedResults = useMemo(() => {
     return calculateMortgage();
-  }, [debouncedInputs, calculateMortgage]);
+  }, [calculateMortgage]);
 
   // Memoize affordability calculations
   const memoizedAffordability = useMemo(() => {
     return calculateMaxAffordability();
-  }, [debouncedInputs, calculateMaxAffordability]);
+  }, [calculateMaxAffordability]);
 
   React.useEffect(() => {
     setResults(memoizedResults);

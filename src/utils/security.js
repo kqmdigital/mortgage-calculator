@@ -84,7 +84,7 @@ export const checkPasswordStrength = (password) => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     numbers: /\d/.test(password),
-    symbols: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password),
+    symbols: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/.test(password),
     noCommon: !isCommonPassword(password),
     noPersonal: !containsPersonalInfo(password)
   };
