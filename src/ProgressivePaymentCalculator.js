@@ -634,7 +634,7 @@ const generateProgressivePaymentReport = () => {
             border-bottom: 2px solid #1d4ed8;
         }
         .logo-section img { 
-            width: 96px !important; 
+            width: 120px !important; 
             height: auto !important; 
             margin: 0 auto 6px; 
             display: block; 
@@ -727,7 +727,7 @@ const generateProgressivePaymentReport = () => {
             body { font-size: 11px !important; }
             .payment-table { font-size: 8px !important; }
             .payment-table th, .payment-table td { padding: 3px 2px !important; font-size: 8px !important; }
-            .logo-section img { width: 80px !important; height: auto !important; }
+            .logo-section img { width: 100px !important; height: auto !important; }
             
             /* Enhanced Mobile PDF Support */
             .section,

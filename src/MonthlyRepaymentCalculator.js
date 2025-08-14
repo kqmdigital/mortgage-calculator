@@ -408,7 +408,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             margin-bottom: 10px;
         }
         .logo-section img {
-            width: 96px !important;
+            width: 120px !important;
             height: auto !important;
             display: block;
             margin: 0 auto;
@@ -623,7 +623,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 padding: 0 !important;
             }
             .logo-section img {
-                width: 80px !important;
+                width: 100px !important;
                 height: auto !important;
                 display: block !important;
                 margin: 0 auto !important;
