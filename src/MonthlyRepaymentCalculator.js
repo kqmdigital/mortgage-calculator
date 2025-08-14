@@ -1234,18 +1234,18 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Loan Amount Options</label>
-                  <div className="grid grid-cols-3 gap-3 mb-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                     <button
                       type="button"
                       onClick={() => handleNewLoanChange('loanAmountOption', '75%')}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg text-center transition-all min-h-[60px] sm:min-h-[70px] ${
                         newLoan.loanAmountOption === '75%'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-semibold">75%</div>
-                      <div className="text-xs text-gray-600">
+                      <div className="font-semibold text-sm sm:text-base">75%</div>
+                      <div className="text-xs text-gray-600 mt-1">
                         {newLoan.purchasePrice ? formatCurrency(parseNumberInput(newLoan.purchasePrice) * 0.75) : 'SGD 0.00'}
                       </div>
                     </button>
@@ -1253,14 +1253,14 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     <button
                       type="button"
                       onClick={() => handleNewLoanChange('loanAmountOption', '55%')}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg text-center transition-all min-h-[60px] sm:min-h-[70px] ${
                         newLoan.loanAmountOption === '55%'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-semibold">55%</div>
-                      <div className="text-xs text-gray-600">
+                      <div className="font-semibold text-sm sm:text-base">55%</div>
+                      <div className="text-xs text-gray-600 mt-1">
                         {newLoan.purchasePrice ? formatCurrency(parseNumberInput(newLoan.purchasePrice) * 0.55) : 'SGD 0.00'}
                       </div>
                     </button>
@@ -1268,14 +1268,14 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     <button
                       type="button"
                       onClick={() => handleNewLoanChange('loanAmountOption', 'custom')}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg text-center transition-all min-h-[60px] sm:min-h-[70px] ${
                         newLoan.loanAmountOption === 'custom'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-semibold">Custom</div>
-                      <div className="text-xs text-gray-600">Amount</div>
+                      <div className="font-semibold text-sm sm:text-base">Custom</div>
+                      <div className="text-xs text-gray-600 mt-1">Amount</div>
                     </button>
                   </div>
                   
@@ -1677,18 +1677,18 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Outstanding Loan Amount Options</label>
-                  <div className="grid grid-cols-3 gap-3 mb-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                     <button
                       type="button"
                       onClick={() => handleExistingLoanChange('outstandingAmountOption', '75%')}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg text-center transition-all min-h-[60px] sm:min-h-[70px] ${
                         existingLoan.outstandingAmountOption === '75%'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-semibold">75%</div>
-                      <div className="text-xs text-gray-600">
+                      <div className="font-semibold text-sm sm:text-base">75%</div>
+                      <div className="text-xs text-gray-600 mt-1">
                         {existingLoan.purchasePrice ? formatCurrency(parseNumberInput(existingLoan.purchasePrice) * 0.75) : 'SGD 0.00'}
                       </div>
                     </button>
@@ -1696,14 +1696,14 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     <button
                       type="button"
                       onClick={() => handleExistingLoanChange('outstandingAmountOption', '55%')}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg text-center transition-all min-h-[60px] sm:min-h-[70px] ${
                         existingLoan.outstandingAmountOption === '55%'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-semibold">55%</div>
-                      <div className="text-xs text-gray-600">
+                      <div className="font-semibold text-sm sm:text-base">55%</div>
+                      <div className="text-xs text-gray-600 mt-1">
                         {existingLoan.purchasePrice ? formatCurrency(parseNumberInput(existingLoan.purchasePrice) * 0.55) : 'SGD 0.00'}
                       </div>
                     </button>
@@ -1711,14 +1711,14 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                     <button
                       type="button"
                       onClick={() => handleExistingLoanChange('outstandingAmountOption', 'custom')}
-                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                      className={`p-3 sm:p-4 border-2 rounded-lg text-center transition-all min-h-[60px] sm:min-h-[70px] ${
                         existingLoan.outstandingAmountOption === 'custom'
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-300 hover:border-gray-400'
                       }`}
                     >
-                      <div className="font-semibold">Custom</div>
-                      <div className="text-xs text-gray-600">Amount</div>
+                      <div className="font-semibold text-sm sm:text-base">Custom</div>
+                      <div className="text-xs text-gray-600 mt-1">Amount</div>
                     </button>
                   </div>
                   
