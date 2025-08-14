@@ -713,7 +713,7 @@ const generateProgressivePaymentReport = () => {
         .monthly-payment-table th:nth-child(2),
         .monthly-payment-table td:nth-child(2) { width: 16%; } /* Opening Balance */
         .monthly-payment-table th:nth-child(3),
-        .monthly-payment-table td:nth-child(3) { width: 8%; } /* Bank Drawdown - significantly reduced */
+        .monthly-payment-table td:nth-child(3) { width: 10%; } /* Bank Drawdown - balanced */
         .monthly-payment-table th:nth-child(4),
         .monthly-payment-table td:nth-child(4) { width: 16%; } /* Monthly Payment */
         .monthly-payment-table th:nth-child(5),
@@ -723,7 +723,7 @@ const generateProgressivePaymentReport = () => {
         .monthly-payment-table th:nth-child(7),
         .monthly-payment-table td:nth-child(7) { width: 16%; } /* Ending Balance */
         .monthly-payment-table th:nth-child(8),
-        .monthly-payment-table td:nth-child(8) { width: 12%; } /* Rate - significantly increased */
+        .monthly-payment-table td:nth-child(8) { width: 10%; } /* Rate - balanced */
         .payment-table th,
         .monthly-payment-table th {
             background: #f8f9fa;
