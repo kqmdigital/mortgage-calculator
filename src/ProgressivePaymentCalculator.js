@@ -814,7 +814,7 @@ const generateProgressivePaymentReport = () => {
 
     <div class="section no-break">
         <h2>🏗️ PROJECT SUMMARY</h2>
-        <div class="info-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 ${inputs.clientName ? `
                 <div class="info-row">
@@ -829,8 +829,6 @@ const generateProgressivePaymentReport = () => {
                     <span class="info-label">Bank Loan Amount:</span>
                     <span class="info-value">${formatCurrency(results.loanAmount)} (${((results.loanAmount/results.purchasePrice)*100).toFixed(1)}%)</span>
                 </div>
-            </div>
-            <div>
                 <div class="info-row">
                     <span class="info-label">Cash/CPF Required:</span>
                     <span class="info-value">${formatCurrency(results.totalCashCPF)}</span>
