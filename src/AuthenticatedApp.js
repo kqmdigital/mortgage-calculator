@@ -12,7 +12,6 @@ import RecommendedPackages from './components/RecommendedPackages';
 // Main TDSR/MSR Calculator Component
 const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   const [inputs, setInputs] = useState({
-    clientName: '',
     propertyType: 'private',
     purchasePrice: '',
     loanPercentage: 75,
@@ -1306,10 +1305,6 @@ const htmlContent = `
         <div class="section-header">📋 LOAN SUMMARY</div>
         <div class="section-content">
             <table class="info-table">
-                ${inputs.clientName ? `<tr>
-                    <td class="info-label">Client Name:</td>
-                    <td class="info-value" colspan="3">${inputs.clientName}</td>
-                </tr>` : ''}
                 <tr>
                     <td class="info-label">Property Type:</td>
                     <td class="info-value">${propertyTypeText}</td>
@@ -2024,30 +2019,6 @@ const htmlContent = `
     <div className="space-y-12">
       {/* Input Section - Full Width */}
       <div className="space-y-8">
-        
-        {/* Client Information Section */}
-        <div className="standard-card card-gradient-green">
-          <div className="section-header">
-            <div className="icon-container green">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-content">
-              <h2>Client Information</h2>
-              <p>Enter client details for the report</p>
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-700">Client Name</label>
-            <input
-              type="text"
-              value={inputs.clientName}
-              onChange={(e) => handleInputChange('clientName', e.target.value)}
-              className="standard-input"
-              placeholder="Enter client's full name"
-            />
-          </div>
-        </div>
         
         {/* Input Cards in Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
