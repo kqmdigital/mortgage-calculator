@@ -684,6 +684,7 @@ const generateProgressivePaymentReport = () => {
             border-collapse: collapse;
             font-size: 8px;
             margin: 8px 0;
+            table-layout: fixed;
         }
         .payment-table th,
         .payment-table td {
@@ -692,6 +693,23 @@ const generateProgressivePaymentReport = () => {
             text-align: center;
             vertical-align: middle;
         }
+        /* Specific column widths for Monthly Payment Schedule */
+        .payment-table th:nth-child(1),
+        .payment-table td:nth-child(1) { width: 8%; } /* Month */
+        .payment-table th:nth-child(2),
+        .payment-table td:nth-child(2) { width: 16%; } /* Opening Balance */
+        .payment-table th:nth-child(3),
+        .payment-table td:nth-child(3) { width: 12%; } /* Bank Drawdown - reduced */
+        .payment-table th:nth-child(4),
+        .payment-table td:nth-child(4) { width: 16%; } /* Monthly Payment */
+        .payment-table th:nth-child(5),
+        .payment-table td:nth-child(5) { width: 12%; } /* Interest */
+        .payment-table th:nth-child(6),
+        .payment-table td:nth-child(6) { width: 12%; } /* Principal */
+        .payment-table th:nth-child(7),
+        .payment-table td:nth-child(7) { width: 16%; } /* Ending Balance */
+        .payment-table th:nth-child(8),
+        .payment-table td:nth-child(8) { width: 8%; } /* Rate - increased */
         .payment-table th {
             background: #f8f9fa;
             font-weight: bold;
