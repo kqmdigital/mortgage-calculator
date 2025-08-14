@@ -8,6 +8,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
   // New Loan State
   const [newLoan, setNewLoan] = useState({
+    clientName: '',
     loanAmount: '',
     interestRate: '',
     loanPeriodYears: 25,
@@ -24,6 +25,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
   // Existing Loan State (Refinancing)
   const [existingLoan, setExistingLoan] = useState({
+    clientName: '',
     outstandingAmount: '',
     currentRate: '',
     remainingYears: 10,
@@ -332,12 +334,14 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
       const loanDetails = loanType === 'new' ? {
         type: 'New Loan',
+        clientName: newLoan.clientName || 'N/A',
         amount: parseNumberInput(newLoan.loanAmount) || 0,
         rate: newLoan.interestRate,
         years: newLoan.loanPeriodYears,
         months: newLoan.loanPeriodMonths
       } : {
         type: 'Refinancing Package',
+        clientName: existingLoan.clientName || 'N/A',
         amount: parseNumberInput(existingLoan.outstandingAmount) || 0,
         rate: existingLoan.newRate,
         years: existingLoan.newLoanYears,
@@ -505,6 +509,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             border-collapse: collapse;
             font-size: 7px;
             margin: 0;
+            table-layout: fixed;
         }
         .monthly-table th,
         .monthly-table td {
@@ -523,6 +528,26 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         }
         .monthly-table tbody tr:nth-child(odd) {
             background: white;
+        }
+        .monthly-table th:nth-child(1), 
+        .monthly-table td:nth-child(1) { 
+            width: 15%; 
+        }
+        .monthly-table th:nth-child(2), 
+        .monthly-table td:nth-child(2) { 
+            width: 21.25%; 
+        }
+        .monthly-table th:nth-child(3), 
+        .monthly-table td:nth-child(3) { 
+            width: 21.25%; 
+        }
+        .monthly-table th:nth-child(4), 
+        .monthly-table td:nth-child(4) { 
+            width: 21.25%; 
+        }
+        .monthly-table th:nth-child(5), 
+        .monthly-table td:nth-child(5) { 
+            width: 21.25%; 
         }
         .refinancing-section {
             margin: 10px 0;
@@ -824,6 +849,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         <div class="section-header">Loan Details</div>
         <div class="section-content">
             <div class="loan-details-header">
+                <strong>Client:</strong> ${loanDetails.clientName}<br>
                 ${loanDetails.type}: ${formatCurrency(loanDetails.amount)} | Period: ${loanDetails.years} years${loanDetails.months > 0 ? ' ' + loanDetails.months + ' months' : ''} | Rate: ${loanDetails.rate}%
             </div>
         </div>
@@ -869,6 +895,35 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     </div>
     ` : ''}
 
+    <div style="margin-top: 30px;">
+        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
+        
+        <div class="table-container">
+            <table class="monthly-table">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Monthly Payment</th>
+                                <th>Interest Paid</th>
+                                <th>Principal Paid</th>
+                                <th>Ending Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${first5YearsMonthly.map(month => `
+                            <tr>
+                                <td>${month.year}</td>
+                                <td>${formatCurrency(month.monthlyPayment)}</td>
+                                <td>${formatCurrency(month.interestPayment)}</td>
+                                <td>${formatCurrency(month.principalPayment)}</td>
+                                <td>${formatCurrency(month.endingBalance)}</td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="yearly-schedule-section">
         <div class="table-container">
             <table class="repayment-table yearly-table">
@@ -901,43 +956,12 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         </div>
     </div>
 
-    <div style="margin-top: 30px;">
-        <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
-        
-        <div class="table-container">
-            <table class="monthly-table">
-                        <thead>
-                            <tr>
-                                <th>Year</th>
-                                <th>Month</th>
-                                <th>Monthly Payment</th>
-                                <th>Interest Paid</th>
-                                <th>Principal Paid</th>
-                                <th>Ending Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${first5YearsMonthly.map(month => `
-                            <tr>
-                                <td>${month.year}</td>
-                                <td>${month.monthName}</td>
-                                <td>${formatCurrency(month.monthlyPayment)}</td>
-                                <td>${formatCurrency(month.interestPayment)}</td>
-                                <td>${formatCurrency(month.principalPayment)}</td>
-                                <td>${formatCurrency(month.endingBalance)}</td>
-                            </tr>
-                            `).join('')}
-                        </tbody>
-            </table>
-        </div>
-    </div>
-
     <div class="disclaimer no-page-break">
-        <h4>Disclaimer</h4>
-        <p style="margin: 2px 0;">1. This schedule is based on the specified interest rates and regular monthly payments.</p>
-        <p style="margin: 2px 0;">2. Actual payments may vary based on rate changes and payment timing.</p>
-        <p style="margin: 2px 0;">3. Early payments can significantly reduce total interest paid.</p>
-        <p style="margin: 8px 0 0 0; font-style: italic;">* This report is for indicative purpose only. ${currentDate}</p>
+        <h4>Disclaimer – Keyquest Ventures Private Limited</h4>
+        <p style="margin: 4px 0; line-height: 1.4;">This report is for general information and personal reference only. It does not constitute financial, investment, or professional advice, and does not take into account individual goals or financial situations.</p>
+        <p style="margin: 4px 0; line-height: 1.4;">Users should not rely solely on this information when making financial or investment decisions. While we aim to use reliable data, Keyquest Ventures Private Limited does not guarantee its accuracy or completeness.</p>
+        <p style="margin: 4px 0; line-height: 1.4;">Use of our reports, consultancy services, or advice—whether by the recipient directly or through our consultants, affiliates, or partners—is undertaken entirely at the user's own risk. Keyquest Ventures Private Limited, including its affiliates and employees, bears no responsibility or liability for any decisions made or actions taken based on the information provided.</p>
+        <p style="margin: 8px 0 0 0; font-style: italic;">Report generated: ${currentDate}</p>
     </div>
 
     <div class="footer no-page-break">        
@@ -1114,6 +1138,17 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
               </div>
               
               <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Client Name</label>
+                  <input
+                    type="text"
+                    value={newLoan.clientName}
+                    onChange={(e) => handleNewLoanChange('clientName', e.target.value)}
+                    className="standard-input"
+                    placeholder="Enter client name"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Loan Amount (SGD)</label>
                   <div className="relative">
@@ -1476,6 +1511,17 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
               </div>
               
               <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Client Name</label>
+                  <input
+                    type="text"
+                    value={existingLoan.clientName}
+                    onChange={(e) => handleExistingLoanChange('clientName', e.target.value)}
+                    className="standard-input"
+                    placeholder="Enter client name"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Outstanding loan amount (SGD)</label>
                   <div className="relative">
