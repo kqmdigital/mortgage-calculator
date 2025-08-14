@@ -383,8 +383,8 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', 'Arial', sans-serif;
-            font-size: 10px;
-            line-height: 1.2;
+            font-size: 12px;
+            line-height: 1.4;
             color: #333;
             background: white;
             -webkit-print-color-adjust: exact !important;
@@ -618,7 +618,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         }
         @media print {
             body { 
-                font-size: 10px !important;
+                font-size: 11px !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }

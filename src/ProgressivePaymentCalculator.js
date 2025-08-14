@@ -620,8 +620,8 @@ const generateProgressivePaymentReport = () => {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            font-size: 10px;
-            line-height: 1.2;
+            font-size: 12px;
+            line-height: 1.4;
             color: #333;
             background: white;
             -webkit-print-color-adjust: exact !important;
@@ -724,9 +724,9 @@ const generateProgressivePaymentReport = () => {
             font-size: 8px;
         }
         @media print {
-            body { font-size: 9px !important; }
-            .payment-table { font-size: 7px !important; }
-            .payment-table th, .payment-table td { padding: 3px 2px !important; font-size: 7px !important; }
+            body { font-size: 11px !important; }
+            .payment-table { font-size: 8px !important; }
+            .payment-table th, .payment-table td { padding: 3px 2px !important; font-size: 8px !important; }
             .logo-section img { width: 80px !important; height: auto !important; }
             
             /* Enhanced Mobile PDF Support */
