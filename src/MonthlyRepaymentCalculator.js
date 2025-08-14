@@ -849,8 +849,7 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
         <div class="section-header">Loan Details</div>
         <div class="section-content">
             <div class="loan-details-header">
-                <strong>Client:</strong> ${loanDetails.clientName}<br>
-                ${loanDetails.type}: ${formatCurrency(loanDetails.amount)} | Period: ${loanDetails.years} years${loanDetails.months > 0 ? ' ' + loanDetails.months + ' months' : ''} | Rate: ${loanDetails.rate}%
+                <strong>Name:</strong> ${loanDetails.clientName} | <strong>Loan Amount:</strong> ${formatCurrency(loanDetails.amount)} | <strong>Tenor:</strong> ${loanDetails.years} years${loanDetails.months > 0 ? ' ' + loanDetails.months + ' months' : ''} | <strong>Rate:</strong> ${loanDetails.rate}%
             </div>
         </div>
     </div>
