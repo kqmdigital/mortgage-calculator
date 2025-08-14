@@ -1321,18 +1321,19 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Loan period</label>
-                    <div className="grid-responsive cols-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="relative">
                         <input
                           type="number"
                           inputMode="numeric"
                           value={newLoan.loanPeriodYears}
                           onChange={(e) => handleNewLoanChange('loanPeriodYears', e.target.value)}
-                          className="standard-input"
+                          className="standard-input pr-12"
                           min="0"
                           max="35"
+                          style={{ WebkitAppearance: 'none' }}
                         />
-                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">yrs</span>
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">yrs</span>
                       </div>
                       <div className="relative">
                         <input
@@ -1340,11 +1341,12 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                           inputMode="numeric"
                           value={newLoan.loanPeriodMonths}
                           onChange={(e) => handleNewLoanChange('loanPeriodMonths', e.target.value)}
-                          className="standard-input"
+                          className="standard-input pr-12"
                           min="0"
                           max="11"
+                          style={{ WebkitAppearance: 'none' }}
                         />
-                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mths</span>
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">mths</span>
                       </div>
                     </div>
                   </div>
@@ -1773,18 +1775,19 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700">Remaining period</label>
-                      <div className="grid-responsive cols-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="relative">
                           <input
                             type="number"
                             inputMode="numeric"
                             value={existingLoan.remainingYears}
                             onChange={(e) => handleExistingLoanChange('remainingYears', e.target.value)}
-                            className="standard-input"
+                            className="standard-input pr-12"
                             min="0"
                             max="35"
+                            style={{ WebkitAppearance: 'none' }}
                           />
-                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">yrs</span>
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">yrs</span>
                         </div>
                         <div className="relative">
                           <input
@@ -1792,11 +1795,12 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                             inputMode="numeric"
                             value={existingLoan.remainingMonths}
                             onChange={(e) => handleExistingLoanChange('remainingMonths', e.target.value)}
-                            className="standard-input"
+                            className="standard-input pr-12"
                             min="0"
                             max="11"
+                            style={{ WebkitAppearance: 'none' }}
                           />
-                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mths</span>
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">mths</span>
                         </div>
                       </div>
                     </div>
@@ -1831,28 +1835,32 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
 
                     <div>
                       <label className="block text-sm font-medium mb-2 text-gray-700">New loan period</label>
-                      <div className="grid-responsive cols-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="relative">
                           <input
                             type="number"
+                            inputMode="numeric"
                             value={existingLoan.newLoanYears}
                             onChange={(e) => handleExistingLoanChange('newLoanYears', e.target.value)}
-                            className="standard-input"
+                            className="standard-input pr-12"
                             min="0"
                             max="35"
+                            style={{ WebkitAppearance: 'none' }}
                           />
-                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">yrs</span>
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">yrs</span>
                         </div>
                         <div className="relative">
                           <input
                             type="number"
+                            inputMode="numeric"
                             value={existingLoan.newLoanMonths}
                             onChange={(e) => handleExistingLoanChange('newLoanMonths', e.target.value)}
-                            className="standard-input"
+                            className="standard-input pr-12"
                             min="0"
                             max="11"
+                            style={{ WebkitAppearance: 'none' }}
                           />
-                          <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">mths</span>
+                          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">mths</span>
                         </div>
                       </div>
                     </div>
