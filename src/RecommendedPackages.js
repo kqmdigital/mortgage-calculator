@@ -10,8 +10,23 @@ import {
   TrendingUp,
   ChevronDown
 } from 'lucide-react';
-import { AuthService } from '../utils/supabase';
-import logger from '../utils/logger';
+import { AuthService } from './utils/supabase';
+import logger from './utils/logger';
+
+// Helper functions for number formatting
+const formatNumberWithCommas = (value) => {
+  if (!value) return '';
+  // Remove any existing commas and non-digits (except decimal point)
+  const numericValue = value.toString().replace(/[^\d.]/g, '');
+  // Add commas for thousands separator
+  return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+const parseNumberFromFormatted = (formattedValue) => {
+  if (!formattedValue) return '';
+  // Remove commas and return clean number string
+  return formattedValue.toString().replace(/,/g, '');
+};
 
 const RecommendedPackages = ({ currentUser }) => {
   
@@ -505,10 +520,19 @@ const RecommendedPackages = ({ currentUser }) => {
   };
 
   const handleInputChange = useCallback((field, value) => {
-    setSearchForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'loanAmount') {
+      // Store the clean numeric value for calculations, but format for display
+      const cleanValue = parseNumberFromFormatted(value);
+      setSearchForm(prev => ({
+        ...prev,
+        [field]: cleanValue
+      }));
+    } else {
+      setSearchForm(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   }, []);
 
   const handleBankSelection = useCallback((bank, isSelected) => {
@@ -2298,12 +2322,17 @@ const RecommendedPackages = ({ currentUser }) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Loan Amount ($)</label>
                 <input
-                  type="number"
-                  value={searchForm.loanAmount}
+                  type="text"
+                  value={formatNumberWithCommas(searchForm.loanAmount)}
                   onChange={(e) => handleInputChange('loanAmount', e.target.value)}
+                  onKeyPress={(e) => {
+                    // Only allow numbers and backspace/delete
+                    if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="500,000"
-                  min="0"
-                  step="1000"
+                  pattern="[0-9,]*"
                   className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 />
               </div>

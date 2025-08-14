@@ -6,7 +6,7 @@ import useDebounce from './hooks/useDebounce';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
-import RecommendedPackages from './components/RecommendedPackages';
+import RecommendedPackages from './RecommendedPackages';
 
 // Import your existing TDSRMSRCalculator component from App.js
 // Main TDSR/MSR Calculator Component
