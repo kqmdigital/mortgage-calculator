@@ -28,7 +28,9 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
   // Existing Loan State (Refinancing)
   const [existingLoan, setExistingLoan] = useState({
     clientName: '',
+    purchasePrice: '',
     outstandingAmount: '',
+    outstandingAmountOption: 'custom', // 'custom', '75%', '55%'
     currentRate: '',
     remainingYears: 10,
     remainingMonths: 0,
@@ -271,8 +273,41 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
   const handleExistingLoanChange = (field, value) => {
     if (field === 'newSubsequentRates') {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
+    } else if (field === 'outstandingAmountOption') {
+      const purchasePriceNum = parseNumberInput(existingLoan.purchasePrice) || 0;
+      let calculatedAmount = '';
+      
+      if (value === '75%' && purchasePriceNum > 0) {
+        calculatedAmount = (purchasePriceNum * 0.75).toString();
+      } else if (value === '55%' && purchasePriceNum > 0) {
+        calculatedAmount = (purchasePriceNum * 0.55).toString();
+      } else if (value === 'custom') {
+        calculatedAmount = existingLoan.outstandingAmount;
+      }
+      
+      setExistingLoan(prev => ({ 
+        ...prev, 
+        outstandingAmountOption: value, 
+        outstandingAmount: calculatedAmount
+      }));
+    } else if (field === 'purchasePrice') {
+      const purchasePriceNum = parseNumberInput(value) || 0;
+      let updatedOutstandingAmount = existingLoan.outstandingAmount;
+      
+      // Auto-update outstanding amount if using percentage option
+      if (existingLoan.outstandingAmountOption === '75%' && purchasePriceNum > 0) {
+        updatedOutstandingAmount = (purchasePriceNum * 0.75).toString();
+      } else if (existingLoan.outstandingAmountOption === '55%' && purchasePriceNum > 0) {
+        updatedOutstandingAmount = (purchasePriceNum * 0.55).toString();
+      }
+      
+      setExistingLoan(prev => ({ 
+        ...prev, 
+        [field]: value,
+        outstandingAmount: updatedOutstandingAmount
+      }));
     } else if (['outstandingAmount'].includes(field)) {
-      setExistingLoan(prev => ({ ...prev, [field]: value }));
+      setExistingLoan(prev => ({ ...prev, [field]: value, outstandingAmountOption: 'custom' }));
     } else if (['remainingYears', 'remainingMonths', 'newLoanYears', 'newLoanMonths'].includes(field)) {
       setExistingLoan(prev => ({ ...prev, [field]: value }));
     } else {
@@ -1626,18 +1661,88 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">Outstanding loan amount (SGD)</label>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                   <div className="relative">
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={formatNumberInput(existingLoan.outstandingAmount)}
-                      onChange={(e) => handleExistingLoanChange('outstandingAmount', e.target.value)}
+                      value={formatNumberInput(existingLoan.purchasePrice)}
+                      onChange={(e) => handleExistingLoanChange('purchasePrice', e.target.value)}
                       className="standard-input currency-input"
-                      placeholder="500,000.00"
+                      placeholder="1,000,000.00"
                     />
                     <span className="currency-symbol">SGD</span>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Outstanding Loan Amount Options</label>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => handleExistingLoanChange('outstandingAmountOption', '75%')}
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                        existingLoan.outstandingAmountOption === '75%'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-semibold">75%</div>
+                      <div className="text-xs text-gray-600">
+                        {existingLoan.purchasePrice ? formatCurrency(parseNumberInput(existingLoan.purchasePrice) * 0.75) : 'SGD 0.00'}
+                      </div>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleExistingLoanChange('outstandingAmountOption', '55%')}
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                        existingLoan.outstandingAmountOption === '55%'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-semibold">55%</div>
+                      <div className="text-xs text-gray-600">
+                        {existingLoan.purchasePrice ? formatCurrency(parseNumberInput(existingLoan.purchasePrice) * 0.55) : 'SGD 0.00'}
+                      </div>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleExistingLoanChange('outstandingAmountOption', 'custom')}
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                        existingLoan.outstandingAmountOption === 'custom'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-semibold">Custom</div>
+                      <div className="text-xs text-gray-600">Amount</div>
+                    </button>
+                  </div>
+                  
+                  {existingLoan.outstandingAmountOption === 'custom' && (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatNumberInput(existingLoan.outstandingAmount)}
+                        onChange={(e) => handleExistingLoanChange('outstandingAmount', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="500,000.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  )}
+                  
+                  {(existingLoan.outstandingAmountOption === '75%' || existingLoan.outstandingAmountOption === '55%') && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <div className="text-sm text-green-700 font-medium">
+                        Outstanding Amount: {formatCurrency(parseNumberInput(existingLoan.outstandingAmount) || 0)}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="standard-card card-gradient-yellow">
