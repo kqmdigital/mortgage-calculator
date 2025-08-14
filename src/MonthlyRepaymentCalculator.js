@@ -9,7 +9,9 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
   // New Loan State
   const [newLoan, setNewLoan] = useState({
     clientName: '',
+    purchasePrice: '',
     loanAmount: '',
+    loanAmountOption: 'custom', // 'custom', '75%', '55%'
     interestRate: '',
     loanPeriodYears: 25,
     loanPeriodMonths: 0,
@@ -223,8 +225,41 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
   const handleNewLoanChange = (field, value) => {
     if (field === 'subsequentRates') {
       setNewLoan(prev => ({ ...prev, subsequentRates: value }));
+    } else if (field === 'loanAmountOption') {
+      const purchasePriceNum = parseNumberInput(newLoan.purchasePrice) || 0;
+      let calculatedAmount = '';
+      
+      if (value === '75%' && purchasePriceNum > 0) {
+        calculatedAmount = (purchasePriceNum * 0.75).toString();
+      } else if (value === '55%' && purchasePriceNum > 0) {
+        calculatedAmount = (purchasePriceNum * 0.55).toString();
+      } else if (value === 'custom') {
+        calculatedAmount = newLoan.loanAmount;
+      }
+      
+      setNewLoan(prev => ({ 
+        ...prev, 
+        loanAmountOption: value, 
+        loanAmount: calculatedAmount
+      }));
+    } else if (field === 'purchasePrice') {
+      const purchasePriceNum = parseNumberInput(value) || 0;
+      let updatedLoanAmount = newLoan.loanAmount;
+      
+      // Auto-update loan amount if using percentage option
+      if (newLoan.loanAmountOption === '75%' && purchasePriceNum > 0) {
+        updatedLoanAmount = (purchasePriceNum * 0.75).toString();
+      } else if (newLoan.loanAmountOption === '55%' && purchasePriceNum > 0) {
+        updatedLoanAmount = (purchasePriceNum * 0.55).toString();
+      }
+      
+      setNewLoan(prev => ({ 
+        ...prev, 
+        [field]: value,
+        loanAmount: updatedLoanAmount
+      }));
     } else if (['loanAmount'].includes(field)) {
-      setNewLoan(prev => ({ ...prev, [field]: value }));
+      setNewLoan(prev => ({ ...prev, [field]: value, loanAmountOption: 'custom' }));
     } else if (['loanPeriodYears', 'loanPeriodMonths'].includes(field)) {
       setNewLoan(prev => ({ ...prev, [field]: value }));
     } else {
@@ -1148,18 +1183,88 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2 text-gray-700">Loan Amount (SGD)</label>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                   <div className="relative">
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={formatNumberInput(newLoan.loanAmount)}
-                      onChange={(e) => handleNewLoanChange('loanAmount', e.target.value)}
+                      value={formatNumberInput(newLoan.purchasePrice)}
+                      onChange={(e) => handleNewLoanChange('purchasePrice', e.target.value)}
                       className="standard-input currency-input"
-                      placeholder="750,000.00"
+                      placeholder="1,000,000.00"
                     />
                     <span className="currency-symbol">SGD</span>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">Loan Amount Options</label>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => handleNewLoanChange('loanAmountOption', '75%')}
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                        newLoan.loanAmountOption === '75%'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-semibold">75%</div>
+                      <div className="text-xs text-gray-600">
+                        {newLoan.purchasePrice ? formatCurrency(parseNumberInput(newLoan.purchasePrice) * 0.75) : 'SGD 0.00'}
+                      </div>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleNewLoanChange('loanAmountOption', '55%')}
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                        newLoan.loanAmountOption === '55%'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-semibold">55%</div>
+                      <div className="text-xs text-gray-600">
+                        {newLoan.purchasePrice ? formatCurrency(parseNumberInput(newLoan.purchasePrice) * 0.55) : 'SGD 0.00'}
+                      </div>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleNewLoanChange('loanAmountOption', 'custom')}
+                      className={`p-3 border-2 rounded-lg text-center transition-all ${
+                        newLoan.loanAmountOption === 'custom'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="font-semibold">Custom</div>
+                      <div className="text-xs text-gray-600">Amount</div>
+                    </button>
+                  </div>
+                  
+                  {newLoan.loanAmountOption === 'custom' && (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formatNumberInput(newLoan.loanAmount)}
+                        onChange={(e) => handleNewLoanChange('loanAmount', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="750,000.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  )}
+                  
+                  {(newLoan.loanAmountOption === '75%' || newLoan.loanAmountOption === '55%') && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <div className="text-sm text-green-700 font-medium">
+                        Loan Amount: {formatCurrency(parseNumberInput(newLoan.loanAmount) || 0)}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid-responsive cols-2">
