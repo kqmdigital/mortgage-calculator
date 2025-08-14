@@ -152,11 +152,11 @@ const AdminManagement = ({ isOpen, onClose }) => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="standard-card w-full max-w-md text-center">
           <div className="mb-4">
-            <Shield className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
-            <p className="text-gray-600">You don't have permission to access user management.</p>
+            <Shield className="w-10 h-10 sm:w-12 sm:h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
+            <p className="text-sm sm:text-base text-gray-600">You don't have permission to access user management.</p>
           </div>
-          <button onClick={onClose} className="btn-standard btn-primary">
+          <button onClick={onClose} className="btn-standard btn-primary w-full sm:w-auto">
             Close
           </button>
         </div>
@@ -165,18 +165,18 @@ const AdminManagement = ({ isOpen, onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="standard-card w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <Users className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="standard-card w-full max-w-6xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-800">User Management</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 p-1"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
@@ -205,13 +205,13 @@ const AdminManagement = ({ isOpen, onClose }) => {
         )}
 
         {/* Create User Button */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
           <div className="text-sm text-gray-600">
             Total Users: <span className="font-semibold">{users.length}</span>
           </div>
           <button
             onClick={() => setShowCreateUser(true)}
-            className="btn-standard btn-success"
+            className="btn-standard btn-success w-full sm:w-auto"
             disabled={isLoading}
           >
             <UserPlus className="w-4 h-4" />
@@ -221,18 +221,18 @@ const AdminManagement = ({ isOpen, onClose }) => {
 
         {/* Create User Form */}
         {showCreateUser && (
-          <div className="standard-card card-gradient-green mb-6">
+          <div className="standard-card card-gradient-green mb-4 sm:mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Create New User</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800">Create New User</h3>
               <button
                 onClick={() => setShowCreateUser(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-1"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="grid-responsive cols-2">
+            <div className="grid-responsive cols-1 sm:cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Full Name
@@ -327,7 +327,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
             {createUserForm.password && (
               <div className="mt-4 text-xs space-y-1">
                 <p className="font-medium text-gray-700">Password Requirements:</p>
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   <span className={`${createUserForm.password.length >= 8 ? 'text-green-600' : 'text-red-600'}`}>
                     • At least 8 characters
                   </span>
@@ -350,7 +350,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button
                 onClick={handleCreateUser}
                 disabled={
@@ -361,7 +361,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
                   createUserForm.password !== createUserForm.confirmPassword ||
                   !validatePassword(createUserForm.password).isValid
                 }
-                className="btn-standard btn-success"
+                className="btn-standard btn-success w-full sm:w-auto"
               >
                 {isLoading ? (
                   <>
@@ -377,7 +377,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
               </button>
               <button
                 onClick={() => setShowCreateUser(false)}
-                className="btn-standard btn-secondary"
+                className="btn-standard btn-secondary w-full sm:w-auto"
                 disabled={isLoading}
               >
                 Cancel
@@ -387,8 +387,8 @@ const AdminManagement = ({ isOpen, onClose }) => {
         )}
 
         {/* Users List */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800">All Users</h3>
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800">All Users</h3>
           
           {isLoading && !users.length ? (
             <div className="text-center py-8">
@@ -401,20 +401,20 @@ const AdminManagement = ({ isOpen, onClose }) => {
               <p className="text-gray-600">No users found</p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {users.map((userData) => (
                 <div key={userData.id} className="standard-card">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-sm sm:text-lg">
                           {userData.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-800">{userData.name}</h4>
-                        <p className="text-sm text-gray-600">{userData.email}</p>
-                        <div className="flex items-center gap-2 mt-1">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-semibold text-gray-800 text-sm sm:text-base truncate">{userData.name}</h4>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">{userData.email}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(userData.role)}`}>
                             {getRoleDisplayName(userData.role)}
                           </span>
@@ -427,18 +427,18 @@ const AdminManagement = ({ isOpen, onClose }) => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="text-right text-xs text-gray-500">
+                    <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+                      <div className="text-xs text-gray-500">
                         <p>Created: {new Date(userData.created_at).toLocaleDateString()}</p>
                         {userData.updated_at !== userData.created_at && (
-                          <p>Updated: {new Date(userData.updated_at).toLocaleDateString()}</p>
+                          <p className="hidden sm:block">Updated: {new Date(userData.updated_at).toLocaleDateString()}</p>
                         )}
                       </div>
                       
                       {isSuperAdmin() && userData.id !== user.id && (
                         <button
                           onClick={() => handleDeleteUser(userData.id, userData.name)}
-                          className="btn-standard btn-danger btn-sm"
+                          className="btn-standard btn-danger btn-sm flex-shrink-0"
                           disabled={isLoading}
                           title="Delete User"
                         >
