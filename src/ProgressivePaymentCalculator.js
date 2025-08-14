@@ -814,7 +814,7 @@ const generateProgressivePaymentReport = () => {
 
     <div class="section no-break">
         <h2>🏗️ PROJECT SUMMARY</h2>
-        <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="info-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
             <div>
                 ${inputs.clientName ? `
                 <div class="info-row">
@@ -839,6 +839,17 @@ const generateProgressivePaymentReport = () => {
                     <span class="info-label">Loan Tenor:</span>
                     <span class="info-value">${inputs.tenure} years</span>
                 </div>
+            </div>
+            <div>
+                <div class="info-row">
+                    <span class="info-label">Interest Rate Structure:</span>
+                </div>
+                ${inputs.rates.map(rate => `
+                <div class="info-row" style="margin-left: 8px;">
+                    <span class="info-label" style="font-size: 8px;">${rate.year === 'thereafter' ? 'Year 6+' : `Year ${rate.year}`}:</span>
+                    <span class="info-value" style="font-size: 8px;">${rate.rate}%</span>
+                </div>
+                `).join('')}
             </div>
         </div>
     </div>
