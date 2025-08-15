@@ -463,11 +463,11 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     if (useCustomAmount) {
       loanAmount = parsedInputs.customLoanAmount;
     } else {
-      loanAmount = parsedInputs.purchasePrice * (loanPercentage / 100);
+      loanAmount = roundUpToNearestThousand(parsedInputs.purchasePrice * (loanPercentage / 100));
     }
     
-    const loanAmount75 = parsedInputs.purchasePrice * 0.75;
-    const loanAmount55 = parsedInputs.purchasePrice * 0.55;
+    const loanAmount75 = roundUpToNearestThousand(parsedInputs.purchasePrice * 0.75);
+    const loanAmount55 = roundUpToNearestThousand(parsedInputs.purchasePrice * 0.55);
     
     const monthlyInstallmentStressTest = calculatePMT(parsedInputs.stressTestRate, parsedInputs.loanTenor * 12, loanAmount);
     const monthlyInstallment = monthlyInstallmentStressTest;
@@ -511,10 +511,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const tdsrPass = tdsrDeficit >= 0;
     const hdbPass = hdbDeficit >= 0;
     
-    const cashShowTDSR = tdsrPass ? 0 : Math.abs(tdsrDeficit) / 0.00625;
-    const cashShowHDB = hdbPass ? 0 : Math.abs(hdbDeficit) / 0.00625;
-    const cashPledgeTDSR = tdsrPass ? 0 : Math.abs(tdsrDeficit) * 48;
-    const cashPledgeHDB = hdbPass ? 0 : Math.abs(hdbDeficit) * 48;
+    const cashShowTDSR = tdsrPass ? 0 : roundUpToNearestThousand(Math.abs(tdsrDeficit) / 0.00625);
+    const cashShowHDB = hdbPass ? 0 : roundUpToNearestThousand(Math.abs(hdbDeficit) / 0.00625);
+    const cashPledgeTDSR = tdsrPass ? 0 : roundUpToNearestThousand(Math.abs(tdsrDeficit) * 48);
+    const cashPledgeHDB = hdbPass ? 0 : roundUpToNearestThousand(Math.abs(hdbDeficit) * 48);
 
     // Calculate actual TDSR and MSR percentages
     const actualTDSRPercentage = combinedMonthlyIncome > 0 ? ((monthlyInstallment + totalCommitmentsTDSR) / combinedMonthlyIncome) * 100 : 0;
@@ -561,7 +561,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       downPayment,
       purchasePrice: parsedInputs.purchasePrice
     };
-  }, [inputs, calculateAverageAge, calculateMaxLoanTenor]);
+  }, [inputs, calculateAverageAge, calculateMaxLoanTenor, roundUpToNearestThousand]);
 
   // ✅ OPTIMIZED: Debounce inputs and memoize calculations
   useDebounce(inputs, 300);
