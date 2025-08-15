@@ -1260,9 +1260,9 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-legend-color.interest { background: #93c5fd !important; }
             .pdf-bar-text { font-size: 11px !important; font-weight: 500 !important; color: white !important; text-align: center !important; line-height: 1.2 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; white-space: nowrap !important; display: block !important; }
             
-            .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; }
+            .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; width: 100% !important; box-sizing: border-box !important; overflow: visible !important; }
             .pdf-disclaimer-title { font-weight: 700 !important; color: #374151 !important; margin-bottom: 6px !important; font-size: 12px !important; }
-            .pdf-disclaimer-text { font-size: 10px !important; color: #6b7280 !important; line-height: 1.5 !important; }
+            .pdf-disclaimer-text { font-size: 10px !important; color: #6b7280 !important; line-height: 1.5 !important; word-wrap: break-word !important; word-break: break-word !important; hyphens: auto !important; white-space: normal !important; overflow-wrap: break-word !important; width: 100% !important; }
             
             /* Enhanced Mobile PDF Support */
             @media print {
