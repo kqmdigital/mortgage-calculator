@@ -300,7 +300,7 @@ export const validators = {
   },
   
   role: (role) => {
-    const validRoles = ['super_admin', 'admin', 'editor'];
+    const validRoles = ['super_admin', 'admin'];
     return validRoles.includes(role);
   },
   

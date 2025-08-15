@@ -16,7 +16,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
   const [createUserForm, setCreateUserForm] = useState({
     name: '',
     email: '',
-    role: 'editor',
+    role: 'admin',
     password: '',
     confirmPassword: ''
   });
@@ -81,7 +81,7 @@ const AdminManagement = ({ isOpen, onClose }) => {
       setCreateUserForm({
         name: '',
         email: '',
-        role: 'editor',
+        role: 'admin',
         password: '',
         confirmPassword: ''
       });
@@ -125,8 +125,6 @@ const AdminManagement = ({ isOpen, onClose }) => {
         return 'bg-purple-100 text-purple-800';
       case 'admin':
         return 'bg-blue-100 text-blue-800';
-      case 'editor':
-        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -138,8 +136,6 @@ const AdminManagement = ({ isOpen, onClose }) => {
         return 'Super Admin';
       case 'admin':
         return 'Admin';
-      case 'editor':
-        return 'Editor';
       default:
         return 'Unknown';
     }
@@ -271,7 +267,6 @@ const AdminManagement = ({ isOpen, onClose }) => {
                   className="standard-input"
                   disabled={isLoading}
                 >
-                  <option value="editor">Editor</option>
                   <option value="admin">Admin</option>
                   {isSuperAdmin() && <option value="super_admin">Super Admin</option>}
                 </select>

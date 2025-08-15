@@ -123,12 +123,6 @@ export const getDefaultUsers = () => [
     name: 'Kenneth (Manager)',
     role: 'admin',
     password: 'Kenneth2025!Mgr' // Change this!
-  },
-  {
-    email: 'analyst@keyquestmortgage.com.sg',
-    name: 'Financial Analyst', 
-    role: 'editor',
-    password: 'Analyst2025!Fin' // Change this!
   }
 ];
 

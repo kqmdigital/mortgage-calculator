@@ -212,7 +212,7 @@ export class AuthService {
   // Create new user (admin only)
   static async createUser(userData, creatorRole) {
     try {
-      if (creatorRole !== 'super_admin' && creatorRole !== 'admin') {
+      if (creatorRole !== 'super_admin') {
         throw new Error('Insufficient permissions to create users');
       }
 
@@ -404,7 +404,7 @@ export class AuthService {
   // List all users (admin only)
   static async listUsers(currentUserRole) {
     try {
-      if (currentUserRole !== 'super_admin' && currentUserRole !== 'admin') {
+      if (currentUserRole !== 'super_admin') {
         throw new Error('Insufficient permissions to view users');
       }
 

@@ -448,9 +448,8 @@ export const AuthProvider = ({ children }) => {
     if (!state.user) return false;
     
     const roleHierarchy = {
-      'super_admin': 3,
-      'admin': 2,
-      'editor': 1
+      'super_admin': 2,
+      'admin': 1
     };
     
     const userLevel = roleHierarchy[state.user.role] || 0;
@@ -461,7 +460,7 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user can perform admin actions
   const canPerformAdminActions = useCallback(() => {
-    return hasRole('admin');
+    return hasRole('super_admin');
   }, [hasRole]);
 
   // Check if user is super admin
