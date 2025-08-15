@@ -113,6 +113,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return Math.floor(parseFloat(amount) / 100) * 100;
   }, []);
 
+  // Helper function to round up loan amount to nearest thousand
+  const roundUpToNearestThousand = useCallback((amount) => {
+    if (!amount || isNaN(amount)) return 0;
+    return Math.ceil(parseFloat(amount) / 1000) * 1000;
+  }, []);
+
   const calculateMaxLoanTenor = useCallback(() => {
     const averageAge = calculateAverageAge();
     
@@ -376,10 +382,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const maxTenure75 = calculateMaxTenureForLTV(75, propertyType, averageAge);
     const maxTenure80 = calculateMaxTenureForLTV(80, propertyType, averageAge);
     
-    // Calculate maximum loan amounts for each LTV scenario using their respective tenures
-    const maxLoanAmount55 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure55 * 12, maxMonthlyInstallment);
-    const maxLoanAmount75 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure75 * 12, maxMonthlyInstallment);
-    const maxLoanAmount80 = calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure80 * 12, maxMonthlyInstallment);
+    // Calculate maximum loan amounts for each LTV scenario using their respective tenures (rounded up to nearest thousand)
+    const maxLoanAmount55 = roundUpToNearestThousand(calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure55 * 12, maxMonthlyInstallment));
+    const maxLoanAmount75 = roundUpToNearestThousand(calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure75 * 12, maxMonthlyInstallment));
+    const maxLoanAmount80 = roundUpToNearestThousand(calculateLoanFromPMT(parsedInputs.stressTestRate, maxTenure80 * 12, maxMonthlyInstallment));
 
     // Calculate maximum property prices for different LTV ratios (rounded down to nearest hundred)
     const maxPropertyPrice55 = roundDownToNearestHundred(maxLoanAmount55 / 0.55);  // 55% LTV with longer tenure
@@ -409,7 +415,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       hasValidData: true,
       maxTenureUsed: primaryTenure
     };
-  }, [inputs, calculateAverageAge, calculateMaxTenureForLTV, roundDownToNearestHundred]);
+  }, [inputs, calculateAverageAge, calculateMaxTenureForLTV, roundDownToNearestHundred, roundUpToNearestThousand]);
 
   // Helper function to calculate loan amount from PMT (reverse PMT calculation)
   const calculateLoanFromPMT = (rate, periods, monthlyPayment) => {
@@ -1380,9 +1386,9 @@ const htmlContent = `
                 </tr>
                 <tr>
                     <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice75 * 0.75))}</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount75)}</td>
                     <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(Math.round(memoizedAffordability.maxPropertyPrice55 * 0.55))}</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount55)}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Tenure:</td>
@@ -2555,7 +2561,7 @@ const htmlContent = `
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
                           <div className="result-value text-blue-600">{formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</div>
                           <div className="result-subtitle">
-                            Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75 * 0.75))}<br />
+                            Loan Amount: {formatCurrency(memoizedAffordability.maxLoanAmount75)}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure75)} years
                           </div>
                           {/* Use This Button */}
@@ -2586,7 +2592,7 @@ const htmlContent = `
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
                           <div className="result-value text-orange-600">{formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</div>
                           <div className="result-subtitle">
-                            Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55 * 0.55))}<br />
+                            Loan Amount: {formatCurrency(memoizedAffordability.maxLoanAmount55)}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure55)} years
                           </div>
                           {/* Use This Button */}
