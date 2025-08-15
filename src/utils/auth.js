@@ -58,10 +58,11 @@ export const verifySessionToken = async (token) => {
     // Parse payload
     const payload = JSON.parse(atob(encodedPayload));
     
-    // Check if token is expired
-    if (Date.now() > payload.expires) {
-      return null;
-    }
+    // DISABLED: Token expiration check removed to prevent auto-logout
+    // Keep the 24-hour expiration in token but don't enforce it
+    // if (Date.now() > payload.expires) {
+    //   return null;
+    // }
 
     // Additional validation
     if (!payload.id || !payload.email || !payload.role) {
@@ -147,19 +148,10 @@ export const clearUserSession = () => {
   sessionStorage.removeItem('last_activity');
 };
 
+// DISABLED: Session timeout check removed to prevent auto-logout
 export const checkSessionTimeout = () => {
-  const lastActivity = sessionStorage.getItem('last_activity');
-  if (!lastActivity) return false;
-  
-  const timeoutDuration = 60 * 60 * 1000; // 1 hour
-  const now = Date.now();
-  
-  if (now - parseInt(lastActivity) > timeoutDuration) {
-    clearUserSession();
-    return true; // Session expired
-  }
-  
-  // Update last activity
-  sessionStorage.setItem('last_activity', now.toString());
-  return false;
+  // Always return false (no timeout) to disable auto-logout
+  // Only update activity for tracking purposes
+  sessionStorage.setItem('last_activity', Date.now().toString());
+  return false; // Never expire
 };

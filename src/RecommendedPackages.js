@@ -973,7 +973,7 @@ const RecommendedPackages = ({ currentUser }) => {
             return formatDetailedRateDisplay(pkg, 'thereafter');
           }
           return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
-            <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">-</div>
+            <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 13px;">-</div>
           </div>`;
         }
 
@@ -981,12 +981,12 @@ const RecommendedPackages = ({ currentUser }) => {
           const rate = calculateInterestRate(pkg, year);
           if (!rate || isNaN(rate)) {
             return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
-              <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">N/A</div>
+              <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 13px;">N/A</div>
             </div>`;
           }
           return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
-            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${rate.toFixed(2)}%</div>
-            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">FIXED</div>
+            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 13px;">${rate.toFixed(2)}%</div>
+            <div style="font-size: 9px; color: #6b7280; line-height: 1.0; margin: 0;">FIXED</div>
           </div>`;
         } else {
           // Use actual database rate instead of hardcoded value
@@ -997,14 +997,14 @@ const RecommendedPackages = ({ currentUser }) => {
           
           if (!totalRate || isNaN(totalRate)) {
             return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
-              <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 11px;">N/A</div>
+              <div style="font-weight: 600; color: #6b7280; margin: 0; line-height: 1.0; font-size: 13px;">N/A</div>
             </div>`;
           }
           
           const operatorSymbol = operator === '+' ? '+' : '-';
           return `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px;">
-            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 11px;">${totalRate.toFixed(2)}%</div>
-            <div style="font-size: 7px; color: #6b7280; line-height: 1.0; margin: 0;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</div>
+            <div style="font-weight: 600; color: #1d4ed8; margin: 0; line-height: 1.0; font-size: 13px;">${totalRate.toFixed(2)}%</div>
+            <div style="font-size: 9px; color: #6b7280; line-height: 1.0; margin: 0;">${rateType}(${referenceRateValue.toFixed(2)}%) ${operatorSymbol} ${spreadValue.toFixed(2)}%</div>
           </div>`;
         }
       };
@@ -1088,7 +1088,7 @@ const RecommendedPackages = ({ currentUser }) => {
             
             .pdf-header { display: flex !important; justify-content: space-between !important; align-items: center !important; margin: 0 0 15px 0 !important; padding: 5px 0 10px 0 !important; border-bottom: 2px solid #264A82 !important; height: 85px !important; overflow: visible !important; }
             .pdf-header .logo-section { height: 85px !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; overflow: visible !important; flex-shrink: 0 !important; margin-left: -10px !important; }
-            .pdf-header .logo-section img { height: 200px !important; width: auto !important; object-fit: contain !important; margin: 0 !important; padding: 0 !important; border: 0 !important; vertical-align: middle !important; display: block !important; max-width: 280px !important; }
+            .pdf-header .logo-section img { height: 250px !important; width: auto !important; object-fit: contain !important; margin: 0 !important; padding: 0 !important; border: 0 !important; vertical-align: middle !important; display: block !important; max-width: 350px !important; }
             .pdf-header .title-section { text-align: right !important; flex: 1 !important; margin-left: 30px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: flex-end !important; }
             .pdf-header h1 { margin: 0 !important; font-size: 24px !important; font-weight: 800 !important; color: #1f2937 !important; letter-spacing: -0.5px !important; line-height: 1.2 !important; }
             .pdf-header .client-name { font-size: 16px !important; color: #6b7280 !important; margin: 2px 0 !important; font-weight: 500 !important; line-height: 1.2 !important; }
@@ -1111,23 +1111,23 @@ const RecommendedPackages = ({ currentUser }) => {
             
             .pdf-comparison-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; }
             .pdf-comparison-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
-            .pdf-comparison-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-comparison-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 14px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-comparison-table th:first-child { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
             .pdf-comparison-table th:not(:first-child) { width: 25% !important; }
             .pdf-comparison-table th.recommended { background: #1e40af !important; position: relative !important; }
             .pdf-comparison-table th.recommended::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             
             .pdf-comparison-table tbody tr:nth-child(even) { background: #f8fafc !important; }
-            .pdf-comparison-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
+            .pdf-comparison-table td { padding: 6px 4px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 13px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; max-width: 0 !important; }
             .pdf-comparison-table td:first-child { text-align: left !important; font-weight: 600 !important; color: #374151 !important; padding-left: 12px !important; white-space: nowrap !important; }
             .pdf-comparison-table td.recommended { background: rgba(38, 74, 130, 0.15) !important; font-weight: 600 !important; color: #264A82 !important; }
             .pdf-comparison-table td.rate-value { font-weight: 600 !important; color: #1d4ed8 !important; text-align: center !important; vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; position: relative !important; }
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
-            .pdf-comparison-table td.features-cell { text-align: center !important; vertical-align: middle !important; font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
-            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: middle !important; max-height: none !important; text-align: left !important; }
-            .pdf-comparison-table td.savings-cell { font-size: 11px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
-            .pdf-comparison-table td.savings-cell small { font-size: 8px !important; color: #6b7280 !important; }
+            .pdf-comparison-table td.features-cell { text-align: center !important; vertical-align: middle !important; font-size: 12px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
+            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: middle !important; max-height: none !important; text-align: left !important; }
+            .pdf-comparison-table td.savings-cell { font-size: 13px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
+            .pdf-comparison-table td.savings-cell small { font-size: 10px !important; color: #6b7280 !important; }
             
             /* Ensure consistent spacing for ALL table rows - uniform height */
             .pdf-comparison-table tbody tr { height: 35px !important; }
@@ -1160,13 +1160,13 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-breakdown-content { }
             .pdf-breakdown-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; margin-bottom: 15px !important; }
             .pdf-breakdown-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
-            .pdf-breakdown-table th { padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-breakdown-table th { padding: 12px 8px !important; text-align: center !important; font-weight: 600 !important; font-size: 14px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-breakdown-table th:first-child { background: #1e3a6f !important; text-align: center !important; }
             .pdf-breakdown-table th small { font-size: 10px !important; font-weight: 400 !important; color: #e2e8f0 !important; display: block !important; margin-top: 2px !important; }
             .pdf-breakdown-table tbody tr:nth-child(even) { background: #f8fafc !important; }
-            .pdf-breakdown-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-breakdown-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 13px !important; line-height: 1.3 !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-breakdown-table td:first-child { font-weight: 600 !important; color: #374151 !important; }
-            .pdf-breakdown-table tbody tr:last-child td { border-top: 2px solid #264A82 !important; background: #f1f5f9 !important; font-weight: 700 !important; color: #264A82 !important; font-size: 12px !important; }
+            .pdf-breakdown-table tbody tr:last-child td { border-top: 2px solid #264A82 !important; background: #f1f5f9 !important; font-weight: 700 !important; color: #264A82 !important; font-size: 14px !important; }
             .pdf-breakdown-note { font-size: 10px !important; color: #6b7280 !important; line-height: 1.4 !important; font-style: italic !important; text-align: center !important; margin-top: 10px !important; }
             ` : ''}
             
@@ -1175,17 +1175,17 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-section-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
             
             .pdf-monthly-installment-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; }
-            .pdf-monthly-installment-table th { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 12px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
+            .pdf-monthly-installment-table th { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 14px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-monthly-installment-table .row-header { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
             .pdf-monthly-installment-table .recommended-package-header { background: #1e40af !important; position: relative !important; width: 25% !important; }
             .pdf-monthly-installment-table .recommended-package-header::after { content: 'RECOMMENDED' !important; position: absolute !important; bottom: -8px !important; left: 50% !important; transform: translateX(-50%) !important; background: #3b82f6 !important; color: white !important; font-size: 6px !important; padding: 2px 6px !important; border-radius: 3px !important; font-weight: 700 !important; white-space: nowrap !important; z-index: 10 !important; }
             .pdf-monthly-installment-table .package-header { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; width: 25% !important; }
             
-            .pdf-monthly-installment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 11px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
+            .pdf-monthly-installment-table td { padding: 8px 6px !important; text-align: center !important; border-bottom: 1px solid #e2e8f0 !important; font-size: 13px !important; line-height: 1.4 !important; word-wrap: break-word !important; vertical-align: top !important; max-width: 0 !important; }
             .pdf-monthly-installment-table .year-label { background: #f3f4f6 !important; font-weight: 600 !important; color: #374151 !important; text-align: left !important; padding-left: 8px !important; }
-            .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: normal !important; font-size: 9px !important; }
+            .pdf-monthly-installment-table .detail-label { color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding-left: 16px !important; font-style: normal !important; font-size: 11px !important; }
             .pdf-monthly-installment-table .package-value { color: #1d4ed8 !important; font-weight: 600 !important; }
-            .pdf-monthly-installment-table .package-detail { color: #6b7280 !important; font-size: 11px !important; }
+            .pdf-monthly-installment-table .package-detail { color: #6b7280 !important; font-size: 13px !important; }
             /* All detail rows have white background */
             .pdf-monthly-installment-table tbody tr.detail-row { background: white !important; }
             
@@ -1204,14 +1204,14 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-monthly-installment-table td:not(:first-child) { width: 25% !important; }
             
             /* Reduce font size for Total Principal and Total Interest rows for better hierarchy */
-            .pdf-monthly-installment-table .detail-row td { font-size: 9px !important; }
-            .pdf-monthly-installment-table .detail-row .detail-label { font-size: 8px !important; }
+            .pdf-monthly-installment-table .detail-row td { font-size: 11px !important; }
+            .pdf-monthly-installment-table .detail-row .detail-label { font-size: 10px !important; }
             
             /* Make Year X Rate and Total Saving same size as Monthly Installment */
-            .pdf-monthly-installment-table .rate-info-row td { font-size: 11px !important; }
-            .pdf-monthly-installment-table .rate-info-row .detail-label { font-size: 11px !important; }
-            .pdf-monthly-installment-table .saving-row td { font-size: 11px !important; }
-            .pdf-monthly-installment-table .saving-row .detail-label { font-size: 11px !important; }
+            .pdf-monthly-installment-table .rate-info-row td { font-size: 13px !important; }
+            .pdf-monthly-installment-table .rate-info-row .detail-label { font-size: 13px !important; }
+            .pdf-monthly-installment-table .saving-row td { font-size: 13px !important; }
+            .pdf-monthly-installment-table .saving-row .detail-label { font-size: 13px !important; }
             
             /* Visual separation between year sections */
             .pdf-monthly-installment-table .rate-info-row { 

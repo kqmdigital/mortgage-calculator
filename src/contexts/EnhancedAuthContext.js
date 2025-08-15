@@ -154,21 +154,21 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // Periodic session validation
-  useEffect(() => {
-    if (state.isAuthenticated) {
-      const interval = setInterval(() => {
-        if (!validateSession()) {
-          handleSessionExpired();
-        } else {
-          dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
-        }
-      }, 60000); // Check every minute
+  // Periodic session validation - DISABLED to prevent auto-logout
+  // useEffect(() => {
+  //   if (state.isAuthenticated) {
+  //     const interval = setInterval(() => {
+  //       if (!validateSession()) {
+  //         handleSessionExpired();
+  //       } else {
+  //         dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
+  //       }
+  //     }, 60000); // Check every minute
 
-      return () => clearInterval(interval);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isAuthenticated]);
+  //     return () => clearInterval(interval);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [state.isAuthenticated]);
 
   // Security checks on mount
   useEffect(() => {

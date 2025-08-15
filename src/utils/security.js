@@ -138,24 +138,19 @@ const generatePasswordFeedback = (checks) => {
   return feedback;
 };
 
-// Session security
+// Session security - MODIFIED to disable auto-logout
 export const validateSession = () => {
   const token = localStorage.getItem('auth_token');
-  const lastActivity = sessionStorage.getItem('last_activity');
   
-  if (!token || !lastActivity) {
+  if (!token) {
     clearUserSession();
     return false;
   }
   
-  // Check for session timeout (1 hour)
-  const timeoutDuration = 60 * 60 * 1000;
-  if (Date.now() - parseInt(lastActivity) > timeoutDuration) {
-    clearUserSession();
-    return false;
-  }
+  // DISABLED: Inactivity timeout check removed to prevent auto-logout
+  // Only check if token exists, no time-based validation
   
-  // Update last activity
+  // Update last activity for tracking purposes only
   sessionStorage.setItem('last_activity', Date.now().toString());
   return true;
 };
