@@ -1245,20 +1245,20 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-chart-section { margin: 20px 0 !important; page-break-inside: avoid !important; }
             .pdf-bar-chart { display: flex !important; justify-content: space-around !important; align-items: flex-end !important; height: 280px !important; padding: 20px !important; background: #f8fafc !important; border-radius: 12px !important; margin: 15px 0 !important; border: 1px solid #e2e8f0 !important; }
             .pdf-bar-item { display: flex !important; flex-direction: column !important; align-items: center !important; position: relative !important; margin: 0 10px !important; }
-            .pdf-bar-rate { font-size: 12px !important; font-weight: 600 !important; color: #264A82 !important; margin-bottom: 8px !important; text-align: center !important; }
+            .pdf-bar-rate { font-size: 14px !important; font-weight: 600 !important; color: #264A82 !important; margin-bottom: 8px !important; text-align: center !important; }
             .pdf-bar-container { height: 200px !important; display: flex !important; align-items: flex-end !important; margin-bottom: 8px !important; }
             .pdf-bar-stack { width: 80px !important; display: flex !important; flex-direction: column-reverse !important; border-radius: 6px 6px 0 0 !important; overflow: hidden !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important; }
             .pdf-bar-stack.new-package { border: 2px solid #264A82 !important; }
             .pdf-bar-segment.principal { background: #264A82 !important; width: 100% !important; min-height: 40px !important; display: flex !important; align-items: center !important; justify-content: center !important; position: relative !important; }
             .pdf-bar-segment.interest { background: #93c5fd !important; width: 100% !important; min-height: 30px !important; display: flex !important; align-items: center !important; justify-content: center !important; position: relative !important; }
-            .pdf-bar-label { font-size: 11px !important; font-weight: 600 !important; color: #374151 !important; text-align: center !important; margin-bottom: 4px !important; white-space: nowrap !important; }
-            .pdf-bar-amount { font-size: 12px !important; font-weight: 500 !important; color: #264A82 !important; text-align: center !important; }
+            .pdf-bar-label { font-size: 13px !important; font-weight: 600 !important; color: #374151 !important; text-align: center !important; margin-bottom: 4px !important; white-space: nowrap !important; }
+            .pdf-bar-amount { font-size: 14px !important; font-weight: 500 !important; color: #264A82 !important; text-align: center !important; }
             .pdf-chart-legend { display: flex !important; justify-content: center !important; gap: 20px !important; margin-top: 15px !important; }
-            .pdf-legend-item { display: flex !important; align-items: center !important; gap: 6px !important; font-size: 11px !important; color: #374151 !important; }
+            .pdf-legend-item { display: flex !important; align-items: center !important; gap: 6px !important; font-size: 13px !important; color: #374151 !important; }
             .pdf-legend-color { width: 16px !important; height: 16px !important; border-radius: 3px !important; }
             .pdf-legend-color.principal { background: #264A82 !important; }
             .pdf-legend-color.interest { background: #93c5fd !important; }
-            .pdf-bar-text { font-size: 9px !important; font-weight: 500 !important; color: white !important; text-align: center !important; line-height: 1.2 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; white-space: nowrap !important; display: block !important; }
+            .pdf-bar-text { font-size: 11px !important; font-weight: 500 !important; color: white !important; text-align: center !important; line-height: 1.2 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; white-space: nowrap !important; display: block !important; }
             
             .pdf-disclaimer { background: #f9fafb !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 12px !important; margin-top: 20px !important; page-break-inside: avoid !important; }
             .pdf-disclaimer-title { font-weight: 700 !important; color: #374151 !important; margin-bottom: 6px !important; font-size: 12px !important; }
