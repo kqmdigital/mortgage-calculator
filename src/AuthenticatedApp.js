@@ -502,8 +502,8 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const tdsr55Available = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR;
     const msr30Available = combinedMonthlyIncome * 0.3;
     
-    const requiredIncomeTDSR = roundDownToNearestHundred((monthlyInstallment + totalCommitmentsTDSR) / 0.55);
-    const requiredIncomeHDB = roundDownToNearestHundred((monthlyInstallment + totalCommitments) / 0.3);
+    const requiredIncomeTDSR = roundDownToNearestHundred((monthlyInstallment + totalCommitmentsTDSR) / 0.55 - showFundIncomeA - pledgeIncomeB);
+    const requiredIncomeHDB = roundDownToNearestHundred((monthlyInstallment + totalCommitments) / 0.3 - showFundIncomeA - pledgeIncomeB);
     
     const tdsrDeficit = combinedMonthlyIncome - requiredIncomeTDSR;
     const hdbDeficit = combinedMonthlyIncome - requiredIncomeHDB;
