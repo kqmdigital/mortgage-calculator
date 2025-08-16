@@ -738,22 +738,28 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
   const handleAffordabilityCardClick = (ltvPercentage) => {
     if (!memoizedAffordability?.hasValidData) return;
 
-    let maxPrice;
+    let maxPrice, maxTenure;
     
     if (ltvPercentage === 75) {
-      maxPrice = roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75);
+      maxPrice = memoizedAffordability.maxPropertyPrice75;
+      maxTenure = memoizedAffordability.maxTenure75;
     } else if (ltvPercentage === 55) {
-      maxPrice = roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55);
+      maxPrice = memoizedAffordability.maxPropertyPrice55;
+      maxTenure = memoizedAffordability.maxTenure55;
     }
 
-    // Update the inputs to populate purchase price and loan settings
+    // Update the inputs to populate purchase price, loan settings, and tenure
     setInputs(prev => ({
       ...prev,
       purchasePrice: maxPrice.toString(),
       loanPercentage: ltvPercentage,
+      loanTenor: maxTenure.toString(),
       useCustomAmount: false, // Reset to percentage-based loan
       customLoanAmount: '' // Clear custom amount
     }));
+    
+    // Mark loan tenor as manually edited to prevent auto-overwrite
+    setLoanTenorManuallyEdited(true);
   };
 
   const generatePDFReport = () => {
