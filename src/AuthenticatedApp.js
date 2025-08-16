@@ -327,9 +327,9 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const totalPropertyLoans = parsedInputs.propertyLoanA + parsedInputs.propertyLoanB;
     const totalCommitmentsTDSR = totalCarPersonalLoans + totalPropertyLoans;
 
-    // Calculate maximum monthly installment based on income limits
-    const maxMonthlyTDSR = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR;
-    const maxMonthlyMSR = (combinedMonthlyIncome * 0.30) - totalPropertyLoans; // MSR only considers property loans
+    // Calculate maximum monthly installment based on income limits (with precision buffer)
+    const maxMonthlyTDSR = (combinedMonthlyIncome * 0.55) - totalCommitmentsTDSR - 0.50; // 50 cent buffer for floating-point precision
+    const maxMonthlyMSR = (combinedMonthlyIncome * 0.30) - totalPropertyLoans - 0.50; // 50 cent buffer for floating-point precision
 
     // Use the more restrictive limit
     let maxMonthlyInstallment;
