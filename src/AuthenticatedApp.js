@@ -1386,9 +1386,9 @@ const htmlContent = `
                 </tr>
                 <tr>
                     <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount75)}</td>
+                    <td class="info-value" style="color: #EA580C; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxLoanAmount75))}</td>
                     <td class="info-label">Max Loan Amount:</td>
-                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(memoizedAffordability.maxLoanAmount55)}</td>
+                    <td class="info-value" style="color: #2563EB; font-weight: bold;">${formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxLoanAmount55))}</td>
                 </tr>
                 <tr>
                     <td class="info-label">Tenure:</td>
@@ -2582,7 +2582,7 @@ const htmlContent = `
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
                           <div className="result-value text-blue-600">{formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice75))}</div>
                           <div className="result-subtitle">
-                            Loan Amount: {formatCurrency(memoizedAffordability.maxLoanAmount75)}<br />
+                            Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxLoanAmount75))}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure75)} years
                           </div>
                           {/* Use This Button */}
@@ -2613,7 +2613,7 @@ const htmlContent = `
                           <div className="text-xs text-gray-500 mb-1">Maximum Purchase Price</div>
                           <div className="result-value text-orange-600">{formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxPropertyPrice55))}</div>
                           <div className="result-subtitle">
-                            Loan Amount: {formatCurrency(memoizedAffordability.maxLoanAmount55)}<br />
+                            Loan Amount: {formatCurrency(roundDownToNearestHundred(memoizedAffordability.maxLoanAmount55))}<br />
                             Loan Tenure: {roundDownTenor(memoizedAffordability.maxTenure55)} years
                           </div>
                           {/* Use This Button */}
