@@ -2408,83 +2408,104 @@ const htmlContent = `
               </div>
             </div>
             
-            <div className="grid-responsive cols-2">
+            <div className="space-y-6">
+              {/* Primary Applicant Section */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (A) (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.carLoanA)}
-                    onChange={(e) => handleInputChange('carLoanA', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="800.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-300 pb-2">
+                  Primary Applicant
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (SGD)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatCurrencyInput(inputs.carLoanA)}
+                        onChange={(e) => handleInputChange('carLoanA', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="800.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (SGD)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatCurrencyInput(inputs.personalLoanA)}
+                        onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="500.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (SGD)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatCurrencyInput(inputs.propertyLoanA)}
+                        onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="2,000.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Co-Applicant Section */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (B) (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.carLoanB)}
-                    onChange={(e) => handleInputChange('carLoanB', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="600.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (A) (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.personalLoanA)}
-                    onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="500.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (B) (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.personalLoanB)}
-                    onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="300.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (A) (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.propertyLoanA)}
-                    onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="2,000.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (B) (SGD)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.propertyLoanB)}
-                    onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
-                    className="standard-input currency-input"
-                    placeholder="1,500.00"
-                  />
-                  <span className="currency-symbol">SGD</span>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-300 pb-2">
+                  Co-Applicant (Optional)
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (SGD)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatCurrencyInput(inputs.carLoanB)}
+                        onChange={(e) => handleInputChange('carLoanB', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="600.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (SGD)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatCurrencyInput(inputs.personalLoanB)}
+                        onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="300.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (SGD)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formatCurrencyInput(inputs.propertyLoanB)}
+                        onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
+                        className="standard-input currency-input"
+                        placeholder="1,500.00"
+                      />
+                      <span className="currency-symbol">SGD</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
