@@ -28,6 +28,27 @@ const parseNumberFromFormatted = (formattedValue) => {
   return formattedValue.toString().replace(/,/g, '');
 };
 
+// Bank logo mapping
+const getBankLogo = (bankName) => {
+  const logoUrls = {
+    'BOC': 'https://ik.imagekit.io/hst9jooux/BOC%20LOGO.png?updatedAt=1755223530214',
+    'SF': 'https://ik.imagekit.io/hst9jooux/SF%20LOGO.png?updatedAt=1755223404411',
+    'UOB': 'https://ik.imagekit.io/hst9jooux/UOB%20LOGO.png?updatedAt=1755223404088',
+    'DBS': 'https://ik.imagekit.io/hst9jooux/DBS%20LOGO.png?updatedAt=1755223401005',
+    'MBB': 'https://ik.imagekit.io/hst9jooux/MBB%20LOGO.png?updatedAt=1755223400971',
+    'SBI': 'https://ik.imagekit.io/hst9jooux/SBI%20LOGO.png?updatedAt=1755223400990',
+    'CITIBANK': 'https://ik.imagekit.io/hst9jooux/Screenshot%202025-08-15%20100042.png?updatedAt=1755223400987',
+    'RHB': 'https://ik.imagekit.io/hst9jooux/RHB%20LOGO.png?updatedAt=1755223400955',
+    'SCB': 'https://ik.imagekit.io/hst9jooux/SCB%20LOGO.png?updatedAt=1755223400950',
+    'OCBC': 'https://ik.imagekit.io/hst9jooux/OCBC%20LOGO.png?updatedAt=1755223400911',
+    'HLF': 'https://ik.imagekit.io/hst9jooux/HLF%20LOGO.png?updatedAt=1755223400633',
+    'CIMB': 'https://ik.imagekit.io/hst9jooux/CIMB%20LOGO.png?updatedAt=1755223400618',
+    'HSBC': 'https://ik.imagekit.io/hst9jooux/HSBC%20LOGO.png?updatedAt=1755223949272',
+    'SIF': 'https://ik.imagekit.io/hst9jooux/SIF%20LOGO.png?updatedAt=1755224044152'
+  };
+  return logoUrls[bankName] || null;
+};
+
 const RecommendedPackages = ({ currentUser }) => {
   
   // State management for all functionality
@@ -2064,8 +2085,26 @@ const RecommendedPackages = ({ currentUser }) => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 space-y-4 lg:space-y-0">
             {/* Bank Info */}
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg sm:text-xl flex-shrink-0">
-                {rank}
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 relative">
+                {!hideBankNames && getBankLogo(pkg.bank_name) ? (
+                  <img 
+                    src={getBankLogo(pkg.bank_name)} 
+                    alt={`${pkg.bank_name} logo`}
+                    className="w-full h-full object-contain rounded-lg"
+                    onError={(e) => {
+                      // Fallback to numbered circle if logo fails to load
+                      e.target.style.display = 'none';
+                      e.target.nextElementSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className={`w-full h-full bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg sm:text-xl ${
+                    !hideBankNames && getBankLogo(pkg.bank_name) ? 'hidden' : 'flex'
+                  }`}
+                >
+                  {rank}
+                </div>
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
