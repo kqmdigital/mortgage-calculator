@@ -218,8 +218,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         return 1800 + (purchasePrice - 180000) * 0.02;
       } else if (purchasePrice <= 1000000) {
         return 1800 + 3600 + (purchasePrice - 360000) * 0.03;
-      } else {
+      } else if (purchasePrice <= 1500000) {
         return 1800 + 3600 + 19200 + (purchasePrice - 1000000) * 0.04;
+      } else if (purchasePrice <= 3000000) {
+        return 1800 + 3600 + 19200 + 20000 + (purchasePrice - 1500000) * 0.05;
+      } else {
+        return 1800 + 3600 + 19200 + 20000 + 75000 + (purchasePrice - 3000000) * 0.06;
       }
     } else {
       // Commercial/Industrial properties
@@ -227,8 +231,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
         return purchasePrice * 0.01;
       } else if (purchasePrice <= 360000) {
         return 1800 + (purchasePrice - 180000) * 0.02;
-      } else {
+      } else if (purchasePrice <= 1000000) {
         return 1800 + 3600 + (purchasePrice - 360000) * 0.03;
+      } else if (purchasePrice <= 1500000) {
+        return 1800 + 3600 + 19200 + (purchasePrice - 1000000) * 0.04;
+      } else {
+        return 1800 + 3600 + 19200 + 20000 + (purchasePrice - 1500000) * 0.05;
       }
     }
   };
