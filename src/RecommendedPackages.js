@@ -31,7 +31,7 @@ const parseNumberFromFormatted = (formattedValue) => {
 // Bank logo mapping
 const getBankLogo = (bankName) => {
   const logoUrls = {
-    'BOC': 'https://ik.imagekit.io/hst9jooux/BOC%20LOGO.png?updatedAt=1755223530214',
+    'BOC': 'https://ik.imagekit.io/hst9jooux/Screenshot%202025-09-20%20093121.png?updatedAt=1758331902323',
     'SF': 'https://ik.imagekit.io/hst9jooux/SF%20LOGO.png?updatedAt=1755223404411',
     'UOB': 'https://ik.imagekit.io/hst9jooux/UOB%20LOGO.png?updatedAt=1755223404088',
     'DBS': 'https://ik.imagekit.io/hst9jooux/DBS%20LOGO.png?updatedAt=1755223401005',
@@ -99,7 +99,8 @@ const RecommendedPackages = ({ currentUser }) => {
     { value: 'free_package_conversion_24m', label: 'Free Conversion (24M)' },
     { value: 'valuation_subsidy', label: 'Valuation Subsidy' },
     { value: 'partial_repayment', label: 'Partial Repayment' },
-    { value: 'waiver_due_to_sales', label: 'Waiver Due to Sales' }
+    { value: 'waiver_due_to_sales', label: 'Waiver Due to Sales' },
+    { value: 'cancellation_fee', label: 'Cancellation Fee' }
   ];
 
   // Load only rate types on component mount (lightweight)
@@ -1558,15 +1559,18 @@ const RecommendedPackages = ({ currentUser }) => {
                           '<div style="color: #2563eb; margin-bottom: 3px;">✓ Valuation Subsidy</div>' : ''}
                         ${pkg.partial_repayment === 'true' || pkg.partial_repayment === true ? 
                           '<div style="color: #2563eb; margin-bottom: 3px;">✓ Partial Repayment</div>' : ''}
-                        ${pkg.waiver_due_to_sales === 'true' || pkg.waiver_due_to_sales === true ? 
+                        ${pkg.waiver_due_to_sales === 'true' || pkg.waiver_due_to_sales === true ?
                           '<div style="color: #2563eb; margin-bottom: 3px;">✓ Waiver Due to Sales</div>' : ''}
-                        ${(!pkg.legal_fee_subsidy || pkg.legal_fee_subsidy === 'false') && 
-                          (!pkg.cash_rebate || pkg.cash_rebate === 'false') && 
+                        ${pkg.cancellation_fee === 'true' || pkg.cancellation_fee === true ?
+                          '<div style="color: #2563eb; margin-bottom: 3px;">✓ Cancellation Fee</div>' : ''}
+                        ${(!pkg.legal_fee_subsidy || pkg.legal_fee_subsidy === 'false') &&
+                          (!pkg.cash_rebate || pkg.cash_rebate === 'false') &&
                           (!pkg.free_package_conversion_12m || pkg.free_package_conversion_12m === 'false') &&
                           (!pkg.free_package_conversion_24m || pkg.free_package_conversion_24m === 'false') &&
                           (!pkg.valuation_subsidy || pkg.valuation_subsidy === 'false') &&
                           (!pkg.partial_repayment || pkg.partial_repayment === 'false') &&
-                          (!pkg.waiver_due_to_sales || pkg.waiver_due_to_sales === 'false') ? 
+                          (!pkg.waiver_due_to_sales || pkg.waiver_due_to_sales === 'false') &&
+                          (!pkg.cancellation_fee || pkg.cancellation_fee === 'false') ?
                             '<div style="color: #6b7280;">Not Specified</div>' : ''}
                       </td>
                     `).join('')}
