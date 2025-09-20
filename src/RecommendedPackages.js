@@ -62,7 +62,8 @@ const RecommendedPackages = ({ currentUser }) => {
     existingInterestRate: '',
     existingBank: '',
     rateType: 'Fixed',
-    lockPeriod: ''
+    lockPeriod: '',
+    loanTypeFilter: ''
   });
   
   const [selectedBanks, setSelectedBanks] = useState([]);
@@ -267,7 +268,29 @@ const RecommendedPackages = ({ currentUser }) => {
       let filtered = [...allPackages];
 
       // Apply loan type filter
-      filtered = filtered.filter(pkg => pkg.loan_type === selectedLoanType);
+      if (selectedLoanType === 'Commercial/Industrial') {
+        // For Commercial/Industrial, use the loanTypeFilter (New Home Loan or Refinancing Home Loan)
+        if (searchForm.loanTypeFilter) {
+          filtered = filtered.filter(pkg => pkg.loan_type === searchForm.loanTypeFilter);
+          logger.info(`Commercial/Industrial with ${searchForm.loanTypeFilter} filter: ${allPackages.length} → ${filtered.length} packages`);
+        } else {
+          // If no specific loan type filter, include both
+          filtered = filtered.filter(pkg =>
+            pkg.loan_type === 'New Home Loan' ||
+            pkg.loan_type === 'Refinancing Home Loan'
+          );
+          logger.info(`Commercial/Industrial (all types) filter: ${allPackages.length} → ${filtered.length} packages`);
+        }
+      } else {
+        filtered = filtered.filter(pkg => pkg.loan_type === selectedLoanType);
+        logger.info(`${selectedLoanType} filter: ${allPackages.length} → ${filtered.length} packages`);
+      }
+
+      // Debug: Show unique loan types in database
+      if (filtered.length === 0 && selectedLoanType === 'Commercial/Industrial') {
+        const uniqueLoanTypes = [...new Set(allPackages.map(pkg => pkg.loan_type))];
+        logger.warn('No Commercial/Industrial packages found. Available loan types:', uniqueLoanTypes);
+      }
 
       // Apply form filters
       if (searchForm.propertyType) {
@@ -549,7 +572,8 @@ const RecommendedPackages = ({ currentUser }) => {
         existingInterestRate: '',
         existingBank: '',
         rateType: 'Fixed',
-        lockPeriod: ''
+        lockPeriod: '',
+        loanTypeFilter: 'New Home Loan' // Default to New Home Loan for Commercial/Industrial
       });
     } else {
       // New Home Loan and Refinancing Home Loan defaults
@@ -562,7 +586,8 @@ const RecommendedPackages = ({ currentUser }) => {
         existingInterestRate: '',
         existingBank: '',
         rateType: 'Fixed',
-        lockPeriod: ''
+        lockPeriod: '',
+        loanTypeFilter: '' // Not used for residential loans
       });
     }
 
@@ -856,6 +881,18 @@ const RecommendedPackages = ({ currentUser }) => {
       const formatCurrency = (amount) => {
         if (!amount || amount === 0) return 'SGD 0';
         return `SGD ${parseFloat(amount).toLocaleString('en-SG', { maximumFractionDigits: 0 })}`;
+      };
+
+      // Format numbered lists with proper line breaks for PDF
+      const formatRemarksTextForPDF = (text) => {
+        if (!text) return text;
+
+        // Add line breaks before numbered items (1. 2. 3. etc.)
+        // Look for pattern: number followed by period and space, but avoid adding extra spaces
+        return text.replace(/(\S)\s*(\d+\.\s)/g, '$1\n$2')
+                   .replace(/^(\d+\.\s)/g, '$1') // Don't add line break at the very beginning
+                   .replace(/\n\s+/g, '\n') // Remove extra spaces after line breaks
+                   .trim();
       };
 
       const calculateInterestRate = (pkg, year) => {
@@ -1539,7 +1576,7 @@ const RecommendedPackages = ({ currentUser }) => {
                     <td>Remarks</td>
                     ${enhancedPackages.map((pkg, index) => `
                       <td class="${index === 0 ? 'recommended features-cell remarks-cell' : 'features-cell remarks-cell'}">
-                        ${(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 300)}${(pkg.custom_remarks || pkg.remarks || '').length > 300 ? '...' : ''}
+                        ${formatRemarksTextForPDF(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 300)}${(pkg.custom_remarks || pkg.remarks || '').length > 300 ? '...' : ''}
                       </td>
                     `).join('')}
                   </tr>
@@ -2363,7 +2400,7 @@ const RecommendedPackages = ({ currentUser }) => {
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="space-y-4 sm:space-y-6">
             {/* Row 1: Basic Filters */}
-            <div className={`grid grid-cols-1 ${selectedLoanType === 'Commercial/Industrial' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3 sm:gap-4`}>
+            <div className={`grid grid-cols-1 ${selectedLoanType === 'Commercial/Industrial' ? 'md:grid-cols-4' : 'md:grid-cols-2'} gap-3 sm:gap-4`}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
                 <select
@@ -2410,6 +2447,21 @@ const RecommendedPackages = ({ currentUser }) => {
                     <option value="Individual Name">Individual Name</option>
                     <option value="Company Operating">Company Operating</option>
                     <option value="Company Investment">Company Investment</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Loan Type Filter - Only show for Commercial/Industrial */}
+              {selectedLoanType === 'Commercial/Industrial' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Loan Type</label>
+                  <select
+                    value={searchForm.loanTypeFilter}
+                    onChange={(e) => handleInputChange('loanTypeFilter', e.target.value)}
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
+                  >
+                    <option value="New Home Loan">New Home Loan</option>
+                    <option value="Refinancing Home Loan">Refinancing Home Loan</option>
                   </select>
                 </div>
               )}
