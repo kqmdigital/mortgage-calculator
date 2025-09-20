@@ -57,11 +57,11 @@ const RecommendedPackages = ({ currentUser }) => {
     propertyType: 'Private Property',
     propertyStatus: 'Completed',
     buyUnder: 'Individual Name',
-    loanAmount: '',
-    loanTenure: '',
+    loanAmount: '200000',
+    loanTenure: '25',
     existingInterestRate: '',
     existingBank: '',
-    rateType: '',
+    rateType: 'Fixed',
     lockPeriod: ''
   });
   
@@ -2012,6 +2012,29 @@ const RecommendedPackages = ({ currentUser }) => {
         setLocalRemarks(pkg.custom_remarks || pkg.remarks || '');
       }
     }, [pkg.custom_remarks, pkg.remarks, isEditing]);
+
+    // Auto-resize textarea when component mounts or remarks change
+    React.useEffect(() => {
+      const textarea = document.querySelector(`[data-pkg-id="${pkg.id}"] textarea`);
+      if (textarea && localRemarks) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.max(100, textarea.scrollHeight) + 'px';
+      }
+    }, [localRemarks, pkg.id]);
+
+    // Format numbered lists with proper line breaks
+    const formatRemarksText = (text) => {
+      if (!text) return text;
+
+      // Add line breaks before numbered items (1. 2. 3. etc.)
+      // Look for pattern: number followed by period and space
+      return text.replace(/(\s)(\d+\.\s)/g, '$1\n$2')
+                 .replace(/^(\d+\.\s)/g, '$1') // Don't add line break at the very beginning
+                 .trim();
+    };
+
+    // Get formatted display text
+    const displayRemarks = formatRemarksText(localRemarks);
     
     // Generate rate schedule - memoized for performance
     const generateRateSchedule = useMemo(() => {
@@ -2076,7 +2099,9 @@ const RecommendedPackages = ({ currentUser }) => {
     }, [pkg, formatPercentage]);
 
     return (
-      <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
+      <div
+        data-pkg-id={pkg.id}
+        className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
         isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
       }`}>
         {/* Package Header - Mobile-Responsive Layout */}
@@ -2122,25 +2147,25 @@ const RecommendedPackages = ({ currentUser }) => {
             
             {/* Property Details - Mobile: Grid, Desktop: Horizontal */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
-              <div className="truncate">
-                <span className="font-medium text-gray-500 block sm:inline">Property:</span> 
-                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.property_type}</span>
+              <div className="min-w-0">
+                <span className="font-medium text-gray-500 block sm:inline">Property:</span>
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1 break-words">{pkg.property_type}</span>
               </div>
-              <div className="truncate">
-                <span className="font-medium text-gray-500 block sm:inline">Status:</span> 
-                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.property_status}</span>
+              <div className="min-w-0">
+                <span className="font-medium text-gray-500 block sm:inline">Status:</span>
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1 break-words">{pkg.property_status}</span>
               </div>
-              <div className="truncate">
-                <span className="font-medium text-gray-500 block sm:inline">Buy Under:</span> 
-                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.buy_under}</span>
+              <div className="min-w-0">
+                <span className="font-medium text-gray-500 block sm:inline">Buy Under:</span>
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1 break-words">{pkg.buy_under}</span>
               </div>
-              <div className="truncate">
-                <span className="font-medium text-gray-500 block sm:inline">Lock:</span> 
-                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{pkg.lock_period || '0 Year'}</span>
+              <div className="min-w-0">
+                <span className="font-medium text-gray-500 block sm:inline">Lock:</span>
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1 break-words">{pkg.lock_period || '0 Year'}</span>
               </div>
-              <div className="truncate col-span-2 sm:col-span-1">
-                <span className="font-medium text-gray-500 block sm:inline">Min Loan:</span> 
-                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
+              <div className="min-w-0 col-span-2 sm:col-span-1">
+                <span className="font-medium text-gray-500 block sm:inline">Min Loan:</span>
+                <span className="font-semibold text-gray-900 block sm:inline sm:ml-1 break-words">{formatCurrency(pkg.minimum_loan_size || 0)}</span>
               </div>
             </div>
             
@@ -2214,19 +2239,33 @@ const RecommendedPackages = ({ currentUser }) => {
             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">EDITABLE</span>
           </div>
           <textarea
-            value={localRemarks}
+            value={isEditing ? localRemarks : displayRemarks}
             onChange={(e) => {
-              setLocalRemarks(e.target.value);
+              const rawValue = e.target.value;
+              setLocalRemarks(rawValue);
               setIsEditing(true);
+
+              // Auto-resize textarea
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.max(100, e.target.scrollHeight) + 'px';
             }}
             onBlur={(e) => {
               setIsEditing(false);
-              onUpdateRemarks(e.target.value);
+              const formattedText = formatRemarksText(e.target.value);
+              setLocalRemarks(formattedText);
+              onUpdateRemarks(formattedText);
+
+              // Trigger resize after formatting
+              setTimeout(() => {
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.max(100, e.target.scrollHeight) + 'px';
+              }, 0);
             }}
             onFocus={() => setIsEditing(true)}
-            placeholder="Enter remarks for this package..."
+            placeholder="Enter remarks for this package... (e.g., 1. First point 2. Second point 3. Third point)"
             rows="4"
-            className="w-full px-3 sm:px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm text-gray-700 min-h-[100px]"
+            className="w-full px-3 sm:px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y text-sm text-gray-700 min-h-[100px] overflow-hidden"
+            style={{ height: 'auto', minHeight: '100px', whiteSpace: 'pre-wrap' }}
           />
         </div>
       </div>
