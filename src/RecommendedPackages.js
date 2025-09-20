@@ -537,6 +537,35 @@ const RecommendedPackages = ({ currentUser }) => {
 
   const handleLoanTypeSelect = (loanType) => {
     setSelectedLoanType(loanType);
+
+    // Set different defaults based on loan type
+    if (loanType === 'Commercial/Industrial') {
+      setSearchForm({
+        propertyType: 'Industrial',
+        propertyStatus: 'Completed',
+        buyUnder: 'Individual Name',
+        loanAmount: '200000',
+        loanTenure: '25',
+        existingInterestRate: '',
+        existingBank: '',
+        rateType: 'Fixed',
+        lockPeriod: ''
+      });
+    } else {
+      // New Home Loan and Refinancing Home Loan defaults
+      setSearchForm({
+        propertyType: 'Private Property',
+        propertyStatus: 'Completed',
+        buyUnder: 'Individual Name',
+        loanAmount: '200000',
+        loanTenure: '25',
+        existingInterestRate: '',
+        existingBank: '',
+        rateType: 'Fixed',
+        lockPeriod: ''
+      });
+    }
+
     logger.info(`Selected loan type: ${loanType}`);
   };
 
@@ -2027,9 +2056,10 @@ const RecommendedPackages = ({ currentUser }) => {
       if (!text) return text;
 
       // Add line breaks before numbered items (1. 2. 3. etc.)
-      // Look for pattern: number followed by period and space
-      return text.replace(/(\s)(\d+\.\s)/g, '$1\n$2')
+      // Look for pattern: number followed by period and space, but avoid adding extra spaces
+      return text.replace(/(\S)\s*(\d+\.\s)/g, '$1\n$2')
                  .replace(/^(\d+\.\s)/g, '$1') // Don't add line break at the very beginning
+                 .replace(/\n\s+/g, '\n') // Remove extra spaces after line breaks
                  .trim();
     };
 
@@ -2333,7 +2363,7 @@ const RecommendedPackages = ({ currentUser }) => {
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="space-y-4 sm:space-y-6">
             {/* Row 1: Basic Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <div className={`grid grid-cols-1 ${selectedLoanType === 'Commercial/Industrial' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3 sm:gap-4`}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
                 <select
@@ -2341,9 +2371,18 @@ const RecommendedPackages = ({ currentUser }) => {
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
                   className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 >
-                  <option value="Private Property">Private Property</option>
-                  <option value="HDB">HDB</option>
-                  <option value="EC">EC</option>
+                  {selectedLoanType === 'Commercial/Industrial' ? (
+                    <>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Industrial">Industrial</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Private Property">Private Property</option>
+                      <option value="HDB">HDB</option>
+                      <option value="EC">EC</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -2358,6 +2397,22 @@ const RecommendedPackages = ({ currentUser }) => {
                   <option value="BUC">BUC</option>
                 </select>
               </div>
+
+              {/* Buy Under - Only show for Commercial/Industrial */}
+              {selectedLoanType === 'Commercial/Industrial' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Buy Under</label>
+                  <select
+                    value={searchForm.buyUnder}
+                    onChange={(e) => handleInputChange('buyUnder', e.target.value)}
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
+                  >
+                    <option value="Individual Name">Individual Name</option>
+                    <option value="Company Operating">Company Operating</option>
+                    <option value="Company Investment">Company Investment</option>
+                  </select>
+                </div>
+              )}
 
             </div>
 
