@@ -54,9 +54,9 @@ const RecommendedPackages = ({ currentUser }) => {
   // State management for all functionality
   const [selectedLoanType, setSelectedLoanType] = useState('New Home Loan');
   const [searchForm, setSearchForm] = useState({
-    propertyType: '',
-    propertyStatus: '',
-    buyUnder: '',
+    propertyType: 'Private Property',
+    propertyStatus: 'Completed',
+    buyUnder: 'Individual Name',
     loanAmount: '',
     loanTenure: '',
     existingInterestRate: '',
@@ -2294,7 +2294,7 @@ const RecommendedPackages = ({ currentUser }) => {
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="space-y-4 sm:space-y-6">
             {/* Row 1: Basic Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
                 <select
@@ -2302,12 +2302,9 @@ const RecommendedPackages = ({ currentUser }) => {
                   onChange={(e) => handleInputChange('propertyType', e.target.value)}
                   className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 >
-                  <option value="">Select Property Type</option>
                   <option value="Private Property">Private Property</option>
                   <option value="HDB">HDB</option>
                   <option value="EC">EC</option>
-                  <option value="Commercial">Commercial</option>
-                  <option value="Industrial">Industrial</option>
                 </select>
               </div>
 
@@ -2318,25 +2315,11 @@ const RecommendedPackages = ({ currentUser }) => {
                   onChange={(e) => handleInputChange('propertyStatus', e.target.value)}
                   className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
                 >
-                  <option value="">Select Property Status</option>
                   <option value="Completed">Completed</option>
                   <option value="BUC">BUC</option>
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Buy Under</label>
-                <select
-                  value={searchForm.buyUnder}
-                  onChange={(e) => handleInputChange('buyUnder', e.target.value)}
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
-                >
-                  <option value="">Select Buy Under</option>
-                  <option value="Individual Name">Individual Name</option>
-                  <option value="Company Operating">Company Operating</option>
-                  <option value="Company Investment">Company Investment</option>
-                </select>
-              </div>
             </div>
 
             {/* Row 2: Financial Parameters */}
@@ -2461,7 +2444,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   onChange={(e) => handleInputChange('rateType', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select Rate Type</option>
+                  <option value="">All</option>
                   <option value="Fixed">Fixed</option>
                   <option value="Floating">Floating</option>
                 </select>
