@@ -2562,8 +2562,9 @@ const RecommendedPackages = ({ currentUser }) => {
                 {showBankDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
                     <div className="p-2">
-                      <label className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label htmlFor="select-all-banks" className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                         <input
+                          id="select-all-banks"
                           type="checkbox"
                           checked={selectedBanks.length === bankOptions.length}
                           onChange={toggleAllBanks}
@@ -2572,8 +2573,9 @@ const RecommendedPackages = ({ currentUser }) => {
                         <span className="font-medium">Select All Banks</span>
                       </label>
                       {bankOptions.map(bank => (
-                        <label key={bank} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <label key={bank} htmlFor={`bank-${bank}`} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                           <input
+                            id={`bank-${bank}`}
                             type="checkbox"
                             checked={selectedBanks.includes(bank)}
                             onChange={(e) => handleBankSelection(bank, e.target.checked)}
@@ -2636,8 +2638,9 @@ const RecommendedPackages = ({ currentUser }) => {
               {showFeaturesDropdown && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
                   <div className="p-2">
-                    <label className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <label htmlFor="select-all-features" className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                       <input
+                        id="select-all-features"
                         type="checkbox"
                         checked={selectedFeatures.length === featureOptions.length}
                         onChange={toggleAllFeatures}
@@ -2646,8 +2649,9 @@ const RecommendedPackages = ({ currentUser }) => {
                       <span className="font-medium">Select All Features</span>
                     </label>
                     {featureOptions.map(feature => (
-                      <label key={feature.value} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label key={feature.value} htmlFor={`feature-${feature.value}`} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
                         <input
+                          id={`feature-${feature.value}`}
                           type="checkbox"
                           checked={selectedFeatures.includes(feature.value)}
                           onChange={(e) => handleFeatureSelection(feature.value, e.target.checked)}
@@ -2793,7 +2797,7 @@ const RecommendedPackages = ({ currentUser }) => {
                     pkg={pkg}
                     index={index}
                     isSelected={selectedPackages.has(pkg.id)}
-                    hideBankNames={hideBankNames}
+                    hideBankNames={false}
                     rateTypes={rateTypes}
                     onToggleSelection={() => togglePackageSelection(pkg.id)}
                     onUpdateFeature={(featureName, isChecked) => updatePackageFeature(index, featureName, isChecked)}
