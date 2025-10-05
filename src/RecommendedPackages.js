@@ -2293,7 +2293,8 @@ const RecommendedPackages = ({ currentUser }) => {
                   type="checkbox"
                   checked={pkg[feature.value] === 'true' || pkg[feature.value] === true}
                   onChange={(e) => onUpdateFeature(feature.value, e.target.checked)}
-                  className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                  onFocus={(e) => e.target.blur()}
+                  className="w-5 h-5 sm:w-4 sm:h-4 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-0 focus:ring-transparent flex-shrink-0"
                 />
                 <span className="text-sm sm:text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                   {feature.label}
