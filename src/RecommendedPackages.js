@@ -2287,8 +2287,9 @@ const RecommendedPackages = ({ currentUser }) => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {featureOptions.map(feature => (
-              <label key={feature.value} className="flex items-center gap-3 cursor-pointer group min-h-[44px] sm:min-h-[auto] p-2 sm:p-0 rounded-lg hover:bg-gray-50 sm:hover:bg-transparent transition-colors">
+              <label key={feature.value} htmlFor={`pkg-${pkg.id}-${feature.value}`} className="flex items-center gap-3 cursor-pointer group min-h-[44px] sm:min-h-[auto] p-2 sm:p-0 rounded-lg hover:bg-gray-50 sm:hover:bg-transparent transition-colors">
                 <input
+                  id={`pkg-${pkg.id}-${feature.value}`}
                   type="checkbox"
                   checked={pkg[feature.value] === 'true' || pkg[feature.value] === true}
                   onChange={(e) => onUpdateFeature(feature.value, e.target.checked)}
