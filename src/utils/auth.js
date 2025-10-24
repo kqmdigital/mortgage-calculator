@@ -22,15 +22,16 @@ export const generateSessionToken = async (userData) => {
     name: userData.name,
     timestamp: Date.now(),
     expires: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+    inactivityTimeout: 2 * 60 * 60 * 1000, // 2 hours inactivity timeout
     iat: Math.floor(Date.now() / 1000) // issued at time
   };
-  
+
   // Base64 encode the payload
   const encodedPayload = btoa(JSON.stringify(payload));
-  
+
   // Generate signature
   const signature = await generateSimpleHash(encodedPayload);
-  
+
   // Return token with payload and signature
   return `${encodedPayload}.${signature}`;
 };
@@ -57,18 +58,28 @@ export const verifySessionToken = async (token) => {
 
     // Parse payload
     const payload = JSON.parse(atob(encodedPayload));
-    
-    // DISABLED: Token expiration check removed to prevent auto-logout
-    // Keep the 24-hour expiration in token but don't enforce it
-    // if (Date.now() > payload.expires) {
-    //   return null;
-    // }
+
+    // Check token expiration (24 hours from creation)
+    if (Date.now() > payload.expires) {
+      return null;
+    }
+
+    // Check inactivity timeout
+    const lastActivity = parseInt(sessionStorage.getItem('last_activity') || '0');
+    if (lastActivity) {
+      const inactivityPeriod = Date.now() - lastActivity;
+      const maxInactivity = payload.inactivityTimeout || (2 * 60 * 60 * 1000); // Default 2 hours
+
+      if (inactivityPeriod > maxInactivity) {
+        return null; // Session expired due to inactivity
+      }
+    }
 
     // Additional validation
     if (!payload.id || !payload.email || !payload.role) {
       return null;
     }
-    
+
     return payload;
   } catch (error) {
     return null;
@@ -148,10 +159,19 @@ export const clearUserSession = () => {
   sessionStorage.removeItem('last_activity');
 };
 
-// DISABLED: Session timeout check removed to prevent auto-logout
+// Check if session has timed out due to inactivity
 export const checkSessionTimeout = () => {
-  // Always return false (no timeout) to disable auto-logout
-  // Only update activity for tracking purposes
-  sessionStorage.setItem('last_activity', Date.now().toString());
-  return false; // Never expire
+  const lastActivity = parseInt(sessionStorage.getItem('last_activity') || '0');
+
+  if (!lastActivity) {
+    // No activity recorded, set current time
+    sessionStorage.setItem('last_activity', Date.now().toString());
+    return false;
+  }
+
+  const inactivityPeriod = Date.now() - lastActivity;
+  const maxInactivity = 2 * 60 * 60 * 1000; // 2 hours
+
+  // Return true if session has timed out
+  return inactivityPeriod > maxInactivity;
 };

@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { AuthService } from '../utils/supabase';
 import logger from '../utils/logger';
-import { 
-  generateSessionToken, 
-  setUserSession, 
-  getUserSession, 
-  clearUserSession 
+import useInactivityTimer from '../hooks/useInactivityTimer';
+import {
+  generateSessionToken,
+  setUserSession,
+  getUserSession,
+  clearUserSession,
+  checkSessionTimeout
 } from '../utils/auth';
 import { 
   authRateLimiter, 
@@ -149,26 +151,42 @@ export const AuthProvider = ({ children }) => {
     return `client_${navigator.userAgent.slice(0, 50)}`;
   }, []);
 
+  // Handle inactivity logout
+  const handleInactivityLogout = useCallback(() => {
+    if (state.isAuthenticated) {
+      AuditLogger.log('SESSION_EXPIRED_INACTIVITY', state.user?.id, {
+        email: state.user?.email,
+        reason: 'inactivity_timeout'
+      });
+      clearUserSession();
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+    }
+  }, [state.isAuthenticated, state.user]);
+
+  // Initialize inactivity timer
+  const { resetTimer } = useInactivityTimer(handleInactivityLogout, 2 * 60 * 60 * 1000); // 2 hours
+
   // Initialize authentication state
   useEffect(() => {
     initializeAuth();
   }, []);
 
-  // Periodic session validation - DISABLED to prevent auto-logout
-  // useEffect(() => {
-  //   if (state.isAuthenticated) {
-  //     const interval = setInterval(() => {
-  //       if (!validateSession()) {
-  //         handleSessionExpired();
-  //       } else {
-  //         dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
-  //       }
-  //     }, 60000); // Check every minute
+  // Periodic session validation for inactivity and token expiration
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      const interval = setInterval(() => {
+        // Check for session timeout due to inactivity or token expiration
+        if (checkSessionTimeout() || !validateSession()) {
+          handleSessionExpired();
+        } else {
+          dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
+        }
+      }, 60000); // Check every minute
 
-  //     return () => clearInterval(interval);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [state.isAuthenticated]);
+      return () => clearInterval(interval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isAuthenticated]);
 
   // Security checks on mount
   useEffect(() => {
@@ -271,7 +289,10 @@ export const AuthProvider = ({ children }) => {
       
       // Update state
       dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: userData });
-      
+
+      // Reset inactivity timer on successful login
+      resetTimer();
+
       return { success: true };
       
     } catch (error) {
@@ -351,7 +372,10 @@ export const AuthProvider = ({ children }) => {
       });
       
       dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: updatedUser });
-      
+
+      // Reset inactivity timer on profile update
+      resetTimer();
+
       return { success: true };
       
     } catch (error) {

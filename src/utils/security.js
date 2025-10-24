@@ -138,19 +138,28 @@ const generatePasswordFeedback = (checks) => {
   return feedback;
 };
 
-// Session security - MODIFIED to disable auto-logout
+// Session security with inactivity timeout
 export const validateSession = () => {
   const token = localStorage.getItem('auth_token');
-  
+
   if (!token) {
     clearUserSession();
     return false;
   }
-  
-  // DISABLED: Inactivity timeout check removed to prevent auto-logout
-  // Only check if token exists, no time-based validation
-  
-  // Update last activity for tracking purposes only
+
+  // Check inactivity timeout
+  const lastActivity = parseInt(sessionStorage.getItem('last_activity') || '0');
+  if (lastActivity) {
+    const inactivityPeriod = Date.now() - lastActivity;
+    const maxInactivity = 2 * 60 * 60 * 1000; // 2 hours
+
+    if (inactivityPeriod > maxInactivity) {
+      clearUserSession();
+      return false;
+    }
+  }
+
+  // Update last activity timestamp
   sessionStorage.setItem('last_activity', Date.now().toString());
   return true;
 };
