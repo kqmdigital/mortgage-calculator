@@ -2058,24 +2058,27 @@ const RecommendedPackages = ({ currentUser }) => {
   };
 
   // PackageCard Component - optimized with memoization
-  const PackageCard = React.memo(({ 
-    pkg, 
-    index, 
-    isSelected, 
-    hideBankNames, 
+  const PackageCard = React.memo(({
+    pkg,
+    index,
+    isSelected,
+    hideBankNames,
     rateTypes,
-    onToggleSelection, 
-    onUpdateFeature, 
+    onToggleSelection,
+    onUpdateFeature,
     onUpdateRemarks,
     formatCurrency,
     formatPercentage
   }) => {
     const rank = index + 1;
-    
+
     // Local state for remarks to prevent re-render issues
     const [localRemarks, setLocalRemarks] = React.useState(pkg.custom_remarks || pkg.remarks || '');
     const [isEditing, setIsEditing] = React.useState(false);
-    
+
+    // Ref for textarea to prevent page jumps
+    const textareaRef = React.useRef(null);
+
     // Update local state when pkg changes
     React.useEffect(() => {
       if (!isEditing) {
@@ -2083,14 +2086,20 @@ const RecommendedPackages = ({ currentUser }) => {
       }
     }, [pkg.custom_remarks, pkg.remarks, isEditing]);
 
-    // Auto-resize textarea when component mounts or remarks change
-    React.useEffect(() => {
-      const textarea = document.querySelector(`[data-pkg-id="${pkg.id}"] textarea`);
-      if (textarea && localRemarks) {
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.max(100, textarea.scrollHeight) + 'px';
+    // Unified resize function - prevents page jumps by using ref
+    const resizeTextarea = React.useCallback(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = Math.max(100, textareaRef.current.scrollHeight) + 'px';
       }
-    }, [localRemarks, pkg.id]);
+    }, []);
+
+    // Auto-resize textarea only when editing (prevents post-blur jumps)
+    React.useEffect(() => {
+      if (isEditing && textareaRef.current) {
+        resizeTextarea();
+      }
+    }, [localRemarks, isEditing, resizeTextarea]);
 
     // Format numbered lists with proper line breaks
     const formatRemarksText = (text) => {
@@ -2312,27 +2321,20 @@ const RecommendedPackages = ({ currentUser }) => {
             <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">EDITABLE</span>
           </div>
           <textarea
+            ref={textareaRef}
             value={isEditing ? localRemarks : displayRemarks}
             onChange={(e) => {
               const rawValue = e.target.value;
               setLocalRemarks(rawValue);
               setIsEditing(true);
-
-              // Auto-resize textarea
-              e.target.style.height = 'auto';
-              e.target.style.height = Math.max(100, e.target.scrollHeight) + 'px';
+              // Resize will be handled by useEffect - prevents direct DOM manipulation
             }}
             onBlur={(e) => {
-              setIsEditing(false);
               const formattedText = formatRemarksText(e.target.value);
               setLocalRemarks(formattedText);
               onUpdateRemarks(formattedText);
-
-              // Trigger resize after formatting
-              setTimeout(() => {
-                e.target.style.height = 'auto';
-                e.target.style.height = Math.max(100, e.target.scrollHeight) + 'px';
-              }, 0);
+              setIsEditing(false);
+              // No resize here - prevents page jump after blur
             }}
             onFocus={() => setIsEditing(true)}
             placeholder="Enter remarks for this package... (e.g., 1. First point 2. Second point 3. Third point)"
