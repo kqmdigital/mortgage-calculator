@@ -75,20 +75,45 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return isNaN(num) ? '' : num;
   };
 
+  // Calculate Effective Monthly Income (accounts for variable income with 30% haircut)
+  // Formula: Monthly Salary + ((Annual Salary - (Monthly Salary × 12)) × 70% / 12)
+  const calculateEffectiveMonthlyIncome = (monthlySalary, annualSalary) => {
+    if (!monthlySalary || monthlySalary <= 0) return 0;
+    if (!annualSalary || annualSalary <= 0) return monthlySalary;
+
+    const fixedAnnual = monthlySalary * 12;
+    const variableIncome = annualSalary - fixedAnnual;
+
+    // Only apply 70% haircut if there's positive variable income
+    if (variableIncome > 0) {
+      const adjustedVariable = variableIncome * 0.70;
+      const monthlyVariable = adjustedVariable / 12;
+      return monthlySalary + monthlyVariable;
+    }
+
+    return monthlySalary;
+  };
+
   const calculateAverageAge = useCallback(() => {
     const ageA = parseNumberInput(inputs.applicantAgeA) || 0;
     const ageB = parseNumberInput(inputs.applicantAgeB) || 0;
-    const salaryA = parseNumberInput(inputs.monthlySalaryA) || 0;
-    const salaryB = parseNumberInput(inputs.monthlySalaryB) || 0;
-    
-    // Use Income Weighted Average Age (IWAA) formula
-    // Formula: (age1*salary1) + (age2*salary2) / (salary1 + salary2)
-    if (ageA > 0 && ageB > 0 && salaryA > 0 && salaryB > 0) {
-      const totalSalary = salaryA + salaryB;
-      return ((ageA * salaryA) + (ageB * salaryB)) / totalSalary;
-    } else if (ageA > 0 && salaryA > 0) {
+    const monthlySalaryA = parseNumberInput(inputs.monthlySalaryA) || 0;
+    const monthlySalaryB = parseNumberInput(inputs.monthlySalaryB) || 0;
+    const annualSalaryA = parseNumberInput(inputs.annualSalaryA) || 0;
+    const annualSalaryB = parseNumberInput(inputs.annualSalaryB) || 0;
+
+    // Calculate effective monthly income (includes 70% of variable income)
+    const effectiveIncomeA = calculateEffectiveMonthlyIncome(monthlySalaryA, annualSalaryA);
+    const effectiveIncomeB = calculateEffectiveMonthlyIncome(monthlySalaryB, annualSalaryB);
+
+    // Use Income Weighted Average Age (IWAA) formula with effective monthly income
+    // Formula: (age1*income1) + (age2*income2) / (income1 + income2)
+    if (ageA > 0 && ageB > 0 && effectiveIncomeA > 0 && effectiveIncomeB > 0) {
+      const totalIncome = effectiveIncomeA + effectiveIncomeB;
+      return ((ageA * effectiveIncomeA) + (ageB * effectiveIncomeB)) / totalIncome;
+    } else if (ageA > 0 && effectiveIncomeA > 0) {
       return ageA; // Single applicant A
-    } else if (ageB > 0 && salaryB > 0) {
+    } else if (ageB > 0 && effectiveIncomeB > 0) {
       return ageB; // Single applicant B
     } else if (ageA > 0 && ageB > 0) {
       // Fallback to simple average if no salary data
@@ -99,7 +124,7 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
       return ageB;
     }
     return 0;
-  }, [inputs.applicantAgeA, inputs.applicantAgeB, inputs.monthlySalaryA, inputs.monthlySalaryB]);
+  }, [inputs.applicantAgeA, inputs.applicantAgeB, inputs.monthlySalaryA, inputs.monthlySalaryB, inputs.annualSalaryA, inputs.annualSalaryB]);
 
   // Helper function to round down tenor to nearest whole number
   const roundDownTenor = useCallback((value) => {
