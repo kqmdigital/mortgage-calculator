@@ -144,6 +144,12 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     return Math.ceil(parseFloat(amount) / 1000) * 1000;
   }, []);
 
+  // Helper function to round up amount to nearest hundred
+  const roundUpToNearestHundred = useCallback((amount) => {
+    if (!amount || isNaN(amount)) return 0;
+    return Math.ceil(parseFloat(amount) / 100) * 100;
+  }, []);
+
   const calculateMaxLoanTenor = useCallback(() => {
     const averageAge = calculateAverageAge();
     
@@ -544,10 +550,10 @@ const TDSRMSRCalculator = ({ currentUser, onLogout }) => {
     const tdsrPass = tdsrDeficit >= 0;
     const hdbPass = hdbDeficit >= 0;
     
-    const cashShowTDSR = tdsrPass ? 0 : roundUpToNearestThousand(Math.abs(tdsrDeficit) / 0.00625);
-    const cashShowHDB = hdbPass ? 0 : roundUpToNearestThousand(Math.abs(hdbDeficit) / 0.00625);
-    const cashPledgeTDSR = tdsrPass ? 0 : roundUpToNearestThousand(Math.abs(tdsrDeficit) * 48);
-    const cashPledgeHDB = hdbPass ? 0 : roundUpToNearestThousand(Math.abs(hdbDeficit) * 48);
+    const cashShowTDSR = tdsrPass ? 0 : roundUpToNearestHundred(Math.abs(tdsrDeficit) / 0.00625);
+    const cashShowHDB = hdbPass ? 0 : roundUpToNearestHundred(Math.abs(hdbDeficit) / 0.00625);
+    const cashPledgeTDSR = tdsrPass ? 0 : roundUpToNearestHundred(Math.abs(tdsrDeficit) * 48);
+    const cashPledgeHDB = hdbPass ? 0 : roundUpToNearestHundred(Math.abs(hdbDeficit) * 48);
 
     // Calculate actual TDSR and MSR percentages
     const actualTDSRPercentage = combinedMonthlyIncome > 0 ? ((monthlyInstallment + totalCommitmentsTDSR) / combinedMonthlyIncome) * 100 : 0;
