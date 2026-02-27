@@ -3377,9 +3377,9 @@ const AuthenticatedApp = () => {
           <div className="hidden lg:flex flex-row gap-4">
             <button
               onClick={() => setCalculatorType('tdsr')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                calculatorType === 'tdsr' 
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-600 text-white shadow-xl' 
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl ${
+                calculatorType === 'tdsr'
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-600 text-white shadow-xl'
                   : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300 shadow-md hover:shadow-lg'
               }`}
             >
@@ -3404,9 +3404,9 @@ const AuthenticatedApp = () => {
             
             <button
               onClick={() => setCalculatorType('repayment')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                calculatorType === 'repayment' 
-                  ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-600 text-white shadow-xl' 
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl ${
+                calculatorType === 'repayment'
+                  ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-600 text-white shadow-xl'
                   : 'bg-white border-gray-200 text-gray-700 hover:border-green-300 shadow-md hover:shadow-lg'
               }`}
             >
@@ -3431,9 +3431,9 @@ const AuthenticatedApp = () => {
             
             <button
               onClick={() => setCalculatorType('progressive')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                calculatorType === 'progressive' 
-                  ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-600 text-white shadow-xl' 
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl ${
+                calculatorType === 'progressive'
+                  ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-600 text-white shadow-xl'
                   : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300 shadow-md hover:shadow-lg'
               }`}
             >
@@ -3458,9 +3458,9 @@ const AuthenticatedApp = () => {
             
             <button
               onClick={() => setCalculatorType('packages')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
-                calculatorType === 'packages' 
-                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-600 text-white shadow-xl' 
+              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl ${
+                calculatorType === 'packages'
+                  ? 'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-600 text-white shadow-xl'
                   : 'bg-white border-gray-200 text-gray-700 hover:border-orange-300 shadow-md hover:shadow-lg'
               }`}
             >
