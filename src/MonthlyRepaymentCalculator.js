@@ -364,8 +364,10 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
       parseInt(existingLoan.newLoanMonths) || 0
     );
     
-    // Calculate savings
-    const monthlySavings = currentSchedule.monthlyPayment - newSchedule.monthlyPayment;
+    // Calculate savings (interest difference only)
+    const currentMonthlyInterest = currentSchedule.monthlyData[0]?.interestPayment || 0;
+    const newMonthlyInterest = newSchedule.monthlyData[0]?.interestPayment || 0;
+    const monthlySavings = currentMonthlyInterest - newMonthlyInterest;
     const firstYearSavings = monthlySavings * 12;
     const totalInterestSavings = currentSchedule.totalInterest - newSchedule.totalInterest;
     
@@ -641,6 +643,36 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
             font-size: 8px;
         }
         .no-page-break { page-break-inside: avoid; break-inside: avoid; }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8px;
+            margin: 0;
+        }
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid #E5E7EB;
+            padding: 6px 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .summary-table th {
+            background: #264A82;
+            color: white;
+            font-weight: bold;
+            font-size: 8px;
+        }
+        .summary-table thead {
+            display: table-header-group;
+        }
+        .summary-table tbody tr:nth-child(even) { background: #F3F4F6; }
+        .summary-table tbody tr:nth-child(odd) { background: white; }
+        .summary-table .totals-row {
+            background: #EFF6FF !important;
+            font-weight: bold;
+            font-size: 8px;
+            border-top: 2px solid #264A82;
+        }
         .disclaimer {
             background: #F9FAFB;
             border: 1px solid #E5E7EB;
@@ -1013,6 +1045,38 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                         <td>${formatCurrency(year.endingPrincipal)}</td>
                     </tr>
                     `).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="yearly-schedule-section" style="margin-top: 20px;">
+        <div class="table-container">
+            <table class="summary-table yearly-table">
+                <caption style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left; caption-side: top;">Loan Repayment Summary (Annual)</caption>
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Interest Paid</th>
+                        <th>Principal Paid</th>
+                        <th>Total Payable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${results.yearlyData.map(year => `
+                    <tr>
+                        <td>${year.yearNumber}</td>
+                        <td>${formatCurrency(year.interestPaid)}</td>
+                        <td>${formatCurrency(year.principalPaid)}</td>
+                        <td>${formatCurrency(year.interestPaid + year.principalPaid)}</td>
+                    </tr>
+                    `).join('')}
+                    <tr class="totals-row">
+                        <td><strong>Total</strong></td>
+                        <td><strong>${formatCurrency(results.totalInterest)}</strong></td>
+                        <td><strong>${formatCurrency(results.totalPrincipal)}</strong></td>
+                        <td><strong>${formatCurrency(results.totalPayable)}</strong></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
