@@ -989,9 +989,41 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
     </div>
     ` : ''}
 
+    <div class="yearly-schedule-section" style="margin-top: 20px;">
+        <div class="table-container">
+            <table class="summary-table yearly-table">
+                <caption style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left; caption-side: top;">Loan Repayment Summary</caption>
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Interest Paid</th>
+                        <th>Principal Paid</th>
+                        <th>Total Payable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${results.yearlyData.slice(0, 5).map(year => `
+                    <tr>
+                        <td>${year.yearNumber}</td>
+                        <td>${formatCurrency(year.interestPaid)}</td>
+                        <td>${formatCurrency(year.principalPaid)}</td>
+                        <td>${formatCurrency(year.interestPaid + year.principalPaid)}</td>
+                    </tr>
+                    `).join('')}
+                    <tr class="totals-row">
+                        <td><strong>Total</strong></td>
+                        <td><strong>${formatCurrency(results.totalInterest)}</strong></td>
+                        <td><strong>${formatCurrency(results.totalPrincipal)}</strong></td>
+                        <td><strong>${formatCurrency(results.totalPayable)}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div style="margin-top: 30px;">
         <h2 style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left;">Monthly Repayment Breakdown (First 5 Years)</h2>
-        
+
         <div class="table-container">
             <table class="monthly-table">
                         <thead>
@@ -1045,38 +1077,6 @@ const MonthlyRepaymentCalculator = ({ currentUser }) => {
                         <td>${formatCurrency(year.endingPrincipal)}</td>
                     </tr>
                     `).join('')}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="yearly-schedule-section" style="margin-top: 20px;">
-        <div class="table-container">
-            <table class="summary-table yearly-table">
-                <caption style="font-size: 16px; font-weight: 700; color: #264A82; margin: 20px 0 10px 0; text-align: left; caption-side: top;">Loan Repayment Summary (Annual)</caption>
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Interest Paid</th>
-                        <th>Principal Paid</th>
-                        <th>Total Payable</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${results.yearlyData.map(year => `
-                    <tr>
-                        <td>${year.yearNumber}</td>
-                        <td>${formatCurrency(year.interestPaid)}</td>
-                        <td>${formatCurrency(year.principalPaid)}</td>
-                        <td>${formatCurrency(year.interestPaid + year.principalPaid)}</td>
-                    </tr>
-                    `).join('')}
-                    <tr class="totals-row">
-                        <td><strong>Total</strong></td>
-                        <td><strong>${formatCurrency(results.totalInterest)}</strong></td>
-                        <td><strong>${formatCurrency(results.totalPrincipal)}</strong></td>
-                        <td><strong>${formatCurrency(results.totalPayable)}</strong></td>
-                    </tr>
                 </tbody>
             </table>
         </div>
