@@ -3015,6 +3015,7 @@ const AuthenticatedApp = () => {
   const { user, logout, canPerformAdminActions } = useAuth();
   
   const [calculatorType, setCalculatorType] = useState('tdsr');
+  const [mountedCalculators, setMountedCalculators] = useState(new Set(['tdsr']));
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAdminManagement, setShowAdminManagement] = useState(false);
   
@@ -3376,7 +3377,7 @@ const AuthenticatedApp = () => {
           {/* Desktop Version - Full buttons with text */}
           <div className="hidden lg:flex flex-row gap-4">
             <button
-              onClick={() => setCalculatorType('tdsr')}
+              onClick={() => { setCalculatorType('tdsr'); setMountedCalculators(prev => new Set(prev).add('tdsr')); }}
               className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl cursor-pointer ${
                 calculatorType === 'tdsr'
                   ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-600 text-white shadow-xl'
@@ -3403,7 +3404,7 @@ const AuthenticatedApp = () => {
             </button>
             
             <button
-              onClick={() => setCalculatorType('repayment')}
+              onClick={() => { setCalculatorType('repayment'); setMountedCalculators(prev => new Set(prev).add('repayment')); }}
               className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl cursor-pointer ${
                 calculatorType === 'repayment'
                   ? 'bg-gradient-to-br from-green-500 to-green-600 border-green-600 text-white shadow-xl'
@@ -3430,7 +3431,7 @@ const AuthenticatedApp = () => {
             </button>
             
             <button
-              onClick={() => setCalculatorType('progressive')}
+              onClick={() => { setCalculatorType('progressive'); setMountedCalculators(prev => new Set(prev).add('progressive')); }}
               className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl cursor-pointer ${
                 calculatorType === 'progressive'
                   ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-600 text-white shadow-xl'
@@ -3457,7 +3458,7 @@ const AuthenticatedApp = () => {
             </button>
             
             <button
-              onClick={() => setCalculatorType('packages')}
+              onClick={() => { setCalculatorType('packages'); setMountedCalculators(prev => new Set(prev).add('packages')); }}
               className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl cursor-pointer ${
                 calculatorType === 'packages'
                   ? 'bg-gradient-to-br from-orange-500 to-orange-600 border-orange-600 text-white shadow-xl'
@@ -3488,7 +3489,7 @@ const AuthenticatedApp = () => {
           <div className="lg:hidden">
             <div className="flex justify-center gap-4 p-4 bg-gray-50 rounded-xl">
               <button
-                onClick={() => setCalculatorType('tdsr')}
+                onClick={() => { setCalculatorType('tdsr'); setMountedCalculators(prev => new Set(prev).add('tdsr')); }}
                 className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'tdsr' 
                     ? 'bg-blue-500 text-white shadow-lg scale-105' 
@@ -3507,7 +3508,7 @@ const AuthenticatedApp = () => {
               </button>
               
               <button
-                onClick={() => setCalculatorType('repayment')}
+                onClick={() => { setCalculatorType('repayment'); setMountedCalculators(prev => new Set(prev).add('repayment')); }}
                 className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'repayment' 
                     ? 'bg-green-500 text-white shadow-lg scale-105' 
@@ -3526,7 +3527,7 @@ const AuthenticatedApp = () => {
               </button>
               
               <button
-                onClick={() => setCalculatorType('progressive')}
+                onClick={() => { setCalculatorType('progressive'); setMountedCalculators(prev => new Set(prev).add('progressive')); }}
                 className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'progressive' 
                     ? 'bg-purple-500 text-white shadow-lg scale-105' 
@@ -3545,7 +3546,7 @@ const AuthenticatedApp = () => {
               </button>
               
               <button
-                onClick={() => setCalculatorType('packages')}
+                onClick={() => { setCalculatorType('packages'); setMountedCalculators(prev => new Set(prev).add('packages')); }}
                 className={`flex-1 p-4 rounded-lg transition-all duration-300 min-h-[72px] touch-manipulation active:scale-95 flex flex-col items-center justify-center ${
                   calculatorType === 'packages' 
                     ? 'bg-orange-500 text-white shadow-lg scale-105' 
@@ -3569,14 +3570,26 @@ const AuthenticatedApp = () => {
 
         {/* Calculator Content */}
         <div className="standard-card" style={{ transform: 'none' }}>
-          {calculatorType === 'tdsr' ? (
+          <div style={{ display: calculatorType === 'tdsr' ? 'block' : 'none' }}>
             <TDSRMSRCalculator currentUser={user} onLogout={handleLogout} />
-          ) : calculatorType === 'repayment' ? (
-            <MonthlyRepaymentCalculator currentUser={user} />
-          ) : calculatorType === 'packages' ? (
-            <RecommendedPackages currentUser={user} />
-          ) : (
-            <ProgressivePaymentCalculator currentUser={user} />
+          </div>
+
+          {mountedCalculators.has('repayment') && (
+            <div style={{ display: calculatorType === 'repayment' ? 'block' : 'none' }}>
+              <MonthlyRepaymentCalculator currentUser={user} />
+            </div>
+          )}
+
+          {mountedCalculators.has('progressive') && (
+            <div style={{ display: calculatorType === 'progressive' ? 'block' : 'none' }}>
+              <ProgressivePaymentCalculator currentUser={user} />
+            </div>
+          )}
+
+          {mountedCalculators.has('packages') && (
+            <div style={{ display: calculatorType === 'packages' ? 'block' : 'none' }}>
+              <RecommendedPackages currentUser={user} />
+            </div>
           )}
         </div>
 
@@ -3584,7 +3597,7 @@ const AuthenticatedApp = () => {
         <div className="mt-12 text-center">
           <div className="standard-card">
             <p className="text-gray-600 text-sm">
-              © 2025 KeyQuest Mortgage
+              © {new Date().getFullYear()} KeyQuest Mortgage
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-3 text-xs text-gray-500">
               <span>📧 kenneth@keyquestmortgage.com.sg</span>

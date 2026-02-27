@@ -549,7 +549,7 @@ const LoginPage = () => {
         {/* Enhanced Footer */}
         <div className="text-center mt-8">
           <div className="space-y-2">
-            <p className="text-gray-600 font-medium">© 2025 KeyQuest Mortgage</p>
+            <p className="text-gray-600 font-medium">© {new Date().getFullYear()} KeyQuest Mortgage</p>
             <p className="text-gray-500 text-sm">Professional Mortgage Advisory Services</p>
           </div>
         </div>
