@@ -1187,17 +1187,19 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-info-label { color: white !important; margin-bottom: 4px !important; font-weight: 600 !important; font-size: 9px !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; line-height: 1.1 !important; }
             .pdf-info-value { font-size: 12px !important; font-weight: 600 !important; color: white !important; line-height: 1.2 !important; margin: 0 !important; }
             
-            .pdf-comparison-section { 
-              margin-bottom: 25px !important; 
-              page-break-inside: avoid !important;
-              -webkit-column-break-inside: avoid !important;
-              break-inside: avoid !important;
+            .pdf-comparison-section {
+              margin-bottom: 25px !important;
+              page-break-inside: auto !important;
+              -webkit-column-break-inside: auto !important;
+              break-inside: auto !important;
               overflow: visible !important;
               display: block !important;
             }
             .pdf-comparison-title { font-size: 16px !important; font-weight: 700 !important; color: #264A82 !important; margin-bottom: 15px !important; text-align: left !important; }
-            
+
             .pdf-comparison-table { width: 100% !important; border-collapse: collapse !important; background: white !important; border-radius: 12px !important; overflow: hidden !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; table-layout: fixed !important; page-break-inside: auto !important; }
+            .pdf-comparison-table thead { page-break-after: avoid !important; break-after: avoid !important; }
+            .pdf-comparison-table tbody tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             .pdf-comparison-table thead { background: linear-gradient(135deg, #264A82 0%, #1e3a6f 100%) !important; }
             .pdf-comparison-table th { padding: 10px 6px !important; text-align: center !important; font-weight: 600 !important; font-size: 14px !important; color: white !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; word-wrap: break-word !important; vertical-align: middle !important; }
             .pdf-comparison-table th:first-child { background: #1e3a6f !important; width: 25% !important; text-align: left !important; padding-left: 12px !important; }
