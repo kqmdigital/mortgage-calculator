@@ -890,8 +890,8 @@ const RecommendedPackages = ({ currentUser }) => {
 
         // Add line breaks before numbered items (1. 2. 3. etc.)
         // Look for pattern: number followed by period and space, but avoid adding extra spaces
-        return text.replace(/(\S)\s*(\d+\.\s)/g, '$1\n$2')
-                   .replace(/^(\d+\.\s)/g, '$1') // Don't add line break at the very beginning
+        return text.replace(/(\S)\s*(\d{1,2}\.\s)/g, '$1\n$2')
+                   .replace(/^(\d{1,2}\.\s)/g, '$1') // Don't add line break at the very beginning
                    .replace(/\n\s+/g, '\n') // Remove extra spaces after line breaks
                    .trim();
       };
@@ -1213,12 +1213,14 @@ const RecommendedPackages = ({ currentUser }) => {
             .pdf-comparison-table td.amount { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.period { color: #3b82f6 !important; font-weight: 600 !important; }
             .pdf-comparison-table td.features-cell { text-align: center !important; vertical-align: middle !important; font-size: 12px !important; line-height: 1.3 !important; padding: 6px 4px !important; word-wrap: break-word !important; }
-            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: middle !important; max-height: none !important; text-align: left !important; }
+            .pdf-comparison-table td.features-cell.remarks-cell { font-size: 10px !important; line-height: 1.3 !important; padding: 6px 4px !important; vertical-align: top !important; max-height: none !important; text-align: left !important; }
             .pdf-comparison-table td.savings-cell { font-size: 13px !important; line-height: 1.2 !important; text-align: center !important; vertical-align: middle !important; white-space: pre-line !important; }
             .pdf-comparison-table td.savings-cell small { font-size: 10px !important; color: #6b7280 !important; }
             
             /* Ensure consistent spacing for ALL table rows - uniform height */
             .pdf-comparison-table tbody tr { height: 35px !important; }
+            .pdf-comparison-table tr.remarks-row { height: auto !important; min-height: 35px !important; }
+            .pdf-comparison-table tr.remarks-row td { height: auto !important; vertical-align: top !important; padding: 8px 4px !important; }
             .pdf-comparison-table tbody tr td { vertical-align: middle !important; padding: 6px 4px !important; line-height: 1.2 !important; }
             
             /* Rate rows use same height as other rows for consistency */
@@ -1576,11 +1578,11 @@ const RecommendedPackages = ({ currentUser }) => {
                     `).join('')}
                   </tr>
                   
-                  <tr>
+                  <tr class="remarks-row">
                     <td>Remarks</td>
                     ${enhancedPackages.map((pkg, index) => `
                       <td class="${index === 0 ? 'recommended features-cell remarks-cell' : 'features-cell remarks-cell'}">
-                        ${formatRemarksTextForPDF(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>').substring(0, 300)}${(pkg.custom_remarks || pkg.remarks || '').length > 300 ? '...' : ''}
+                        ${formatRemarksTextForPDF(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>')}
                       </td>
                     `).join('')}
                   </tr>
@@ -2107,8 +2109,8 @@ const RecommendedPackages = ({ currentUser }) => {
 
       // Add line breaks before numbered items (1. 2. 3. etc.)
       // Look for pattern: number followed by period and space, but avoid adding extra spaces
-      return text.replace(/(\S)\s*(\d+\.\s)/g, '$1\n$2')
-                 .replace(/^(\d+\.\s)/g, '$1') // Don't add line break at the very beginning
+      return text.replace(/(\S)\s*(\d{1,2}\.\s)/g, '$1\n$2')
+                 .replace(/^(\d{1,2}\.\s)/g, '$1') // Don't add line break at the very beginning
                  .replace(/\n\s+/g, '\n') // Remove extra spaces after line breaks
                  .trim();
     };
