@@ -1396,10 +1396,22 @@ const RecommendedPackages = ({ currentUser }) => {
                 display: table !important;
                 width: 100% !important;
                 margin-bottom: 20px !important;
+                overflow: visible !important;
+                border-radius: 0 !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: none !important;
+              }
+              /* Repeat column headers on page 2 */
+              .pdf-comparison-table thead {
+                display: table-header-group !important;
               }
               .pdf-comparison-table tbody tr {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+              }
+              /* Close last row on each page with a visible bottom border */
+              .pdf-comparison-table tbody tr:last-child td {
+                border-bottom: 2px solid #264A82 !important;
               }
 
               /* Prevent table splitting on monthly installment */
