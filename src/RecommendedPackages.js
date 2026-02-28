@@ -889,8 +889,8 @@ const RecommendedPackages = ({ currentUser }) => {
         if (!text) return text;
 
         // Add line breaks before numbered items (1. 2. 3. etc.)
-        // Look for pattern: number followed by period and space, but avoid adding extra spaces
-        return text.replace(/(\S)\s*(\d{1,2}\.\s)/g, '$1\n$2')
+        // Require whitespace before the number to avoid breaking inside values like $2,000.
+        return text.replace(/(\S)(\s+)(\d{1,2}\.\s)/g, '$1\n$3')
                    .replace(/^(\d{1,2}\.\s)/g, '$1') // Don't add line break at the very beginning
                    .replace(/\n\s+/g, '\n') // Remove extra spaces after line breaks
                    .trim();
@@ -2108,8 +2108,8 @@ const RecommendedPackages = ({ currentUser }) => {
       if (!text) return text;
 
       // Add line breaks before numbered items (1. 2. 3. etc.)
-      // Look for pattern: number followed by period and space, but avoid adding extra spaces
-      return text.replace(/(\S)\s*(\d{1,2}\.\s)/g, '$1\n$2')
+      // Require whitespace before the number to avoid breaking inside values like $2,000.
+      return text.replace(/(\S)(\s+)(\d{1,2}\.\s)/g, '$1\n$3')
                  .replace(/^(\d{1,2}\.\s)/g, '$1') // Don't add line break at the very beginning
                  .replace(/\n\s+/g, '\n') // Remove extra spaces after line breaks
                  .trim();
