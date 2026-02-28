@@ -6,6 +6,7 @@ import useDebounce from './hooks/useDebounce';
 import ProgressivePaymentCalculator from './ProgressivePaymentCalculator';
 import MonthlyRepaymentCalculator from './MonthlyRepaymentCalculator';
 import AdminManagement from './components/AdminManagement';
+import CurrencyInput from './components/CurrencyInput';
 import RecommendedPackages from './RecommendedPackages';
 
 // Import your existing TDSRMSRCalculator component from App.js
@@ -2163,11 +2164,9 @@ const htmlContent = `
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Purchase Price (SGD)</label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formatCurrencyInput(inputs.purchasePrice)}
-                    onChange={(e) => handleInputChange('purchasePrice', e.target.value)}
+                  <CurrencyInput
+                    value={inputs.purchasePrice}
+                    onChange={(raw) => handleInputChange('purchasePrice', raw)}
                     className="standard-input currency-input"
                     placeholder="1,000,000.00"
                   />
@@ -2233,11 +2232,9 @@ const htmlContent = `
                   <div className="mt-4 fade-in">
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Loan Amount</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={formatCurrencyInput(inputs.customLoanAmount)}
-                        onChange={(e) => handleInputChange('customLoanAmount', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.customLoanAmount}
+                        onChange={(raw) => handleInputChange('customLoanAmount', raw)}
                         className="standard-input currency-input"
                         placeholder="750,000.00"
                       />
@@ -2311,11 +2308,9 @@ const htmlContent = `
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={formatCurrencyInput(inputs.monthlySalaryA)}
-                      onChange={(e) => handleInputChange('monthlySalaryA', e.target.value)}
+                    <CurrencyInput
+                      value={inputs.monthlySalaryA}
+                      onChange={(raw) => handleInputChange('monthlySalaryA', raw)}
                       className="standard-input currency-input"
                       placeholder="8,000.00"
                     />
@@ -2325,10 +2320,9 @@ const htmlContent = `
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    <input
-                      type="text"
-                      value={formatCurrencyInput(inputs.annualSalaryA)}
-                      onChange={(e) => handleInputChange('annualSalaryA', e.target.value)}
+                    <CurrencyInput
+                      value={inputs.annualSalaryA}
+                      onChange={(raw) => handleInputChange('annualSalaryA', raw)}
                       className="standard-input currency-input"
                       placeholder="Auto-filled (Monthly × 12)"
                     />
@@ -2355,10 +2349,9 @@ const htmlContent = `
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Salary (SGD)</label>
                   <div className="relative">
-                    <input
-                      type="text"
-                      value={formatCurrencyInput(inputs.monthlySalaryB)}
-                      onChange={(e) => handleInputChange('monthlySalaryB', e.target.value)}
+                    <CurrencyInput
+                      value={inputs.monthlySalaryB}
+                      onChange={(raw) => handleInputChange('monthlySalaryB', raw)}
                       className="standard-input currency-input"
                       placeholder="6,000.00"
                     />
@@ -2368,10 +2361,9 @@ const htmlContent = `
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700">Annual Salary (SGD)</label>
                   <div className="relative">
-                    <input
-                      type="text"
-                      value={formatCurrencyInput(inputs.annualSalaryB)}
-                      onChange={(e) => handleInputChange('annualSalaryB', e.target.value)}
+                    <CurrencyInput
+                      value={inputs.annualSalaryB}
+                      onChange={(raw) => handleInputChange('annualSalaryB', raw)}
                       className="standard-input currency-input"
                       placeholder="Auto-filled (Monthly × 12)"
                     />
@@ -2415,10 +2407,9 @@ const htmlContent = `
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Show Fund (SGD)</label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.showFundAmount)}
-                    onChange={(e) => handleInputChange('showFundAmount', e.target.value)}
+                  <CurrencyInput
+                    value={inputs.showFundAmount}
+                    onChange={(raw) => handleInputChange('showFundAmount', raw)}
                     className="standard-input currency-input"
                     placeholder="500,000.00"
                   />
@@ -2428,10 +2419,9 @@ const htmlContent = `
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Pledging (SGD)</label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    value={formatCurrencyInput(inputs.pledgeAmount)}
-                    onChange={(e) => handleInputChange('pledgeAmount', e.target.value)}
+                  <CurrencyInput
+                    value={inputs.pledgeAmount}
+                    onChange={(raw) => handleInputChange('pledgeAmount', raw)}
                     className="standard-input currency-input"
                     placeholder="300,000.00"
                   />
@@ -2463,10 +2453,9 @@ const htmlContent = `
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (SGD)</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={formatCurrencyInput(inputs.carLoanA)}
-                        onChange={(e) => handleInputChange('carLoanA', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.carLoanA}
+                        onChange={(raw) => handleInputChange('carLoanA', raw)}
                         className="standard-input currency-input"
                         placeholder="800.00"
                       />
@@ -2477,10 +2466,9 @@ const htmlContent = `
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (SGD)</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={formatCurrencyInput(inputs.personalLoanA)}
-                        onChange={(e) => handleInputChange('personalLoanA', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.personalLoanA}
+                        onChange={(raw) => handleInputChange('personalLoanA', raw)}
                         className="standard-input currency-input"
                         placeholder="500.00"
                       />
@@ -2491,10 +2479,9 @@ const htmlContent = `
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (SGD)</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={formatCurrencyInput(inputs.propertyLoanA)}
-                        onChange={(e) => handleInputChange('propertyLoanA', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.propertyLoanA}
+                        onChange={(raw) => handleInputChange('propertyLoanA', raw)}
                         className="standard-input currency-input"
                         placeholder="2,000.00"
                       />
@@ -2513,10 +2500,9 @@ const htmlContent = `
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Car Loan (SGD)</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={formatCurrencyInput(inputs.carLoanB)}
-                        onChange={(e) => handleInputChange('carLoanB', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.carLoanB}
+                        onChange={(raw) => handleInputChange('carLoanB', raw)}
                         className="standard-input currency-input"
                         placeholder="600.00"
                       />
@@ -2527,10 +2513,9 @@ const htmlContent = `
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Personal Loan (SGD)</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={formatCurrencyInput(inputs.personalLoanB)}
-                        onChange={(e) => handleInputChange('personalLoanB', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.personalLoanB}
+                        onChange={(raw) => handleInputChange('personalLoanB', raw)}
                         className="standard-input currency-input"
                         placeholder="300.00"
                       />
@@ -2541,10 +2526,9 @@ const htmlContent = `
                   <div>
                     <label className="block text-sm font-semibold mb-2 text-gray-700">Monthly Property Loan (SGD)</label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={formatCurrencyInput(inputs.propertyLoanB)}
-                        onChange={(e) => handleInputChange('propertyLoanB', e.target.value)}
+                      <CurrencyInput
+                        value={inputs.propertyLoanB}
+                        onChange={(raw) => handleInputChange('propertyLoanB', raw)}
                         className="standard-input currency-input"
                         placeholder="1,500.00"
                       />
