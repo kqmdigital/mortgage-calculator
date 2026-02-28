@@ -1359,10 +1359,9 @@ const RecommendedPackages = ({ currentUser }) => {
             /* Enhanced Mobile PDF Support */
             @media print {
               /* Mobile-specific page break handling */
-              .pdf-comparison-section, 
-              .pdf-monthly-installment-section, 
+              .pdf-monthly-installment-section,
               .pdf-chart-section,
-              .pdf-disclaimer { 
+              .pdf-disclaimer {
                 page-break-inside: avoid !important;
                 -webkit-column-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -1374,9 +1373,36 @@ const RecommendedPackages = ({ currentUser }) => {
                 margin-bottom: 30px !important;
                 padding-bottom: 15px !important;
               }
-              
-              /* Prevent table splitting on mobile */
-              .pdf-comparison-table,
+
+              /* Allow comparison section to flow naturally across pages */
+              .pdf-comparison-section {
+                page-break-inside: auto !important;
+                -webkit-column-break-inside: auto !important;
+                break-inside: auto !important;
+                display: block !important;
+                overflow: visible !important;
+                float: none !important;
+                clear: both !important;
+                width: 100% !important;
+                margin-bottom: 30px !important;
+                padding-bottom: 15px !important;
+              }
+
+              /* Allow comparison table to flow across pages, prevent row splitting */
+              .pdf-comparison-table {
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+                -webkit-column-break-inside: auto !important;
+                display: table !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+              }
+              .pdf-comparison-table tbody tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+              }
+
+              /* Prevent table splitting on monthly installment */
               .pdf-monthly-installment-table {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -1385,21 +1411,24 @@ const RecommendedPackages = ({ currentUser }) => {
                 width: 100% !important;
                 margin-bottom: 20px !important;
               }
-              
+
               /* Force sections to start on new page if needed */
               .pdf-monthly-installment-section {
                 page-break-before: auto !important;
                 margin-top: 40px !important;
               }
-              
+
               /* Mobile WebKit specific fixes */
               @supports (-webkit-appearance: none) {
-                .pdf-comparison-section,
                 .pdf-monthly-installment-section {
                   -webkit-column-break-inside: avoid !important;
                   -webkit-region-break-inside: avoid !important;
                   orphans: 3 !important;
                   widows: 3 !important;
+                }
+                .pdf-comparison-section {
+                  -webkit-column-break-inside: auto !important;
+                  -webkit-region-break-inside: auto !important;
                 }
               }
             }
