@@ -77,7 +77,11 @@ const RecommendedPackages = ({ currentUser }) => {
   const [hideBankNames, setHideBankNames] = useState(false);
   const [selectedPackages, setSelectedPackages] = useState(new Set());
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  
+  const [recommendedPackageIndex, setRecommendedPackageIndex] = useState(0);
+
+  // Persists user edits (feature toggles, remarks) across filter re-searches
+  const packageEditsRef = useRef(new Map()); // Map<pkgId, partialPkgOverrides>
+
   // Multi-select dropdown states
   const [showBankDropdown, setShowBankDropdown] = useState(false);
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
@@ -386,7 +390,16 @@ const RecommendedPackages = ({ currentUser }) => {
       
       filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
 
+      // Merge any persisted user edits (feature toggles, remarks) back into fresh results
+      if (packageEditsRef.current.size > 0) {
+        filtered = filtered.map(pkg => {
+          const edits = packageEditsRef.current.get(pkg.id);
+          return edits ? { ...pkg, ...edits } : pkg;
+        });
+      }
+
       setFilteredPackages(filtered);
+      setRecommendedPackageIndex(0);
       setShowResults(true);
       
       logger.info(`Found ${filtered.length} matching packages`);
@@ -749,23 +762,33 @@ const RecommendedPackages = ({ currentUser }) => {
     }
   };
 
-  // Update package feature in filteredPackages state
+  // Update package feature in filteredPackages state (and persist to survive re-searches)
   const updatePackageFeature = useCallback((packageIndex, featureName, isChecked) => {
     setFilteredPackages(prevPackages => {
       const updated = [...prevPackages];
       if (updated[packageIndex]) {
-        updated[packageIndex][featureName] = isChecked;
+        updated[packageIndex] = { ...updated[packageIndex], [featureName]: isChecked };
+        const pkgId = updated[packageIndex].id;
+        if (pkgId) {
+          const existing = packageEditsRef.current.get(pkgId) || {};
+          packageEditsRef.current.set(pkgId, { ...existing, [featureName]: isChecked });
+        }
       }
       return updated;
     });
   }, []);
 
-  // Update package remarks in filteredPackages state
+  // Update package remarks in filteredPackages state (and persist to survive re-searches)
   const updatePackageRemarks = useCallback((packageIndex, newRemarks) => {
     setFilteredPackages(prevPackages => {
       const updated = [...prevPackages];
       if (updated[packageIndex]) {
-        updated[packageIndex].custom_remarks = newRemarks;
+        updated[packageIndex] = { ...updated[packageIndex], custom_remarks: newRemarks };
+        const pkgId = updated[packageIndex].id;
+        if (pkgId) {
+          const existing = packageEditsRef.current.get(pkgId) || {};
+          packageEditsRef.current.set(pkgId, { ...existing, custom_remarks: newRemarks });
+        }
       }
       return updated;
     });
@@ -1507,7 +1530,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <th>Details</th>
                     ${enhancedPackages.map((pkg, index) => `
-                      <th class="${index === 0 ? 'recommended' : ''}">
+                      <th class="${index === recommendedPackageIndex ? 'recommended' : ''}">
                         ${hideBankNames ? `PKG(${index + 1})` : pkg.bank_name}
                       </th>
                     `).join('')}
@@ -1517,7 +1540,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <td>Rate Type</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended' : ''}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended' : ''}">
                         ${pkg.rate_type_category || 'Rate Package'}
                       </td>
                     `).join('')}
@@ -1525,7 +1548,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <td>Min Loan Amount</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended amount' : 'amount'}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended amount' : 'amount'}">
                         ${formatCurrency(pkg.minimum_loan_size || 0)}
                       </td>
                     `).join('')}
@@ -1537,7 +1560,7 @@ const RecommendedPackages = ({ currentUser }) => {
                       ${enhancedPackages.map((pkg, index) => {
                         const rateDisplay = formatDetailedRateDisplay(pkg, year);
                         return `
-                        <td class="${index === 0 ? 'recommended rate-value' : 'rate-value'}">
+                        <td class="${index === recommendedPackageIndex ? 'recommended rate-value' : 'rate-value'}">
                           ${rateDisplay}
                         </td>
                       `;
@@ -1550,7 +1573,7 @@ const RecommendedPackages = ({ currentUser }) => {
                     ${enhancedPackages.map((pkg, index) => {
                       const rateDisplay = formatDetailedRateDisplay(pkg, 'thereafter');
                       return `
-                      <td class="${index === 0 ? 'recommended rate-value' : 'rate-value'}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended rate-value' : 'rate-value'}">
                         ${rateDisplay}
                       </td>
                     `;
@@ -1560,7 +1583,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <td>Lock-in Period</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended period' : 'period'}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended period' : 'period'}">
                         ${parseLockInPeriod(pkg.lock_period) || 0} Years
                       </td>
                     `).join('')}
@@ -1569,7 +1592,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <td>Monthly Installment</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended' : ''}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended' : ''}">
                         ${formatCurrency(pkg.monthlyInstallment || 0)}
                       </td>
                     `).join('')}
@@ -1579,7 +1602,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <td>Total Savings</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended savings-cell' : 'savings-cell'}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended savings-cell' : 'savings-cell'}">
                         ${pkg.totalSavings > 0 ? 
                           `Save ${formatCurrency(Math.abs(pkg.totalSavings))}<br><small style="font-size: 8px; color: #6b7280;">Over ${parseLockInPeriod(pkg.lock_period) || 2} Year${parseLockInPeriod(pkg.lock_period) > 1 ? 's' : ''} Lock-in</small>` : 
                           'No savings'}
@@ -1591,7 +1614,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr>
                     <td>Package Features</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended features-cell' : 'features-cell'}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended features-cell' : 'features-cell'}">
                         ${pkg.legal_fee_subsidy === 'true' || pkg.legal_fee_subsidy === true ? 
                           '<div style="color: #2563eb; margin-bottom: 3px;">✓ Legal Fee Subsidy</div>' : ''}
                         ${pkg.cash_rebate === 'true' || pkg.cash_rebate === true ? 
@@ -1624,7 +1647,7 @@ const RecommendedPackages = ({ currentUser }) => {
                   <tr class="remarks-row">
                     <td>Remarks</td>
                     ${enhancedPackages.map((pkg, index) => `
-                      <td class="${index === 0 ? 'recommended features-cell remarks-cell' : 'features-cell remarks-cell'}">
+                      <td class="${index === recommendedPackageIndex ? 'recommended features-cell remarks-cell' : 'features-cell remarks-cell'}">
                         ${formatRemarksTextForPDF(pkg.custom_remarks || pkg.remarks || 'All packages are structured with fixed rates followed by floating rates based on 3M SORA.').replace(/\n/g, '<br>')}
                       </td>
                     `).join('')}
@@ -1641,9 +1664,9 @@ const RecommendedPackages = ({ currentUser }) => {
                 <thead>
                   <tr>
                     <th class="row-header">RATE</th>
-                    <th class="recommended-package-header">PKG(1)</th>
-                    <th class="package-header">PKG(2)</th>
-                    <th class="package-header">PKG(3)</th>
+                    ${enhancedPackages.map((pkg, index) => `
+                      <th class="${index === recommendedPackageIndex ? 'recommended-package-header' : 'package-header'}">PKG(${index + 1})</th>
+                    `).join('')}
                   </tr>
                 </thead>
                 <tbody>
@@ -1709,7 +1732,7 @@ const RecommendedPackages = ({ currentUser }) => {
                         <tr class="rate-info-row">
                           <td class="detail-label">Year ${year} Rate</td>
                           ${yearData.map((data, index) => `
-                            <td class="package-detail ${index === 0 ? 'recommended' : ''}">
+                            <td class="package-detail ${index === recommendedPackageIndex ? 'recommended' : ''}">
                               ${data ? data.rate.toFixed(2) + '%' : 'N/A'}
                             </td>
                           `).join('')}
@@ -1718,7 +1741,7 @@ const RecommendedPackages = ({ currentUser }) => {
                         <tr class="year-row">
                           <td class="year-label">Monthly Installment</td>
                           ${yearData.map((data, index) => `
-                            <td class="package-value ${index === 0 ? 'recommended' : ''}">
+                            <td class="package-value ${index === recommendedPackageIndex ? 'recommended' : ''}">
                               ${data ? formatCurrency(data.monthlyInstalment) : 'N/A'}
                             </td>
                           `).join('')}
@@ -1727,7 +1750,7 @@ const RecommendedPackages = ({ currentUser }) => {
                         <tr class="detail-row">
                           <td class="detail-label">Total Principal</td>
                           ${yearData.map((data, index) => `
-                            <td class="package-detail ${index === 0 ? 'recommended' : ''}">
+                            <td class="package-detail ${index === recommendedPackageIndex ? 'recommended' : ''}">
                               ${data ? formatCurrency(data.principalPaid) : 'N/A'}
                             </td>
                           `).join('')}
@@ -1736,7 +1759,7 @@ const RecommendedPackages = ({ currentUser }) => {
                         <tr class="detail-row">
                           <td class="detail-label">Total Interest</td>
                           ${yearData.map((data, index) => `
-                            <td class="package-detail ${index === 0 ? 'recommended' : ''}">
+                            <td class="package-detail ${index === recommendedPackageIndex ? 'recommended' : ''}">
                               ${data ? formatCurrency(data.interestPaid) : 'N/A'}
                             </td>
                           `).join('')}
@@ -1758,7 +1781,7 @@ const RecommendedPackages = ({ currentUser }) => {
                             // Use the new reducing balance method
                             const yearInterestSavings = calculateYearlyInterestSavingsPDF(loanAmount, loanTenure, existingRate, newRate, currentYear);
                             
-                            return `<td class="package-detail ${index === 0 ? 'recommended' : ''}">${formatCurrency(Math.max(0, yearInterestSavings))}</td>`;
+                            return `<td class="package-detail ${index === recommendedPackageIndex ? 'recommended' : ''}">${formatCurrency(Math.max(0, yearInterestSavings))}</td>`;
                           }).join('')}
                         </tr>
                         ` : ''}
@@ -2113,7 +2136,9 @@ const RecommendedPackages = ({ currentUser }) => {
     onUpdateFeature,
     onUpdateRemarks,
     formatCurrency,
-    formatPercentage
+    formatPercentage,
+    isRecommended,
+    onSetRecommended
   }) => {
     const rank = index + 1;
 
@@ -2257,16 +2282,33 @@ const RecommendedPackages = ({ currentUser }) => {
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
-                  {hideBankNames ? `Bank ${String.fromCharCode(64 + rank)}` : pkg.bank_name}
-                </h3>
-                <span className={`inline-block px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium mt-1 ${
-                  pkg.rate_type_category === 'Fixed' 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {pkg.rate_type_category || 'FLOATING'}
-                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
+                    {hideBankNames ? `Bank ${String.fromCharCode(64 + rank)}` : pkg.bank_name}
+                  </h3>
+                  {isRecommended && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                      ★ Recommended
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap mt-1">
+                  <span className={`inline-block px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
+                    pkg.rate_type_category === 'Fixed'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {pkg.rate_type_category || 'FLOATING'}
+                  </span>
+                  {!isRecommended && (
+                    <button
+                      onClick={onSetRecommended}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 hover:bg-amber-100 hover:text-amber-700 transition-colors"
+                    >
+                      ☆ Set as Recommended
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -2853,6 +2895,8 @@ const RecommendedPackages = ({ currentUser }) => {
                     onUpdateRemarks={(newRemarks) => updatePackageRemarks(index, newRemarks)}
                     formatCurrency={formatCurrency}
                     formatPercentage={formatPercentage}
+                    isRecommended={index === recommendedPackageIndex}
+                    onSetRecommended={() => setRecommendedPackageIndex(index)}
                   />
                 ))}
               </div>
