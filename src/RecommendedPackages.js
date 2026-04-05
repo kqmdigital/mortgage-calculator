@@ -390,12 +390,16 @@ const RecommendedPackages = ({ currentUser }) => {
       
       filtered.sort((a, b) => (a.avgFirst2Years || 0) - (b.avgFirst2Years || 0));
 
-      // Merge any persisted user edits (feature toggles, remarks) back into fresh results
       if (packageEditsRef.current.size > 0) {
         filtered = filtered.map(pkg => {
           const edits = packageEditsRef.current.get(pkg.id);
           return edits ? { ...pkg, ...edits } : pkg;
         });
+        // Drop edits for packages no longer in results to prevent unbounded growth
+        const currentIds = new Set(filtered.map(p => p.id));
+        for (const id of packageEditsRef.current.keys()) {
+          if (!currentIds.has(id)) packageEditsRef.current.delete(id);
+        }
       }
 
       setFilteredPackages(filtered);
@@ -762,37 +766,28 @@ const RecommendedPackages = ({ currentUser }) => {
     }
   };
 
-  // Update package feature in filteredPackages state (and persist to survive re-searches)
-  const updatePackageFeature = useCallback((packageIndex, featureName, isChecked) => {
+  const updatePackageInState = useCallback((packageIndex, updates) => {
     setFilteredPackages(prevPackages => {
       const updated = [...prevPackages];
       if (updated[packageIndex]) {
-        updated[packageIndex] = { ...updated[packageIndex], [featureName]: isChecked };
+        updated[packageIndex] = { ...updated[packageIndex], ...updates };
         const pkgId = updated[packageIndex].id;
         if (pkgId) {
-          const existing = packageEditsRef.current.get(pkgId) || {};
-          packageEditsRef.current.set(pkgId, { ...existing, [featureName]: isChecked });
+          const existing = packageEditsRef.current.get(pkgId);
+          packageEditsRef.current.set(pkgId, existing ? { ...existing, ...updates } : { ...updates });
         }
       }
       return updated;
     });
   }, []);
 
-  // Update package remarks in filteredPackages state (and persist to survive re-searches)
+  const updatePackageFeature = useCallback((packageIndex, featureName, isChecked) => {
+    updatePackageInState(packageIndex, { [featureName]: isChecked });
+  }, [updatePackageInState]);
+
   const updatePackageRemarks = useCallback((packageIndex, newRemarks) => {
-    setFilteredPackages(prevPackages => {
-      const updated = [...prevPackages];
-      if (updated[packageIndex]) {
-        updated[packageIndex] = { ...updated[packageIndex], custom_remarks: newRemarks };
-        const pkgId = updated[packageIndex].id;
-        if (pkgId) {
-          const existing = packageEditsRef.current.get(pkgId) || {};
-          packageEditsRef.current.set(pkgId, { ...existing, custom_remarks: newRemarks });
-        }
-      }
-      return updated;
-    });
-  }, []);
+    updatePackageInState(packageIndex, { custom_remarks: newRemarks });
+  }, [updatePackageInState]);
 
   // EXACT rate calculation functions from HTML version
   const calculateInterestRate = useCallback((pkg, year) => {
