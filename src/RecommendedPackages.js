@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { AuthService } from './utils/supabase';
 import logger from './utils/logger';
+import MultiSelectDropdown from './components/MultiSelectDropdown';
 
 // Helper functions for number formatting
 const formatNumberWithCommas = (value) => {
@@ -54,16 +55,15 @@ const RecommendedPackages = ({ currentUser }) => {
   // State management for all functionality
   const [selectedLoanType, setSelectedLoanType] = useState('New Home Loan');
   const [searchForm, setSearchForm] = useState({
-    propertyType: 'Private Property',
-    propertyStatus: 'Completed',
-    buyUnder: 'Individual Name',
+    propertyType: ['Private Property'],
+    propertyStatus: ['Completed'],
+    buyUnder: ['Individual Name'],
     loanAmount: '200000',
     loanTenure: '25',
     existingInterestRate: '',
     existingBank: '',
-    rateType: 'Fixed',
-    lockPeriod: '',
-    loanTypeFilter: ''
+    rateType: ['Fixed'],
+    lockPeriod: []
   });
   
   const [selectedBanks, setSelectedBanks] = useState([]);
@@ -85,10 +85,20 @@ const RecommendedPackages = ({ currentUser }) => {
   // Multi-select dropdown states
   const [showBankDropdown, setShowBankDropdown] = useState(false);
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
-  
+  const [showPropertyTypeDropdown, setShowPropertyTypeDropdown] = useState(false);
+  const [showPropertyStatusDropdown, setShowPropertyStatusDropdown] = useState(false);
+  const [showBuyUnderDropdown, setShowBuyUnderDropdown] = useState(false);
+  const [showRateTypeDropdown, setShowRateTypeDropdown] = useState(false);
+  const [showLockPeriodDropdown, setShowLockPeriodDropdown] = useState(false);
+
   // Refs for dropdowns
   const bankDropdownRef = useRef(null);
   const featuresDropdownRef = useRef(null);
+  const propertyTypeDropdownRef = useRef(null);
+  const propertyStatusDropdownRef = useRef(null);
+  const buyUnderDropdownRef = useRef(null);
+  const rateTypeDropdownRef = useRef(null);
+  const lockPeriodDropdownRef = useRef(null);
   
   // Available options
   const bankOptions = [
@@ -274,18 +284,8 @@ const RecommendedPackages = ({ currentUser }) => {
 
       // Apply loan type filter
       if (selectedLoanType === 'Commercial/Industrial') {
-        // For Commercial/Industrial, use the loanTypeFilter (New Home Loan or Refinancing Home Loan)
-        if (searchForm.loanTypeFilter) {
-          filtered = filtered.filter(pkg => pkg.loan_type === searchForm.loanTypeFilter);
-          logger.info(`Commercial/Industrial with ${searchForm.loanTypeFilter} filter: ${allPackages.length} → ${filtered.length} packages`);
-        } else {
-          // If no specific loan type filter, include both
-          filtered = filtered.filter(pkg =>
-            pkg.loan_type === 'New Home Loan' ||
-            pkg.loan_type === 'Refinancing Home Loan'
-          );
-          logger.info(`Commercial/Industrial (all types) filter: ${allPackages.length} → ${filtered.length} packages`);
-        }
+        filtered = filtered.filter(pkg => pkg.loan_type === 'Commercial/Industrial');
+        logger.info(`Commercial/Industrial filter: ${allPackages.length} → ${filtered.length} packages`);
       } else {
         filtered = filtered.filter(pkg => pkg.loan_type === selectedLoanType);
         logger.info(`${selectedLoanType} filter: ${allPackages.length} → ${filtered.length} packages`);
@@ -298,16 +298,16 @@ const RecommendedPackages = ({ currentUser }) => {
       }
 
       // Apply form filters
-      if (searchForm.propertyType) {
-        filtered = filtered.filter(pkg => pkg.property_type === searchForm.propertyType);
+      if (searchForm.propertyType.length > 0) {
+        filtered = filtered.filter(pkg => searchForm.propertyType.includes(pkg.property_type));
       }
-      
-      if (searchForm.propertyStatus) {
-        filtered = filtered.filter(pkg => pkg.property_status === searchForm.propertyStatus);
+
+      if (searchForm.propertyStatus.length > 0) {
+        filtered = filtered.filter(pkg => searchForm.propertyStatus.includes(pkg.property_status));
       }
-      
-      if (searchForm.buyUnder) {
-        filtered = filtered.filter(pkg => pkg.buy_under === searchForm.buyUnder);
+
+      if (searchForm.buyUnder.length > 0) {
+        filtered = filtered.filter(pkg => searchForm.buyUnder.includes(pkg.buy_under));
       }
 
       // CRITICAL: Loan amount filter - exclude packages with minimum loan size higher than user's loan amount
@@ -325,16 +325,16 @@ const RecommendedPackages = ({ currentUser }) => {
         logger.info(`Loan amount filter: ${beforeLoanFilter} → ${filtered.length} packages (loan amount: ${loanAmount})`);
       }
       
-      // Rate Type filter (matches HTML: formData.rateTypeFilter)
-      if (searchForm.rateType) {
-        filtered = filtered.filter(pkg => pkg.rate_type_category === searchForm.rateType);
+      // Rate Type filter
+      if (searchForm.rateType.length > 0) {
+        filtered = filtered.filter(pkg => searchForm.rateType.includes(pkg.rate_type_category));
       }
-      
-      // Lock-in Period filter (matches HTML: formData.lockPeriodFilter)
-      if (searchForm.lockPeriod) {
+
+      // Lock-in Period filter
+      if (searchForm.lockPeriod.length > 0) {
         filtered = filtered.filter(pkg => {
           const pkgLockPeriod = pkg.lock_period || '0 Year';
-          return pkgLockPeriod === searchForm.lockPeriod;
+          return searchForm.lockPeriod.includes(pkgLockPeriod);
         });
       }
 
@@ -418,15 +418,15 @@ const RecommendedPackages = ({ currentUser }) => {
 
   // Auto-search when filters change - load packages on demand
   useEffect(() => {
-    const hasFilters = 
-      searchForm.propertyType || 
-      searchForm.propertyStatus || 
-      searchForm.buyUnder || 
-      searchForm.loanAmount || 
-      searchForm.loanTenure || 
-      searchForm.rateType || 
-      searchForm.lockPeriod || 
-      selectedBanks.length > 0 || 
+    const hasFilters =
+      searchForm.propertyType.length > 0 ||
+      searchForm.propertyStatus.length > 0 ||
+      searchForm.buyUnder.length > 0 ||
+      searchForm.loanAmount ||
+      searchForm.loanTenure ||
+      searchForm.rateType.length > 0 ||
+      searchForm.lockPeriod.length > 0 ||
+      selectedBanks.length > 0 ||
       selectedFeatures.length > 0;
 
     if (hasFilters) {
@@ -465,16 +465,35 @@ const RecommendedPackages = ({ currentUser }) => {
       if (featuresDropdownRef.current && !featuresDropdownRef.current.contains(event.target)) {
         setShowFeaturesDropdown(false);
       }
+      if (propertyTypeDropdownRef.current && !propertyTypeDropdownRef.current.contains(event.target)) {
+        setShowPropertyTypeDropdown(false);
+      }
+      if (propertyStatusDropdownRef.current && !propertyStatusDropdownRef.current.contains(event.target)) {
+        setShowPropertyStatusDropdown(false);
+      }
+      if (buyUnderDropdownRef.current && !buyUnderDropdownRef.current.contains(event.target)) {
+        setShowBuyUnderDropdown(false);
+      }
+      if (rateTypeDropdownRef.current && !rateTypeDropdownRef.current.contains(event.target)) {
+        setShowRateTypeDropdown(false);
+      }
+      if (lockPeriodDropdownRef.current && !lockPeriodDropdownRef.current.contains(event.target)) {
+        setShowLockPeriodDropdown(false);
+      }
     };
 
-    if (showBankDropdown || showFeaturesDropdown) {
+    const anyOpen = showBankDropdown || showFeaturesDropdown || showPropertyTypeDropdown ||
+      showPropertyStatusDropdown || showBuyUnderDropdown || showRateTypeDropdown || showLockPeriodDropdown;
+
+    if (anyOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showBankDropdown, showFeaturesDropdown]);
+  }, [showBankDropdown, showFeaturesDropdown, showPropertyTypeDropdown,
+    showPropertyStatusDropdown, showBuyUnderDropdown, showRateTypeDropdown, showLockPeriodDropdown]);
 
   // Show/hide refinancing fields based on loan type
   useEffect(() => {
@@ -582,30 +601,27 @@ const RecommendedPackages = ({ currentUser }) => {
     // Set different defaults based on loan type
     if (loanType === 'Commercial/Industrial') {
       setSearchForm({
-        propertyType: 'Industrial',
-        propertyStatus: 'Completed',
-        buyUnder: 'Individual Name',
+        propertyType: ['Commercial', 'Industrial'],
+        propertyStatus: ['Completed'],
+        buyUnder: ['Company Operating'],
         loanAmount: '200000',
         loanTenure: '25',
         existingInterestRate: '',
         existingBank: '',
-        rateType: 'Fixed',
-        lockPeriod: '',
-        loanTypeFilter: 'New Home Loan' // Default to New Home Loan for Commercial/Industrial
+        rateType: ['Fixed'],
+        lockPeriod: []
       });
     } else {
-      // New Home Loan and Refinancing Home Loan defaults
       setSearchForm({
-        propertyType: 'Private Property',
-        propertyStatus: 'Completed',
-        buyUnder: 'Individual Name',
+        propertyType: ['Private Property'],
+        propertyStatus: ['Completed'],
+        buyUnder: ['Individual Name'],
         loanAmount: '200000',
         loanTenure: '25',
         existingInterestRate: '',
         existingBank: '',
-        rateType: 'Fixed',
-        lockPeriod: '',
-        loanTypeFilter: '' // Not used for residential loans
+        rateType: ['Fixed'],
+        lockPeriod: []
       });
     }
 
@@ -626,6 +642,16 @@ const RecommendedPackages = ({ currentUser }) => {
         [field]: value
       }));
     }
+  }, []);
+
+  const handleMultiSelectToggle = useCallback((field, value) => {
+    setSearchForm(prev => {
+      const current = Array.isArray(prev[field]) ? prev[field] : [];
+      const updated = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value];
+      return { ...prev, [field]: updated };
+    });
   }, []);
 
   const handleBankSelection = useCallback((bank, isSelected) => {
@@ -678,15 +704,15 @@ const RecommendedPackages = ({ currentUser }) => {
 
   const clearAllFilters = () => {
     setSearchForm({
-      propertyType: '',
-      propertyStatus: '',
-      buyUnder: '',
+      propertyType: [],
+      propertyStatus: [],
+      buyUnder: [],
       loanAmount: '',
       loanTenure: '',
       existingInterestRate: '',
       existingBank: '',
-      rateType: '',
-      lockPeriod: ''
+      rateType: [],
+      lockPeriod: []
     });
     setSelectedBanks([]);
     setSelectedFeatures([]);
@@ -1493,12 +1519,12 @@ const RecommendedPackages = ({ currentUser }) => {
                 <div class="pdf-info-item">
                   <div class="pdf-info-icon">🏠</div>
                   <div class="pdf-info-label">Property Type</div>
-                  <div class="pdf-info-value property-type">${searchForm.propertyType || 'Private Property'}</div>
+                  <div class="pdf-info-value property-type">${searchForm.propertyType.length > 0 ? searchForm.propertyType.join(', ') : 'All'}</div>
                 </div>
                 <div class="pdf-info-item">
                   <div class="pdf-info-icon">📋</div>
                   <div class="pdf-info-label">Property Status</div>
-                  <div class="pdf-info-value property-status">${searchForm.propertyStatus || 'Completed'}</div>
+                  <div class="pdf-info-value property-status">${searchForm.propertyStatus.length > 0 ? searchForm.propertyStatus.join(', ') : 'All'}</div>
                 </div>
                 ${selectedLoanType === 'Refinancing Home Loan' && searchForm.existingInterestRate ? `
                 <div class="pdf-info-item">
@@ -2490,72 +2516,41 @@ const RecommendedPackages = ({ currentUser }) => {
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="space-y-4 sm:space-y-6">
             {/* Row 1: Basic Filters */}
-            <div className={`grid grid-cols-1 ${selectedLoanType === 'Commercial/Industrial' ? 'md:grid-cols-4' : 'md:grid-cols-2'} gap-3 sm:gap-4`}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-                <select
-                  value={searchForm.propertyType}
-                  onChange={(e) => handleInputChange('propertyType', e.target.value)}
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
-                >
-                  {selectedLoanType === 'Commercial/Industrial' ? (
-                    <>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Industrial">Industrial</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Private Property">Private Property</option>
-                      <option value="HDB">HDB</option>
-                      <option value="EC">EC</option>
-                    </>
-                  )}
-                </select>
-              </div>
+            <div className={`grid grid-cols-1 ${selectedLoanType === 'Commercial/Industrial' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-3 sm:gap-4`}>
+              <MultiSelectDropdown
+                label="Property Type"
+                options={selectedLoanType === 'Commercial/Industrial'
+                  ? ['Commercial', 'Industrial']
+                  : ['Private Property', 'HDB', 'EC']}
+                selected={searchForm.propertyType}
+                onToggle={(opt) => handleMultiSelectToggle('propertyType', opt)}
+                isOpen={showPropertyTypeDropdown}
+                onToggleOpen={() => setShowPropertyTypeDropdown(!showPropertyTypeDropdown)}
+                dropdownRef={propertyTypeDropdownRef}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Property Status</label>
-                <select
-                  value={searchForm.propertyStatus}
-                  onChange={(e) => handleInputChange('propertyStatus', e.target.value)}
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
-                >
-                  <option value="Completed">Completed</option>
-                  <option value="BUC">BUC</option>
-                </select>
-              </div>
+              <MultiSelectDropdown
+                label="Property Status"
+                options={['Completed', 'BUC']}
+                selected={searchForm.propertyStatus}
+                onToggle={(opt) => handleMultiSelectToggle('propertyStatus', opt)}
+                isOpen={showPropertyStatusDropdown}
+                onToggleOpen={() => setShowPropertyStatusDropdown(!showPropertyStatusDropdown)}
+                dropdownRef={propertyStatusDropdownRef}
+              />
 
               {/* Buy Under - Only show for Commercial/Industrial */}
               {selectedLoanType === 'Commercial/Industrial' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Buy Under</label>
-                  <select
-                    value={searchForm.buyUnder}
-                    onChange={(e) => handleInputChange('buyUnder', e.target.value)}
-                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
-                  >
-                    <option value="Individual Name">Individual Name</option>
-                    <option value="Company Operating">Company Operating</option>
-                    <option value="Company Investment">Company Investment</option>
-                  </select>
-                </div>
+                <MultiSelectDropdown
+                  label="Buy Under"
+                  options={['Individual Name', 'Company Operating', 'Company Investment']}
+                  selected={searchForm.buyUnder}
+                  onToggle={(opt) => handleMultiSelectToggle('buyUnder', opt)}
+                  isOpen={showBuyUnderDropdown}
+                  onToggleOpen={() => setShowBuyUnderDropdown(!showBuyUnderDropdown)}
+                  dropdownRef={buyUnderDropdownRef}
+                />
               )}
-
-              {/* Loan Type Filter - Only show for Commercial/Industrial */}
-              {selectedLoanType === 'Commercial/Industrial' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Loan Type</label>
-                  <select
-                    value={searchForm.loanTypeFilter}
-                    onChange={(e) => handleInputChange('loanTypeFilter', e.target.value)}
-                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base sm:text-sm min-h-[44px] sm:min-h-[auto]"
-                  >
-                    <option value="New Home Loan">New Home Loan</option>
-                    <option value="Refinancing Home Loan">Refinancing Home Loan</option>
-                  </select>
-                </div>
-              )}
-
             </div>
 
             {/* Row 2: Financial Parameters */}
@@ -2675,33 +2670,28 @@ const RecommendedPackages = ({ currentUser }) => {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Rate Type</label>
-                <select
-                  value={searchForm.rateType}
-                  onChange={(e) => handleInputChange('rateType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">All</option>
-                  <option value="Fixed">Fixed</option>
-                  <option value="Floating">Floating</option>
-                </select>
-              </div>
+              <MultiSelectDropdown
+                label="Rate Type"
+                options={['Fixed', 'Floating']}
+                selected={searchForm.rateType}
+                onToggle={(opt) => handleMultiSelectToggle('rateType', opt)}
+                isOpen={showRateTypeDropdown}
+                onToggleOpen={() => setShowRateTypeDropdown(!showRateTypeDropdown)}
+                dropdownRef={rateTypeDropdownRef}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Lock-in Period</label>
-                <select
-                  value={searchForm.lockPeriod}
-                  onChange={(e) => handleInputChange('lockPeriod', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select Lock Period</option>
-                  {['0 Year', '1 Year', '2 Years', '3 Years', '4 Years', '5 Years', 
-                    '6 Years', '7 Years', '8 Years', '9 Years', '10 Years'].map(period => (
-                    <option key={period} value={period}>{period}</option>
-                  ))}
-                </select>
-              </div>
+              <MultiSelectDropdown
+                label="Lock-in Period"
+                options={['0 Year', '1 Year', '2 Years', '3 Years', '4 Years', '5 Years',
+                  '6 Years', '7 Years', '8 Years', '9 Years', '10 Years']}
+                selected={searchForm.lockPeriod}
+                onToggle={(period) => handleMultiSelectToggle('lockPeriod', period)}
+                isOpen={showLockPeriodDropdown}
+                onToggleOpen={() => setShowLockPeriodDropdown(!showLockPeriodDropdown)}
+                dropdownRef={lockPeriodDropdownRef}
+                placeholder="Select Lock Period"
+                scrollable
+              />
             </div>
 
             {/* Row 4: Package Features */}
